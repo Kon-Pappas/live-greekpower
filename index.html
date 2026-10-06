@@ -3,97 +3,211 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Live Greek Power Dashboard</title>
+    <title>Greek Power Market Analytics</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- ECharts -->
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
     <style>
-        body {
-            background-color: #121212;
-            color: #e0e0e0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        :root {
+            --bg-color: #0f141d;
+            --card-bg: #18202c;
+            --border-color: #222b38;
+            --accent-green: #2ecc71;
+            --text-main: #ffffff;
+            --text-muted: #8892b0;
         }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding-bottom: 40px;
+        }
+
+        /* Top Header & Breadcrumb */
+        .top-nav {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            padding: 15px 30px;
+            border-bottom: 1px solid var(--border-color);
+            background-color: rgba(15, 20, 29, 0.95);
+        }
+        .top-nav a {
+            color: var(--text-muted);
+            text-decoration: none;
+        }
+        .top-nav a:hover {
+            color: var(--text-main);
+        }
+
+        .header-section {
+            padding: 25px 30px 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .dashboard-title {
+            color: var(--accent-green);
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .update-info {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 5px;
+        }
+
+        /* Top Right Controls */
+        .controls-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .status-pill {
+            background-color: rgba(46, 204, 113, 0.15);
+            color: var(--accent-green);
+            border: 1px solid rgba(46, 204, 113, 0.3);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        /* Navigation Tabs */
+        .nav-tabs-container {
+            border-bottom: 1px solid var(--border-color);
+            padding: 0 30px;
+            display: flex;
+            gap: 30px;
+        }
+        .nav-tab-item {
+            color: var(--text-muted);
+            padding: 12px 5px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            text-decoration: none;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s ease;
+        }
+        .nav-tab-item.active {
+            color: var(--accent-green);
+            border-bottom-color: var(--accent-green);
+        }
+        .nav-tab-item:hover {
+            color: var(--text-main);
+        }
+
+        /* Main Content Container */
+        .main-container {
+            padding: 30px;
+        }
+
+        /* Metric Cards */
         .metric-card {
-            background-color: #1e1e1e;
-            border: 1px solid #2d2d2d;
-            border-radius: 8px;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
             padding: 20px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
             text-align: center;
             height: 100%;
         }
-        .metric-value {
-            font-size: 2rem;
-            font-weight: bold;
-            color: #ffffff;
-        }
         .metric-title {
-            color: #a0a0a0;
-            font-size: 0.9rem;
+            color: var(--text-muted);
+            font-size: 0.85rem;
             text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
         }
+        .metric-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        /* Chart Containers */
         .chart-container {
-            background-color: #1e1e1e;
-            border: 1px solid #2d2d2d;
-            border-radius: 8px;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
             padding: 20px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
             height: 420px;
-        }
-        h1 {
-            color: #ffffff;
-        }
-        #last-updated {
-            color: #f1c40f !important; /* Ευδιάκριτο κίτρινο χρώμα στο dark mode */
-            font-weight: 600;
         }
     </style>
 </head>
 <body>
 
-<div class="container mt-5">
-    <h1 class="mb-2 text-center">Greece Energy System (Live)</h1>
-    <p class="text-center mb-4" id="last-updated">Last Updated: Loading...</p>
+    <!-- Top Breadcrumb Navigation -->
+    <div class="top-nav">
+        <a href="#">Konstantinos Pappas Hub</a> / Live Greek Power
+    </div>
 
-    <!-- Metrics Cards -->
-    <div class="row mb-4">
-        <div class="col-md-3 mb-3">
-            <div class="metric-card">
-                <div class="metric-title">Total Demand</div>
-                <div class="metric-value" id="val-demand">- MWh</div>
-            </div>
+    <!-- Header Section -->
+    <div class="header-section">
+        <div>
+            <h1 class="dashboard-title">Greek Power Market Analytics</h1>
+            <div class="update-info" id="last-updated">Last Update: Loading...</div>
         </div>
-        <div class="col-md-3 mb-3">
-            <div class="metric-card">
-                <div class="metric-title">Total Generation</div>
-                <div class="metric-value" id="val-production">- MWh</div>
-            </div>
-        </div>
-        <div class="col-md-3 mb-3">
-            <div class="metric-card">
-                <div class="metric-title">DAM Price</div>
-                <div class="metric-value text-info" id="val-price">- €/MWh</div>
-            </div>
-        </div>
-        <div class="col-md-3 mb-3">
-            <div class="metric-card">
-                <div class="metric-title">Storage (Inj./Abs.)</div>
-                <div class="metric-value text-success" id="val-storage">- MWh</div>
-            </div>
+        <div class="controls-wrapper">
+            <div class="status-pill">● Live Data Active</div>
         </div>
     </div>
 
-    <!-- Charts -->
-    <div class="row">
-        <div class="col-md-6 mb-4">
-            <div class="chart-container" id="mixChart"></div>
+    <!-- Sub-navigation Tabs -->
+    <div class="nav-tabs-container">
+        <a href="#" class="nav-tab-item active">Live Analytics</a>
+        <a href="#" class="nav-tab-item">Generation Mix</a>
+        <a href="#" class="nav-tab-item">Cross-Border Flows</a>
+    </div>
+
+    <!-- Main Body -->
+    <div class="main-container">
+        <!-- Metrics Row -->
+        <div class="row mb-4">
+            <div class="col-md-3 mb-3">
+                <div class="metric-card">
+                    <div class="metric-title">Total Demand</div>
+                    <div class="metric-value" id="val-demand">- MWh</div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="metric-card">
+                    <div class="metric-title">Total Generation</div>
+                    <div class="metric-value" id="val-production">- MWh</div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="metric-card">
+                    <div class="metric-title">DAM Price</div>
+                    <div class="metric-value text-info" id="val-price">- €/MWh</div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="metric-card">
+                    <div class="metric-title">Storage (Inj./Abs.)</div>
+                    <div class="metric-value text-success" id="val-storage">- MWh</div>
+                </div>
+            </div>
         </div>
-        <div class="col-md-6 mb-4">
-            <div class="chart-container" id="flowsChart"></div>
+
+        <!-- Charts Row -->
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <div class="chart-container" id="mixChart"></div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="chart-container" id="flowsChart"></div>
+            </div>
         </div>
     </div>
-</div>
 
 <script>
     let mixChart = echarts.init(document.getElementById('mixChart'), 'dark');
@@ -105,8 +219,9 @@
             const data = await response.json();
             const latestData = data[data.length - 1];
 
-            // 1. Update Metrics
-            document.getElementById('last-updated').innerText = `Last Updated (Fetch): ${new Date(latestData.fetch_timestamp).toLocaleString('en-GB')}`;
+            // Update Metrics & Timestamps
+            const fetchTime = new Date(latestData.fetch_timestamp).toLocaleString('en-GB');
+            document.getElementById('last-updated').innerText = `Last Update: ${fetchTime}  |  Target Hour: ${latestData.target_hour}:00`;
             document.getElementById('val-demand').innerText = `${latestData.demand_mwh} MWh`;
             document.getElementById('val-production').innerText = `${latestData.production_mix['TOTAL_PROD'] || '-'} MWh`;
             document.getElementById('val-price').innerText = `${latestData.dam_price_eur} €/MWh`;
@@ -115,7 +230,7 @@
             const stAbs = latestData.production_mix['STORAGE_ABSORPTION'] || 0;
             document.getElementById('val-storage').innerText = `${stIn} / ${stAbs} MWh`;
 
-            // 2. Energy Mix & Contribution Calculations
+            // Energy Mix Calculations
             let lignite = latestData.production_mix['TOTAL LIGNITE'] || 0;
             let gas = latestData.production_mix['TOTAL GAS'] || 0;
             let hydro = latestData.production_mix['TOTAL HYDRO'] || 0;
@@ -125,9 +240,7 @@
             let storageDischargeForPie = netStorage > 0 ? netStorage : 0;
 
             let totalNetImports = 0;
-            const countries = ['ALBANIA', 'BULGARIA', 'ITALY', 'TURKEY', 'NORTH MACEDONIA'];
             const countryKeys = ['ΑΛΒΑΝΙΑ', 'ΒΟΥΛΓΑΡΙΑ', 'ΙΤΑΛΙΑ', 'ΤΟΥΡΚΙΑ', 'FYROM'];
-            
             countryKeys.forEach(country => {
                 const imp = latestData.interconnections_mwh[`${country}_IMP`] || 0;
                 const exp = latestData.interconnections_mwh[`${country}_EXP`] || 0;
@@ -137,7 +250,7 @@
 
             let pieData = [
                 { value: lignite, name: 'Lignite', itemStyle: { color: '#8c533c' } },
-                { value: gas, name: 'Natural Gas', itemStyle: { color: '#c4826b' } }, // Βρώμικο ροζ / dusty brownish pink
+                { value: gas, name: 'Natural Gas', itemStyle: { color: '#c4826b' } },
                 { value: hydro, name: 'Hydro', itemStyle: { color: '#3498db' } },
                 { value: res, name: 'RES', itemStyle: { color: '#2ecc71' } }
             ];
@@ -146,68 +259,69 @@
                 pieData.push({ value: storageDischargeForPie, name: 'Storage (Discharge)', itemStyle: { color: '#9b59b6' } });
             }
             if (importsForPie > 0) {
-                pieData.push({ value: importsForPie, name: 'Net Imports', itemStyle: { color: '#f1c40f' } }); // Κίτρινο
+                pieData.push({ value: importsForPie, name: 'Net Imports', itemStyle: { color: '#f1c40f' } });
             }
 
-            // 3. Render Energy Mix Donut Chart
+            // Render Donut Chart
             const mixOptions = {
                 backgroundColor: 'transparent',
-                title: { text: 'Energy Mix & Contribution', left: 'center', textStyle: { color: '#fff' } },
+                title: { text: 'Energy Mix & Contribution', left: 'center', textStyle: { color: '#ffffff', fontSize: 15 } },
                 tooltip: { trigger: 'item' },
-                legend: { top: 'bottom', textStyle: { color: '#ccc' } },
+                legend: { top: 'bottom', textStyle: { color: '#8892b0' } },
                 series: [
                     {
                         name: 'Generation / Resources (MWh)',
                         type: 'pie',
                         radius: ['40%', '70%'],
                         avoidLabelOverlap: false,
-                        itemStyle: { borderRadius: 8, borderColor: '#1e1e1e', borderWidth: 2 },
+                        itemStyle: { borderRadius: 8, borderColor: '#18202c', borderWidth: 2 },
                         label: { show: false },
-                        emphasis: { label: { show: true, fontSize: 16, fontWeight: 'bold', color: '#fff' } },
+                        emphasis: { label: { show: true, fontSize: 14, fontWeight: 'bold', color: '#fff' } },
                         data: pieData
                     }
                 ]
             };
             mixChart.setOption(mixOptions);
 
-            // 4. Render Vertical Cross-Border Flows Chart (Imports positive on top, Exports negative on bottom)
+            // Render Vertical Cross-Border Flows Chart
+            const countries = ['ALBANIA', 'BULGARIA', 'ITALY', 'TURKEY', 'NORTH MACEDONIA'];
             const importsData = countryKeys.map(c => latestData.interconnections_mwh[`${c}_IMP`] || 0);
             const exportsData = countryKeys.map(c => -(latestData.interconnections_mwh[`${c}_EXP`] || 0));
 
             const flowsOptions = {
                 backgroundColor: 'transparent',
-                title: { text: 'Cross-Border Flows (Imports / Exports)', left: 'center', textStyle: { color: '#fff' } },
+                title: { text: 'Cross-Border Flows (Imports / Exports)', left: 'center', textStyle: { color: '#ffffff', fontSize: 15 } },
                 tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
-                legend: { top: 35, textStyle: { color: '#ccc' } },
+                legend: { top: 35, textStyle: { color: '#8892b0' } },
                 grid: { top: 90, bottom: 30, left: 50, right: 20 },
                 xAxis: { 
                     type: 'category', 
                     data: countries, 
-                    axisLabel: { color: '#fff', interval: 0, rotate: 15 } 
+                    axisLabel: { color: '#ffffff', interval: 0, rotate: 15 } 
                 },
                 yAxis: { 
                     type: 'value', 
-                    splitLine: { lineStyle: { color: '#333', type: 'dashed' } }, 
-                    axisLabel: { color: '#aaa' } 
+                    splitLine: { lineStyle: { color: '#222b38', type: 'dashed' } }, 
+                    axisLabel: { color: '#8892b0' } 
                 },
                 series: [
                     {
                         name: 'Imports',
                         type: 'bar',
                         stack: 'Flow',
-                        itemStyle: { color: '#f1c40f' }, // Κίτρινο από πάνω
+                        itemStyle: { color: '#f1c40f' },
                         data: importsData
                     },
                     {
                         name: 'Exports',
                         type: 'bar',
                         stack: 'Flow',
-                        itemStyle: { color: '#e74c3c' }, // Κόκκινο από κάτω
+                        itemStyle: { color: '#e74c3c' },
                         data: exportsData
                     }
                 ]
             };
-            flowsChart.setOption(flowsOptions);
+        flowsChart.setOption(flowsOptions);
 
         } catch (error) {
             console.error("Error loading data:", error);
