@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Greek Power Dashboard</title>
+    <!-- Εισαγωγή του Bootstrap για εύκολο styling και Grid -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Εισαγωγή της βιβλιοθήκης ECharts -->
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <style>
+        body {
+            background-color: #f4f7f6;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .metric-card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            text-align: center;
+            height: 100%;
+        }
+        .metric-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .metric-title {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+        }
+        .chart-container {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            height: 400px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container mt-5">
+    <h1 class="mb-4 text-center">Σύστημα Ενέργειας Ελλάδας (Live)</h1>
+    <p class="text-center text-muted" id="last-updated">Τελευταία Ενημέρωση: Φόρτωση...</p>
+
+    <!-- Καρτέλες με τα βασικά μεγέθη (Metrics) -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="metric-card">
+                <div class="metric-title">Συνολικη Ζητηση</div>
+                <div class="metric-value" id="val-demand">- MWh</div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="metric-card">
+                <div class="metric-title">Συνολικη Παραγωγη</div>
+                <div class="metric-value" id="val-production">- MWh</div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="metric-card">
+                <div class="metric-title">Τιμη Αγορας (DAM)</div>
+                <div class="metric-value text-primary" id="val-price">- €/MWh</div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="metric-card">
+                <div class="metric-title">Αποθηκευση (Έγχυση / Απορ.)</div>
+                <div class="metric-value text-success" id="val-storage">- MWh</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Τα Γραφήματα -->
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="chart-container" id="mixChart"></div>
+        </div>
+        <div class="col-md-6 mb-4">
+            <div class="chart-container" id="flowsChart"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Συναρτήσεις για τη δημιουργία των Γραφημάτων ECharts
+    let mixChart = echarts.init(document.getElementById('mixChart'));
+    let flowsChart = echarts.init(document.getElementById('flowsChart'));
+
+    async function loadData() {
+        try {
+            // Διαβάζουμε το JSON που φτιάχνει το Python script μας
+            const response = await fetch('data/live_data.json');
+            const data = await response.json();
+            
+            // Παίρνουμε την τελευταία καταχώρηση (το πιο πρόσφατο fetch)
+            const latestData = data[data.length - 1];
+
+            // 1. Ενημέρωση των Metrics (Καρτέλες)
+            document.getElementById('last-updated').innerText = `Τελευταία Ενημέρωση (Λήψη): ${new Date(latestData.fetch_timestamp).toLocaleString('el-GR')}`;
+            document.getElementById('val-demand').innerText = `${latestData.demand_mwh} MWh`;
+            document.getElementById('val-production').innerText = `${latestData.production_mix['TOTAL_PROD'] || '-'} MWh`;
+            document.getElementById('val-price').innerText = `${latestData.dam_price_eur} €/MWh`;
+            
+            // Φτιάχνουμε το κείμενο για την Αποθήκευση
+            const stIn = latestData.production_mix['STORAGE_INJECTION'] || 0;
+            const stOut = latestData.production_mix['STORAGE_ABSORPTION'] || 0;
+            document.getElementById('val-storage').innerText = `${stIn} / ${stOut} MWh`;
+
+            // 2. Ενημέρωση του γραφήματος: Ενεργειακό Μείγμα (Donut Chart)
+            const mixOptions = {
+                title: { text: 'Ενεργειακό Μείγμα', left: 'center' },
+                tooltip: { trigger: 'item' },
+                legend: { top: 'bottom' },
+                series: [
+                    {
+                        name: 'Παραγωγή (MWh)',
+                        type: 'pie',
+                        radius: ['40%', '70%'],
+                        avoidLabelOverlap: false,
+                        itemStyle: { borderRadius: 10, borderColor: '#fff', borderWidth: 2 },
+                        label: { show: false, position: 'center' },
+                        emphasis: { label: { show: true, fontSize: 18, fontWeight: 'bold' } },
+                        labelLine: { show: false },
+                        data: [
+                            { value: latestData.production_mix['TOTAL LIGNITE'] || 0, name: 'Λιγνίτης', itemStyle: { color: '#8B4513' } },
+                            { value: latestData.production_mix['TOTAL GAS'] || 0, name: 'Φυσικό Αέριο', itemStyle: { color: '#FFA500' } },
+                            { value: latestData.production_mix['TOTAL HYDRO'] || 0, name: 'Υδροηλεκτρικά', itemStyle: { color: '#4169E1' } },
+                            { value: latestData.production_mix['RES_PROD'] || 0, name: 'ΑΠΕ', itemStyle: { color: '#228B22' } }
+                        ]
+                    }
+                ]
+            };
+            mixChart.setOption(mixOptions);
+
+            // 3. Ενημέρωση του γραφήματος: Διασυνδέσεις (Bar Chart)
+            // Παίρνουμε τα ονόματα των χωρών και υπολογίζουμε το ισοζύγιο (Εισαγωγές - Εξαγωγές)
+            const interKeys = Object.keys(latestData.interconnections_mwh);
+            const countries = ['ΑΛΒΑΝΙΑ', 'ΒΟΥΛΓΑΡΙΑ', 'ΙΤΑΛΙΑ', 'ΤΟΥΡΚΙΑ', 'FYROM'];
+            const netFlows = countries.map(country => {
+                const imp = latestData.interconnections_mwh[`${country}_IMP`] || 0;
+                const exp = latestData.interconnections_mwh[`${country}_EXP`] || 0;
+                return imp - exp; // Θετικό = Καθαρές Εισαγωγές, Αρνητικό = Καθαρές Εξαγωγές
+            });
+
+            const flowsOptions = {
+                title: { text: 'Καθαρές Ροές Διασυνδέσεων (MWh)', left: 'center' },
+                tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+                grid: { top: 80, bottom: 30 },
+                xAxis: { type: 'value', position: 'top', splitLine: { lineStyle: { type: 'dashed' } } },
+                yAxis: { type: 'category', axisLine: { show: false }, axisLabel: { show: false }, axisTick: { show: false }, splitLine: { show: false }, data: countries },
+                series: [
+                    {
+                        name: 'Καθαρή Ροή (Εισαγ. - Εξαγ.)',
+                        type: 'bar',
+                        stack: 'Total',
+                        label: { show: true, formatter: '{b}' },
+                        itemStyle: {
+                            // Πράσινο για Εισαγωγές (Θετικό), Κόκκινο για Εξαγωγές (Αρνητικό)
+                            color: function(params) { return params.value > 0 ? '#2E8B57' : '#DC143C'; }
+                        },
+                        data: netFlows
+                    }
+                ]
+            };
+            flowsChart.setOption(flowsOptions);
+
+        } catch (error) {
+            console.error("Σφάλμα κατά τη φόρτωση των δεδομένων:", error);
+            document.getElementById('last-updated').innerText = "Αδυναμία φόρτωσης δεδομένων.";
+        }
+    }
+
+    // Καλούμε τη συνάρτηση όταν φορτώσει η σελίδα
+    loadData();
+
+    // Κάνουμε τα γραφήματα responsive όταν αλλάζει το μέγεθος του παραθύρου
+    window.addEventListener('resize', function() {
+        mixChart.resize();
+        flowsChart.resize();
+    });
+</script>
+</body>
+</html>
