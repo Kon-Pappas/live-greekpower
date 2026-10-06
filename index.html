@@ -4,47 +4,53 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Live Greek Power Dashboard</title>
-    <!-- Εισαγωγή του Bootstrap για εύκολο styling και Grid -->
+    <!-- Εισαγωγή του Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Εισαγωγή της βιβλιοθήκης ECharts -->
+    <!-- Εισαγωγή του ECharts -->
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
     <style>
         body {
-            background-color: #f4f7f6;
+            background-color: #121212; /* Σκούρο background */
+            color: #e0e0e0;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         .metric-card {
-            background-color: white;
+            background-color: #1e1e1e; /* Σκούρο γκρι κάρτες */
+            border: 1px solid #2d2d2d;
             border-radius: 8px;
             padding: 20px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
             text-align: center;
             height: 100%;
         }
         .metric-value {
             font-size: 2rem;
             font-weight: bold;
-            color: #2c3e50;
+            color: #ffffff;
         }
         .metric-title {
-            color: #7f8c8d;
+            color: #a0a0a0;
             font-size: 0.9rem;
             text-transform: uppercase;
         }
         .chart-container {
-            background-color: white;
+            background-color: #1e1e1e; /* Σκούρο γκρι containers για τα γραφήματα */
+            border: 1px solid #2d2d2d;
             border-radius: 8px;
             padding: 20px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
             height: 400px;
+        }
+        h1, #last-updated {
+            color: #ffffff;
         }
     </style>
 </head>
 <body>
 
 <div class="container mt-5">
-    <h1 class="mb-4 text-center">Σύστημα Ενέργειας Ελλάδας (Live)</h1>
-    <p class="text-center text-muted" id="last-updated">Τελευταία Ενημέρωση: Φόρτωση...</p>
+    <h1 class="mb-2 text-center">Σύστημα Ενέργειας Ελλάδας (Live)</h1>
+    <p class="text-center text-muted mb-4" id="last-updated">Τελευταία Ενημέρωση: Φόρτωση...</p>
 
     <!-- Καρτέλες με τα βασικά μεγέθη (Metrics) -->
     <div class="row mb-4">
@@ -63,12 +69,12 @@
         <div class="col-md-3 mb-3">
             <div class="metric-card">
                 <div class="metric-title">Τιμη Αγορας (DAM)</div>
-                <div class="metric-value text-primary" id="val-price">- €/MWh</div>
+                <div class="metric-value text-info" id="val-price">- €/MWh</div>
             </div>
         </div>
         <div class="col-md-3 mb-3">
             <div class="metric-card">
-                <div class="metric-title">Αποθηκευση (Έγχυση / Απορ.)</div>
+                <div class="metric-title">Αποθηκευση (Έγχ./Απορ.)</div>
                 <div class="metric-value text-success" id="val-storage">- MWh</div>
             </div>
         </div>
@@ -86,81 +92,99 @@
 </div>
 
 <script>
-    // Συναρτήσεις για τη δημιουργία των Γραφημάτων ECharts
-    let mixChart = echarts.init(document.getElementById('mixChart'));
-    let flowsChart = echarts.init(document.getElementById('flowsChart'));
+    let mixChart = echarts.init(document.getElementById('mixChart'), 'dark');
+    let flowsChart = echarts.init(document.getElementById('flowsChart'), 'dark');
 
     async function loadData() {
         try {
-            // Διαβάζουμε το JSON που φτιάχνει το Python script μας
             const response = await fetch('data/live_data.json');
             const data = await response.json();
-            
-            // Παίρνουμε την τελευταία καταχώρηση (το πιο πρόσφατο fetch)
             const latestData = data[data.length - 1];
 
-            // 1. Ενημέρωση των Metrics (Καρτέλες)
+            // 1. Metrics Updates
             document.getElementById('last-updated').innerText = `Τελευταία Ενημέρωση (Λήψη): ${new Date(latestData.fetch_timestamp).toLocaleString('el-GR')}`;
             document.getElementById('val-demand').innerText = `${latestData.demand_mwh} MWh`;
             document.getElementById('val-production').innerText = `${latestData.production_mix['TOTAL_PROD'] || '-'} MWh`;
             document.getElementById('val-price').innerText = `${latestData.dam_price_eur} €/MWh`;
             
-            // Φτιάχνουμε το κείμενο για την Αποθήκευση
             const stIn = latestData.production_mix['STORAGE_INJECTION'] || 0;
-            const stOut = latestData.production_mix['STORAGE_ABSORPTION'] || 0;
-            document.getElementById('val-storage').innerText = `${stIn} / ${stOut} MWh`;
+            const stAbs = latestData.production_mix['STORAGE_ABSORPTION'] || 0;
+            document.getElementById('val-storage').innerText = `${stIn} / ${stAbs} MWh`;
 
-            // 2. Ενημέρωση του γραφήματος: Ενεργειακό Μείγμα (Donut Chart)
+            // 2. Υπολογισμός Δεδομένων για την Πίτα (Energy Mix με προσθήκη καθαρών μπαταριών & ροών)
+            let lignite = latestData.production_mix['TOTAL LIGNITE'] || 0;
+            let gas = latestData.production_mix['TOTAL GAS'] || 0;
+            let hydro = latestData.production_mix['TOTAL HYDRO'] || 0;
+            let res = latestData.production_mix['RES_PROD'] || 0;
+
+            // Υπολογισμός καθαρής μπαταρίας (STORAGE_INJECTION - ABSORSION, όπου abs είναι συνήθως αρνητικό ή θετικό ανάλογα τη σύμβαση)
+            // Στο JSON σου είδαμε STORAGE_INJECTION: 297 και STORAGE_ABSORPTION: -9
+            let netStorage = stIn - Math.abs(stAbs); 
+            let storageDischargeForPie = netStorage > 0 ? netStorage : 0;
+
+            // Υπολογισμός συνολικών καθαρών εισαγωγών από τις διασυνδέσεις
+            let totalNetImports = 0;
+            const countries = ['ΑΛΒΑΝΙΑ', 'ΒΟΥΛΓΑΡΙΑ', 'ΙΤΑΛΙΑ', 'ΤΟΥΡΚΙΑ', 'FYROM'];
+            const netFlows = countries.map(country => {
+                const imp = latestData.interconnections_mwh[`${country}_IMP`] || 0;
+                const exp = latestData.interconnections_mwh[`${country}_EXP`] || 0;
+                const net = imp - exp;
+                totalNetImports += net;
+                return net;
+            });
+            let importsForPie = totalNetImports > 0 ? totalNetImports : 0;
+
+            // Δημιουργία δεδομένων πίτας (αγνοούμε μηδενικές ή αρνητικές τιμές για καθαρή απεικόνιση)
+            let pieData = [
+                { value: lignite, name: 'Λιγνίτης', itemStyle: { color: '#b5651d' } },
+                { value: gas, name: 'Φυσικό Αέριο', itemStyle: { color: '#f39c12' } },
+                { value: hydro, name: 'Υδροηλεκτρικά', itemStyle: { color: '#3498db' } },
+                { value: res, name: 'ΑΠΕ', itemStyle: { color: '#2ecc71' } }
+            ];
+
+            if (storageDischargeForPie > 0) {
+                pieData.push({ value: storageDischargeForPie, name: 'Αποθήκευση (Εκκένωση)', itemStyle: { color: '#9b59b6' } });
+            }
+            if (importsForPie > 0) {
+                pieData.push({ value: importsForPie, name: 'Καθαρές Εισαγωγές', itemStyle: { color: '#1abc9c' } });
+            }
+
+            // 3. Ενημέρωση Γραφήματος: Ενεργειακό Μείγμα
             const mixOptions = {
-                title: { text: 'Ενεργειακό Μείγμα', left: 'center' },
+                backgroundColor: 'transparent',
+                title: { text: 'Ενεργειακό Μείγμα & Συνεισφορά', left: 'center', textStyle: { color: '#fff' } },
                 tooltip: { trigger: 'item' },
-                legend: { top: 'bottom' },
+                legend: { top: 'bottom', textStyle: { color: '#ccc' } },
                 series: [
                     {
-                        name: 'Παραγωγή (MWh)',
+                        name: 'Παραγωγή / Πόροι (MWh)',
                         type: 'pie',
                         radius: ['40%', '70%'],
                         avoidLabelOverlap: false,
-                        itemStyle: { borderRadius: 10, borderColor: '#fff', borderWidth: 2 },
-                        label: { show: false, position: 'center' },
-                        emphasis: { label: { show: true, fontSize: 18, fontWeight: 'bold' } },
-                        labelLine: { show: false },
-                        data: [
-                            { value: latestData.production_mix['TOTAL LIGNITE'] || 0, name: 'Λιγνίτης', itemStyle: { color: '#8B4513' } },
-                            { value: latestData.production_mix['TOTAL GAS'] || 0, name: 'Φυσικό Αέριο', itemStyle: { color: '#FFA500' } },
-                            { value: latestData.production_mix['TOTAL HYDRO'] || 0, name: 'Υδροηλεκτρικά', itemStyle: { color: '#4169E1' } },
-                            { value: latestData.production_mix['RES_PROD'] || 0, name: 'ΑΠΕ', itemStyle: { color: '#228B22' } }
-                        ]
+                        itemStyle: { borderRadius: 8, borderColor: '#1e1e1e', borderWidth: 2 },
+                        label: { show: false },
+                        emphasis: { label: { show: true, fontSize: 16, fontWeight: 'bold', color: '#fff' } },
+                        data: pieData
                     }
                 ]
             };
             mixChart.setOption(mixOptions);
 
-            // 3. Ενημέρωση του γραφήματος: Διασυνδέσεις (Bar Chart)
-            // Παίρνουμε τα ονόματα των χωρών και υπολογίζουμε το ισοζύγιο (Εισαγωγές - Εξαγωγές)
-            const interKeys = Object.keys(latestData.interconnections_mwh);
-            const countries = ['ΑΛΒΑΝΙΑ', 'ΒΟΥΛΓΑΡΙΑ', 'ΙΤΑΛΙΑ', 'ΤΟΥΡΚΙΑ', 'FYROM'];
-            const netFlows = countries.map(country => {
-                const imp = latestData.interconnections_mwh[`${country}_IMP`] || 0;
-                const exp = latestData.interconnections_mwh[`${country}_EXP`] || 0;
-                return imp - exp; // Θετικό = Καθαρές Εισαγωγές, Αρνητικό = Καθαρές Εξαγωγές
-            });
-
+            // 4. Ενημέρωση Γραφήματος: Διασυνδέσεις (Bar Chart)
             const flowsOptions = {
-                title: { text: 'Καθαρές Ροές Διασυνδέσεων (MWh)', left: 'center' },
+                backgroundColor: 'transparent',
+                title: { text: 'Καθαρές Ροές Διασυνδέσεων (MWh)', left: 'center', textStyle: { color: '#fff' } },
                 tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
-                grid: { top: 80, bottom: 30 },
-                xAxis: { type: 'value', position: 'top', splitLine: { lineStyle: { type: 'dashed' } } },
-                yAxis: { type: 'category', axisLine: { show: false }, axisLabel: { show: false }, axisTick: { show: false }, splitLine: { show: false }, data: countries },
+                grid: { top: 80, bottom: 30, left: 60, right: 20 },
+                xAxis: { type: 'value', position: 'top', splitLine: { lineStyle: { color: '#333', type: 'dashed' } }, axisLabel: { color: '#aaa' } },
+                yAxis: { type: 'category', axisLine: { show: false }, axisLabel: { color: '#fff' }, axisTick: { show: false }, splitLine: { show: false }, data: countries },
                 series: [
                     {
                         name: 'Καθαρή Ροή (Εισαγ. - Εξαγ.)',
                         type: 'bar',
-                        stack: 'Total',
-                        label: { show: true, formatter: '{b}' },
+                        label: { show: true, color: '#fff' },
                         itemStyle: {
-                            // Πράσινο για Εισαγωγές (Θετικό), Κόκκινο για Εξαγωγές (Αρνητικό)
-                            color: function(params) { return params.value > 0 ? '#2E8B57' : '#DC143C'; }
+                            color: function(params) { return params.value > 0 ? '#27ae60' : '#c0392b'; }
                         },
                         data: netFlows
                     }
@@ -174,10 +198,8 @@
         }
     }
 
-    // Καλούμε τη συνάρτηση όταν φορτώσει η σελίδα
     loadData();
 
-    // Κάνουμε τα γραφήματα responsive όταν αλλάζει το μέγεθος του παραθύρου
     window.addEventListener('resize', function() {
         mixChart.resize();
         flowsChart.resize();
