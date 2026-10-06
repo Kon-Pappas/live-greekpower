@@ -29,10 +29,9 @@ def fetch_all_data():
 
     tz = pytz.timezone('Europe/Athens')
     current_time = datetime.now(tz)
-    # To API συνήθως είναι 1-2 ώρες πίσω, αλλά ας κρατήσουμε την ώρα που τρέχει το script για αναφορά
+    # To API συνήθως είναι 1-2 ώρες πίσω, αλλά ας κρατήσουμε την ώρα που τρέχει το script
     run_hour = current_time.hour 
 
-    # Εδώ θα "χτίσουμε" τη συνολική εγγραφή για αυτή την ώρα
     hourly_record = {
         "fetch_timestamp": current_time.isoformat(),
         "date": date_str,
@@ -53,11 +52,11 @@ def fetch_all_data():
             data = resp_prod.json()
             if "items" in data:
                 for item in data["items"]:
-                    # Φιλτράρισμα για την τρέχουσα ώρα
                     if item.get("hr") == run_hour:
                         tech = item.get("itemname")
                         energy = item.get("energy")
-                        if tech == "LOAD":
+                        # Διόρθωση στο κλειδί του συνολικού φορτίου
+                        if tech == "TOTAL_LOAD":
                             hourly_record["demand_mwh"] = energy
                         elif tech:
                             hourly_record["production_mix"][tech] = energy
@@ -66,11 +65,12 @@ def fetch_all_data():
         resp_dam = requests.get(endpoints["dam"], headers=headers)
         if resp_dam.status_code == 200:
              data = resp_dam.json()
+             # Debug Print για να δούμε τα κλειδιά της DAM στα GitHub logs
+             print("DAM Data Sample:", str(data)[:500]) 
              if "items" in data:
                  for item in data["items"]:
                      if item.get("hr") == run_hour:
-                         # Το κλειδί συνήθως είναι 'price' ή 'mcp' (προσαρμόζεις αν χρειαστεί)
-                         hourly_record["dam_price_eur"] = item.get("price", 0) 
+                         hourly_record["dam_price_eur"] = item.get("price", item.get("mcp", 0)) 
 
         # 3. Διασυνδέσεις
         resp_int = requests.get(endpoints["interconnections"], headers=headers)
@@ -88,6 +88,8 @@ def fetch_all_data():
         resp_co2 = requests.get(endpoints["co2"], headers=headers)
         if resp_co2.status_code == 200:
             data = resp_co2.json()
+            # Debug Print για να δούμε τα κλειδιά του CO2 στα GitHub logs
+            print("CO2 Data Sample:", str(data)[:500])
             if "items" in data:
                  for item in data["items"]:
                     if item.get("hr") == run_hour:
@@ -112,7 +114,7 @@ def save_to_json(new_data):
             with open(filepath, 'r', encoding='utf-8') as f:
                 history = json.load(f)
         except json.JSONDecodeError:
-            pass # Αν το αρχείο είναι χαλασμένο, ξεκινάμε νέο list
+            pass 
 
     history.append(new_data)
 
@@ -125,6 +127,5 @@ if __name__ == "__main__":
     combined_data = fetch_all_data()
     save_to_json(combined_data)
     
-    # Εκτυπώνουμε ένα summary για τα logs του GitHub Action
     if combined_data:
         print(json.dumps(combined_data, indent=2, ensure_ascii=False))
