@@ -1,21 +1,21 @@
 <!DOCTYPE html>
-<html lang="el">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Live Greek Power Dashboard</title>
-    <!-- Εισαγωγή του Bootstrap -->
+    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Εισαγωγή του ECharts -->
+    <!-- ECharts -->
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
     <style>
         body {
-            background-color: #121212; /* Σκούρο background */
+            background-color: #121212;
             color: #e0e0e0;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         .metric-card {
-            background-color: #1e1e1e; /* Σκούρο γκρι κάρτες */
+            background-color: #1e1e1e;
             border: 1px solid #2d2d2d;
             border-radius: 8px;
             padding: 20px;
@@ -34,53 +34,57 @@
             text-transform: uppercase;
         }
         .chart-container {
-            background-color: #1e1e1e; /* Σκούρο γκρι containers για τα γραφήματα */
+            background-color: #1e1e1e;
             border: 1px solid #2d2d2d;
             border-radius: 8px;
             padding: 20px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-            height: 400px;
+            height: 420px;
         }
-        h1, #last-updated {
+        h1 {
             color: #ffffff;
+        }
+        #last-updated {
+            color: #f1c40f !important; /* Ευδιάκριτο κίτρινο χρώμα στο dark mode */
+            font-weight: 600;
         }
     </style>
 </head>
 <body>
 
 <div class="container mt-5">
-    <h1 class="mb-2 text-center">Σύστημα Ενέργειας Ελλάδας (Live)</h1>
-    <p class="text-center text-muted mb-4" id="last-updated">Τελευταία Ενημέρωση: Φόρτωση...</p>
+    <h1 class="mb-2 text-center">Greece Energy System (Live)</h1>
+    <p class="text-center mb-4" id="last-updated">Last Updated: Loading...</p>
 
-    <!-- Καρτέλες με τα βασικά μεγέθη (Metrics) -->
+    <!-- Metrics Cards -->
     <div class="row mb-4">
         <div class="col-md-3 mb-3">
             <div class="metric-card">
-                <div class="metric-title">Συνολικη Ζητηση</div>
+                <div class="metric-title">Total Demand</div>
                 <div class="metric-value" id="val-demand">- MWh</div>
             </div>
         </div>
         <div class="col-md-3 mb-3">
             <div class="metric-card">
-                <div class="metric-title">Συνολικη Παραγωγη</div>
+                <div class="metric-title">Total Generation</div>
                 <div class="metric-value" id="val-production">- MWh</div>
             </div>
         </div>
         <div class="col-md-3 mb-3">
             <div class="metric-card">
-                <div class="metric-title">Τιμη Αγορας (DAM)</div>
+                <div class="metric-title">DAM Price</div>
                 <div class="metric-value text-info" id="val-price">- €/MWh</div>
             </div>
         </div>
         <div class="col-md-3 mb-3">
             <div class="metric-card">
-                <div class="metric-title">Αποθηκευση (Έγχ./Απορ.)</div>
+                <div class="metric-title">Storage (Inj./Abs.)</div>
                 <div class="metric-value text-success" id="val-storage">- MWh</div>
             </div>
         </div>
     </div>
 
-    <!-- Τα Γραφήματα -->
+    <!-- Charts -->
     <div class="row">
         <div class="col-md-6 mb-4">
             <div class="chart-container" id="mixChart"></div>
@@ -101,8 +105,8 @@
             const data = await response.json();
             const latestData = data[data.length - 1];
 
-            // 1. Metrics Updates
-            document.getElementById('last-updated').innerText = `Τελευταία Ενημέρωση (Λήψη): ${new Date(latestData.fetch_timestamp).toLocaleString('el-GR')}`;
+            // 1. Update Metrics
+            document.getElementById('last-updated').innerText = `Last Updated (Fetch): ${new Date(latestData.fetch_timestamp).toLocaleString('en-GB')}`;
             document.getElementById('val-demand').innerText = `${latestData.demand_mwh} MWh`;
             document.getElementById('val-production').innerText = `${latestData.production_mix['TOTAL_PROD'] || '-'} MWh`;
             document.getElementById('val-price').innerText = `${latestData.dam_price_eur} €/MWh`;
@@ -111,53 +115,49 @@
             const stAbs = latestData.production_mix['STORAGE_ABSORPTION'] || 0;
             document.getElementById('val-storage').innerText = `${stIn} / ${stAbs} MWh`;
 
-            // 2. Υπολογισμός Δεδομένων για την Πίτα (Energy Mix με προσθήκη καθαρών μπαταριών & ροών)
+            // 2. Energy Mix & Contribution Calculations
             let lignite = latestData.production_mix['TOTAL LIGNITE'] || 0;
             let gas = latestData.production_mix['TOTAL GAS'] || 0;
             let hydro = latestData.production_mix['TOTAL HYDRO'] || 0;
             let res = latestData.production_mix['RES_PROD'] || 0;
 
-            // Υπολογισμός καθαρής μπαταρίας (STORAGE_INJECTION - ABSORSION, όπου abs είναι συνήθως αρνητικό ή θετικό ανάλογα τη σύμβαση)
-            // Στο JSON σου είδαμε STORAGE_INJECTION: 297 και STORAGE_ABSORPTION: -9
             let netStorage = stIn - Math.abs(stAbs); 
             let storageDischargeForPie = netStorage > 0 ? netStorage : 0;
 
-            // Υπολογισμός συνολικών καθαρών εισαγωγών από τις διασυνδέσεις
             let totalNetImports = 0;
-            const countries = ['ΑΛΒΑΝΙΑ', 'ΒΟΥΛΓΑΡΙΑ', 'ΙΤΑΛΙΑ', 'ΤΟΥΡΚΙΑ', 'FYROM'];
-            const netFlows = countries.map(country => {
+            const countries = ['ALBANIA', 'BULGARIA', 'ITALY', 'TURKEY', 'NORTH MACEDONIA'];
+            const countryKeys = ['ΑΛΒΑΝΙΑ', 'ΒΟΥΛΓΑΡΙΑ', 'ΙΤΑΛΙΑ', 'ΤΟΥΡΚΙΑ', 'FYROM'];
+            
+            countryKeys.forEach(country => {
                 const imp = latestData.interconnections_mwh[`${country}_IMP`] || 0;
                 const exp = latestData.interconnections_mwh[`${country}_EXP`] || 0;
-                const net = imp - exp;
-                totalNetImports += net;
-                return net;
+                totalNetImports += (imp - exp);
             });
             let importsForPie = totalNetImports > 0 ? totalNetImports : 0;
 
-            // Δημιουργία δεδομένων πίτας (αγνοούμε μηδενικές ή αρνητικές τιμές για καθαρή απεικόνιση)
             let pieData = [
-                { value: lignite, name: 'Λιγνίτης', itemStyle: { color: '#b5651d' } },
-                { value: gas, name: 'Φυσικό Αέριο', itemStyle: { color: '#f39c12' } },
-                { value: hydro, name: 'Υδροηλεκτρικά', itemStyle: { color: '#3498db' } },
-                { value: res, name: 'ΑΠΕ', itemStyle: { color: '#2ecc71' } }
+                { value: lignite, name: 'Lignite', itemStyle: { color: '#8c533c' } },
+                { value: gas, name: 'Natural Gas', itemStyle: { color: '#c4826b' } }, // Βρώμικο ροζ / dusty brownish pink
+                { value: hydro, name: 'Hydro', itemStyle: { color: '#3498db' } },
+                { value: res, name: 'RES', itemStyle: { color: '#2ecc71' } }
             ];
 
             if (storageDischargeForPie > 0) {
-                pieData.push({ value: storageDischargeForPie, name: 'Αποθήκευση (Εκκένωση)', itemStyle: { color: '#9b59b6' } });
+                pieData.push({ value: storageDischargeForPie, name: 'Storage (Discharge)', itemStyle: { color: '#9b59b6' } });
             }
             if (importsForPie > 0) {
-                pieData.push({ value: importsForPie, name: 'Καθαρές Εισαγωγές', itemStyle: { color: '#1abc9c' } });
+                pieData.push({ value: importsForPie, name: 'Net Imports', itemStyle: { color: '#f1c40f' } }); // Κίτρινο
             }
 
-            // 3. Ενημέρωση Γραφήματος: Ενεργειακό Μείγμα
+            // 3. Render Energy Mix Donut Chart
             const mixOptions = {
                 backgroundColor: 'transparent',
-                title: { text: 'Ενεργειακό Μείγμα & Συνεισφορά', left: 'center', textStyle: { color: '#fff' } },
+                title: { text: 'Energy Mix & Contribution', left: 'center', textStyle: { color: '#fff' } },
                 tooltip: { trigger: 'item' },
                 legend: { top: 'bottom', textStyle: { color: '#ccc' } },
                 series: [
                     {
-                        name: 'Παραγωγή / Πόροι (MWh)',
+                        name: 'Generation / Resources (MWh)',
                         type: 'pie',
                         radius: ['40%', '70%'],
                         avoidLabelOverlap: false,
@@ -170,31 +170,48 @@
             };
             mixChart.setOption(mixOptions);
 
-            // 4. Ενημέρωση Γραφήματος: Διασυνδέσεις (Bar Chart)
+            // 4. Render Vertical Cross-Border Flows Chart (Imports positive on top, Exports negative on bottom)
+            const importsData = countryKeys.map(c => latestData.interconnections_mwh[`${c}_IMP`] || 0);
+            const exportsData = countryKeys.map(c => -(latestData.interconnections_mwh[`${c}_EXP`] || 0));
+
             const flowsOptions = {
                 backgroundColor: 'transparent',
-                title: { text: 'Καθαρές Ροές Διασυνδέσεων (MWh)', left: 'center', textStyle: { color: '#fff' } },
+                title: { text: 'Cross-Border Flows (Imports / Exports)', left: 'center', textStyle: { color: '#fff' } },
                 tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
-                grid: { top: 80, bottom: 30, left: 60, right: 20 },
-                xAxis: { type: 'value', position: 'top', splitLine: { lineStyle: { color: '#333', type: 'dashed' } }, axisLabel: { color: '#aaa' } },
-                yAxis: { type: 'category', axisLine: { show: false }, axisLabel: { color: '#fff' }, axisTick: { show: false }, splitLine: { show: false }, data: countries },
+                legend: { top: 35, textStyle: { color: '#ccc' } },
+                grid: { top: 90, bottom: 30, left: 50, right: 20 },
+                xAxis: { 
+                    type: 'category', 
+                    data: countries, 
+                    axisLabel: { color: '#fff', interval: 0, rotate: 15 } 
+                },
+                yAxis: { 
+                    type: 'value', 
+                    splitLine: { lineStyle: { color: '#333', type: 'dashed' } }, 
+                    axisLabel: { color: '#aaa' } 
+                },
                 series: [
                     {
-                        name: 'Καθαρή Ροή (Εισαγ. - Εξαγ.)',
+                        name: 'Imports',
                         type: 'bar',
-                        label: { show: true, color: '#fff' },
-                        itemStyle: {
-                            color: function(params) { return params.value > 0 ? '#27ae60' : '#c0392b'; }
-                        },
-                        data: netFlows
+                        stack: 'Flow',
+                        itemStyle: { color: '#f1c40f' }, // Κίτρινο από πάνω
+                        data: importsData
+                    },
+                    {
+                        name: 'Exports',
+                        type: 'bar',
+                        stack: 'Flow',
+                        itemStyle: { color: '#e74c3c' }, // Κόκκινο από κάτω
+                        data: exportsData
                     }
                 ]
             };
             flowsChart.setOption(flowsOptions);
 
         } catch (error) {
-            console.error("Σφάλμα κατά τη φόρτωση των δεδομένων:", error);
-            document.getElementById('last-updated').innerText = "Αδυναμία φόρτωσης δεδομένων.";
+            console.error("Error loading data:", error);
+            document.getElementById('last-updated').innerText = "Failed to load data.";
         }
     }
 
