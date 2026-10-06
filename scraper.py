@@ -12,14 +12,14 @@ def get_today_string():
 def fetch_all_data():
     date_str = get_today_string()
     
-    # Base URL και τα 4 κρίσιμα endpoints
     base_proxy = "https://iptoanalytics-api.admie.gr/iptoanalytics/api/ipto?endpoint=https:%2F%2Fmarket-public-api.admie.gr%2Frestws%2Fportal%2F"
     
     endpoints = {
         "production": f"{base_proxy}prodmixandload%2F{date_str}",
         "dam": f"{base_proxy}dayaheadmarket%2F{date_str}",
         "interconnections": f"{base_proxy}scadainterflows%2F{date_str}",
-        "co2": f"{base_proxy}co2emissions%2F{date_str}%2F{date_str}"
+        # ΑΛΛΑΓΗ: Χρησιμοποιούμε το 'carbon' endpoint αντί για το co2emissions
+        "co2": f"{base_proxy}carbon%2F{date_str}"
     }
 
     headers = {
@@ -29,7 +29,6 @@ def fetch_all_data():
 
     tz = pytz.timezone('Europe/Athens')
     current_time = datetime.now(tz)
-    # To API συνήθως είναι 1-2 ώρες πίσω, αλλά ας κρατήσουμε την ώρα που τρέχει το script
     run_hour = current_time.hour 
 
     hourly_record = {
@@ -55,7 +54,6 @@ def fetch_all_data():
                     if item.get("hr") == run_hour:
                         tech = item.get("itemname")
                         energy = item.get("energy")
-                        # Διόρθωση στο κλειδί του συνολικού φορτίου
                         if tech == "TOTAL_LOAD":
                             hourly_record["demand_mwh"] = energy
                         elif tech:
@@ -65,12 +63,11 @@ def fetch_all_data():
         resp_dam = requests.get(endpoints["dam"], headers=headers)
         if resp_dam.status_code == 200:
              data = resp_dam.json()
-             # Debug Print για να δούμε τα κλειδιά της DAM στα GitHub logs
-             print("DAM Data Sample:", str(data)[:500]) 
              if "items" in data:
                  for item in data["items"]:
-                     if item.get("hr") == run_hour:
-                         hourly_record["dam_price_eur"] = item.get("price", item.get("mcp", 0)) 
+                     # ΑΛΛΑΓΗ: Φιλτράρουμε για ώρα ΚΑΙ για Ελλάδα (GR), παίρνοντας το 'value'
+                     if item.get("hr") == run_hour and item.get("country") == "GR":
+                         hourly_record["dam_price_eur"] = item.get("value", 0) 
 
         # 3. Διασυνδέσεις
         resp_int = requests.get(endpoints["interconnections"], headers=headers)
@@ -84,12 +81,12 @@ def fetch_all_data():
                         if country:
                             hourly_record["interconnections_mwh"][country] = flow
 
-        # 4. Εκπομπές CO2
+        # 4. Εκπομπές CO2 (Carbon)
         resp_co2 = requests.get(endpoints["co2"], headers=headers)
         if resp_co2.status_code == 200:
             data = resp_co2.json()
-            # Debug Print για να δούμε τα κλειδιά του CO2 στα GitHub logs
-            print("CO2 Data Sample:", str(data)[:500])
+            # Αφήνουμε το print για να δούμε τι ακριβώς φέρνει το carbon endpoint
+            print("Carbon Data Sample:", str(data)[:500])
             if "items" in data:
                  for item in data["items"]:
                     if item.get("hr") == run_hour:
