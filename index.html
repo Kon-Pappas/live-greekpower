@@ -264,4 +264,200 @@
     </div>
 
 <script>
-    let
+    let mixChart = echarts.init(document.getElementById('mixChart'), 'dark');
+    let flowsChart = echarts.init(document.getElementById('flowsChart'), 'dark');
+
+    async function loadData() {
+        try {
+            const response = await fetch('data/live_data.json');
+            const data = await response.json();
+            const latestData = data[data.length - 1];
+
+            // Timestamps
+            const fetchTime = new Date(latestData.fetch_timestamp).toLocaleString('en-GB');
+            document.getElementById('last-updated').innerText = `Last Update: ${fetchTime}  |  Target Hour: ${latestData.target_hour}:00`;
+
+            // --- 1. Data Extraction & Preparation ---
+            
+            // Generation Sources
+            let lignite = latestData.production_mix['TOTAL LIGNITE'] || 0;
+            let gas = latestData.production_mix['TOTAL GAS'] || 0;
+            let hydro = latestData.production_mix['TOTAL HYDRO'] || 0;
+            let res = latestData.production_mix['RES_PROD'] || 0;
+            let totalGen = latestData.production_mix['TOTAL_PROD'] || 0;
+
+            // Storage & Pumping
+            const stIn = latestData.production_mix['STORAGE_INJECTION'] || 0;
+            const stAbs = Math.abs(latestData.production_mix['STORAGE_ABSORPTION'] || 0); // Κάνουμε το ABS θετικό για την εξίσωση
+            const pump = latestData.production_mix['ΣΥΝΟΛΙΚΗ ΑΝΤΛΗΣΗ'] || 0;
+
+            let netStorage = stIn - stAbs; 
+            let storageDischargeForPie = netStorage > 0 ? netStorage : 0;
+
+            // Cross-Border Flows
+            let totalImports = 0;
+            let totalExports = 0;
+            const countryKeys = ['ΑΛΒΑΝΙΑ', 'ΒΟΥΛΓΑΡΙΑ', 'ΙΤΑΛΙΑ', 'ΤΟΥΡΚΙΑ', 'FYROM'];
+            
+            countryKeys.forEach(country => {
+                totalImports += (latestData.interconnections_mwh[`${country}_IMP`] || 0);
+                totalExports += (latestData.interconnections_mwh[`${country}_EXP`] || 0);
+            });
+            let netImports = totalImports - totalExports;
+            let importsForPie = netImports > 0 ? netImports : 0;
+
+            // Demand & MCP
+            let demand = latestData.demand_mwh || 0;
+            let mcp = latestData.dam_price_eur || 0;
+
+
+            // --- 2. Update Metric Cards & Equations ---
+            
+            document.getElementById('val-production').innerText = `${totalGen} MWh`;
+            document.getElementById('val-demand').innerText = `${demand} MWh`;
+            document.getElementById('val-price').innerText = `${mcp} €`;
+
+            // Equation: Total Generation = Lignite + Gas + Hydro + RES
+            document.getElementById('eq-generation').innerHTML = `
+                <span class="eq-item c-lignite">${lignite} Lignite</span> <span class="eq-operator">+</span>
+                <span class="eq-item c-gas">${gas} Gas</span> <span class="eq-operator">+</span>
+                <span class="eq-item c-hydro">${hydro} Hydro</span> <span class="eq-operator">+</span>
+                <span class="eq-item c-res">${res} RES</span>
+            `;
+
+            // Equation: Demand = Generation + Imports - Exports + Storage Discharge - Storage Charge - Pump
+            document.getElementById('eq-demand').innerHTML = `
+                <span class="eq-item text-white">${totalGen} Gen.</span> <span class="eq-operator">+</span>
+                <span class="eq-item c-imports">${totalImports} Imp.</span> <span class="eq-operator">-</span>
+                <span class="eq-item c-exports">${totalExports} Exp.</span> <span class="eq-operator">+</span>
+                <span class="eq-item c-storage">${stIn} Disch.</span> <span class="eq-operator">-</span>
+                <span class="eq-item c-storage">${stAbs} Chrg.</span> <span class="eq-operator">-</span>
+                <span class="eq-item c-pump">${pump} Pump</span>
+            `;
+
+
+            // --- 3. Render Energy Mix Donut Chart (with Percentages) ---
+            
+            let pieData = [
+                { value: lignite, name: 'Lignite', itemStyle: { color: '#8c533c' } },
+                { value: gas, name: 'Natural Gas', itemStyle: { color: '#c4826b' } },
+                { value: hydro, name: 'Hydro', itemStyle: { color: '#3498db' } },
+                { value: res, name: 'RES', itemStyle: { color: '#2ecc71' } }
+            ];
+
+            if (storageDischargeForPie > 0) {
+                pieData.push({ value: storageDischargeForPie, name: 'Storage (Discharge)', itemStyle: { color: '#9b59b6' } });
+            }
+            if (importsForPie > 0) {
+                pieData.push({ value: importsForPie, name: 'Net Imports', itemStyle: { color: '#f1c40f' } });
+            }
+
+            const mixOptions = {
+                backgroundColor: 'transparent',
+                title: { text: 'Energy Mix & Contribution', left: 'center', textStyle: { color: '#ffffff', fontSize: 15 } },
+                tooltip: { 
+                    trigger: 'item',
+                    // Tooltip shows MWh on hover
+                    formatter: '{b}: {c} MWh ({d}%)' 
+                },
+                legend: { top: 'bottom', textStyle: { color: '#8892b0' } },
+                series: [
+                    {
+                        name: 'Generation',
+                        type: 'pie',
+                        radius: ['40%', '70%'],
+                        avoidLabelOverlap: true,
+                        itemStyle: { borderRadius: 8, borderColor: '#18202c', borderWidth: 2 },
+                        // ECharts Label Formatter to show Percentages instead of MWh inside the chart
+                        label: { 
+                            show: true, 
+                            formatter: '{d}%', // {d} is the ECharts variable for percentage
+                            color: '#fff',
+                            fontSize: 12,
+                            fontWeight: 'bold'
+                        },
+                        labelLine: {
+                            lineStyle: { color: '#8892b0' },
+                            smooth: 0.2,
+                            length: 10,
+                            length2: 20
+                        },
+                        emphasis: { label: { show: true, fontSize: 16, fontWeight: 'bold' } },
+                        data: pieData
+                    }
+                ]
+            };
+            mixChart.setOption(mixOptions);
+
+
+            // --- 4. Render Vertical Cross-Border Flows Chart ---
+            
+            const displayCountries = ['ALBANIA', 'BULGARIA', 'ITALY', 'TURKEY', 'NORTH MACEDONIA'];
+            const importsData = countryKeys.map(c => latestData.interconnections_mwh[`${c}_IMP`] || 0);
+            const exportsData = countryKeys.map(c => -(latestData.interconnections_mwh[`${c}_EXP`] || 0)); // Negative for Exports
+
+            const flowsOptions = {
+                backgroundColor: 'transparent',
+                title: { text: 'Cross-Border Flows (Imports / Exports)', left: 'center', textStyle: { color: '#ffffff', fontSize: 15 } },
+                tooltip: { 
+                    trigger: 'axis', 
+                    axisPointer: { type: 'shadow' },
+                    // Formatter to remove negative sign from tooltip
+                    formatter: function(params) {
+                        let html = params[0].name + '<br/>';
+                        params.forEach(p => {
+                            html += `${p.marker} ${p.seriesName}: ${Math.abs(p.value)} MWh<br/>`;
+                        });
+                        return html;
+                    }
+                },
+                legend: { top: 35, textStyle: { color: '#8892b0' } },
+                grid: { top: 90, bottom: 30, left: 50, right: 20 },
+                xAxis: { 
+                    type: 'category', 
+                    data: displayCountries, 
+                    axisLabel: { color: '#ffffff', interval: 0, rotate: 15 } 
+                },
+                yAxis: { 
+                    type: 'value', 
+                    splitLine: { lineStyle: { color: '#222b38', type: 'dashed' } }, 
+                    axisLabel: { 
+                        color: '#8892b0',
+                        // Formatter to remove negative sign from Y-Axis labels
+                        formatter: function(value) { return Math.abs(value); } 
+                    } 
+                },
+                series: [
+                    {
+                        name: 'Imports',
+                        type: 'bar',
+                        stack: 'Flow',
+                        itemStyle: { color: '#f1c40f' },
+                        data: importsData
+                    },
+                    {
+                        name: 'Exports',
+                        type: 'bar',
+                        stack: 'Flow',
+                        itemStyle: { color: '#e74c3c' },
+                        data: exportsData
+                    }
+                ]
+            };
+        flowsChart.setOption(flowsOptions);
+
+        } catch (error) {
+            console.error("Error loading data:", error);
+            document.getElementById('last-updated').innerText = "Failed to load data.";
+        }
+    }
+
+    loadData();
+
+    window.addEventListener('resize', function() {
+        mixChart.resize();
+        flowsChart.resize();
+    });
+</script>
+</body>
+</html>
