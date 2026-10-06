@@ -6,6 +6,10 @@ on:
     - cron: '0 * * * *' # Τρέχει στο λεπτό "0" κάθε ώρας
   workflow_dispatch: # Επιτρέπει να το τρέχουμε και χειροκίνητα με ένα κουμπί
 
+# Απαραίτητο για να έχει δικαίωμα το Action να κάνει git push πίσω στο repo
+permissions:
+  contents: write
+
 jobs:
   scrape-and-save:
     runs-on: ubuntu-latest
@@ -19,8 +23,11 @@ jobs:
         with:
           python-version: '3.10'
           
+      # Ενωμένο και πλήρες step για τις βιβλιοθήκες, ΠΡΙΝ τρέξει το script
       - name: Install dependencies
-        run: pip install requests
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests pytz
         
       - name: Run scraper
         run: python scraper.py
@@ -29,12 +36,8 @@ jobs:
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action Bot"
-          git add data.json
+          # Ενημερωμένη διαδρομή για το νέο JSON αρχείο
+          git add data/live_data.json
           # Αν δεν υπάρχουν αλλαγές, το script δεν θα "κρασάρει"
           git diff --quiet && git diff --staged --quiet || git commit -m "Ενημέρωση δεδομένων ΑΔΜΗΕ: $(date +'%Y-%m-%d %H:%M')"
           git push
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install requests pytz
