@@ -22,10 +22,10 @@
             --color-gas: #c4826b; /* Βρώμικο Ροζ */
             --color-hydro: #3498db;
             --color-res: #2ecc71;
-            --color-storage: #9b59b6;
+            --color-storage: #d2b4de; /* Ανοιχτό/Παστέλ Μωβ για καλύτερη αντίθεση */
             --color-imports: #f1c40f;
             --color-exports: #e74c3c;
-            --color-pump: #e67e22;
+            --color-pump: #85c1e9; /* Ανοιχτό Μπλε/Γαλάζιο */
         }
 
         body {
@@ -126,12 +126,18 @@
             border-radius: 10px;
             padding: 20px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-            text-align: center;
-            height: 100%;
             display: flex;
             flex-direction: column;
-            justify-content: center;
+            height: 100%;
         }
+        
+        .metric-header-center {
+            text-align: center;
+            margin-bottom: 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            padding-bottom: 15px;
+        }
+
         .metric-title {
             color: var(--text-muted);
             font-size: 0.9rem;
@@ -139,32 +145,52 @@
             letter-spacing: 0.5px;
             margin-bottom: 8px;
         }
+        
+        /* Και τα δύο κεντρικά νούμερα λευκά και ευδιάκριτα */
         .metric-value {
             font-size: 2.2rem;
             font-weight: 700;
-            color: var(--text-main);
-            margin-bottom: 10px;
-        }
-        
-        /* Equation Styling inside Cards */
-        .equation-text {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 5px;
-            align-items: center;
-        }
-        .eq-item {
-            font-weight: 600;
-        }
-        .eq-operator {
-            color: #666;
-            margin: 0 2px;
+            color: #ffffff; 
         }
 
-        /* Custom Color Classes for Cognitive Mapping */
+        /* Vertical Breakdown List (Σαν Λογιστικό Καθολικό / Απόδειξη) */
+        .breakdown-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+        
+        .eq-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .eq-label {
+            flex: 1;
+            text-align: left;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+        }
+
+        .eq-operator {
+            color: #ffffff; /* Άσπρα πρόσημα */
+            font-weight: 800;
+            font-size: 1.1rem;
+            width: 30px;
+            text-align: center;
+        }
+
+        .eq-value {
+            width: 80px;
+            text-align: right;
+            font-weight: 600;
+            font-family: 'Courier New', Courier, monospace; /* Στοιχίζει τέλεια τα ψηφία */
+        }
+
+        /* Custom Color Classes */
         .c-lignite { color: var(--color-lignite); }
         .c-gas { color: var(--color-gas); }
         .c-hydro { color: var(--color-hydro); }
@@ -192,12 +218,10 @@
 </head>
 <body>
 
-    <!-- Top Breadcrumb Navigation -->
     <div class="top-nav">
         <a href="#">Konstantinos Pappas Hub</a> / Live Greek Power
     </div>
 
-    <!-- Header Section -->
     <div class="header-section">
         <div>
             <h1 class="dashboard-title">Greek Power Market Analytics</h1>
@@ -208,26 +232,25 @@
         </div>
     </div>
 
-    <!-- Sub-navigation Tabs -->
     <div class="nav-tabs-container">
         <a href="#" class="nav-tab-item active">Live Analytics</a>
         <a href="#" class="nav-tab-item">Generation Mix</a>
         <a href="#" class="nav-tab-item">Cross-Border Flows</a>
     </div>
 
-    <!-- Main Body -->
     <div class="main-container">
         
-        <!-- Metrics Row (3 Boxes) -->
         <div class="row mb-4">
             
             <!-- 1. Total Generation Box -->
             <div class="col-md-5 mb-3">
                 <div class="metric-card">
-                    <div class="metric-title">Total Generation</div>
-                    <div class="metric-value" id="val-production">- MWh</div>
-                    <div class="equation-text" id="eq-generation">
-                        <!-- Γεμίζει δυναμικά μέσω JS -->
+                    <div class="metric-header-center">
+                        <div class="metric-title">Total Generation</div>
+                        <div class="metric-value" id="val-production">- MWh</div>
+                    </div>
+                    <div class="breakdown-list" id="eq-generation">
+                        <!-- Γεμίζει δυναμικά -->
                     </div>
                 </div>
             </div>
@@ -235,24 +258,25 @@
             <!-- 2. Total Demand Box (Energy Balance) -->
             <div class="col-md-5 mb-3">
                 <div class="metric-card">
-                    <div class="metric-title">Total Demand (Balance)</div>
-                    <div class="metric-value" id="val-demand">- MWh</div>
-                    <div class="equation-text" id="eq-demand">
-                        <!-- Γεμίζει δυναμικά μέσω JS -->
+                    <div class="metric-header-center">
+                        <div class="metric-title">Total Demand (Balance)</div>
+                        <div class="metric-value" id="val-demand">- MWh</div>
+                    </div>
+                    <div class="breakdown-list" id="eq-demand">
+                        <!-- Γεμίζει δυναμικά -->
                     </div>
                 </div>
             </div>
 
             <!-- 3. MCP Box -->
             <div class="col-md-2 mb-3">
-                <div class="metric-card" style="border-color: rgba(52, 152, 219, 0.4);">
-                    <div class="metric-title">Market Clearing Price (MCP)</div>
-                    <div class="metric-value" style="color: #3498db; font-size: 2.5rem;" id="val-price">- €/MWh</div>
+                <div class="metric-card" style="border-color: rgba(52, 152, 219, 0.4); justify-content: center; align-items: center;">
+                    <div class="metric-title text-center">Market Clearing Price (MCP)</div>
+                    <div class="metric-value" style="color: #3498db; font-size: 2.5rem;" id="val-price">- €</div>
                 </div>
             </div>
         </div>
 
-        <!-- Charts Row -->
         <div class="row">
             <div class="col-md-6 mb-4">
                 <div class="chart-container" id="mixChart"></div>
@@ -267,34 +291,32 @@
     let mixChart = echarts.init(document.getElementById('mixChart'), 'dark');
     let flowsChart = echarts.init(document.getElementById('flowsChart'), 'dark');
 
+    // Συνάρτηση για διαχωριστικό χιλιάδων (π.χ. 5,443)
+    const fmt = (num) => new Intl.NumberFormat('en-US').format(num);
+
     async function loadData() {
         try {
             const response = await fetch('data/live_data.json');
             const data = await response.json();
             const latestData = data[data.length - 1];
 
-            // Timestamps
             const fetchTime = new Date(latestData.fetch_timestamp).toLocaleString('en-GB');
             document.getElementById('last-updated').innerText = `Last Update: ${fetchTime}  |  Target Hour: ${latestData.target_hour}:00`;
 
-            // --- 1. Data Extraction & Preparation ---
-            
-            // Generation Sources
+            // Data Extraction
             let lignite = latestData.production_mix['TOTAL LIGNITE'] || 0;
             let gas = latestData.production_mix['TOTAL GAS'] || 0;
             let hydro = latestData.production_mix['TOTAL HYDRO'] || 0;
             let res = latestData.production_mix['RES_PROD'] || 0;
             let totalGen = latestData.production_mix['TOTAL_PROD'] || 0;
 
-            // Storage & Pumping
             const stIn = latestData.production_mix['STORAGE_INJECTION'] || 0;
-            const stAbs = Math.abs(latestData.production_mix['STORAGE_ABSORPTION'] || 0); // Κάνουμε το ABS θετικό για την εξίσωση
+            const stAbs = Math.abs(latestData.production_mix['STORAGE_ABSORPTION'] || 0); 
             const pump = latestData.production_mix['ΣΥΝΟΛΙΚΗ ΑΝΤΛΗΣΗ'] || 0;
 
             let netStorage = stIn - stAbs; 
             let storageDischargeForPie = netStorage > 0 ? netStorage : 0;
 
-            // Cross-Border Flows
             let totalImports = 0;
             let totalExports = 0;
             const countryKeys = ['ΑΛΒΑΝΙΑ', 'ΒΟΥΛΓΑΡΙΑ', 'ΙΤΑΛΙΑ', 'ΤΟΥΡΚΙΑ', 'FYROM'];
@@ -306,38 +328,32 @@
             let netImports = totalImports - totalExports;
             let importsForPie = netImports > 0 ? netImports : 0;
 
-            // Demand & MCP
             let demand = latestData.demand_mwh || 0;
             let mcp = latestData.dam_price_eur || 0;
 
+            // Update Main Metric Numbers with formatting
+            document.getElementById('val-production').innerText = `${fmt(totalGen)} MWh`;
+            document.getElementById('val-demand').innerText = `${fmt(demand)} MWh`;
+            document.getElementById('val-price').innerText = `${fmt(mcp)} €`;
 
-            // --- 2. Update Metric Cards & Equations ---
-            
-            document.getElementById('val-production').innerText = `${totalGen} MWh`;
-            document.getElementById('val-demand').innerText = `${demand} MWh`;
-            document.getElementById('val-price').innerText = `${mcp} €`;
-
-            // Equation: Total Generation = Lignite + Gas + Hydro + RES
+            // Build Vertical Lists (Ledger Style)
             document.getElementById('eq-generation').innerHTML = `
-                <span class="eq-item c-lignite">${lignite} Lignite</span> <span class="eq-operator">+</span>
-                <span class="eq-item c-gas">${gas} Gas</span> <span class="eq-operator">+</span>
-                <span class="eq-item c-hydro">${hydro} Hydro</span> <span class="eq-operator">+</span>
-                <span class="eq-item c-res">${res} RES</span>
+                <div class="eq-row c-lignite"><span class="eq-label">Lignite</span><span class="eq-operator"></span><span class="eq-value">${fmt(lignite)}</span></div>
+                <div class="eq-row c-gas"><span class="eq-label">Natural Gas</span><span class="eq-operator">+</span><span class="eq-value">${fmt(gas)}</span></div>
+                <div class="eq-row c-hydro"><span class="eq-label">Hydro</span><span class="eq-operator">+</span><span class="eq-value">${fmt(hydro)}</span></div>
+                <div class="eq-row c-res"><span class="eq-label">RES</span><span class="eq-operator">+</span><span class="eq-value">${fmt(res)}</span></div>
             `;
 
-            // Equation: Demand = Generation + Imports - Exports + Storage Discharge - Storage Charge - Pump
             document.getElementById('eq-demand').innerHTML = `
-                <span class="eq-item text-white">${totalGen} Gen.</span> <span class="eq-operator">+</span>
-                <span class="eq-item c-imports">${totalImports} Imp.</span> <span class="eq-operator">-</span>
-                <span class="eq-item c-exports">${totalExports} Exp.</span> <span class="eq-operator">+</span>
-                <span class="eq-item c-storage">${stIn} Disch.</span> <span class="eq-operator">-</span>
-                <span class="eq-item c-storage">${stAbs} Chrg.</span> <span class="eq-operator">-</span>
-                <span class="eq-item c-pump">${pump} Pump</span>
+                <div class="eq-row text-white"><span class="eq-label">Generation</span><span class="eq-operator"></span><span class="eq-value">${fmt(totalGen)}</span></div>
+                <div class="eq-row c-imports"><span class="eq-label">Imports</span><span class="eq-operator">+</span><span class="eq-value">${fmt(totalImports)}</span></div>
+                <div class="eq-row c-exports"><span class="eq-label">Exports</span><span class="eq-operator">-</span><span class="eq-value">${fmt(totalExports)}</span></div>
+                <div class="eq-row c-storage"><span class="eq-label">Storage Disch.</span><span class="eq-operator">+</span><span class="eq-value">${fmt(stIn)}</span></div>
+                <div class="eq-row c-storage"><span class="eq-label">Storage Charge</span><span class="eq-operator">-</span><span class="eq-value">${fmt(stAbs)}</span></div>
+                <div class="eq-row c-pump"><span class="eq-label">Pumping</span><span class="eq-operator">-</span><span class="eq-value">${fmt(pump)}</span></div>
             `;
 
-
-            // --- 3. Render Energy Mix Donut Chart (with Percentages) ---
-            
+            // Charts Rendering (Pie Chart updated with new colors)
             let pieData = [
                 { value: lignite, name: 'Lignite', itemStyle: { color: '#8c533c' } },
                 { value: gas, name: 'Natural Gas', itemStyle: { color: '#c4826b' } },
@@ -346,7 +362,7 @@
             ];
 
             if (storageDischargeForPie > 0) {
-                pieData.push({ value: storageDischargeForPie, name: 'Storage (Discharge)', itemStyle: { color: '#9b59b6' } });
+                pieData.push({ value: storageDischargeForPie, name: 'Storage (Discharge)', itemStyle: { color: '#d2b4de' } }); // Lighter Purple
             }
             if (importsForPie > 0) {
                 pieData.push({ value: importsForPie, name: 'Net Imports', itemStyle: { color: '#f1c40f' } });
@@ -357,8 +373,9 @@
                 title: { text: 'Energy Mix & Contribution', left: 'center', textStyle: { color: '#ffffff', fontSize: 15 } },
                 tooltip: { 
                     trigger: 'item',
-                    // Tooltip shows MWh on hover
-                    formatter: '{b}: {c} MWh ({d}%)' 
+                    formatter: function(params) {
+                        return `${params.name}: ${fmt(params.value)} MWh (${params.percent}%)`;
+                    }
                 },
                 legend: { top: 'bottom', textStyle: { color: '#8892b0' } },
                 series: [
@@ -368,10 +385,9 @@
                         radius: ['40%', '70%'],
                         avoidLabelOverlap: true,
                         itemStyle: { borderRadius: 8, borderColor: '#18202c', borderWidth: 2 },
-                        // ECharts Label Formatter to show Percentages instead of MWh inside the chart
                         label: { 
                             show: true, 
-                            formatter: '{d}%', // {d} is the ECharts variable for percentage
+                            formatter: '{d}%',
                             color: '#fff',
                             fontSize: 12,
                             fontWeight: 'bold'
@@ -389,12 +405,9 @@
             };
             mixChart.setOption(mixOptions);
 
-
-            // --- 4. Render Vertical Cross-Border Flows Chart ---
-            
             const displayCountries = ['ALBANIA', 'BULGARIA', 'ITALY', 'TURKEY', 'NORTH MACEDONIA'];
             const importsData = countryKeys.map(c => latestData.interconnections_mwh[`${c}_IMP`] || 0);
-            const exportsData = countryKeys.map(c => -(latestData.interconnections_mwh[`${c}_EXP`] || 0)); // Negative for Exports
+            const exportsData = countryKeys.map(c => -(latestData.interconnections_mwh[`${c}_EXP`] || 0)); 
 
             const flowsOptions = {
                 backgroundColor: 'transparent',
@@ -402,11 +415,10 @@
                 tooltip: { 
                     trigger: 'axis', 
                     axisPointer: { type: 'shadow' },
-                    // Formatter to remove negative sign from tooltip
                     formatter: function(params) {
                         let html = params[0].name + '<br/>';
                         params.forEach(p => {
-                            html += `${p.marker} ${p.seriesName}: ${Math.abs(p.value)} MWh<br/>`;
+                            html += `${p.marker} ${p.seriesName}: ${fmt(Math.abs(p.value))} MWh<br/>`;
                         });
                         return html;
                     }
@@ -423,25 +435,12 @@
                     splitLine: { lineStyle: { color: '#222b38', type: 'dashed' } }, 
                     axisLabel: { 
                         color: '#8892b0',
-                        // Formatter to remove negative sign from Y-Axis labels
-                        formatter: function(value) { return Math.abs(value); } 
+                        formatter: function(value) { return fmt(Math.abs(value)); } 
                     } 
                 },
                 series: [
-                    {
-                        name: 'Imports',
-                        type: 'bar',
-                        stack: 'Flow',
-                        itemStyle: { color: '#f1c40f' },
-                        data: importsData
-                    },
-                    {
-                        name: 'Exports',
-                        type: 'bar',
-                        stack: 'Flow',
-                        itemStyle: { color: '#e74c3c' },
-                        data: exportsData
-                    }
+                    { name: 'Imports', type: 'bar', stack: 'Flow', itemStyle: { color: '#f1c40f' }, data: importsData },
+                    { name: 'Exports', type: 'bar', stack: 'Flow', itemStyle: { color: '#e74c3c' }, data: exportsData }
                 ]
             };
         flowsChart.setOption(flowsOptions);
