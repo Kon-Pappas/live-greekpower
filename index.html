@@ -302,9 +302,35 @@
             const latestData = data[data.length - 1];
 
             const fetchTime = new Date(latestData.fetch_timestamp).toLocaleString('en-GB');
-            document.getElementById('last-updated').innerText = `Last Update: ${fetchTime} | Target Hour: ${latestData.target_hour}:00`;              // Data Extraction             let lignite = latestData.production_mix['TOTAL LIGNITE'] \vert{}\vert{} 0;             let gas = latestData.production_mix['TOTAL GAS'] \vert{}\vert{} 0;             let hydro = latestData.production_mix['TOTAL HYDRO'] \vert{}\vert{} 0;             let res = latestData.production_mix['RES_PROD'] \vert{}\vert{} 0;             let totalGen = latestData.production_mix['TOTAL_PROD'] \vert{}\vert{} 0;              const stIn = latestData.production_mix['STORAGE_INJECTION'] \vert{}\vert{} 0;             const stAbs = Math.abs(latestData.production_mix['STORAGE_ABSORPTION'] \vert{}\vert{} 0);              const pump = latestData.production_mix['ΣΥΝΟΛΙΚΗ ΑΝΤΛΗΣΗ'] \vert{}\vert{} 0;              // CROSS-BORDER FLOWS (GROSS)             let totalImports = 0;             let totalExports = 0;             const countryKeys = ['ΑΛΒΑΝΙΑ', 'ΒΟΥΛΓΑΡΙΑ', 'ΙΤΑΛΙΑ', 'ΤΟΥΡΚΙΑ', 'FYROM'];             countryKeys.forEach(country => {                 totalImports += (latestData.interconnections_mwh[`${country}_IMP`] || 0);
-                totalExports += (latestData.interconnections_mwh[`${country}_EXP`] \vert{}\vert{} 0);             });              let demand = latestData.demand_mwh \vert{}\vert{} 0;             let mcp = latestData.dam_price_eur \vert{}\vert{} 0;              // --- UI Text Updates ---             document.getElementById('val-production').innerText = `${fmt(totalGen)} MWh`;
-            document.getElementById('val-demand').innerText = `${fmt(demand)} MWh`;             document.getElementById('val-price').innerText = `${fmt(mcp)} €`;
+            document.getElementById('last-updated').innerText = `Last Update: ${fetchTime} | Target Hour: ${latestData.target_hour}:00`;
+
+            // Data Extraction
+            let lignite = latestData.production_mix['TOTAL LIGNITE'] || 0;
+            let gas = latestData.production_mix['TOTAL GAS'] || 0;
+            let hydro = latestData.production_mix['TOTAL HYDRO'] || 0;
+            let res = latestData.production_mix['RES_PROD'] || 0;
+            let totalGen = latestData.production_mix['TOTAL_PROD'] || 0;
+
+            const stIn = latestData.production_mix['STORAGE_INJECTION'] || 0;
+            const stAbs = Math.abs(latestData.production_mix['STORAGE_ABSORPTION'] || 0); 
+            const pump = latestData.production_mix['ΣΥΝΟΛΙΚΗ ΑΝΤΛΗΣΗ'] || 0;
+
+            // CROSS-BORDER FLOWS (GROSS)
+            let totalImports = 0;
+            let totalExports = 0;
+            const countryKeys = ['ΑΛΒΑΝΙΑ', 'ΒΟΥΛΓΑΡΙΑ', 'ΙΤΑΛΙΑ', 'ΤΟΥΡΚΙΑ', 'FYROM'];
+            countryKeys.forEach(country => {
+                totalImports += (latestData.interconnections_mwh[`${country}_IMP`] || 0);
+                totalExports += (latestData.interconnections_mwh[`${country}_EXP`] || 0);
+            });
+
+            let demand = latestData.demand_mwh || 0;
+            let mcp = latestData.dam_price_eur || 0;
+
+            // --- UI Text Updates ---
+            document.getElementById('val-production').innerText = `${fmt(totalGen)} MWh`;
+            document.getElementById('val-demand').innerText = `${fmt(demand)} MWh`;
+            document.getElementById('val-price').innerText = `${fmt(mcp)} €`;
 
             document.getElementById('eq-generation').innerHTML = `
                 <div class="eq-row c-lignite"><span class="eq-label">Lignite</span><span class="eq-operator"></span><span class="eq-value">${fmt(lignite)}</span></div>
@@ -319,4 +345,141 @@
                 <div class="eq-row c-exports"><span class="eq-label">Exports</span><span class="eq-operator">-</span><span class="eq-value">${fmt(totalExports)}</span></div>
                 <div class="eq-row c-storage"><span class="eq-label">Storage Disch.</span><span class="eq-operator">+</span><span class="eq-value">${fmt(stIn)}</span></div>
                 <div class="eq-row c-storage" style="color: #b276a0;"><span class="eq-label">Storage Charge</span><span class="eq-operator">-</span><span class="eq-value">${fmt(stAbs)}</span></div>
-                <div class="eq-row c-pump"><span class="eq-label">Pumping</span><span class="eq
+                <div class="eq-row c-pump"><span class="eq-label">Pumping</span><span class="eq-operator">-</span><span class="eq-value">${fmt(pump)}</span></div>
+            `;
+
+            // --- NESTED DONUT CHART LOGIC (100% GROSS, NO NET) ---
+            
+            // 1. OUTER CIRCLE: Sources (Clockwise)
+            let outerDataRaw = [
+                { value: lignite, name: 'Lignite', itemStyle: { color: '#b06a4b' } },
+                { value: gas, name: 'Natural Gas', itemStyle: { color: '#d18b57' } },
+                { value: hydro, name: 'Hydro', itemStyle: { color: '#5b9bd5' } },
+                { value: res, name: 'RES', itemStyle: { color: '#70ad47' } },
+                { value: stIn, name: 'Storage Disch.', itemStyle: { color: '#e0c2cd' } },
+                { value: totalImports, name: 'Imports', itemStyle: { color: '#ffc000' } }
+            ];
+
+            // 2. INNER CIRCLE: Sinks (Counter-Clockwise)
+            let innerDataRaw = [
+                { value: pump, name: 'Pumping', itemStyle: { color: '#85c1e9' } },
+                { value: stAbs, name: 'Storage Charge', itemStyle: { color: '#b276a0' } },
+                { value: totalExports, name: 'Exports', itemStyle: { color: '#e74c3c' } }
+            ];
+            
+            // Calculate exact remaining balance for "Domestic Demand" to close the inner circle perfectly
+            let totalSupply = lignite + gas + hydro + res + stIn + totalImports;
+            let totalSinksExceptDemand = pump + stAbs + totalExports;
+            let domesticDemand = totalSupply - totalSinksExceptDemand;
+            
+            // Demand fills the rest of the inner circle
+            innerDataRaw.push({ value: domesticDemand, name: 'Domestic Demand', itemStyle: { color: '#4a5568' } });
+
+            // Φιλτράρισμα για να μην τυπώνει labels του 0%
+            let outerData = outerDataRaw.filter(item => item.value > 0);
+            let innerData = innerDataRaw.filter(item => item.value > 0);
+
+            const mixOptions = {
+                backgroundColor: 'transparent',
+                title: { text: 'System Energy Balance (Supply vs Sinks)', left: 'center', textStyle: { color: '#ffffff', fontSize: 14 } },
+                tooltip: { 
+                    trigger: 'item',
+                    formatter: function(params) {
+                        return `${params.name}: <br/> <b>${fmt(params.value)} MWh</b> (${params.percent}%)`;
+                    }
+                },
+                series: [
+                    // --- OUTER DONUT (Sources) ---
+                    {
+                        name: 'Supply (Sources)',
+                        type: 'pie',
+                        radius: ['52%', '75%'], // Εξωτερικός δακτύλιος
+                        center: ['50%', '55%'],
+                        clockwise: true, // Δεξιόστροφα
+                        startAngle: 90,  // Ξεκινάει από την ώρα 12 (πάνω)
+                        itemStyle: { borderRadius: 2, borderColor: '#1c2128', borderWidth: 2 },
+                        label: { 
+                            show: true, 
+                            position: 'outside',
+                            formatter: '{b}\n{d}%',
+                            color: '#fff',
+                            fontSize: 10
+                        },
+                        labelLine: { length: 10, length2: 15 },
+                        data: outerData
+                    },
+                    // --- INNER DONUT (Sinks) ---
+                    {
+                        name: 'Sinks (Demand & Usage)',
+                        type: 'pie',
+                        radius: ['35%', '52%'], // Εσωτερικός δακτύλιος (ακουμπάει τον εξωτερικό)
+                        center: ['50%', '55%'],
+                        clockwise: false, // Αριστερόστροφα
+                        startAngle: 90,   // Ξεκινάει κι αυτός από την ώρα 12 (πάνω)
+                        itemStyle: { borderRadius: 0, borderColor: '#1c2128', borderWidth: 1 },
+                        label: { 
+                            show: false // Κρύβουμε τα labels του εσωτερικού κύκλου για να μη γίνει χαμός (φαίνονται στο hover/tooltip)
+                        },
+                        data: innerData
+                    }
+                ]
+            };
+            mixChart.setOption(mixOptions);
+
+            // --- CROSS-BORDER FLOWS CHART ---
+            const displayCountries = ['ALBANIA', 'BULGARIA', 'ITALY', 'TURKEY', 'NORTH MACEDONIA'];
+            const importsData = countryKeys.map(c => latestData.interconnections_mwh[`${c}_IMP`] || 0);
+            const exportsData = countryKeys.map(c => -(latestData.interconnections_mwh[`${c}_EXP`] || 0)); 
+
+            const flowsOptions = {
+                backgroundColor: 'transparent',
+                title: { text: 'Cross-Border Flows (Imports / Exports)', left: 'center', textStyle: { color: '#ffffff', fontSize: 14 } },
+                tooltip: { 
+                    trigger: 'axis', 
+                    axisPointer: { type: 'shadow' },
+                    formatter: function(params) {
+                        let html = params[0].name + '<br/>';
+                        params.forEach(p => {
+                            html += `${p.marker} ${p.seriesName}: ${fmt(Math.abs(p.value))} MWh<br/>`;
+                        });
+                        return html;
+                    }
+                },
+                legend: { top: 30, textStyle: { color: '#8892b0', fontSize: 11 }, icon: 'roundRect' },
+                grid: { top: 80, bottom: 40, left: 50, right: 20 },
+                xAxis: { 
+                    type: 'category', 
+                    data: displayCountries, 
+                    axisLabel: { color: '#ffffff', interval: 0, rotate: 15, fontSize: 10 } 
+                },
+                yAxis: { 
+                    type: 'value', 
+                    splitLine: { lineStyle: { color: '#2d333b', type: 'dashed' } }, 
+                    axisLabel: { 
+                        color: '#8892b0',
+                        fontSize: 11,
+                        formatter: function(value) { return fmt(Math.abs(value)); } 
+                    } 
+                },
+                series: [
+                    { name: 'Imports', type: 'bar', stack: 'Flow', itemStyle: { color: '#ffc000' }, data: importsData },
+                    { name: 'Exports', type: 'bar', stack: 'Flow', itemStyle: { color: '#e74c3c' }, data: exportsData }
+                ]
+            };
+        flowsChart.setOption(flowsOptions);
+
+        } catch (error) {
+            console.error("Error loading data:", error);
+            document.getElementById('last-updated').innerText = "Failed to load data.";
+        }
+    }
+
+    loadData();
+
+    window.addEventListener('resize', function() {
+        mixChart.resize();
+        flowsChart.resize();
+    });
+</script>
+</body>
+</html>
