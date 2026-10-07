@@ -17,15 +17,17 @@
             --text-main: #ffffff;
             --text-muted: #8892b0;
             
-            /* Color Palette Matched to Mockup */
-            --color-lignite: #b06a4b; /* Καφέ/Κεραμιδί */
-            --color-gas: #d18b57;     /* Πορτοκαλί/Ροζ */
-            --color-hydro: #5b9bd5;   /* Μπλε */
-            --color-res: #70ad47;     /* Πράσινο */
-            --color-storage: #e0c2cd; /* Παστέλ Ροζ/Μωβ */
-            --color-imports: #ffc000; /* Κίτρινο */
-            --color-exports: #e74c3c; /* Κόκκινο */
-            --color-pump: #85c1e9;    /* Γαλάζιο */
+            /* Color Palette */
+            --color-lignite: #b06a4b; 
+            --color-gas: #d18b57;     
+            --color-hydro: #5b9bd5;   
+            --color-res: #70ad47;     
+            --color-storage: #e0c2cd; /* Discharge (Παστέλ Ροζ/Μωβ) */
+            --color-storage-chg: #b276a0; /* Charge (Πιο σκούρο Μωβ για αντίθεση στον έσω κύκλο) */
+            --color-imports: #ffc000; 
+            --color-exports: #e74c3c; 
+            --color-pump: #85c1e9;    
+            --color-demand: #4a5568;  /* Ανθρακί/Γκρι για την Εγχώρια Ζήτηση (Έσω Κύκλος) */
         }
 
         body {
@@ -36,7 +38,6 @@
             padding-bottom: 40px;
         }
 
-        /* Top Header & Breadcrumb */
         .top-nav {
             font-size: 0.85rem;
             color: var(--text-muted);
@@ -44,13 +45,8 @@
             border-bottom: 1px solid var(--border-color);
             background-color: rgba(18, 20, 24, 0.95);
         }
-        .top-nav a {
-            color: var(--text-muted);
-            text-decoration: none;
-        }
-        .top-nav a:hover {
-            color: var(--text-main);
-        }
+        .top-nav a { color: var(--text-muted); text-decoration: none; }
+        .top-nav a:hover { color: var(--text-main); }
 
         .header-section {
             padding: 25px 30px 15px 30px;
@@ -70,17 +66,12 @@
 
         .update-info {
             font-size: 0.85rem;
-            color: var(--color-imports); /* Κίτρινο χρώμα όπως στο mockup */
+            color: var(--color-imports); 
             margin-top: 5px;
             font-weight: 600;
         }
 
-        /* Top Right Controls */
-        .controls-wrapper {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
+        .controls-wrapper { display: flex; align-items: center; gap: 15px; }
         .status-pill {
             background-color: rgba(46, 204, 113, 0.15);
             color: var(--accent-green);
@@ -91,7 +82,6 @@
             font-weight: 600;
         }
 
-        /* Navigation Tabs */
         .nav-tabs-container {
             border-bottom: 1px solid var(--border-color);
             padding: 0 30px;
@@ -111,16 +101,10 @@
             color: var(--accent-green);
             border-bottom-color: var(--accent-green);
         }
-        .nav-tab-item:hover {
-            color: var(--text-main);
-        }
+        .nav-tab-item:hover { color: var(--text-main); }
 
-        /* Main Content Container */
-        .main-container {
-            padding: 30px;
-        }
+        .main-container { padding: 30px; }
 
-        /* Metric Cards */
         .metric-card {
             background-color: var(--card-bg);
             border: 1px solid var(--border-color);
@@ -130,7 +114,6 @@
             height: 100%;
         }
 
-        /* Split Layout for Cards */
         .split-card-inner {
             display: flex;
             flex-direction: row;
@@ -149,7 +132,6 @@
             padding-left: 20px;
         }
         
-        /* For MCP card (No split) */
         .center-card {
             display: flex;
             flex-direction: column;
@@ -173,7 +155,6 @@
             white-space: nowrap;
         }
 
-        /* Vertical Breakdown List */
         .breakdown-list {
             display: flex;
             flex-direction: column;
@@ -187,12 +168,7 @@
             justify-content: space-between;
         }
 
-        .eq-label {
-            flex: 1;
-            text-align: left;
-            font-weight: 600;
-        }
-
+        .eq-label { flex: 1; text-align: left; font-weight: 600; }
         .eq-operator {
             color: #ffffff;
             font-weight: 800;
@@ -200,15 +176,13 @@
             width: 30px;
             text-align: center;
         }
-
         .eq-value {
             width: 70px;
             text-align: right;
             font-weight: 600;
-            font-family: 'Courier New', Courier, monospace; /* Align digits */
+            font-family: 'Courier New', Courier, monospace; 
         }
 
-        /* Custom Color Classes */
         .c-lignite { color: var(--color-lignite); }
         .c-gas { color: var(--color-gas); }
         .c-hydro { color: var(--color-hydro); }
@@ -218,14 +192,13 @@
         .c-storage { color: var(--color-storage); }
         .c-pump { color: var(--color-pump); }
 
-        /* Chart Containers */
         .chart-container {
             background-color: var(--card-bg);
             border: 1px solid var(--border-color);
             border-radius: 6px;
             padding: 20px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            height: 420px;
+            height: 440px;
         }
     </style>
 </head>
@@ -252,10 +225,8 @@
     </div>
 
     <div class="main-container">
-        
         <div class="row mb-4">
-            
-            <!-- 1. Total Generation Box -->
+            <!-- Total Generation Box -->
             <div class="col-xl-5 col-lg-6 mb-3">
                 <div class="metric-card">
                     <div class="split-card-inner">
@@ -264,15 +235,13 @@
                             <div class="metric-value" id="val-production">- MWh</div>
                         </div>
                         <div class="split-right">
-                            <div class="breakdown-list" id="eq-generation">
-                                <!-- Γεμίζει δυναμικά -->
-                            </div>
+                            <div class="breakdown-list" id="eq-generation"></div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- 2. Total Demand Box (Energy Balance) -->
+            <!-- Total Demand Box -->
             <div class="col-xl-5 col-lg-6 mb-3">
                 <div class="metric-card">
                     <div class="split-card-inner">
@@ -281,15 +250,13 @@
                             <div class="metric-value" id="val-demand">- MWh</div>
                         </div>
                         <div class="split-right">
-                            <div class="breakdown-list" id="eq-demand">
-                                <!-- Γεμίζει δυναμικά -->
-                            </div>
+                            <div class="breakdown-list" id="eq-demand"></div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- 3. MCP Box -->
+            <!-- MCP Box -->
             <div class="col-xl-2 col-lg-12 mb-3">
                 <div class="metric-card center-card" style="border-color: rgba(52, 152, 219, 0.3);">
                     <div class="metric-title">MARKET CLEARING PRICE<br>(MCP)</div>
@@ -312,7 +279,6 @@
     let mixChart = echarts.init(document.getElementById('mixChart'), 'dark');
     let flowsChart = echarts.init(document.getElementById('flowsChart'), 'dark');
 
-    // Συνάρτηση για διαχωριστικό χιλιάδων (π.χ. 5,443)
     const fmt = (num) => new Intl.NumberFormat('en-US').format(num);
 
     async function loadData() {
@@ -335,29 +301,31 @@
             const stAbs = Math.abs(latestData.production_mix['STORAGE_ABSORPTION'] || 0); 
             const pump = latestData.production_mix['ΣΥΝΟΛΙΚΗ ΑΝΤΛΗΣΗ'] || 0;
 
+            // NET Storage calculation
             let netStorage = stIn - stAbs; 
             let storageDischargeForPie = netStorage > 0 ? netStorage : 0;
+            let storageChargeForPie = netStorage < 0 ? Math.abs(netStorage) : 0;
 
+            // NET Interconnections calculation
             let totalImports = 0;
             let totalExports = 0;
             const countryKeys = ['ΑΛΒΑΝΙΑ', 'ΒΟΥΛΓΑΡΙΑ', 'ΙΤΑΛΙΑ', 'ΤΟΥΡΚΙΑ', 'FYROM'];
-            
             countryKeys.forEach(country => {
                 totalImports += (latestData.interconnections_mwh[`${country}_IMP`] || 0);
                 totalExports += (latestData.interconnections_mwh[`${country}_EXP`] || 0);
             });
-            let netImports = totalImports - totalExports;
-            let importsForPie = netImports > 0 ? netImports : 0;
+            let netInterconnections = totalImports - totalExports;
+            let importsForPie = netInterconnections > 0 ? netInterconnections : 0;
+            let exportsForPie = netInterconnections < 0 ? Math.abs(netInterconnections) : 0;
 
             let demand = latestData.demand_mwh || 0;
             let mcp = latestData.dam_price_eur || 0;
 
-            // Update Main Metric Numbers
+            // --- UI Text Updates ---
             document.getElementById('val-production').innerText = `${fmt(totalGen)} MWh`;
             document.getElementById('val-demand').innerText = `${fmt(demand)} MWh`;
             document.getElementById('val-price').innerText = `${fmt(mcp)} €`;
 
-            // Build Vertical Lists (Split layout implementation)
             document.getElementById('eq-generation').innerHTML = `
                 <div class="eq-row c-lignite"><span class="eq-label">Lignite</span><span class="eq-operator"></span><span class="eq-value">${fmt(lignite)}</span></div>
                 <div class="eq-row c-gas"><span class="eq-label">Natural Gas</span><span class="eq-operator">+</span><span class="eq-value">${fmt(gas)}</span></div>
@@ -370,65 +338,84 @@
                 <div class="eq-row c-imports"><span class="eq-label">Imports</span><span class="eq-operator">+</span><span class="eq-value">${fmt(totalImports)}</span></div>
                 <div class="eq-row c-exports"><span class="eq-label">Exports</span><span class="eq-operator">-</span><span class="eq-value">${fmt(totalExports)}</span></div>
                 <div class="eq-row c-storage"><span class="eq-label">Storage Disch.</span><span class="eq-operator">+</span><span class="eq-value">${fmt(stIn)}</span></div>
-                <div class="eq-row c-storage"><span class="eq-label">Storage Charge</span><span class="eq-operator">-</span><span class="eq-value">${fmt(stAbs)}</span></div>
+                <div class="eq-row c-storage" style="color: #b276a0;"><span class="eq-label">Storage Charge</span><span class="eq-operator">-</span><span class="eq-value">${fmt(stAbs)}</span></div>
                 <div class="eq-row c-pump"><span class="eq-label">Pumping</span><span class="eq-operator">-</span><span class="eq-value">${fmt(pump)}</span></div>
             `;
 
-            // Charts Rendering
-            let pieData = [
+            // --- NESTED DONUT CHART LOGIC ---
+            
+            // 1. OUTER CIRCLE: Sources (Clockwise)
+            let outerData = [
                 { value: lignite, name: 'Lignite', itemStyle: { color: '#b06a4b' } },
                 { value: gas, name: 'Natural Gas', itemStyle: { color: '#d18b57' } },
                 { value: hydro, name: 'Hydro', itemStyle: { color: '#5b9bd5' } },
                 { value: res, name: 'RES', itemStyle: { color: '#70ad47' } }
             ];
+            if (storageDischargeForPie > 0) outerData.push({ value: storageDischargeForPie, name: 'Storage Disch.', itemStyle: { color: '#e0c2cd' } });
+            if (importsForPie > 0) outerData.push({ value: importsForPie, name: 'Net Imports', itemStyle: { color: '#ffc000' } });
 
-            if (storageDischargeForPie > 0) {
-                pieData.push({ value: storageDischargeForPie, name: 'Storage (Discharge)', itemStyle: { color: '#e0c2cd' } });
-            }
-            if (importsForPie > 0) {
-                pieData.push({ value: importsForPie, name: 'Net Imports', itemStyle: { color: '#ffc000' } });
-            }
+            // 2. INNER CIRCLE: Sinks (Counter-Clockwise)
+            let innerData = [];
+            if (pump > 0) innerData.push({ value: pump, name: 'Pumping', itemStyle: { color: '#85c1e9' } });
+            if (storageChargeForPie > 0) innerData.push({ value: storageChargeForPie, name: 'Storage Charge', itemStyle: { color: '#b276a0' } });
+            if (exportsForPie > 0) innerData.push({ value: exportsForPie, name: 'Net Exports', itemStyle: { color: '#e74c3c' } });
+            
+            // Calculate exact remaining balance for "Domestic Demand" to close the inner circle perfectly
+            let totalSupply = lignite + gas + hydro + res + storageDischargeForPie + importsForPie;
+            let totalSinksExceptDemand = pump + storageChargeForPie + exportsForPie;
+            let domesticDemand = totalSupply - totalSinksExceptDemand;
+            
+            // Demand fills the rest of the inner circle
+            innerData.push({ value: domesticDemand, name: 'Domestic Demand', itemStyle: { color: '#4a5568' } });
 
             const mixOptions = {
                 backgroundColor: 'transparent',
-                title: { text: 'Energy Mix & Contribution', left: 'center', textStyle: { color: '#ffffff', fontSize: 14 } },
+                title: { text: 'System Energy Balance (Supply vs Sinks)', left: 'center', textStyle: { color: '#ffffff', fontSize: 14 } },
                 tooltip: { 
                     trigger: 'item',
                     formatter: function(params) {
-                        return `${params.name}: ${fmt(params.value)} MWh (${params.percent}%)`;
+                        return `${params.name}: <br/> <b>${fmt(params.value)} MWh</b> (${params.percent}%)`;
                     }
                 },
-                legend: { top: 'bottom', textStyle: { color: '#8892b0', fontSize: 11 }, icon: 'roundRect' },
                 series: [
+                    // --- OUTER DONUT (Sources) ---
                     {
-                        name: 'Generation',
+                        name: 'Supply (Sources)',
                         type: 'pie',
-                        radius: ['45%', '70%'],
-                        center: ['50%', '50%'],
-                        avoidLabelOverlap: true,
-                        itemStyle: { borderRadius: 4, borderColor: '#1c2128', borderWidth: 2 },
-                        // Labels outside with connecting lines
+                        radius: ['52%', '75%'], // Εξωτερικός δακτύλιος
+                        center: ['50%', '55%'],
+                        clockwise: true, // Δεξιόστροφα
+                        startAngle: 90,  // Ξεκινάει από την ώρα 12 (πάνω)
+                        itemStyle: { borderRadius: 2, borderColor: '#1c2128', borderWidth: 2 },
                         label: { 
                             show: true, 
                             position: 'outside',
-                            formatter: '{d}%',
+                            formatter: '{b}\n{d}%',
                             color: '#fff',
-                            fontSize: 11,
-                            fontWeight: 'bold'
+                            fontSize: 10
                         },
-                        labelLine: {
-                            show: true,
-                            lineStyle: { color: '#8892b0' },
-                            smooth: 0.2,
-                            length: 15,
-                            length2: 15
+                        labelLine: { length: 10, length2: 15 },
+                        data: outerData
+                    },
+                    // --- INNER DONUT (Sinks) ---
+                    {
+                        name: 'Sinks (Demand & Usage)',
+                        type: 'pie',
+                        radius: ['35%', '52%'], // Εσωτερικός δακτύλιος (ακουμπάει τον εξωτερικό)
+                        center: ['50%', '55%'],
+                        clockwise: false, // Αριστερόστροφα
+                        startAngle: 90,   // Ξεκινάει κι αυτός από την ώρα 12 (πάνω)
+                        itemStyle: { borderRadius: 0, borderColor: '#1c2128', borderWidth: 1 },
+                        label: { 
+                            show: false // Κρύβουμε τα labels του εσωτερικού κύκλου για να μη γίνει χαμός (φαίνονται στο hover/tooltip)
                         },
-                        data: pieData
+                        data: innerData
                     }
                 ]
             };
             mixChart.setOption(mixOptions);
 
+            // --- CROSS-BORDER FLOWS CHART ---
             const displayCountries = ['ALBANIA', 'BULGARIA', 'ITALY', 'TURKEY', 'NORTH MACEDONIA'];
             const importsData = countryKeys.map(c => latestData.interconnections_mwh[`${c}_IMP`] || 0);
             const exportsData = countryKeys.map(c => -(latestData.interconnections_mwh[`${c}_EXP`] || 0)); 
