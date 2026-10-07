@@ -22,12 +22,12 @@
             --color-gas: #d18b57;     
             --color-hydro: #5b9bd5;   
             --color-res: #70ad47;     
-            --color-storage: #e0c2cd; /* Discharge (Παστέλ Ροζ/Μωβ) */
-            --color-storage-chg: #b276a0; /* Charge (Πιο σκούρο Μωβ για αντίθεση στον έσω κύκλο) */
+            --color-storage: #e0c2cd; /* Discharge */
+            --color-storage-chg: #b276a0; /* Charge */
             --color-imports: #ffc000; 
             --color-exports: #e74c3c; 
             --color-pump: #85c1e9;    
-            --color-demand: #4a5568;  /* Ανθρακί/Γκρι για την Εγχώρια Ζήτηση (Έσω Κύκλος) */
+            --color-demand: #6c757d;  /* Γκρι για την Εγχώρια Ζήτηση */
         }
 
         body {
@@ -111,33 +111,12 @@
             border-radius: 6px;
             padding: 20px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            height: 100%;
-        }
-
-        .split-card-inner {
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            justify-content: space-between;
-            height: 100%;
-        }
-        .split-left {
-            text-align: center;
-            padding-right: 20px;
-            border-right: 1px solid var(--border-color);
-            min-width: 40%;
-        }
-        .split-right {
-            flex-grow: 1;
-            padding-left: 20px;
-        }
-        
-        .center-card {
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             text-align: center;
+            height: 100%;
         }
 
         .metric-title {
@@ -145,52 +124,14 @@
             font-size: 0.8rem;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
         }
         
         .metric-value {
-            font-size: 2.2rem;
+            font-size: 2.5rem;
             font-weight: 700;
             color: #ffffff; 
-            white-space: nowrap;
         }
-
-        .breakdown-list {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            font-size: 0.85rem;
-        }
-        
-        .eq-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .eq-label { flex: 1; text-align: left; font-weight: 600; }
-        .eq-operator {
-            color: #ffffff;
-            font-weight: 800;
-            font-size: 1rem;
-            width: 30px;
-            text-align: center;
-        }
-        .eq-value {
-            width: 70px;
-            text-align: right;
-            font-weight: 600;
-            font-family: 'Courier New', Courier, monospace; 
-        }
-
-        .c-lignite { color: var(--color-lignite); }
-        .c-gas { color: var(--color-gas); }
-        .c-hydro { color: var(--color-hydro); }
-        .c-res { color: var(--color-res); }
-        .c-imports { color: var(--color-imports); }
-        .c-exports { color: var(--color-exports); }
-        .c-storage { color: var(--color-storage); }
-        .c-pump { color: var(--color-pump); }
 
         .chart-container {
             background-color: var(--card-bg);
@@ -198,7 +139,7 @@
             border-radius: 6px;
             padding: 20px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            height: 440px;
+            height: 480px;
         }
     </style>
 </head>
@@ -225,58 +166,35 @@
     </div>
 
     <div class="main-container">
+        <!-- MCP Card & Total Volume Card στην κορυφή -->
         <div class="row mb-4">
-            <!-- Total Generation Box -->
-            <div class="col-xl-5 col-lg-6 mb-3">
-                <div class="metric-card">
-                    <div class="split-card-inner">
-                        <div class="split-left">
-                            <div class="metric-title">TOTAL GENERATION</div>
-                            <div class="metric-value" id="val-production">- MWh</div>
-                        </div>
-                        <div class="split-right">
-                            <div class="breakdown-list" id="eq-generation"></div>
-                        </div>
-                    </div>
+            <div class="col-md-6 mb-3">
+                <div class="metric-card" style="border-color: rgba(52, 152, 219, 0.4);">
+                    <div class="metric-title">Market Clearing Price (MCP)</div>
+                    <div class="metric-value" style="color: #5b9bd5;" id="val-price">- €/MWh</div>
                 </div>
             </div>
-
-            <!-- Total Demand Box -->
-            <div class="col-xl-5 col-lg-6 mb-3">
-                <div class="metric-card">
-                    <div class="split-card-inner">
-                        <div class="split-left">
-                            <div class="metric-title">TOTAL DEMAND (BALANCE)</div>
-                            <div class="metric-value" id="val-demand">- MWh</div>
-                        </div>
-                        <div class="split-right">
-                            <div class="breakdown-list" id="eq-demand"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- MCP Box -->
-            <div class="col-xl-2 col-lg-12 mb-3">
-                <div class="metric-card center-card" style="border-color: rgba(52, 152, 219, 0.3);">
-                    <div class="metric-title">MARKET CLEARING PRICE<br>(MCP)</div>
-                    <div class="metric-value" style="color: #5b9bd5; font-size: 2.8rem;" id="val-price">- €</div>
+            <div class="col-md-6 mb-3">
+                <div class="metric-card" style="border-color: rgba(46, 204, 113, 0.4);">
+                    <div class="metric-title">Total System Volume</div>
+                    <div class="metric-value text-success" id="val-volume">- MWh</div>
                 </div>
             </div>
         </div>
 
+        <!-- Charts Row: Energy Balance Stacked Bars & Cross-Border Flows -->
         <div class="row">
-            <div class="col-md-6 mb-4">
-                <div class="chart-container" id="mixChart"></div>
+            <div class="col-lg-6 mb-4">
+                <div class="chart-container" id="balanceChart"></div>
             </div>
-            <div class="col-md-6 mb-4">
+            <div class="col-lg-6 mb-4">
                 <div class="chart-container" id="flowsChart"></div>
             </div>
         </div>
     </div>
 
 <script>
-    let mixChart = echarts.init(document.getElementById('mixChart'), 'dark');
+    let balanceChart = echarts.init(document.getElementById('balanceChart'), 'dark');
     let flowsChart = echarts.init(document.getElementById('flowsChart'), 'dark');
 
     const fmt = (num) => new Intl.NumberFormat('en-US').format(num);
@@ -290,23 +208,17 @@
             const fetchTime = new Date(latestData.fetch_timestamp).toLocaleString('en-GB');
             document.getElementById('last-updated').innerText = `Last Update: ${fetchTime} | Target Hour: ${latestData.target_hour}:00`;
 
-            // Data Extraction
+            // Data Extraction (Αυτούσια τα δεδομένα, χωρίς καμία αλλοίωση/net)
             let lignite = latestData.production_mix['TOTAL LIGNITE'] || 0;
             let gas = latestData.production_mix['TOTAL GAS'] || 0;
             let hydro = latestData.production_mix['TOTAL HYDRO'] || 0;
             let res = latestData.production_mix['RES_PROD'] || 0;
             let totalGen = latestData.production_mix['TOTAL_PROD'] || 0;
 
-            const stIn = latestData.production_mix['STORAGE_INJECTION'] || 0;
-            const stAbs = Math.abs(latestData.production_mix['STORAGE_ABSORPTION'] || 0); 
+            const stIn = latestData.production_mix['STORAGE_INJECTION'] || 0;  // BESS Discharge
+            const stAbs = Math.abs(latestData.production_mix['STORAGE_ABSORPTION'] || 0); // BESS Charge
             const pump = latestData.production_mix['ΣΥΝΟΛΙΚΗ ΑΝΤΛΗΣΗ'] || 0;
 
-            // NET Storage calculation
-            let netStorage = stIn - stAbs; 
-            let storageDischargeForPie = netStorage > 0 ? netStorage : 0;
-            let storageChargeForPie = netStorage < 0 ? Math.abs(netStorage) : 0;
-
-            // NET Interconnections calculation
             let totalImports = 0;
             let totalExports = 0;
             const countryKeys = ['ΑΛΒΑΝΙΑ', 'ΒΟΥΛΓΑΡΙΑ', 'ΙΤΑΛΙΑ', 'ΤΟΥΡΚΙΑ', 'FYROM'];
@@ -314,106 +226,53 @@
                 totalImports += (latestData.interconnections_mwh[`${country}_IMP`] || 0);
                 totalExports += (latestData.interconnections_mwh[`${country}_EXP`] || 0);
             });
-            let netInterconnections = totalImports - totalExports;
-            let importsForPie = netInterconnections > 0 ? netInterconnections : 0;
-            let exportsForPie = netInterconnections < 0 ? Math.abs(netInterconnections) : 0;
 
             let demand = latestData.demand_mwh || 0;
             let mcp = latestData.dam_price_eur || 0;
 
-            // --- UI Text Updates ---
-            document.getElementById('val-production').innerText = `${fmt(totalGen)} MWh`;
-            document.getElementById('val-demand').innerText = `${fmt(demand)} MWh`;
-            document.getElementById('val-price').innerText = `${fmt(mcp)} €`;
+            // MCP & Volume Cards Update
+            document.getElementById('val-price').innerText = `${fmt(mcp)} €/MWh`;
+            document.getElementById('val-volume').innerText = `${fmt(totalGen + totalImports + stIn)} MWh`;
 
-            document.getElementById('eq-generation').innerHTML = `
-                <div class="eq-row c-lignite"><span class="eq-label">Lignite</span><span class="eq-operator"></span><span class="eq-value">${fmt(lignite)}</span></div>
-                <div class="eq-row c-gas"><span class="eq-label">Natural Gas</span><span class="eq-operator">+</span><span class="eq-value">${fmt(gas)}</span></div>
-                <div class="eq-row c-hydro"><span class="eq-label">Hydro</span><span class="eq-operator">+</span><span class="eq-value">${fmt(hydro)}</span></div>
-                <div class="eq-row c-res"><span class="eq-label">RES</span><span class="eq-operator">+</span><span class="eq-value">${fmt(res)}</span></div>
-            `;
-
-            document.getElementById('eq-demand').innerHTML = `
-                <div class="eq-row text-white"><span class="eq-label">Generation</span><span class="eq-operator"></span><span class="eq-value">${fmt(totalGen)}</span></div>
-                <div class="eq-row c-imports"><span class="eq-label">Imports</span><span class="eq-operator">+</span><span class="eq-value">${fmt(totalImports)}</span></div>
-                <div class="eq-row c-exports"><span class="eq-label">Exports</span><span class="eq-operator">-</span><span class="eq-value">${fmt(totalExports)}</span></div>
-                <div class="eq-row c-storage"><span class="eq-label">Storage Disch.</span><span class="eq-operator">+</span><span class="eq-value">${fmt(stIn)}</span></div>
-                <div class="eq-row c-storage" style="color: #b276a0;"><span class="eq-label">Storage Charge</span><span class="eq-operator">-</span><span class="eq-value">${fmt(stAbs)}</span></div>
-                <div class="eq-row c-pump"><span class="eq-label">Pumping</span><span class="eq-operator">-</span><span class="eq-value">${fmt(pump)}</span></div>
-            `;
-
-            // --- NESTED DONUT CHART LOGIC ---
-            
-            // 1. OUTER CIRCLE: Sources (Clockwise)
-            let outerData = [
-                { value: lignite, name: 'Lignite', itemStyle: { color: '#b06a4b' } },
-                { value: gas, name: 'Natural Gas', itemStyle: { color: '#d18b57' } },
-                { value: hydro, name: 'Hydro', itemStyle: { color: '#5b9bd5' } },
-                { value: res, name: 'RES', itemStyle: { color: '#70ad47' } }
-            ];
-            if (storageDischargeForPie > 0) outerData.push({ value: storageDischargeForPie, name: 'Storage Disch.', itemStyle: { color: '#e0c2cd' } });
-            if (importsForPie > 0) outerData.push({ value: importsForPie, name: 'Net Imports', itemStyle: { color: '#ffc000' } });
-
-            // 2. INNER CIRCLE: Sinks (Counter-Clockwise)
-            let innerData = [];
-            if (pump > 0) innerData.push({ value: pump, name: 'Pumping', itemStyle: { color: '#85c1e9' } });
-            if (storageChargeForPie > 0) innerData.push({ value: storageChargeForPie, name: 'Storage Charge', itemStyle: { color: '#b276a0' } });
-            if (exportsForPie > 0) innerData.push({ value: exportsForPie, name: 'Net Exports', itemStyle: { color: '#e74c3c' } });
-            
-            // Calculate exact remaining balance for "Domestic Demand" to close the inner circle perfectly
-            let totalSupply = lignite + gas + hydro + res + storageDischargeForPie + importsForPie;
-            let totalSinksExceptDemand = pump + storageChargeForPie + exportsForPie;
-            let domesticDemand = totalSupply - totalSinksExceptDemand;
-            
-            // Demand fills the rest of the inner circle
-            innerData.push({ value: domesticDemand, name: 'Domestic Demand', itemStyle: { color: '#4a5568' } });
-
-            const mixOptions = {
+            // --- 2 STACKED BARS CONFIGURATION (Supply vs Demand) ---
+            const balanceOptions = {
                 backgroundColor: 'transparent',
-                title: { text: 'System Energy Balance (Supply vs Sinks)', left: 'center', textStyle: { color: '#ffffff', fontSize: 14 } },
-                tooltip: { 
+                title: { text: 'Energy Balance (Supply vs Demand)', left: 'center', textStyle: { color: '#ffffff', fontSize: 14 } },
+                tooltip: {
                     trigger: 'item',
                     formatter: function(params) {
-                        return `${params.name}: <br/> <b>${fmt(params.value)} MWh</b> (${params.percent}%)`;
+                        return `${params.seriesName}: <br/><b>${fmt(params.value)} MWh</b> (${params.percent.toFixed(2)}%)`;
                     }
                 },
+                legend: { top: 30, textStyle: { color: '#8892b0', fontSize: 10 }, icon: 'rect' },
+                grid: { top: 90, bottom: 30, left: 60, right: 20 },
+                xAxis: {
+                    type: 'category',
+                    data: ['Supply (Inflows)', 'Demand (Outflows)'],
+                    axisLabel: { color: '#ffffff', fontSize: 12, fontWeight: 'bold' }
+                },
+                yAxis: {
+                    type: 'value',
+                    splitLine: { lineStyle: { color: '#2d333b', type: 'dashed' } },
+                    axisLabel: { color: '#8892b0', formatter: (val) => fmt(val) }
+                },
                 series: [
-                    // --- OUTER DONUT (Sources) ---
-                    {
-                        name: 'Supply (Sources)',
-                        type: 'pie',
-                        radius: ['52%', '75%'], // Εξωτερικός δακτύλιος
-                        center: ['50%', '55%'],
-                        clockwise: true, // Δεξιόστροφα
-                        startAngle: 90,  // Ξεκινάει από την ώρα 12 (πάνω)
-                        itemStyle: { borderRadius: 2, borderColor: '#1c2128', borderWidth: 2 },
-                        label: { 
-                            show: true, 
-                            position: 'outside',
-                            formatter: '{b}\n{d}%',
-                            color: '#fff',
-                            fontSize: 10
-                        },
-                        labelLine: { length: 10, length2: 15 },
-                        data: outerData
-                    },
-                    // --- INNER DONUT (Sinks) ---
-                    {
-                        name: 'Sinks (Demand & Usage)',
-                        type: 'pie',
-                        radius: ['35%', '52%'], // Εσωτερικός δακτύλιος (ακουμπάει τον εξωτερικό)
-                        center: ['50%', '55%'],
-                        clockwise: false, // Αριστερόστροφα
-                        startAngle: 90,   // Ξεκινάει κι αυτός από την ώρα 12 (πάνω)
-                        itemStyle: { borderRadius: 0, borderColor: '#1c2128', borderWidth: 1 },
-                        label: { 
-                            show: false // Κρύβουμε τα labels του εσωτερικού κύκλου για να μη γίνει χαμός (φαίνονται στο hover/tooltip)
-                        },
-                        data: innerData
-                    }
+                    // --- SUPPLY (Αριστερή Στήλη) ---
+                    { name: 'Lignite', type: 'bar', stack: 'Supply', data: [lignite, 0], itemStyle: { color: '#b06a4b' } },
+                    { name: 'Natural Gas', type: 'bar', stack: 'Supply', data: [gas, 0], itemStyle: { color: '#d18b57' } },
+                    { name: 'Hydro', type: 'bar', stack: 'Supply', data: [hydro, 0], itemStyle: { color: '#5b9bd5' } },
+                    { name: 'RES', type: 'bar', stack: 'Supply', data: [res, 0], itemStyle: { color: '#70ad47' } },
+                    { name: 'BESS Discharge', type: 'bar', stack: 'Supply', data: [stIn, 0], itemStyle: { color: '#e0c2cd' } },
+                    { name: 'Imports', type: 'bar', stack: 'Supply', data: [totalImports, 0], itemStyle: { color: '#ffc000' } },
+
+                    // --- DEMAND (Δεξιά Στήλη) ---
+                    { name: 'Exports', type: 'bar', stack: 'Demand', data: [0, totalExports], itemStyle: { color: '#e74c3c' } },
+                    { name: 'BESS Charge', type: 'bar', stack: 'Demand', data: [0, stAbs], itemStyle: { color: '#b276a0' } },
+                    { name: 'Pumping', type: 'bar', stack: 'Demand', data: [0, pump], itemStyle: { color: '#85c1e9' } },
+                    { name: 'Domestic Demand', type: 'bar', stack: 'Demand', data: [0, demand], itemStyle: { color: '#6c757d' } }
                 ]
             };
-            mixChart.setOption(mixOptions);
+            balanceChart.setOption(balanceOptions);
 
             // --- CROSS-BORDER FLOWS CHART ---
             const displayCountries = ['ALBANIA', 'BULGARIA', 'ITALY', 'TURKEY', 'NORTH MACEDONIA'];
@@ -455,7 +314,7 @@
                     { name: 'Exports', type: 'bar', stack: 'Flow', itemStyle: { color: '#e74c3c' }, data: exportsData }
                 ]
             };
-        flowsChart.setOption(flowsOptions);
+            flowsChart.setOption(flowsOptions);
 
         } catch (error) {
             console.error("Error loading data:", error);
@@ -466,7 +325,7 @@
     loadData();
 
     window.addEventListener('resize', function() {
-        mixChart.resize();
+        balanceChart.resize();
         flowsChart.resize();
     });
 </script>
