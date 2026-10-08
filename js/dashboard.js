@@ -54,14 +54,16 @@ async function loadData() {
             throw new Error("No data found in JSON.");
         }
 
-        // --- ΒΗΜΑ 1: GLOBAL DEDUPLICATION ΚΑΙ ΔΙΟΡΘΩΣΗ ΩΡΑΣ 0 ---
+        // --- ΒΗΜΑ 1: GLOBAL DEDUPLICATION ΚΑΙ ΦΙΛΤΡΟ "ΣΚΟΥΠΙΔΙΩΝ" ---
         const cleanDataMap = new Map();
         
         rawData.forEach(entry => {
-            // Διορθώνουμε το πρόβλημα της ώρας 0 εδώ, ώστε να συγχωνευτεί με την ώρα 1
             let hr = parseInt(entry.target_hour);
-            if (hr === 0) hr = 1; 
-            entry.target_hour = hr; // Το σώζουμε στο ίδιο το object
+            
+            // ΑΓΝΟΟΥΜΕ εντελώς την ώρα 0 (σκουπίδι από παλιό script) και ότι είναι πάνω από 24
+            if (hr === 0 || hr > 24) return; 
+            
+            entry.target_hour = hr; 
             
             const key = `${entry.date}_${hr}`;
             if (!cleanDataMap.has(key)) {
@@ -84,20 +86,19 @@ async function loadData() {
 
         // --- ΒΗΜΑ 2: ΕΥΡΕΣΗ ΤΗΣ ΠΡΑΓΜΑΤΙΚΗΣ "LIVE" ΩΡΑΣ ΓΙΑ ΤΟ 1ο TAB ---
         let validLiveData = null;
-        // Ψάχνουμε από το τέλος προς την αρχή
+        // Ψάχνουμε από το τέλος προς την αρχή για την πρώτη ώρα που έχει πραγματικά νούμερα
         for (let i = cleanDataArray.length - 1; i >= 0; i--) {
             let d = cleanDataArray[i];
             let totalGen = d.production_mix['TOTAL_PROD'] || 0;
             let demand = d.demand_mwh || 0;
             
-            // Αν βρούμε ώρα που έχει καταγεγραμμένη παραγωγή ή ζήτηση, αυτή είναι η Live ώρα μας!
             if (totalGen > 0 || demand > 0) {
                 validLiveData = d;
                 break;
             }
         }
         
-        // Fallback (ασφάλεια)
+        // Fallback (ασφάλεια σε περίπτωση που δεν βρει τίποτα)
         if (!validLiveData) validLiveData = cleanDataArray[cleanDataArray.length - 1];
 
         const fetchTime = new Date(validLiveData.fetch_timestamp).toLocaleString('en-GB');
@@ -246,7 +247,7 @@ function renderDailyTab(todayData) {
         sum.stIn += sIn; sum.stAbs += sAbs; sum.imp += imp; sum.exp += exp; sum.pump += p; sum.dem += dem;
     });
 
-    // Update Ribbon
+    // Update Ribbon with Percentages and RTE
     let thermSum = sum.lig + sum.gas;
     let greenSum = sum.hyd + sum.res;
     
@@ -273,7 +274,7 @@ function renderDailyTab(todayData) {
     
     document.getElementById('rib-pump').innerText = `${fmt(sum.pump)} MWh`;
 
-    // 24H Dispatch Chart
+    // 24H Dispatch Chart with Custom Tooltip
     dailyDispatchChart.setOption({
         backgroundColor: 'transparent',
         title: { text: '24-Hour Dispatch & Market Clearing Price', left: 'center', top: 5, textStyle: { color: '#ffffff', fontSize: 15 } },
