@@ -98,62 +98,23 @@
              ============================== -->
         <div id="tab-daily" class="tab-pane">
             
-            <!-- TOP RIBBON (Daily KPIs) -->
-            <div class="ribbon-container">
-                <!-- 1. Generation Card -->
-                <div class="ribbon-card">
-                    <div>
-                        <div class="ribbon-title">Day Generation</div>
-                        <div class="ribbon-main-value text-white" id="rib-gen">- MWh</div>
-                    </div>
-                    <div>
-                        <div class="ribbon-subtext">Lig/Gas: <span class="text-white" id="rib-therm">-</span></div>
-                        <div class="ribbon-subtext">Res + Hydro: <span class="text-white" id="rib-green">-</span></div>
-                    </div>
-                </div>
-                
-                <!-- 2. Demand Card -->
-                <div class="ribbon-card">
-                    <div>
-                        <div class="ribbon-title">Day Demand (System)</div>
-                        <div class="ribbon-main-value text-white" id="rib-dem">- MWh</div>
-                    </div>
-                </div>
-
-                <!-- 3. BESS Efficiency Card -->
-                <div class="ribbon-card">
-                    <div>
-                        <div class="ribbon-title">BESS Efficiency (RTE)</div>
-                        <div class="ribbon-main-value" style="color: #e0c2cd;" id="rib-bess-rte">-</div>
-                    </div>
-                    <div>
-                        <div class="ribbon-subtext">Discharge (In): <span style="color: #e0c2cd;" id="rib-bess-dis">-</span></div>
-                        <div class="ribbon-subtext">Charge (Out): <span style="color: #b276a0;" id="rib-bess-chg">-</span></div>
-                    </div>
-                </div>
-
-                <!-- 4. Flows Card -->
-                <div class="ribbon-card">
-                    <div>
-                        <div class="ribbon-title" id="rib-flows-title">Net Flows</div>
-                        <div class="ribbon-main-value" id="rib-flows-net">- MWh</div>
-                    </div>
-                    <div>
-                        <div class="ribbon-subtext">Total Imports: <span style="color: #ffc000;" id="rib-imp">-</span></div>
-                        <div class="ribbon-subtext">Total Exports: <span style="color: #e74c3c;" id="rib-exp">-</span></div>
-                    </div>
-                </div>
-
-                <!-- 5. Pump Card -->
-                <div class="ribbon-card">
-                    <div>
-                        <div class="ribbon-title">Total Pumping</div>
-                        <div class="ribbon-main-value" style="color: #85c1e9;" id="rib-pump">- MWh</div>
-                    </div>
+            <!-- 1. FULL-WIDTH BALANCE EQUATION BANNER -->
+            <div class="daily-section-card mb-4">
+                <div class="section-header">Daily System Balance & Accounting Ledger</div>
+                <div class="balance-equation-container" id="daily-balance-equation">
+                    <!-- Dynamically populated by JS -->
                 </div>
             </div>
 
-            <!-- 24-HOUR DISPATCH MASTER CHART -->
+            <!-- 2. DYNAMIC SORTED VOLUME RANKING (LEADERBOARD) -->
+            <div class="daily-section-card mb-4">
+                <div class="section-header">Daily Volume Ranking (Sorted by Cumulative MWh)</div>
+                <div class="leaderboard-grid" id="daily-leaderboard">
+                    <!-- Dynamically populated by JS -->
+                </div>
+            </div>
+
+            <!-- 3. 24-HOUR DISPATCH MASTER CHART -->
             <div class="row">
                 <div class="col-12">
                     <div class="chart-container" id="dailyDispatchChart" style="height: 650px;"></div>
