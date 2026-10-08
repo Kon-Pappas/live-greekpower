@@ -92,20 +92,35 @@ body {
     border-bottom: 1px solid var(--border-color);
     padding-bottom: 8px;
 }
+
+/* Balance Equation Sub-lines (Strictly No Wrap) */
 .balance-equation-container {
-    font-size: 1.05rem;
-    font-family: 'Courier New', Courier, monospace;
     display: flex;
-    flex-wrap: wrap;
+    flex-direction: column;
+    gap: 8px;
+    font-family: 'Courier New', Courier, monospace;
+}
+.eq-subline {
+    display: flex;
     align-items: center;
-    gap: 12px;
-    line-height: 1.8;
+    gap: 8px;
+    font-size: 0.85rem;
+    white-space: nowrap;
+    overflow-x: auto;
+    padding-bottom: 2px;
+}
+.eq-subline::-webkit-scrollbar {
+    height: 4px;
+}
+.eq-subline::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 2px;
 }
 .eq-term {
     display: inline-flex;
     align-items: center;
     background: rgba(255,255,255,0.03);
-    padding: 4px 10px;
+    padding: 3px 8px;
     border-radius: 4px;
     border: 1px solid rgba(255,255,255,0.05);
 }
