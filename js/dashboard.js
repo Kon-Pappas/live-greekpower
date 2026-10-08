@@ -54,22 +54,18 @@ async function loadData() {
             throw new Error("No data found in JSON.");
         }
 
-        // --- ΒΗΜΑ 1: GLOBAL DEDUPLICATION ΚΑΙ ΦΙΛΤΡΟ "ΣΚΟΥΠΙΔΙΩΝ" ---
+        // --- ΒΗΜΑ 1: GLOBAL DEDUPLICATION & FILTER ---
         const cleanDataMap = new Map();
         
         rawData.forEach(entry => {
             let hr = parseInt(entry.target_hour);
-            
-            // ΑΓΝΟΟΥΜΕ εντελώς την ώρα 0 (σκουπίδι από παλιό script) και ότι είναι πάνω από 24
             if (hr === 0 || hr > 24) return; 
-            
             entry.target_hour = hr; 
             
             const key = `${entry.date}_${hr}`;
             if (!cleanDataMap.has(key)) {
                 cleanDataMap.set(key, entry);
             } else {
-                // Αν υπάρχει ήδη η ώρα, κράτα αυτήν με το πιο πρόσφατο timestamp (Healing)
                 const existingTime = new Date(cleanDataMap.get(key).fetch_timestamp).getTime();
                 const newTime = new Date(entry.fetch_timestamp).getTime();
                 if (newTime > existingTime) {
@@ -78,38 +74,32 @@ async function loadData() {
             }
         });
 
-        // Μετατροπή ξανά σε Array και ταξινόμηση αυστηρά χρονολογικά
         const cleanDataArray = Array.from(cleanDataMap.values()).sort((a, b) => {
             if (a.date !== b.date) return a.date.localeCompare(b.date);
             return a.target_hour - b.target_hour;
         });
 
-        // --- ΒΗΜΑ 2: ΕΥΡΕΣΗ ΤΗΣ ΠΡΑΓΜΑΤΙΚΗΣ "LIVE" ΩΡΑΣ ΓΙΑ ΤΟ 1ο TAB ---
+        // --- ΒΗΜΑ 2: LIVE TAB SELECTION ---
         let validLiveData = null;
-        // Ψάχνουμε από το τέλος προς την αρχή για την πρώτη ώρα που έχει πραγματικά νούμερα
         for (let i = cleanDataArray.length - 1; i >= 0; i--) {
             let d = cleanDataArray[i];
             let totalGen = d.production_mix['TOTAL_PROD'] || 0;
             let demand = d.demand_mwh || 0;
-            
             if (totalGen > 0 || demand > 0) {
                 validLiveData = d;
                 break;
             }
         }
-        
-        // Fallback (ασφάλεια σε περίπτωση που δεν βρει τίποτα)
         if (!validLiveData) validLiveData = cleanDataArray[cleanDataArray.length - 1];
 
         const fetchTime = new Date(validLiveData.fetch_timestamp).toLocaleString('en-GB');
         const displayHour = validLiveData.target_hour.toString().padStart(2, '0') + ':00';
         document.getElementById('last-updated').innerText = `Last Update: ${fetchTime} | Target Hour: ${displayHour}`;
 
-        // Φιλτράρουμε όλα τα δεδομένα της ημέρας που ανήκει η "Live" ώρα
         const todayDate = validLiveData.date;
         const todayData = cleanDataArray.filter(d => d.date === todayDate);
 
-        // --- ΒΗΜΑ 3: RENDER ΣΤΑ TABS ---
+        // --- ΒΗΜΑ 3: RENDER ---
         renderLiveTab(validLiveData);
         renderDailyTab(todayData);
 
@@ -144,7 +134,6 @@ function renderLiveTab(latestData) {
     let liveTotalSinks = live.pump + live.stAbs + live.exports;
     let liveDemand = liveTotalSupply - liveTotalSinks;
 
-    // UI Updates
     document.getElementById('val-production').innerText = `${fmt(live.totalGen)} MWh`;
     document.getElementById('val-demand').innerText = `${fmt(liveDemand)} MWh`;
     document.getElementById('val-price').innerText = `${fmt(live.mcp)} €`;
@@ -164,7 +153,6 @@ function renderLiveTab(latestData) {
         <div class="eq-row c-pump"><span class="eq-label">Pumping</span><span class="eq-operator">-</span><span class="eq-value">${fmt(live.pump)}</span></div>
     `;
 
-    // Charts Config
     const getDonutOpt = (title, data) => ({
         backgroundColor: 'transparent',
         title: [
@@ -247,32 +235,53 @@ function renderDailyTab(todayData) {
         sum.stIn += sIn; sum.stAbs += sAbs; sum.imp += imp; sum.exp += exp; sum.pump += p; sum.dem += dem;
     });
 
-    // Update Ribbon with Percentages and RTE
-    let thermSum = sum.lig + sum.gas;
-    let greenSum = sum.hyd + sum.res;
-    
-    let thermPct = sum.gen > 0 ? Math.round((thermSum / sum.gen) * 100) : 0;
-    let greenPct = sum.gen > 0 ? Math.round((greenSum / sum.gen) * 100) : 0;
-    let rteDisplay = sum.stAbs > 0 ? Math.round((sum.stIn / sum.stAbs) * 100) + '%' : 'N/A';
+    // --- RENDER BALANCE EQUATION BANNER ---
+    const balanceContainer = document.getElementById('daily-balance-equation');
+    balanceContainer.innerHTML = `
+        <span class="eq-term" style="color: var(--color-lignite);">Lig: <b>${fmt(sum.lig)}</b></span> <span class="eq-op">+</span>
+        <span class="eq-term" style="color: var(--color-gas);">Gas: <b>${fmt(sum.gas)}</b></span> <span class="eq-op">+</span>
+        <span class="eq-term" style="color: var(--color-hydro);">Hyd: <b>${fmt(sum.hyd)}</b></span> <span class="eq-op">+</span>
+        <span class="eq-term" style="color: var(--color-res);">RES: <b>${fmt(sum.res)}</b></span> 
+        <span class="eq-op">=</span> 
+        <span class="eq-term text-white">Gen: <b>${fmt(sum.gen)}</b></span> <span class="eq-op">+</span>
+        <span class="eq-term" style="color: var(--color-imports);">Imp: <b>${fmt(sum.imp)}</b></span> <span class="eq-op">-</span>
+        <span class="eq-term" style="color: var(--color-exports);">Exp: <b>${fmt(sum.exp)}</b></span> <span class="eq-op">+</span>
+        <span class="eq-term" style="color: var(--color-storage);">BESS-Dis: <b>${fmt(sum.stIn)}</b></span> <span class="eq-op">-</span>
+        <span class="eq-term" style="color: var(--color-storage-chg);">BESS-Chg: <b>${fmt(sum.stAbs)}</b></span> <span class="eq-op">-</span>
+        <span class="eq-term" style="color: var(--color-pump);">Pump: <b>${fmt(sum.pump)}</b></span> 
+        <span class="eq-op">=</span> 
+        <span class="eq-term text-white" style="border-color: rgba(46,204,113,0.3); background: rgba(46,204,113,0.08);">Demand: <b>${fmt(sum.dem)} MWh</b></span>
+    `;
 
-    document.getElementById('rib-gen').innerText = `${fmt(sum.gen)} MWh`;
-    document.getElementById('rib-therm').innerHTML = `<b>${thermPct}%</b> &nbsp; ${fmt(thermSum)} MWh`;
-    document.getElementById('rib-green').innerHTML = `<b>${greenPct}%</b> &nbsp; ${fmt(greenSum)} MWh`;
-    
-    document.getElementById('rib-dem').innerText = `${fmt(sum.dem)} MWh`;
-    
-    document.getElementById('rib-bess-rte').innerText = rteDisplay;
-    document.getElementById('rib-bess-dis').innerText = `${fmt(sum.stIn)} MWh`;
-    document.getElementById('rib-bess-chg').innerText = `${fmt(sum.stAbs)} MWh`;
-    
-    let netFlow = sum.imp - sum.exp;
-    document.getElementById('rib-flows-title').innerText = netFlow >= 0 ? "Net Imports" : "Net Exports";
-    document.getElementById('rib-flows-net').innerText = `${fmt(Math.abs(netFlow))} MWh`;
-    document.getElementById('rib-flows-net').style.color = netFlow >= 0 ? "#ffc000" : "#e74c3c";
-    document.getElementById('rib-imp').innerText = `${fmt(sum.imp)} MWh`;
-    document.getElementById('rib-exp').innerText = `${fmt(sum.exp)} MWh`;
-    
-    document.getElementById('rib-pump').innerText = `${fmt(sum.pump)} MWh`;
+    // --- RENDER DYNAMIC SORTED LEADERBOARD ---
+    const leaderboardItems = [
+        { name: 'RES (ΑΠΕ)', value: sum.res, color: 'var(--color-res)' },
+        { name: 'Natural Gas (Φ.Αεριο)', value: sum.gas, color: 'var(--color-gas)' },
+        { name: 'Domestic Demand (Ζήτηση)', value: sum.dem, color: 'var(--text-main)' },
+        { name: 'Total Generation (Παραγωγή)', value: sum.gen, color: 'var(--accent-green)' },
+        { name: 'Imports (Εισαγωγές)', value: sum.imp, color: 'var(--color-imports)' },
+        { name: 'Exports (Εξαγωγές)', value: sum.exp, color: 'var(--color-exports)' },
+        { name: 'Hydro (Υδροηλεκτρικά)', value: sum.hyd, color: 'var(--color-hydro)' },
+        { name: 'BESS Discharge (Αποφόρτιση)', value: sum.stIn, color: 'var(--color-storage)' },
+        { name: 'BESS Charge (Φόρτιση)', value: sum.stAbs, color: 'var(--color-storage-chg)' },
+        { name: 'Lignite (Λιγνίτης)', value: sum.lig, color: 'var(--color-lignite)' },
+        { name: 'Pumping (Άντληση)', value: sum.pump, color: 'var(--color-pump)' }
+    ];
+
+    // Sort descending by value
+    leaderboardItems.sort((a, b) => b.value - a.value);
+
+    const leaderboardContainer = document.getElementById('daily-leaderboard');
+    leaderboardContainer.innerHTML = leaderboardItems.map((item, index) => `
+        <div class="leaderboard-item">
+            <div class="lb-top">
+                <span class="lb-name" style="color: ${item.color};">${item.name}</span>
+                <span class="lb-rank">#${index + 1}</span>
+            </div>
+            <div class="lb-value">${fmt(item.value)} <span style="font-size: 0.9rem; font-weight: normal; color: var(--text-muted);">MWh</span></div>
+        </div>
+    `).join('');
+
 
     // 24H Dispatch Chart with Custom Tooltip
     dailyDispatchChart.setOption({
