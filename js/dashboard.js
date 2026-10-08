@@ -217,17 +217,60 @@ function renderDailyTab(todayData) {
         backgroundColor: 'transparent',
         title: { text: '24-Hour Dispatch & Market Clearing Price', left: 'center', top: 5, textStyle: { color: '#ffffff', fontSize: 15 } },
         tooltip: {
-            trigger: 'axis', axisPointer: { type: 'cross' }, backgroundColor: 'rgba(28, 33, 40, 0.95)', borderColor: '#2d333b', textStyle: { color: '#fff' },
+            trigger: 'axis',
+            axisPointer: { type: 'cross' },
+            backgroundColor: 'rgba(28, 33, 40, 0.95)',
+            borderColor: '#2d333b',
+            textStyle: { color: '#fff' },
             formatter: function (params) {
-                let h = `<b style="font-size:14px; color:#2ecc71;">Hour: ${params[0].axisValue}</b><br/><hr style="margin:5px 0; border-color:#2d333b;">`;
-                params.sort((a,b) => b.seriesType === 'line' ? 1 : -1); 
-                params.forEach(p => {
+                let hour = params[0].axisValue;
+                
+                // Ορίζουμε τις ομάδες μας (βάσει των ονομάτων των series)
+                const supplyOrder = ['Hydro', 'RES', 'BESS Discharge', 'Imports', 'Natural Gas', 'Lignite'];
+                const demandOrder = ['Domestic Demand', 'Exports', 'BESS Charge', 'Pumping'];
+                
+                // Βρίσκουμε το MCP
+                let mcpParam = params.find(p => p.seriesName === 'MCP');
+                let mcpValue = mcpParam ? fmt(Math.abs(mcpParam.value)) : '-';
+
+                // 1. HEADER (Hour + MCP)
+                let html = `<div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                                <b style="font-size:14px; color:#2ecc71;">Hour: ${hour}</b>
+                                <b style="font-size:14px; color:#ffffff;">MCP: ${mcpValue} €/MWh</b>
+                            </div>`;
+
+                // Βοηθητική συνάρτηση για τη δημιουργία της κάθε γραμμής
+                const renderRow = (p) => {
+                    if (!p) return '';
                     let val = Math.abs(p.value);
-                    let unit = p.seriesName === 'MCP' ? '€/MWh' : 'MWh';
-                    let fontW = p.seriesType === 'line' ? 'font-weight:900;' : '';
-                    h += `<span style="color:${p.color}; font-size:16px;">●</span> <span style="${fontW}">${p.seriesName}</span>: <b>${fmt(val)}</b> ${unit}<br/>`;
+                    // Κάνουμε το "Domestic Demand" bold
+                    let isDemand = p.seriesName === 'Domestic Demand';
+                    let label = isDemand ? `<b>${p.seriesName}</b>` : p.seriesName;
+                    let valueStr = isDemand ? `<b>${fmt(val)}</b>` : `<b>${fmt(val)}</b>`;
+                    
+                    return `<div style="margin-bottom: 3px;">
+                                <span style="color:${p.color}; font-size:14px;">●</span> 
+                                <span style="display:inline-block; width:130px; font-size:13px; color:#fff;">${label}:</span> 
+                                <span style="font-size:13px; color:#fff; float:right;">${valueStr} MWh</span>
+                            </div>`;
+                };
+
+                // 2. SUPPLY GROUP (Με συγκεκριμένη σειρά)
+                supplyOrder.forEach(name => {
+                    let p = params.find(item => item.seriesName === name);
+                    if(p && p.value !== 0) html += renderRow(p); // Δείχνουμε μόνο αν έχει τιμή
                 });
-                return h;
+
+                // 3. SEPARATOR (Κενό)
+                html += `<div style="height: 15px;"></div>`;
+
+                // 4. DEMAND & SINKS GROUP (Με συγκεκριμένη σειρά)
+                demandOrder.forEach(name => {
+                    let p = params.find(item => item.seriesName === name);
+                    if(p && p.value !== 0) html += renderRow(p); // Δείχνουμε μόνο αν έχει τιμή
+                });
+
+                return html;
             }
         },
         legend: { top: 40, textStyle: { color: '#8892b0' }, icon: 'roundRect' },
