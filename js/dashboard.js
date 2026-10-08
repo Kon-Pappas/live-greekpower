@@ -50,6 +50,10 @@ async function loadData() {
         const response = await fetch('data/live_data.json');
         const data = await response.json();
         
+        if (!data || data.length === 0) {
+            throw new Error("No data found in JSON.");
+        }
+
         const latestData = data[data.length - 1];
         const fetchTime = new Date(latestData.fetch_timestamp).toLocaleString('en-GB');
         document.getElementById('last-updated').innerText = `Last Update: ${fetchTime} | Target Hour: ${latestData.target_hour}:00`;
@@ -158,6 +162,31 @@ function renderLiveTab(latestData) {
 
 // --- 5. Render Logic for Tab 2 (Daily) ---
 function renderDailyTab(todayData) {
+    // --- STEP 1: DEDUPLICATION (The Shield) ---
+    // Χρησιμοποιούμε Map για να κρατήσουμε ΜΟΝΟ την πιο πρόσφατη εγγραφή ανά ώρα
+    const cleanDataMap = new Map();
+    
+    todayData.forEach(entry => {
+        const hr = entry.target_hour;
+        if (!cleanDataMap.has(hr)) {
+            cleanDataMap.set(hr, entry);
+        } else {
+            // Αν υπάρχει ήδη αυτή η ώρα, σύγκρινε τα timestamps. Κράτα το νεότερο.
+            const existingEntry = cleanDataMap.get(hr);
+            const existingTime = new Date(existingEntry.fetch_timestamp).getTime();
+            const newTime = new Date(entry.fetch_timestamp).getTime();
+            
+            if (newTime > existingTime) {
+                cleanDataMap.set(hr, entry);
+            }
+        }
+    });
+
+    // Μετατρέπουμε το Map πάλι σε Array και το κάνουμε sort βάσει ώρας (από 1 έως 24)
+    const cleanDataArray = Array.from(cleanDataMap.values()).sort((a, b) => a.target_hour - b.target_hour);
+
+
+    // --- STEP 2: BUILD ARRAYS FOR CHARTS ---
     let hours = [], arrLignite = [], arrGas = [], arrHydro = [], arrRes = [];
     let arrImports = [], arrStIn = [], arrDemand = [], arrMcp = [];
     let arrPump = [], arrStAbs = [], arrExports = []; 
@@ -165,7 +194,7 @@ function renderDailyTab(todayData) {
     let sum = { gen:0, lig:0, gas:0, hyd:0, res:0, dem:0, stIn:0, stAbs:0, imp:0, exp:0, pump:0 };
     const countryKeys = ['ΑΛΒΑΝΙΑ', 'ΒΟΥΛΓΑΡΙΑ', 'ΙΤΑΛΙΑ', 'ΤΟΥΡΚΙΑ', 'FYROM'];
 
-    todayData.forEach(d => {
+    cleanDataArray.forEach(d => {
         hours.push(d.target_hour.toString().padStart(2, '0') + ':00');
 
         let l = d.production_mix['TOTAL LIGNITE'] || 0;
@@ -195,7 +224,7 @@ function renderDailyTab(todayData) {
         sum.stIn += sIn; sum.stAbs += sAbs; sum.imp += imp; sum.exp += exp; sum.pump += p; sum.dem += dem;
     });
 
-    // Update Ribbon with Percentages and RTE
+    // --- STEP 3: UPDATE RIBBON ---
     let thermSum = sum.lig + sum.gas;
     let greenSum = sum.hyd + sum.res;
     
@@ -222,7 +251,7 @@ function renderDailyTab(todayData) {
     
     document.getElementById('rib-pump').innerText = `${fmt(sum.pump)} MWh`;
 
-    // 24H Dispatch Chart with Custom Tooltip
+    // --- STEP 4: 24H DISPATCH CHART ---
     dailyDispatchChart.setOption({
         backgroundColor: 'transparent',
         title: { text: '24-Hour Dispatch & Market Clearing Price', left: 'center', top: 5, textStyle: { color: '#ffffff', fontSize: 15 } },
