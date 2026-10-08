@@ -1,6 +1,13 @@
-// --- 1. Global ECharts Instances ---
+// --- 1. Global ECharts Instances & Utilities ---
 let supplyChart, demandChart, flowsChart, dailyDispatchChart;
 const fmt = (num) => new Intl.NumberFormat('en-US').format(Math.round(num));
+
+// Συνάρτηση για να διορθώσουμε το 00:00 σε 01:00 και να προσθέσουμε τα μηδενικά
+const formatHourStr = (hr) => {
+    let h = parseInt(hr);
+    if (h === 0) h = 1; // Αν η ώρα είναι 0, την κάνουμε 1
+    return h.toString().padStart(2, '0') + ':00';
+};
 
 // --- 2. Initialize App ---
 document.addEventListener('DOMContentLoaded', () => {
@@ -44,22 +51,49 @@ function setupTabSwitcher() {
     });
 }
 
-// --- 3. Main Data Fetcher ---
+// --- 3. Main Data Fetcher & Global Deduplication ---
 async function loadData() {
     try {
         const response = await fetch('data/live_data.json');
-        const data = await response.json();
+        const rawData = await response.json();
         
-        if (!data || data.length === 0) {
+        if (!rawData || rawData.length === 0) {
             throw new Error("No data found in JSON.");
         }
 
-        const latestData = data[data.length - 1];
+        // --- GLOBAL DEDUPLICATION (Η ΑΣΠΙΔΑ ΓΙΑ ΟΛΟ ΤΟ DASHBOARD) ---
+        const cleanDataMap = new Map();
+        
+        rawData.forEach(entry => {
+            // Κλειδί: Ημερομηνία + Ώρα για να ξεχωρίζουν οι μέρες
+            const key = `${entry.date}_${entry.target_hour}`;
+            if (!cleanDataMap.has(key)) {
+                cleanDataMap.set(key, entry);
+            } else {
+                // Αν υπάρχει διπλοεγγραφή, κράτα αυτή με το πιο πρόσφατο fetch_timestamp
+                const existingTime = new Date(cleanDataMap.get(key).fetch_timestamp).getTime();
+                const newTime = new Date(entry.fetch_timestamp).getTime();
+                if (newTime > existingTime) {
+                    cleanDataMap.set(key, entry);
+                }
+            }
+        });
+
+        // Μετατροπή ξανά σε Array και ταξινόμηση αυστηρά χρονολογικά
+        const cleanDataArray = Array.from(cleanDataMap.values()).sort((a, b) => {
+            if (a.date !== b.date) {
+                return a.date.localeCompare(b.date);
+            }
+            return a.target_hour - b.target_hour;
+        });
+
+        // Τώρα η τελευταία εγγραφή είναι ΕΓΓΥΗΜΕΝΑ η σωστή "Live" ώρα
+        const latestData = cleanDataArray[cleanDataArray.length - 1];
         const fetchTime = new Date(latestData.fetch_timestamp).toLocaleString('en-GB');
-        document.getElementById('last-updated').innerText = `Last Update: ${fetchTime} | Target Hour: ${latestData.target_hour}:00`;
+        document.getElementById('last-updated').innerText = `Last Update: ${fetchTime} | Target Hour: ${formatHourStr(latestData.target_hour)}`;
 
         const todayDate = latestData.date;
-        const todayData = data.filter(d => d.date === todayDate);
+        const todayData = cleanDataArray.filter(d => d.date === todayDate);
 
         // Delegation to specific render functions
         renderLiveTab(latestData);
@@ -162,31 +196,6 @@ function renderLiveTab(latestData) {
 
 // --- 5. Render Logic for Tab 2 (Daily) ---
 function renderDailyTab(todayData) {
-    // --- STEP 1: DEDUPLICATION (The Shield) ---
-    // Χρησιμοποιούμε Map για να κρατήσουμε ΜΟΝΟ την πιο πρόσφατη εγγραφή ανά ώρα
-    const cleanDataMap = new Map();
-    
-    todayData.forEach(entry => {
-        const hr = entry.target_hour;
-        if (!cleanDataMap.has(hr)) {
-            cleanDataMap.set(hr, entry);
-        } else {
-            // Αν υπάρχει ήδη αυτή η ώρα, σύγκρινε τα timestamps. Κράτα το νεότερο.
-            const existingEntry = cleanDataMap.get(hr);
-            const existingTime = new Date(existingEntry.fetch_timestamp).getTime();
-            const newTime = new Date(entry.fetch_timestamp).getTime();
-            
-            if (newTime > existingTime) {
-                cleanDataMap.set(hr, entry);
-            }
-        }
-    });
-
-    // Μετατρέπουμε το Map πάλι σε Array και το κάνουμε sort βάσει ώρας (από 1 έως 24)
-    const cleanDataArray = Array.from(cleanDataMap.values()).sort((a, b) => a.target_hour - b.target_hour);
-
-
-    // --- STEP 2: BUILD ARRAYS FOR CHARTS ---
     let hours = [], arrLignite = [], arrGas = [], arrHydro = [], arrRes = [];
     let arrImports = [], arrStIn = [], arrDemand = [], arrMcp = [];
     let arrPump = [], arrStAbs = [], arrExports = []; 
@@ -194,8 +203,8 @@ function renderDailyTab(todayData) {
     let sum = { gen:0, lig:0, gas:0, hyd:0, res:0, dem:0, stIn:0, stAbs:0, imp:0, exp:0, pump:0 };
     const countryKeys = ['ΑΛΒΑΝΙΑ', 'ΒΟΥΛΓΑΡΙΑ', 'ΙΤΑΛΙΑ', 'ΤΟΥΡΚΙΑ', 'FYROM'];
 
-    cleanDataArray.forEach(d => {
-        hours.push(d.target_hour.toString().padStart(2, '0') + ':00');
+    todayData.forEach(d => {
+        hours.push(formatHourStr(d.target_hour));
 
         let l = d.production_mix['TOTAL LIGNITE'] || 0;
         let g = d.production_mix['TOTAL GAS'] || 0;
@@ -224,7 +233,7 @@ function renderDailyTab(todayData) {
         sum.stIn += sIn; sum.stAbs += sAbs; sum.imp += imp; sum.exp += exp; sum.pump += p; sum.dem += dem;
     });
 
-    // --- STEP 3: UPDATE RIBBON ---
+    // Update Ribbon with Percentages and RTE
     let thermSum = sum.lig + sum.gas;
     let greenSum = sum.hyd + sum.res;
     
@@ -251,7 +260,7 @@ function renderDailyTab(todayData) {
     
     document.getElementById('rib-pump').innerText = `${fmt(sum.pump)} MWh`;
 
-    // --- STEP 4: 24H DISPATCH CHART ---
+    // 24H Dispatch Chart with Custom Tooltip
     dailyDispatchChart.setOption({
         backgroundColor: 'transparent',
         title: { text: '24-Hour Dispatch & Market Clearing Price', left: 'center', top: 5, textStyle: { color: '#ffffff', fontSize: 15 } },
