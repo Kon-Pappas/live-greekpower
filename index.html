@@ -8,213 +8,8 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- ECharts -->
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
-    <style>
-        :root {
-            --bg-color: #121418;
-            --card-bg: #1c2128;
-            --border-color: #2d333b;
-            --accent-green: #2ecc71;
-            --text-main: #ffffff;
-            --text-muted: #8892b0;
-            
-            /* Color Palette */
-            --color-lignite: #b06a4b; 
-            --color-gas: #d18b57;     
-            --color-hydro: #5b9bd5;   
-            --color-res: #70ad47;     
-            --color-storage: #e0c2cd; /* Discharge (Παστέλ Ροζ/Μωβ) */
-            --color-storage-chg: #b276a0; /* Charge (Πιο σκούρο Μωβ για αντίθεση) */
-            --color-imports: #ffc000; 
-            --color-exports: #e74c3c; 
-            --color-pump: #85c1e9;    
-            --color-demand: #4a5568;  /* Ανθρακί/Γκρι για την Εγχώρια Ζήτηση */
-        }
-
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding-bottom: 40px;
-        }
-
-        .top-nav {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            padding: 15px 30px;
-            border-bottom: 1px solid var(--border-color);
-            background-color: rgba(18, 20, 24, 0.95);
-        }
-        .top-nav a { color: var(--text-muted); text-decoration: none; }
-        .top-nav a:hover { color: var(--text-main); }
-
-        .header-section {
-            padding: 25px 30px 15px 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-
-        .dashboard-title {
-            color: var(--accent-green);
-            font-size: 1.8rem;
-            font-weight: 700;
-            margin: 0;
-        }
-
-        .update-info {
-            font-size: 0.85rem;
-            color: var(--color-imports); 
-            margin-top: 5px;
-            font-weight: 600;
-        }
-
-        .controls-wrapper { display: flex; align-items: center; gap: 15px; }
-        .status-pill {
-            background-color: rgba(46, 204, 113, 0.15);
-            color: var(--accent-green);
-            border: 1px solid rgba(46, 204, 113, 0.3);
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 600;
-        }
-
-        .nav-tabs-container {
-            border-bottom: 1px solid var(--border-color);
-            padding: 0 30px;
-            display: flex;
-            gap: 30px;
-        }
-        .nav-tab-item {
-            color: var(--text-muted);
-            padding: 12px 5px;
-            font-size: 0.95rem;
-            font-weight: 500;
-            text-decoration: none;
-            border-bottom: 2px solid transparent;
-            transition: all 0.2s ease;
-        }
-        .nav-tab-item.active {
-            color: var(--accent-green);
-            border-bottom-color: var(--accent-green);
-        }
-        .nav-tab-item:hover { color: var(--text-main); }
-
-        .main-container { padding: 30px; }
-
-        .metric-card {
-            background-color: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            padding: 20px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            height: 100%;
-        }
-
-        .split-card-inner {
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            justify-content: space-between;
-            height: 100%;
-        }
-        .split-left {
-            text-align: center;
-            padding-right: 20px;
-            border-right: 1px solid var(--border-color);
-            min-width: 40%;
-        }
-        .split-right {
-            flex-grow: 1;
-            padding-left: 20px;
-        }
-        
-        .center-card {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-        }
-
-        .metric-title {
-            color: var(--text-muted);
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 15px;
-        }
-        
-        .metric-value {
-            font-size: 2.2rem;
-            font-weight: 700;
-            color: #ffffff; 
-            white-space: nowrap;
-        }
-
-        .breakdown-list {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            font-size: 0.85rem;
-        }
-        
-        .eq-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .eq-label { flex: 1; text-align: left; font-weight: 600; }
-        .eq-operator {
-            color: #ffffff;
-            font-weight: 800;
-            font-size: 1rem;
-            width: 30px;
-            text-align: center;
-        }
-        .eq-value {
-            width: 70px;
-            text-align: right;
-            font-weight: 600;
-            font-family: 'Courier New', Courier, monospace; 
-        }
-
-        .c-lignite { color: var(--color-lignite); }
-        .c-gas { color: var(--color-gas); }
-        .c-hydro { color: var(--color-hydro); }
-        .c-res { color: var(--color-res); }
-        .c-imports { color: var(--color-imports); }
-        .c-exports { color: var(--color-exports); }
-        .c-storage { color: var(--color-storage); }
-        .c-pump { color: var(--color-pump); }
-
-        .chart-container {
-            background-color: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            padding: 20px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            height: 440px;
-        }
-
-        /* Responsive Fix για Κινητά στα πάνω κουτιά */
-        @media (max-width: 991px) {
-            .split-card-inner { flex-direction: column; }
-            .split-left {
-                border-right: none;
-                border-bottom: 1px solid var(--border-color);
-                padding-right: 0;
-                padding-bottom: 15px;
-                margin-bottom: 15px;
-                width: 100%;
-            }
-            .split-right { padding-left: 0; width: 100%; }
-        }
-    </style>
+    <!-- Custom CSS -->
+    <link href="css/styles.css" rel="stylesheet">
 </head>
 <body>
 
@@ -232,275 +27,138 @@
         </div>
     </div>
 
+    <!-- TABS MENU -->
     <div class="nav-tabs-container">
-        <a href="#" class="nav-tab-item active">Live Analytics</a>
-        <a href="#" class="nav-tab-item">Generation Mix</a>
-        <a href="#" class="nav-tab-item">Cross-Border Flows</a>
+        <a class="nav-tab-item active" data-target="tab-live">Live Analytics</a>
+        <a class="nav-tab-item" data-target="tab-daily">Daily Dashboard</a>
     </div>
 
     <div class="main-container">
-        <!-- Κουτιά Μετρικών (Λογιστικό Καθολικό) -->
-        <div class="row mb-4">
-            <div class="col-xl-5 col-lg-6 mb-3">
-                <div class="metric-card">
-                    <div class="split-card-inner">
-                        <div class="split-left">
-                            <div class="metric-title">TOTAL GENERATION</div>
-                            <div class="metric-value" id="val-production">- MWh</div>
+        
+        <!-- ==============================
+             TAB 1: LIVE ANALYTICS
+             ============================== -->
+        <div id="tab-live" class="tab-pane active">
+            <!-- Metrics Row -->
+            <div class="row mb-4">
+                <div class="col-xl-5 col-lg-6 mb-3">
+                    <div class="metric-card">
+                        <div class="split-card-inner">
+                            <div class="split-left">
+                                <div class="metric-title">TOTAL GENERATION</div>
+                                <div class="metric-value" id="val-production">- MWh</div>
+                            </div>
+                            <div class="split-right">
+                                <div class="breakdown-list" id="eq-generation"></div>
+                            </div>
                         </div>
-                        <div class="split-right">
-                            <div class="breakdown-list" id="eq-generation"></div>
+                    </div>
+                </div>
+                <div class="col-xl-5 col-lg-6 mb-3">
+                    <div class="metric-card">
+                        <div class="split-card-inner">
+                            <div class="split-left">
+                                <div class="metric-title">TOTAL DEMAND (BALANCE)</div>
+                                <div class="metric-value" id="val-demand">- MWh</div>
+                            </div>
+                            <div class="split-right">
+                                <div class="breakdown-list" id="eq-demand"></div>
+                            </div>
                         </div>
+                    </div>
+                </div>
+                <div class="col-xl-2 col-lg-12 mb-3">
+                    <div class="metric-card center-card" style="border-color: rgba(52, 152, 219, 0.3);">
+                        <div class="metric-title">MARKET CLEARING PRICE<br>(MCP)</div>
+                        <div class="metric-value" style="color: #5b9bd5; font-size: 2.8rem;" id="val-price">- €</div>
                     </div>
                 </div>
             </div>
 
-            <div class="col-xl-5 col-lg-6 mb-3">
-                <div class="metric-card">
-                    <div class="split-card-inner">
-                        <div class="split-left">
-                            <div class="metric-title">TOTAL DEMAND (BALANCE)</div>
-                            <div class="metric-value" id="val-demand">- MWh</div>
-                        </div>
-                        <div class="split-right">
-                            <div class="breakdown-list" id="eq-demand"></div>
-                        </div>
+            <!-- Charts Row (Donuts) -->
+            <div class="row">
+                <div class="col-md-6 mb-4">
+                    <div class="chart-container" id="supplyChart" style="height: 440px;"></div>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <div class="chart-container" id="demandChart" style="height: 440px;"></div>
+                </div>
+            </div>
+            
+            <!-- Flows Chart -->
+            <div class="row">
+                <div class="col-12 mb-4">
+                    <div class="chart-container" id="flowsChart" style="height: 380px;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==============================
+             TAB 2: DAILY DASHBOARD
+             ============================== -->
+        <div id="tab-daily" class="tab-pane">
+            
+            <!-- TOP RIBBON (Daily KPIs) -->
+            <div class="ribbon-container">
+                <div class="ribbon-card">
+                    <div>
+                        <div class="ribbon-title">Day Generation</div>
+                        <div class="ribbon-main-value text-white" id="rib-gen">- MWh</div>
+                    </div>
+                    <div>
+                        <div class="ribbon-subtext">Lig/Gas: <span class="text-white" id="rib-therm">-</span></div>
+                        <div class="ribbon-subtext">Hyd/Res: <span class="text-white" id="rib-green">-</span></div>
+                    </div>
+                </div>
+                
+                <div class="ribbon-card">
+                    <div>
+                        <div class="ribbon-title">Day Demand (System)</div>
+                        <div class="ribbon-main-value text-white" id="rib-dem">- MWh</div>
+                    </div>
+                </div>
+
+                <div class="ribbon-card">
+                    <div>
+                        <div class="ribbon-title">BESS Volume (Gross)</div>
+                        <div class="ribbon-main-value" style="color: #e0c2cd;" id="rib-bess">- MWh</div>
+                    </div>
+                    <div>
+                        <div class="ribbon-subtext">Discharge (In): <span style="color: #e0c2cd;" id="rib-bess-dis">-</span></div>
+                        <div class="ribbon-subtext">Charge (Out): <span style="color: #b276a0;" id="rib-bess-chg">-</span></div>
+                    </div>
+                </div>
+
+                <div class="ribbon-card">
+                    <div>
+                        <div class="ribbon-title" id="rib-flows-title">Net Flows</div>
+                        <div class="ribbon-main-value" id="rib-flows-net">- MWh</div>
+                    </div>
+                    <div>
+                        <div class="ribbon-subtext">Total Imports: <span style="color: #ffc000;" id="rib-imp">-</span></div>
+                        <div class="ribbon-subtext">Total Exports: <span style="color: #e74c3c;" id="rib-exp">-</span></div>
+                    </div>
+                </div>
+
+                <div class="ribbon-card">
+                    <div>
+                        <div class="ribbon-title">Total Pumping</div>
+                        <div class="ribbon-main-value" style="color: #85c1e9;" id="rib-pump">- MWh</div>
                     </div>
                 </div>
             </div>
 
-            <div class="col-xl-2 col-lg-12 mb-3">
-                <div class="metric-card center-card" style="border-color: rgba(52, 152, 219, 0.3);">
-                    <div class="metric-title">MARKET CLEARING PRICE<br>(MCP)</div>
-                    <div class="metric-value" style="color: #5b9bd5; font-size: 2.8rem;" id="val-price">- €</div>
+            <!-- 24-HOUR DISPATCH MASTER CHART -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="chart-container" id="dailyDispatchChart" style="height: 650px;"></div>
                 </div>
             </div>
         </div>
 
-        <!-- 2 Ξεχωριστά Donuts (Supply vs Demand) -->
-        <div class="row">
-            <div class="col-md-6 mb-4">
-                <div class="chart-container" id="supplyChart"></div>
-            </div>
-            <div class="col-md-6 mb-4">
-                <div class="chart-container" id="demandChart"></div>
-            </div>
-        </div>
-
-        <!-- Γράφημα Ροών (Full Width από κάτω) -->
-        <div class="row">
-            <div class="col-12 mb-4">
-                <div class="chart-container" id="flowsChart" style="height: 380px;"></div>
-            </div>
-        </div>
     </div>
 
-<script>
-    // Αρχικοποίηση των 3 γραφημάτων
-    let supplyChart = echarts.init(document.getElementById('supplyChart'), 'dark');
-    let demandChart = echarts.init(document.getElementById('demandChart'), 'dark');
-    let flowsChart = echarts.init(document.getElementById('flowsChart'), 'dark');
-
-    const fmt = (num) => new Intl.NumberFormat('en-US').format(num);
-
-    async function loadData() {
-        try {
-            const response = await fetch('data/live_data.json');
-            const data = await response.json();
-            const latestData = data[data.length - 1];
-
-            const fetchTime = new Date(latestData.fetch_timestamp).toLocaleString('en-GB');
-            document.getElementById('last-updated').innerText = `Last Update: ${fetchTime} | Target Hour: ${latestData.target_hour}:00`;
-
-            // Εξαγωγή Δεδομένων
-            let lignite = latestData.production_mix['TOTAL LIGNITE'] || 0;
-            let gas = latestData.production_mix['TOTAL GAS'] || 0;
-            let hydro = latestData.production_mix['TOTAL HYDRO'] || 0;
-            let res = latestData.production_mix['RES_PROD'] || 0;
-            let totalGen = latestData.production_mix['TOTAL_PROD'] || 0;
-
-            const stIn = latestData.production_mix['STORAGE_INJECTION'] || 0; // Discharge
-            const stAbs = Math.abs(latestData.production_mix['STORAGE_ABSORPTION'] || 0); // Charge
-            const pump = latestData.production_mix['ΣΥΝΟΛΙΚΗ ΑΝΤΛΗΣΗ'] || 0;
-
-            // GROSS Interconnections calculation (Όχι Net)
-            let totalImports = 0;
-            let totalExports = 0;
-            const countryKeys = ['ΑΛΒΑΝΙΑ', 'ΒΟΥΛΓΑΡΙΑ', 'ΙΤΑΛΙΑ', 'ΤΟΥΡΚΙΑ', 'FYROM'];
-            countryKeys.forEach(country => {
-                totalImports += (latestData.interconnections_mwh[`${country}_IMP`] || 0);
-                totalExports += (latestData.interconnections_mwh[`${country}_EXP`] || 0);
-            });
-
-            // Υπολογισμός Συνολικής Προσφοράς & Εγχώριας Ζήτησης για να κλείνει το ισοζύγιο
-            let totalSupply = totalGen + stIn + totalImports;
-            let totalSinksExceptDemand = pump + stAbs + totalExports;
-            let domesticDemand = totalSupply - totalSinksExceptDemand;
-
-            let demandText = latestData.demand_mwh || 0;
-            let mcp = latestData.dam_price_eur || 0;
-
-            // --- UI Text Updates στα Κουτιά ---
-            document.getElementById('val-production').innerText = `${fmt(totalGen)} MWh`;
-            document.getElementById('val-demand').innerText = `${fmt(demandText)} MWh`;
-            document.getElementById('val-price').innerText = `${fmt(mcp)} €`;
-
-            document.getElementById('eq-generation').innerHTML = `
-                <div class="eq-row c-lignite"><span class="eq-label">Lignite</span><span class="eq-operator"></span><span class="eq-value">${fmt(lignite)}</span></div>
-                <div class="eq-row c-gas"><span class="eq-label">Natural Gas</span><span class="eq-operator">+</span><span class="eq-value">${fmt(gas)}</span></div>
-                <div class="eq-row c-hydro"><span class="eq-label">Hydro</span><span class="eq-operator">+</span><span class="eq-value">${fmt(hydro)}</span></div>
-                <div class="eq-row c-res"><span class="eq-label">RES</span><span class="eq-operator">+</span><span class="eq-value">${fmt(res)}</span></div>
-            `;
-
-            document.getElementById('eq-demand').innerHTML = `
-                <div class="eq-row text-white"><span class="eq-label">Generation</span><span class="eq-operator"></span><span class="eq-value">${fmt(totalGen)}</span></div>
-                <div class="eq-row c-imports"><span class="eq-label">Imports</span><span class="eq-operator">+</span><span class="eq-value">${fmt(totalImports)}</span></div>
-                <div class="eq-row c-exports"><span class="eq-label">Exports</span><span class="eq-operator">-</span><span class="eq-value">${fmt(totalExports)}</span></div>
-                <div class="eq-row c-storage"><span class="eq-label">Storage Disch.</span><span class="eq-operator">+</span><span class="eq-value">${fmt(stIn)}</span></div>
-                <div class="eq-row c-storage" style="color: #b276a0;"><span class="eq-label">Storage Charge</span><span class="eq-operator">-</span><span class="eq-value">${fmt(stAbs)}</span></div>
-                <div class="eq-row c-pump"><span class="eq-label">Pumping</span><span class="eq-operator">-</span><span class="eq-value">${fmt(pump)}</span></div>
-            `;
-
-            let totalSupplyString = fmt(totalSupply);
-
-            // --- CHART 1: SUPPLY MIX DONUT ---
-            let supplyDataRaw = [
-                { value: lignite, name: 'Lignite', itemStyle: { color: '#b06a4b' } },
-                { value: gas, name: 'Natural Gas', itemStyle: { color: '#d18b57' } },
-                { value: hydro, name: 'Hydro', itemStyle: { color: '#5b9bd5' } },
-                { value: res, name: 'RES', itemStyle: { color: '#70ad47' } },
-                { value: stIn, name: 'Storage Disch.', itemStyle: { color: '#e0c2cd' } },
-                { value: totalImports, name: 'Imports', itemStyle: { color: '#ffc000' } }
-            ];
-            let supplyData = supplyDataRaw.filter(item => item.value > 0);
-
-            const supplyOptions = {
-                backgroundColor: 'transparent',
-                title: [
-                    { text: 'Supply Mix (Inflows)', left: 'center', top: 5, textStyle: { color: '#ffffff', fontSize: 14 } },
-                    // Κεντρικό νούμερο (Σύνολο) μέσα στην τρύπα
-                    { text: `${totalSupplyString}\nMWh`, left: 'center', top: 'center', textStyle: { color: '#ffffff', fontSize: 18, fontWeight: 'bold' } }
-                ],
-                tooltip: { 
-                    trigger: 'item',
-                    formatter: function(params) {
-                        return `${params.name}: <br/> <b>${fmt(params.value)} MWh</b> (${params.percent}%)`;
-                    }
-                },
-                legend: { top: 'bottom', textStyle: { color: '#8892b0' } },
-                series: [{
-                    name: 'Supply',
-                    type: 'pie',
-                    radius: ['45%', '70%'],
-                    itemStyle: { borderRadius: 4, borderColor: '#1c2128', borderWidth: 2 },
-                    label: { 
-                        show: true, 
-                        formatter: '{b}\n{d}%',
-                        color: '#fff',
-                        fontSize: 11
-                    },
-                    labelLine: { length: 10, length2: 15 },
-                    data: supplyData
-                }]
-            };
-            supplyChart.setOption(supplyOptions);
-
-            // --- CHART 2: DEMAND & SINKS DONUT ---
-            let demandDataRaw = [
-                { value: pump, name: 'Pumping', itemStyle: { color: '#85c1e9' } },
-                { value: stAbs, name: 'Storage Charge', itemStyle: { color: '#b276a0' } },
-                { value: totalExports, name: 'Exports', itemStyle: { color: '#e74c3c' } },
-                { value: domesticDemand, name: 'Domestic Demand', itemStyle: { color: '#4a5568' } }
-            ];
-            let demandData = demandDataRaw.filter(item => item.value > 0);
-
-            const demandOptions = {
-                backgroundColor: 'transparent',
-                title: [
-                    { text: 'Demand & Sinks (Outflows)', left: 'center', top: 5, textStyle: { color: '#ffffff', fontSize: 14 } },
-                    // Ακριβώς το ίδιο κεντρικό νούμερο
-                    { text: `${totalSupplyString}\nMWh`, left: 'center', top: 'center', textStyle: { color: '#ffffff', fontSize: 18, fontWeight: 'bold' } }
-                ],
-                tooltip: { 
-                    trigger: 'item',
-                    formatter: function(params) {
-                        return `${params.name}: <br/> <b>${fmt(params.value)} MWh</b> (${params.percent}%)`;
-                    }
-                },
-                legend: { top: 'bottom', textStyle: { color: '#8892b0' } },
-                series: [{
-                    name: 'Demand',
-                    type: 'pie',
-                    radius: ['45%', '70%'],
-                    itemStyle: { borderRadius: 4, borderColor: '#1c2128', borderWidth: 2 },
-                    label: { 
-                        show: true, 
-                        formatter: '{b}\n{d}%',
-                        color: '#fff',
-                        fontSize: 11
-                    },
-                    labelLine: { length: 10, length2: 15 },
-                    data: demandData
-                }]
-            };
-            demandChart.setOption(demandOptions);
-
-            // --- CHART 3: CROSS-BORDER FLOWS CHART (Full Width) ---
-            const displayCountries = ['ALBANIA', 'BULGARIA', 'ITALY', 'TURKEY', 'NORTH MACEDONIA'];
-            const importsData = countryKeys.map(c => latestData.interconnections_mwh[`${c}_IMP`] || 0);
-            const exportsData = countryKeys.map(c => -(latestData.interconnections_mwh[`${c}_EXP`] || 0)); 
-
-            const flowsOptions = {
-                backgroundColor: 'transparent',
-                title: { text: 'Cross-Border Flows (Imports / Exports)', left: 'center', top: 10, textStyle: { color: '#ffffff', fontSize: 14 } },
-                tooltip: { 
-                    trigger: 'axis', 
-                    axisPointer: { type: 'shadow' },
-                    formatter: function(params) {
-                        let html = params[0].name + '<br/>';
-                        params.forEach(p => {
-                            html += `${p.marker} ${p.seriesName}: ${fmt(Math.abs(p.value))} MWh<br/>`;
-                        });
-                        return html;
-                    }
-                },
-                legend: { top: 40, textStyle: { color: '#8892b0', fontSize: 11 }, icon: 'roundRect' },
-                grid: { top: 90, bottom: 40, left: 50, right: 20 },
-                xAxis: { 
-                    type: 'category', 
-                    data: displayCountries, 
-                    axisLabel: { color: '#ffffff', interval: 0, rotate: 15, fontSize: 11 } 
-                },
-                yAxis: { 
-                    type: 'value', 
-                    splitLine: { lineStyle: { color: '#2d333b', type: 'dashed' } }, 
-                    axisLabel: { 
-                        color: '#8892b0',
-                        fontSize: 11,
-                        formatter: function(value) { return fmt(Math.abs(value)); } 
-                    } 
-                },
-                series: [
-                    { name: 'Imports', type: 'bar', stack: 'Flow', itemStyle: { color: '#ffc000' }, data: importsData },
-                    { name: 'Exports', type: 'bar', stack: 'Flow', itemStyle: { color: '#e74c3c' }, data: exportsData }
-                ]
-            };
-            flowsChart.setOption(flowsOptions);
-
-        } catch (error) {
-            console.error("Error loading data:", error);
-            document.getElementById('last-updated').innerText = "Failed to load data.";
-        }
-    }
-
-    loadData();
-
-    // Resize listeners για όλα τα charts
-    window.addEventListener('resize', function() {
-        supplyChart.resize();
-        demandChart.resize();
-        flowsChart.resize();
-    });
-</script>
+    <!-- Custom JS -->
+    <script src="js/dashboard.js"></script>
 </body>
 </html>
