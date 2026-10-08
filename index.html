@@ -23,7 +23,7 @@
             <div class="update-info" id="last-updated">Last Update: Loading...</div>
         </div>
         <div class="controls-wrapper">
-            <div class="status-pill">● Live Data Every Hour</div>
+            <div class="status-pill">● Live Data Active</div>
         </div>
     </div>
 
@@ -100,6 +100,7 @@
             
             <!-- TOP RIBBON (Daily KPIs) -->
             <div class="ribbon-container">
+                <!-- 1. Generation Card -->
                 <div class="ribbon-card">
                     <div>
                         <div class="ribbon-title">Day Generation</div>
@@ -107,10 +108,11 @@
                     </div>
                     <div>
                         <div class="ribbon-subtext">Lig/Gas: <span class="text-white" id="rib-therm">-</span></div>
-                        <div class="ribbon-subtext">Hyd/Res: <span class="text-white" id="rib-green">-</span></div>
+                        <div class="ribbon-subtext">Res + Hydro: <span class="text-white" id="rib-green">-</span></div>
                     </div>
                 </div>
                 
+                <!-- 2. Demand Card -->
                 <div class="ribbon-card">
                     <div>
                         <div class="ribbon-title">Day Demand (System)</div>
@@ -118,10 +120,11 @@
                     </div>
                 </div>
 
+                <!-- 3. BESS Efficiency Card -->
                 <div class="ribbon-card">
                     <div>
-                        <div class="ribbon-title">BESS Volume (Gross)</div>
-                        <div class="ribbon-main-value" style="color: #e0c2cd;" id="rib-bess">- MWh</div>
+                        <div class="ribbon-title">BESS Efficiency (RTE)</div>
+                        <div class="ribbon-main-value" style="color: #e0c2cd;" id="rib-bess-rte">-</div>
                     </div>
                     <div>
                         <div class="ribbon-subtext">Discharge (In): <span style="color: #e0c2cd;" id="rib-bess-dis">-</span></div>
@@ -129,6 +132,7 @@
                     </div>
                 </div>
 
+                <!-- 4. Flows Card -->
                 <div class="ribbon-card">
                     <div>
                         <div class="ribbon-title" id="rib-flows-title">Net Flows</div>
@@ -140,6 +144,7 @@
                     </div>
                 </div>
 
+                <!-- 5. Pump Card -->
                 <div class="ribbon-card">
                     <div>
                         <div class="ribbon-title">Total Pumping</div>
