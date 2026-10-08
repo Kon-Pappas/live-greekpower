@@ -235,22 +235,27 @@ function renderDailyTab(todayData) {
         sum.stIn += sIn; sum.stAbs += sAbs; sum.imp += imp; sum.exp += exp; sum.pump += p; sum.dem += dem;
     });
 
-    // --- RENDER BALANCE EQUATION BANNER ---
+    // --- RENDER BALANCE EQUATION BANNER (2 Sub-lines, No Wrap) ---
     const balanceContainer = document.getElementById('daily-balance-equation');
     balanceContainer.innerHTML = `
-        <span class="eq-term" style="color: var(--color-lignite);">Lig: <b>${fmt(sum.lig)}</b></span> <span class="eq-op">+</span>
-        <span class="eq-term" style="color: var(--color-gas);">Gas: <b>${fmt(sum.gas)}</b></span> <span class="eq-op">+</span>
-        <span class="eq-term" style="color: var(--color-hydro);">Hyd: <b>${fmt(sum.hyd)}</b></span> <span class="eq-op">+</span>
-        <span class="eq-term" style="color: var(--color-res);">RES: <b>${fmt(sum.res)}</b></span> 
-        <span class="eq-op">=</span> 
-        <span class="eq-term text-white">Gen: <b>${fmt(sum.gen)}</b></span> <span class="eq-op">+</span>
-        <span class="eq-term" style="color: var(--color-imports);">Imp: <b>${fmt(sum.imp)}</b></span> <span class="eq-op">-</span>
-        <span class="eq-term" style="color: var(--color-exports);">Exp: <b>${fmt(sum.exp)}</b></span> <span class="eq-op">+</span>
-        <span class="eq-term" style="color: var(--color-storage);">BESS-Dis: <b>${fmt(sum.stIn)}</b></span> <span class="eq-op">-</span>
-        <span class="eq-term" style="color: var(--color-storage-chg);">BESS-Chg: <b>${fmt(sum.stAbs)}</b></span> <span class="eq-op">-</span>
-        <span class="eq-term" style="color: var(--color-pump);">Pump: <b>${fmt(sum.pump)}</b></span> 
-        <span class="eq-op">=</span> 
-        <span class="eq-term text-white" style="border-color: rgba(46,204,113,0.3); background: rgba(46,204,113,0.08);">Demand: <b>${fmt(sum.dem)} MWh</b></span>
+        <div class="eq-subline">
+            <span class="eq-term text-white">Generation: <b>${fmt(sum.gen)}</b></span> <span class="eq-op">+</span>
+            <span class="eq-term" style="color: var(--color-imports);">Imports: <b>${fmt(sum.imp)}</b></span> <span class="eq-op">+</span>
+            <span class="eq-term" style="color: var(--color-storage);">Bess_Discharge: <b>${fmt(sum.stIn)}</b></span> 
+            <span class="eq-op">=</span> 
+            <span class="eq-term" style="color: var(--color-demand);">Demand: <b>${fmt(sum.dem)}</b></span> <span class="eq-op">+</span>
+            <span class="eq-term" style="color: var(--color-exports);">Exports: <b>${fmt(sum.exp)}</b></span> <span class="eq-op">+</span>
+            <span class="eq-term" style="color: var(--color-storage-chg);">Bess_Charge: <b>${fmt(sum.stAbs)}</b></span> <span class="eq-op">+</span>
+            <span class="eq-term" style="color: var(--color-pump);">Pump: <b>${fmt(sum.pump)}</b></span>
+        </div>
+        <div class="eq-subline" style="border-top: 1px dashed rgba(255,255,255,0.08); padding-top: 6px;">
+            <span class="eq-term text-white">Generation: <b>${fmt(sum.gen)}</b></span> 
+            <span class="eq-op">=</span> 
+            <span class="eq-term" style="color: var(--color-lignite);">Lignite: <b>${fmt(sum.lig)}</b></span> <span class="eq-op">+</span>
+            <span class="eq-term" style="color: var(--color-gas);">N.Gas: <b>${fmt(sum.gas)}</b></span> <span class="eq-op">+</span>
+            <span class="eq-term" style="color: var(--color-res);">RES: <b>${fmt(sum.res)}</b></span> <span class="eq-op">+</span>
+            <span class="eq-term" style="color: var(--color-hydro);">Hydro: <b>${fmt(sum.hyd)}</b></span>
+        </div>
     `;
 
     // --- RENDER DYNAMIC SORTED LEADERBOARD ---
@@ -268,7 +273,6 @@ function renderDailyTab(todayData) {
         { name: 'Pumping (Άντληση)', value: sum.pump, color: 'var(--color-pump)' }
     ];
 
-    // Sort descending by value
     leaderboardItems.sort((a, b) => b.value - a.value);
 
     const leaderboardContainer = document.getElementById('daily-leaderboard');
@@ -281,7 +285,6 @@ function renderDailyTab(todayData) {
             <div class="lb-value">${fmt(item.value)} <span style="font-size: 0.9rem; font-weight: normal; color: var(--text-muted);">MWh</span></div>
         </div>
     `).join('');
-
 
     // 24H Dispatch Chart with Custom Tooltip
     dailyDispatchChart.setOption({
