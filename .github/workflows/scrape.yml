@@ -36,8 +36,8 @@ jobs:
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action Bot"
-          # Ενημερωμένη διαδρομή για το νέο JSON αρχείο
-          git add data/live_data.json
+          # Προσθήκη και των δύο αρχείων JSON (live_data και records)
+          git add data/live_data.json data/records.json
           # Αν δεν υπάρχουν αλλαγές, το script δεν θα "κρασάρει"
-          git diff --quiet && git diff --staged --quiet || git commit -m "Ενημέρωση δεδομένων ΑΔΜΗΕ: $(date +'%Y-%m-%d %H:%M')"
+          git diff --quiet && git diff --staged --quiet || git commit -m "Ενημέρωση δεδομένων & ρεκόρ ΑΔΜΗΕ: $(date +'%Y-%m-%d %H:%M')"
           git push
