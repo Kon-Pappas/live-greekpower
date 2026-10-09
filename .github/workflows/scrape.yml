@@ -1,12 +1,19 @@
 name: Scrape Live Greek Power Data
 
-# Πότε θα τρέχει ο κώδικας
 on:
   schedule:
-    - cron: '0 * * * *' # Τρέχει στο λεπτό "0" κάθε ώρας
-  workflow_dispatch: # Επιτρέπει να το τρέχουμε και χειροκίνητα με ένα κουμπί
+    - cron: '0 * * * *'
+  workflow_dispatch:
+    inputs:
+      start_date:
+        description: 'Από (YYYYMMDD). Άστο κενό για Σήμερα.'
+        required: false
+        type: string
+      end_date:
+        description: 'Εώς (YYYYMMDD). Άστο κενό για Σήμερα.'
+        required: false
+        type: string
 
-# Απαραίτητο για να έχει δικαίωμα το Action να κάνει git push πίσω στο repo
 permissions:
   contents: write
 
@@ -23,21 +30,21 @@ jobs:
         with:
           python-version: '3.10'
           
-      # Ενωμένο και πλήρες step για τις βιβλιοθήκες, ΠΡΙΝ τρέξει το script
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install requests pytz
         
       - name: Run scraper
+        env:
+          START_DATE: ${{ github.event.inputs.start_date }}
+          END_DATE: ${{ github.event.inputs.end_date }}
         run: python scraper.py
         
       - name: Commit and push changes
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action Bot"
-          # Προσθήκη και των δύο αρχείων JSON (live_data και records)
           git add data/live_data.json data/records.json
-          # Αν δεν υπάρχουν αλλαγές, το script δεν θα "κρασάρει"
           git diff --quiet && git diff --staged --quiet || git commit -m "Ενημέρωση δεδομένων & ρεκόρ ΑΔΜΗΕ: $(date +'%Y-%m-%d %H:%M')"
           git push
