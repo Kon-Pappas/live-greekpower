@@ -1,16 +1,39 @@
 import requests
 import json
 import os
+import sys
 from datetime import datetime, timedelta
 import pytz
 
-def get_today_string():
-    tz = pytz.timezone('Europe/Athens')
-    now = datetime.now(tz)
-    return now.strftime("%Y%m%d")
+def get_target_dates():
+    # Διαβάζει τα inputs από το GitHub Action (αφαιρεί τυχόν παύλες αν ο χρήστης βάλει 2026-10-09 αντί για 20261009)
+    start_env = os.environ.get('START_DATE', '').strip().replace('-', '')
+    end_env = os.environ.get('END_DATE', '').strip().replace('-', '')
 
-def fetch_all_data():
-    date_str = get_today_string()
+    tz = pytz.timezone('Europe/Athens')
+    today_dt = datetime.now(tz)
+    today_str = today_dt.strftime("%Y%m%d")
+
+    start_str = start_env if start_env else today_str
+    end_str = end_env if end_env else start_str
+
+    try:
+        start_dt = datetime.strptime(start_str, "%Y%m%d")
+        end_dt = datetime.strptime(end_str, "%Y%m%d")
+    except ValueError:
+        print("Μη έγκυρη μορφή ημερομηνίας. Γίνεται fallback στη σημερινή.")
+        start_dt = today_dt
+        end_dt = today_dt
+
+    dates = []
+    current = start_dt
+    while current <= end_dt:
+        dates.append(current.strftime("%Y%m%d"))
+        current += timedelta(days=1)
+
+    return dates
+
+def fetch_all_data(date_str):
     base_proxy = "https://iptoanalytics-api.admie.gr/iptoanalytics/api/ipto?endpoint=https:%2F%2Fmarket-public-api.admie.gr%2Frestws%2Fportal%2F"
     
     endpoints = {
@@ -74,20 +97,10 @@ def fetch_all_data():
 
         return list(daily_data.values())
     except Exception as e:
-        print(f"Σφάλμα κατά την άντληση: {e}")
+        print(f"Σφάλμα κατά την άντληση {date_str}: {e}")
         return []
 
 def update_records():
-    filepath = 'data/live_data.json'
-    if not os.path.exists(filepath):
-        return
-    
-    try:
-        with open(filepath, 'r', encoding='utf-8') as f:
-            all_history = json.load(f)
-    except:
-        return
-
     records_path = 'data/records.json'
     records = {
         "daily": {"res": [], "res_share": [], "exports": [], "bess_chg_pump": [], "bess_dis": []},
@@ -99,6 +112,29 @@ def update_records():
             with open(records_path, 'r', encoding='utf-8') as f:
                 records = json.load(f)
         except: pass
+
+    all_history = []
+    if os.path.exists('data'):
+        for filename in os.listdir('data'):
+            if filename.endswith('.json') and filename != 'records.json':
+                filepath = os.path.join('data', filename)
+                try:
+                    with open(filepath, 'r', encoding='utf-8') as f:
+                        data = json.load(f)
+                        if isinstance(data, list):
+                            all_history.extend(data)
+                except: pass
+
+    if not all_history: return
+
+    unique_hours = {}
+    for hr_data in all_history:
+        date_str = hr_data.get('date')
+        hr = hr_data.get('target_hour')
+        if not date_str or hr == 0 or hr > 24: continue
+        unique_hours[f"{date_str}_{hr}"] = hr_data
+
+    clean_history = list(unique_hours.values())
 
     def add_top5(lst, entry):
         existing = next((i for i in lst if i['id'] == entry['id']), None)
@@ -112,10 +148,9 @@ def update_records():
     days_map = {}
     country_keys = ['ΑΛΒΑΝΙΑ', 'ΒΟΥΛΓΑΡΙΑ', 'ΙΤΑΛΙΑ', 'ΤΟΥΡΚΙΑ', 'FYROM']
 
-    for hr_data in all_history:
+    for hr_data in clean_history:
         date_str = hr_data.get('date')
         hr = hr_data.get('target_hour')
-        if not date_str or hr == 0 or hr > 24: continue
         
         if date_str not in days_map:
             days_map[date_str] = {'res': 0, 'gen': 0, 'exp': 0, 'chg_pump': 0, 'dis': 0}
@@ -166,7 +201,7 @@ def update_records():
 
     with open(records_path, 'w', encoding='utf-8') as f:
         json.dump(records, f, ensure_ascii=False, indent=2)
-    print(f"✓ Το αρχείο records.json ενημερώθηκε επιτυχώς χωρίς σφάλματα.")
+    print(f"✓ Το records.json ενημερώθηκε σαρώνοντας {len(clean_history)} μοναδικές ώρες.")
 
 def save_to_json(new_records):
     if not new_records: return
@@ -178,18 +213,23 @@ def save_to_json(new_records):
             with open(filepath, 'r', encoding='utf-8') as f:
                 history = json.load(f)
         except: pass 
+        
     history_map = { (rec.get("date"), rec.get("target_hour")): i for i, rec in enumerate(history) }
+    
     for new_rec in new_records:
         key = (new_rec["date"], new_rec["target_hour"])
-        if key in history_map: history[history_map[key]] = new_rec
+        if key in history_map: 
+            history[history_map[key]] = new_rec
         else:
             history.append(new_rec)
             history_map[key] = len(history) - 1
+            
     history.sort(key=lambda x: (x.get("date", ""), x.get("target_hour", 0)))
     
+    # Επέκταση σε 30 ημέρες για να χωράει τα ιστορικά fetch
     tz = pytz.timezone('Europe/Athens')
-    seven_days_ago = datetime.now(tz) - timedelta(days=7)
-    cutoff = seven_days_ago.strftime("%Y%m%d")
+    thirty_days_ago = datetime.now(tz) - timedelta(days=30)
+    cutoff = thirty_days_ago.strftime("%Y%m%d")
     filtered_history = [rec for rec in history if rec.get("date", "") >= cutoff]
 
     with open(filepath, 'w', encoding='utf-8') as f:
@@ -197,6 +237,14 @@ def save_to_json(new_records):
     print(f"✓ Δεδομένα αποθηκεύτηκαν στο {filepath}.")
 
 if __name__ == "__main__":
-    combined_data = fetch_all_data()
-    save_to_json(combined_data)
-    update_records()
+    target_dates = get_target_dates()
+    print(f"Θα αντληθούν δεδομένα για τις εξής {len(target_dates)} ημέρες: {target_dates}")
+    
+    all_new_data = []
+    for d_str in target_dates:
+        daily_data = fetch_all_data(d_str)
+        all_new_data.extend(daily_data)
+        
+    if all_new_data:
+        save_to_json(all_new_data)
+        update_records()
