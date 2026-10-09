@@ -23,6 +23,8 @@
             <div class="update-info" id="last-updated">Last Update: Loading...</div>
         </div>
         <div class="controls-wrapper">
+            <!-- Records Button -->
+            <button class="btn-records" data-bs-toggle="modal" data-bs-target="#recordsModal" onclick="loadRecords()">🏆 Records</button>
             <!-- Context-Aware Dropdown -->
             <select id="context-dropdown" class="form-select custom-dropdown"></select>
             <!-- Status Pill -->
@@ -37,12 +39,9 @@
     </div>
 
     <div class="main-container">
-        
-        <!-- ==============================
-             TAB 1: LIVE ANALYTICS
-             ============================== -->
+        <!-- TAB 1: LIVE ANALYTICS -->
         <div id="tab-live" class="tab-pane active">
-            <!-- Metrics Row -->
+            <!-- ... (Ο Κώδικας του Live Analytics παραμένει ίδιος) ... -->
             <div class="row mb-4">
                 <div class="col-xl-5 col-lg-6 mb-3">
                     <div class="metric-card">
@@ -77,8 +76,6 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Charts Row (Donuts) -->
             <div class="row">
                 <div class="col-md-6 mb-4">
                     <div class="chart-container" id="supplyChart" style="height: 440px;"></div>
@@ -87,8 +84,6 @@
                     <div class="chart-container" id="demandChart" style="height: 440px;"></div>
                 </div>
             </div>
-            
-            <!-- Flows Chart -->
             <div class="row">
                 <div class="col-12 mb-4">
                     <div class="chart-container" id="flowsChart" style="height: 380px;"></div>
@@ -96,37 +91,71 @@
             </div>
         </div>
 
-        <!-- ==============================
-             TAB 2: DAILY DASHBOARD
-             ============================== -->
+        <!-- TAB 2: DAILY DASHBOARD -->
         <div id="tab-daily" class="tab-pane">
-            
-            <!-- 1. FULL-WIDTH BALANCE EQUATION BANNER (2 Sub-lines) -->
             <div class="daily-section-card mb-4">
                 <div class="section-header">Daily System Balance & Accounting Ledger</div>
-                <div class="balance-equation-container" id="daily-balance-equation">
-                    <!-- Dynamically populated by JS -->
-                </div>
+                <div class="balance-equation-container" id="daily-balance-equation"></div>
             </div>
-
-            <!-- 2. DYNAMIC SORTED VOLUME RANKING (LEADERBOARD) -->
             <div class="daily-section-card mb-4">
                 <div class="section-header">Daily Volume Ranking (Sorted by Cumulative MWh)</div>
-                <div class="leaderboard-grid" id="daily-leaderboard">
-                    <!-- Dynamically populated by JS -->
-                </div>
+                <div class="leaderboard-grid" id="daily-leaderboard"></div>
             </div>
-
-            <!-- 3. 24-HOUR DISPATCH MASTER CHART -->
             <div class="row">
                 <div class="col-12">
                     <div class="chart-container" id="dailyDispatchChart" style="height: 650px;"></div>
                 </div>
             </div>
         </div>
-
     </div>
 
+    <!-- ==============================
+         ALL-TIME RECORDS MODAL
+         ============================== -->
+    <div class="modal fade" id="recordsModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable">
+            <div class="modal-content custom-modal">
+                <div class="modal-header custom-modal-header">
+                    <h5 class="modal-title" style="color: #ffc000; font-weight: bold;">🏆 All-Time Records</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                
+                <!-- Σταθερά Tabs (Δεν σκρολάρουν) -->
+                <div class="modal-tabs-header">
+                    <ul class="nav nav-tabs custom-nav-tabs" id="recordsTab" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#rec-hourly" type="button">Hourly (MW)</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#rec-daily" type="button">Daily (MWh / %)</button>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Κυρίως Σώμα (Μόνο αυτό σκρολάρει κάθετα) -->
+                <div class="modal-body custom-modal-body">
+                    <div class="tab-content">
+                        <!-- HOURLY RECORDS -->
+                        <div class="tab-pane fade show active" id="rec-hourly">
+                            <div class="row" id="render-hourly-records">
+                                <!-- Populated via JS -->
+                            </div>
+                        </div>
+                        
+                        <!-- DAILY RECORDS -->
+                        <div class="tab-pane fade" id="rec-daily">
+                            <div class="row" id="render-daily-records">
+                                <!-- Populated via JS -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap Bundle JS (Απαιτείται για το Modal) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <!-- Custom JS -->
     <script src="js/dashboard.js"></script>
 </body>
