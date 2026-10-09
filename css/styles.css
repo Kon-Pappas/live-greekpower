@@ -17,7 +17,7 @@
     --color-exports: #e74c3c; 
     --color-pump: #85c1e9;    
     --color-demand: #cbd5e1;  
-    --color-mcp: #00e5ff; /* Νέο φωτεινό Cyan για το MCP */
+    --color-mcp: #00e5ff; 
 }
 
 body {
@@ -35,8 +35,30 @@ body {
 .header-section { padding: 25px 30px 15px 30px; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 15px; }
 .dashboard-title { color: var(--accent-green); font-size: 1.8rem; font-weight: 700; margin: 0; }
 .update-info { font-size: 0.85rem; color: var(--color-imports); margin-top: 5px; font-weight: 600; }
-.controls-wrapper { display: flex; align-items: center; gap: 15px; }
-.status-pill { background-color: rgba(46, 204, 113, 0.15); color: var(--accent-green); border: 1px solid rgba(46, 204, 113, 0.3); padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; }
+.controls-wrapper { display: flex; align-items: center; gap: 15px; flex-wrap: wrap; }
+
+/* Custom Dropdown Styling */
+.custom-dropdown {
+    background-color: rgba(28, 33, 40, 0.8);
+    color: var(--text-main);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    padding: 5px 35px 5px 15px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    outline: none;
+    box-shadow: none;
+    width: auto;
+}
+.custom-dropdown:focus {
+    border-color: var(--accent-green);
+    background-color: var(--card-bg);
+    color: var(--text-main);
+    box-shadow: 0 0 0 2px rgba(46, 204, 113, 0.2);
+}
+
+.status-pill { background-color: rgba(46, 204, 113, 0.15); color: var(--accent-green); border: 1px solid rgba(46, 204, 113, 0.3); padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; transition: all 0.3s ease; }
 
 /* Tabs */
 .nav-tabs-container { border-bottom: 1px solid var(--border-color); padding: 0 30px; display: flex; gap: 30px; overflow-x: auto; white-space: nowrap; }
