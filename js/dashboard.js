@@ -442,7 +442,6 @@ async function loadRecords() {
         if (!response.ok) throw new Error("No records file");
         const recs = await response.json();
         
-        // Ορισμός του σημερινού string 
         let todayFormatted = '';
         if (latestDateGlobal) { 
             todayFormatted = `${latestDateGlobal.substring(0,4)}-${latestDateGlobal.substring(4,6)}-${latestDateGlobal.substring(6,8)}`;
@@ -466,18 +465,22 @@ async function loadRecords() {
             }
         }
 
-        // Helper to generate a card for a category
         const buildCard = (title, items, color, unit) => {
-            let listHtml = items.map((item, idx) => {
-                let rankCls = idx === 0 ? 'rec-rank-1' : '';
+            // Το slice(0, 3) επιβάλλει στο UI να δείξει μόνο τα 3 πρώτα ακόμα κι αν το παλιό JSON έχει 5!
+            let listHtml = items.slice(0, 3).map((item, idx) => {
                 
-                // ΝΕΟ: Έλεγχος αν το ρεκόρ είναι σημερινό για να προσθέσουμε το λοξό badge!
+                // Προσθήκη χρωμάτων (Χρυσό, Αργυρό, Χάλκινο) στους αριθμούς κατάταξης
+                let rankStyle = '';
+                if (idx === 0) rankStyle = 'color: #ffc000; font-size: 0.85rem; text-shadow: 0 0 5px rgba(255,192,0,0.3);'; // Gold
+                else if (idx === 1) rankStyle = 'color: #c0c0c0;'; // Silver
+                else if (idx === 2) rankStyle = 'color: #cd7f32;'; // Bronze
+                
                 let isNew = todayFormatted && item.id.startsWith(todayFormatted);
                 let newBadgeHtml = isNew ? `<span class="new-record-badge">NEW!</span>` : '';
                 
                 return `
                     <div class="record-row">
-                        <span class="rec-rank ${rankCls}">#${idx+1}</span>
+                        <span class="rec-rank" style="${rankStyle}">#${idx+1}</span>
                         <span class="rec-date">${item.id}</span>
                         <span class="rec-val" style="color: ${color};">${fmt(item.value)} <span style="font-size:0.75rem;">${unit}</span></span>
                         ${newBadgeHtml}
@@ -495,7 +498,6 @@ async function loadRecords() {
             `;
         };
 
-        // Render Hourly
         let hourlyHtml = '';
         hourlyHtml += buildCard('Peak Demand', recs.hourly.demand, 'var(--color-demand)', 'MW');
         hourlyHtml += buildCard('Peak Exports', recs.hourly.exports, 'var(--color-exports)', 'MW');
@@ -504,7 +506,6 @@ async function loadRecords() {
         hourlyHtml += buildCard('Peak Network Load (Gross Supply)', recs.hourly.network_load, 'var(--accent-green)', 'MW');
         document.getElementById('render-hourly-records').innerHTML = hourlyHtml;
 
-        // Render Daily
         let dailyHtml = '';
         dailyHtml += buildCard('Max Daily RES', recs.daily.res, 'var(--color-res)', 'MWh');
         dailyHtml += buildCard('Max RES Share', recs.daily.res_share, 'var(--color-res)', '%');
