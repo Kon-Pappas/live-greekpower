@@ -53,7 +53,6 @@ function setupTabSwitcher() {
 // --- 3. Main Data Fetcher & Deduplication ---
 async function loadData() {
     try {
-        // Εδώ προστέθηκε το Cache Busting με το new Date().getTime()
         const response = await fetch('data/live_data.json?v=' + new Date().getTime());
         const rawData = await response.json();
         
@@ -96,6 +95,9 @@ async function loadData() {
         selectedDateDaily = validLiveRecord.date;
 
         updateDropdownState();
+        
+        // Φόρτωση Records αθόρυβα στο background για να ελέγξουμε αν υπάρχει Badge
+        loadRecords();
 
     } catch (error) {
         console.error("Error loading data:", error);
@@ -433,14 +435,44 @@ function renderDailyTab(todayData) {
     });
 }
 
-// --- 7. Modal Records Loader ---
+// --- 7. Modal Records Loader & Smart Notification Badge ---
 async function loadRecords() {
     try {
-        // Εδώ προστέθηκε το Cache Busting με το new Date().getTime()
         const response = await fetch('data/records.json?v=' + new Date().getTime());
         if (!response.ok) throw new Error("No records file");
         const recs = await response.json();
         
+        // Έλεγχος για σημερινά ρεκόρ και ενεργοποίηση του Badge
+        if (latestDateGlobal) { 
+            const todayFormatted = `${latestDateGlobal.substring(0,4)}-${latestDateGlobal.substring(4,6)}-${latestDateGlobal.substring(6,8)}`;
+            let todayRecordsCount = 0;
+
+            // Σάρωση ημερήσιων ρεκόρ
+            for (const category in recs.daily) {
+                recs.daily[category].forEach(item => {
+                    if (item.id === todayFormatted) todayRecordsCount++;
+                });
+            }
+
+            // Σάρωση ωριαίων ρεκόρ
+            for (const category in recs.hourly) {
+                recs.hourly[category].forEach(item => {
+                    if (item.id.startsWith(todayFormatted)) todayRecordsCount++;
+                });
+            }
+
+            // Ενημέρωση του Badge στο UI
+            const badge = document.getElementById('records-badge');
+            if (badge) {
+                if (todayRecordsCount > 0) {
+                    badge.innerText = `${todayRecordsCount} New!`;
+                    badge.classList.remove('d-none');
+                } else {
+                    badge.classList.add('d-none');
+                }
+            }
+        }
+
         // Helper to generate a card for a category
         const buildCard = (title, items, color, unit) => {
             let listHtml = items.map((item, idx) => {
