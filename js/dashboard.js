@@ -442,26 +442,19 @@ async function loadRecords() {
         if (!response.ok) throw new Error("No records file");
         const recs = await response.json();
         
-        // Έλεγχος για σημερινά ρεκόρ και ενεργοποίηση του Badge
+        // Ορισμός του σημερινού string 
+        let todayFormatted = '';
         if (latestDateGlobal) { 
-            const todayFormatted = `${latestDateGlobal.substring(0,4)}-${latestDateGlobal.substring(4,6)}-${latestDateGlobal.substring(6,8)}`;
+            todayFormatted = `${latestDateGlobal.substring(0,4)}-${latestDateGlobal.substring(4,6)}-${latestDateGlobal.substring(6,8)}`;
             let todayRecordsCount = 0;
 
-            // Σάρωση ημερήσιων ρεκόρ
             for (const category in recs.daily) {
-                recs.daily[category].forEach(item => {
-                    if (item.id === todayFormatted) todayRecordsCount++;
-                });
+                recs.daily[category].forEach(item => { if (item.id === todayFormatted) todayRecordsCount++; });
             }
-
-            // Σάρωση ωριαίων ρεκόρ
             for (const category in recs.hourly) {
-                recs.hourly[category].forEach(item => {
-                    if (item.id.startsWith(todayFormatted)) todayRecordsCount++;
-                });
+                recs.hourly[category].forEach(item => { if (item.id.startsWith(todayFormatted)) todayRecordsCount++; });
             }
 
-            // Ενημέρωση του Badge στο UI
             const badge = document.getElementById('records-badge');
             if (badge) {
                 if (todayRecordsCount > 0) {
@@ -477,11 +470,17 @@ async function loadRecords() {
         const buildCard = (title, items, color, unit) => {
             let listHtml = items.map((item, idx) => {
                 let rankCls = idx === 0 ? 'rec-rank-1' : '';
+                
+                // ΝΕΟ: Έλεγχος αν το ρεκόρ είναι σημερινό για να προσθέσουμε το λοξό badge!
+                let isNew = todayFormatted && item.id.startsWith(todayFormatted);
+                let newBadgeHtml = isNew ? `<span class="new-record-badge">NEW!</span>` : '';
+                
                 return `
                     <div class="record-row">
                         <span class="rec-rank ${rankCls}">#${idx+1}</span>
                         <span class="rec-date">${item.id}</span>
                         <span class="rec-val" style="color: ${color};">${fmt(item.value)} <span style="font-size:0.75rem;">${unit}</span></span>
+                        ${newBadgeHtml}
                     </div>
                 `;
             }).join('');
