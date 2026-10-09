@@ -23,8 +23,11 @@
             <div class="update-info" id="last-updated">Last Update: Loading...</div>
         </div>
         <div class="controls-wrapper">
-            <!-- Records Button -->
-            <button class="btn-records" data-bs-toggle="modal" data-bs-target="#recordsModal" onclick="loadRecords()">🏆 Records</button>
+            <!-- Records Button with Notification Badge -->
+            <div class="records-btn-wrapper">
+                <button class="btn-records" data-bs-toggle="modal" data-bs-target="#recordsModal" onclick="loadRecords()">🏆 Records</button>
+                <span id="records-badge" class="badge-pulse d-none"></span>
+            </div>
             <!-- Context-Aware Dropdown -->
             <select id="context-dropdown" class="form-select custom-dropdown"></select>
             <!-- Status Pill -->
@@ -41,7 +44,6 @@
     <div class="main-container">
         <!-- TAB 1: LIVE ANALYTICS -->
         <div id="tab-live" class="tab-pane active">
-            <!-- ... (Ο Κώδικας του Live Analytics παραμένει ίδιος) ... -->
             <div class="row mb-4">
                 <div class="col-xl-5 col-lg-6 mb-3">
                     <div class="metric-card">
