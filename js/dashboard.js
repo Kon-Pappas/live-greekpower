@@ -305,9 +305,10 @@ function renderDailyTab(todayData) {
                 let mcpParam = params.find(p => p.seriesName === 'MCP');
                 let mcpValue = mcpParam ? fmt(Math.abs(mcpParam.value)) : '-';
 
+                // Εδώ ενημερώθηκε το χρώμα της τιμής του MCP μέσα στο Tooltip (Cyan: #00e5ff)
                 let html = `<div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
                                 <b style="font-size:14px; color:#2ecc71;">Hour: ${hour}</b>
-                                <b style="font-size:14px; color:#ffffff;">MCP: ${mcpValue} €/MWh</b>
+                                <b style="font-size:14px; color:#00e5ff;">MCP: ${mcpValue} €/MWh</b>
                             </div>`;
 
                 const renderRow = (p) => {
@@ -344,7 +345,8 @@ function renderDailyTab(todayData) {
         xAxis: { type: 'category', data: hours, axisLabel: { color: '#fff' } },
         yAxis: [
             { type: 'value', name: 'Volume (MWh)', position: 'left', splitLine: { lineStyle: { color: '#2d333b', type: 'dashed' } }, axisLabel: { color: '#8892b0', formatter: (val) => fmt(Math.abs(val)) }, nameTextStyle: { color: '#8892b0' } },
-            { type: 'value', name: 'Price (€/MWh)', position: 'right', splitLine: { show: false }, axisLabel: { color: '#e74c3c', fontWeight: 'bold' }, nameTextStyle: { color: '#e74c3c' } }
+            // Ενημερώθηκε το χρώμα του δεξιού άξονα σε Cyan (#00e5ff)
+            { type: 'value', name: 'Price (€/MWh)', position: 'right', splitLine: { show: false }, axisLabel: { color: '#00e5ff', fontWeight: 'bold' }, nameTextStyle: { color: '#00e5ff' } }
         ],
         series: [
             { name: 'Lignite', type: 'bar', stack: 'Pos', data: arrLignite, itemStyle: { color: '#b06a4b' } },
@@ -357,7 +359,8 @@ function renderDailyTab(todayData) {
             { name: 'BESS Charge', type: 'bar', stack: 'Neg', data: arrStAbs, itemStyle: { color: '#b276a0' } },
             { name: 'Exports', type: 'bar', stack: 'Neg', data: arrExports, itemStyle: { color: '#e74c3c' } },
             { name: 'Domestic Demand', type: 'line', yAxisIndex: 0, data: arrDemand, symbol: 'none', smooth: true, lineStyle: { color: '#ffffff', width: 3, type: 'dashed' }, z: 10 },
-            { name: 'MCP', type: 'line', yAxisIndex: 1, data: arrMcp, symbol: 'circle', symbolSize: 6, lineStyle: { color: '#e74c3c', width: 3 }, itemStyle: { color: '#e74c3c' }, z: 10 }
+            // Ενημερώθηκε το χρώμα της σειράς του MCP σε Cyan (#00e5ff)
+            { name: 'MCP', type: 'line', yAxisIndex: 1, data: arrMcp, symbol: 'circle', symbolSize: 6, lineStyle: { color: '#00e5ff', width: 3 }, itemStyle: { color: '#00e5ff' }, z: 10 }
         ]
     });
 }
