@@ -167,12 +167,37 @@ body {
 
 .record-box { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 6px; padding: 15px; margin-bottom: 20px; height: 100%; box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
 .record-box h6 { color: var(--text-muted); text-transform: uppercase; font-size: 0.85rem; font-weight: 700; letter-spacing: 0.5px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom: 15px; }
-.record-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px dashed rgba(255,255,255,0.05); }
+
+/* NΕΟ: Η γραμμή πήρε position: relative για να κουμπώνει το badge */
+.record-row { position: relative; display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px dashed rgba(255,255,255,0.05); }
 .record-row:last-child { border-bottom: none; }
 .rec-rank { font-size: 0.75rem; font-weight: bold; width: 25px; color: #5b9bd5; }
 .rec-rank-1 { color: #ffc000; font-size: 0.85rem; } 
 .rec-date { font-size: 0.85rem; color: #fff; font-family: 'Courier New', Courier, monospace; }
 .rec-val { font-size: 1rem; font-weight: bold; font-family: 'Courier New', Courier, monospace; }
+
+/* NΕΟ: Το λοξό badge μέσα στο modal */
+.new-record-badge {
+    position: absolute;
+    right: -5px; 
+    top: -8px;    
+    background-color: var(--accent-green);
+    color: #111;
+    font-size: 0.65rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    padding: 2px 6px;
+    border-radius: 4px;
+    transform: rotate(15deg);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.4);
+    pointer-events: none;
+    animation: pop-in 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes pop-in {
+    0% { opacity: 0; transform: scale(0.5) rotate(0deg); }
+    100% { opacity: 1; transform: scale(1) rotate(15deg); }
+}
 
 @media (max-width: 991px) {
     .split-card-inner { flex-direction: column; }
