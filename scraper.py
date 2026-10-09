@@ -136,14 +136,15 @@ def update_records():
 
     clean_history = list(unique_hours.values())
 
-    def add_top5(lst, entry):
+    # ΝΕΑ ΣΥΝΑΡΤΗΣΗ: Κρατάει μόνο τα Top 3
+    def add_top3(lst, entry):
         existing = next((i for i in lst if i['id'] == entry['id']), None)
         if existing:
             existing['value'] = max(existing['value'], entry['value'])
         else:
             lst.append(entry)
         lst.sort(key=lambda x: x['value'], reverse=True)
-        return lst[:5]
+        return lst[:3]
 
     days_map = {}
     country_keys = ['ΑΛΒΑΝΙΑ', 'ΒΟΥΛΓΑΡΙΑ', 'ΙΤΑΛΙΑ', 'ΤΟΥΡΚΙΑ', 'FYROM']
@@ -178,11 +179,11 @@ def update_records():
         days_map[date_str]['dis'] += st_in
         
         hr_id = f"{date_str[:4]}-{date_str[4:6]}-{date_str[6:]}, {hr:02d}:00"
-        records['hourly']['demand'] = add_top5(records['hourly']['demand'], {'id': hr_id, 'value': round(demand, 1)})
-        records['hourly']['exports'] = add_top5(records['hourly']['exports'], {'id': hr_id, 'value': round(exp, 1)})
-        records['hourly']['bess_chg'] = add_top5(records['hourly']['bess_chg'], {'id': hr_id, 'value': round(st_abs, 1)})
-        records['hourly']['bess_dis'] = add_top5(records['hourly']['bess_dis'], {'id': hr_id, 'value': round(st_in, 1)})
-        records['hourly']['network_load'] = add_top5(records['hourly']['network_load'], {'id': hr_id, 'value': round(net_load, 1)})
+        records['hourly']['demand'] = add_top3(records['hourly']['demand'], {'id': hr_id, 'value': round(demand, 1)})
+        records['hourly']['exports'] = add_top3(records['hourly']['exports'], {'id': hr_id, 'value': round(exp, 1)})
+        records['hourly']['bess_chg'] = add_top3(records['hourly']['bess_chg'], {'id': hr_id, 'value': round(st_abs, 1)})
+        records['hourly']['bess_dis'] = add_top3(records['hourly']['bess_dis'], {'id': hr_id, 'value': round(st_in, 1)})
+        records['hourly']['network_load'] = add_top3(records['hourly']['network_load'], {'id': hr_id, 'value': round(net_load, 1)})
 
     for date_str, d_vals in days_map.items():
         date_formatted = f"{date_str[:4]}-{date_str[4:6]}-{date_str[6:]}"
@@ -193,15 +194,15 @@ def update_records():
         d_dis = d_vals['dis']
         d_res_share = (d_res / d_gen * 100) if d_gen > 0 else 0
 
-        records['daily']['res'] = add_top5(records['daily']['res'], {'id': date_formatted, 'value': round(d_res, 1)})
-        records['daily']['res_share'] = add_top5(records['daily']['res_share'], {'id': date_formatted, 'value': round(d_res_share, 2)})
-        records['daily']['exports'] = add_top5(records['daily']['exports'], {'id': date_formatted, 'value': round(d_exp, 1)})
-        records['daily']['bess_chg_pump'] = add_top5(records['daily']['bess_chg_pump'], {'id': date_formatted, 'value': round(d_chg_pump, 1)})
-        records['daily']['bess_dis'] = add_top5(records['daily']['bess_dis'], {'id': date_formatted, 'value': round(d_dis, 1)})
+        records['daily']['res'] = add_top3(records['daily']['res'], {'id': date_formatted, 'value': round(d_res, 1)})
+        records['daily']['res_share'] = add_top3(records['daily']['res_share'], {'id': date_formatted, 'value': round(d_res_share, 2)})
+        records['daily']['exports'] = add_top3(records['daily']['exports'], {'id': date_formatted, 'value': round(d_exp, 1)})
+        records['daily']['bess_chg_pump'] = add_top3(records['daily']['bess_chg_pump'], {'id': date_formatted, 'value': round(d_chg_pump, 1)})
+        records['daily']['bess_dis'] = add_top3(records['daily']['bess_dis'], {'id': date_formatted, 'value': round(d_dis, 1)})
 
     with open(records_path, 'w', encoding='utf-8') as f:
         json.dump(records, f, ensure_ascii=False, indent=2)
-    print(f"✓ Το records.json ενημερώθηκε σαρώνοντας {len(clean_history)} μοναδικές ώρες.")
+    print(f"✓ Το records.json ενημερώθηκε (Top-3) σαρώνοντας {len(clean_history)} μοναδικές ώρες.")
 
 def save_to_json(new_records):
     if not new_records: return
