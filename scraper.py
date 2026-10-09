@@ -109,7 +109,6 @@ def update_records():
         lst.sort(key=lambda x: x['value'], reverse=True)
         return lst[:5]
 
-    # Ομαδοποίηση δεδομένων ανά ημέρα για τα ημερήσια ρεκόρ
     days_map = {}
     country_keys = ['ΑΛΒΑΝΙΑ', 'ΒΟΥΛΓΑΡΙΑ', 'ΙΤΑΛΙΑ', 'ΤΟΥΡΚΙΑ', 'FYROM']
 
@@ -121,28 +120,28 @@ def update_records():
         if date_str not in days_map:
             days_map[date_str] = {'res': 0, 'gen': 0, 'exp': 0, 'chg_pump': 0, 'dis': 0}
 
-        gen = hr_data['production_mix'].get('TOTAL_PROD', 0)
-        res = hr_data['production_mix'].get('RES_PROD', 0)
-        st_in = hr_data['production_mix'].get('STORAGE_INJECTION', 0)
-        st_abs = abs(hr_data['production_mix'].get('STORAGE_ABSORPTION', 0))
-        pump = hr_data['production_mix'].get('ΣΥΝΟΛΙΚΗ ΑΝΤΛΗΣΗ', 0)
+        mix = hr_data.get('production_mix', {}) or {}
+        gen = mix.get('TOTAL_PROD') or 0
+        res = mix.get('RES_PROD') or 0
+        st_in = mix.get('STORAGE_INJECTION') or 0
+        st_abs = abs(mix.get('STORAGE_ABSORPTION') or 0)
+        pump = mix.get('ΣΥΝΟΛΙΚΗ ΑΝΤΛΗΣΗ') or 0
         
         imp, exp = 0, 0
+        interchanges = hr_data.get('interconnections_mwh', {}) or {}
         for c in country_keys:
-            imp += hr_data['interconnections_mwh'].get(f"{c}_IMP", 0)
-            exp += abs(hr_data['interconnections_mwh'].get(f"{c}_EXP", 0))
+            imp += interchanges.get(f"{c}_IMP") or 0
+            exp += abs(interchanges.get(f"{c}_EXP") or 0)
             
         demand = gen + imp + st_in - exp - st_abs - pump
         net_load = gen + imp + st_in
         
-        # Άθροιση για τα ημερήσια totals της μέρας
         days_map[date_str]['res'] += res
         days_map[date_str]['gen'] += gen
         days_map[date_str]['exp'] += exp
         days_map[date_str]['chg_pump'] += (st_abs + pump)
         days_map[date_str]['dis'] += st_in
         
-        # Αξιολόγηση Ωριαίων Ρεκόρ (MW) από ΟΛΟΚΛΗΡΟ το ιστορικό
         hr_id = f"{date_str[:4]}-{date_str[4:6]}-{date_str[6:]}, {hr:02d}:00"
         records['hourly']['demand'] = add_top5(records['hourly']['demand'], {'id': hr_id, 'value': round(demand, 1)})
         records['hourly']['exports'] = add_top5(records['hourly']['exports'], {'id': hr_id, 'value': round(exp, 1)})
@@ -150,7 +149,6 @@ def update_records():
         records['hourly']['bess_dis'] = add_top5(records['hourly']['bess_dis'], {'id': hr_id, 'value': round(st_in, 1)})
         records['hourly']['network_load'] = add_top5(records['hourly']['network_load'], {'id': hr_id, 'value': round(net_load, 1)})
 
-    # Αξιολόγηση Ημερήσιων Ρεκόρ (MWh / %) από τις ολοκληρωμένες μέρες
     for date_str, d_vals in days_map.items():
         date_formatted = f"{date_str[:4]}-{date_str[4:6]}-{date_str[6:]}"
         d_res = d_vals['res']
@@ -168,7 +166,7 @@ def update_records():
 
     with open(records_path, 'w', encoding='utf-8') as f:
         json.dump(records, f, ensure_ascii=False, indent=2)
-    print(f"✓ Το αρχείο records.json ενημερώθηκε επιτυχώς από ολόκληρο το 7ήμερο ιστορικό.")
+    print(f"✓ Το αρχείο records.json ενημερώθηκε επιτυχώς χωρίς σφάλματα.")
 
 def save_to_json(new_records):
     if not new_records: return
@@ -201,4 +199,4 @@ def save_to_json(new_records):
 if __name__ == "__main__":
     combined_data = fetch_all_data()
     save_to_json(combined_data)
-    update_records()  # Σαρώνει πλέον ολόκληρο το live_data.json αυτόματα!
+    update_records()
