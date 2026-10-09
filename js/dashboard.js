@@ -1,11 +1,20 @@
-// --- 1. Global ECharts Instances ---
+// --- 1. Global ECharts Instances & State Management ---
 let supplyChart, demandChart, flowsChart, dailyDispatchChart;
 const fmt = (num) => new Intl.NumberFormat('en-US').format(Math.round(num));
+
+// Global State Variables
+let globalData = [];
+let latestDateGlobal = '';
+let currentActiveTab = 'tab-live';
+let validLiveRecord = null;
+let selectedHourLive = null;
+let selectedDateDaily = null;
 
 // --- 2. Initialize App ---
 document.addEventListener('DOMContentLoaded', () => {
     initCharts();
     setupTabSwitcher();
+    document.getElementById('context-dropdown').addEventListener('change', handleDropdownChange);
     loadData();
 });
 
@@ -35,6 +44,10 @@ function setupTabSwitcher() {
             const targetId = tab.getAttribute('data-target');
             document.getElementById(targetId).classList.add('active');
             
+            // Update Context State
+            currentActiveTab = targetId;
+            updateDropdownState();
+            
             // Force resize charts on tab change
             setTimeout(() => {
                 supplyChart.resize(); demandChart.resize(); 
@@ -54,7 +67,7 @@ async function loadData() {
             throw new Error("No data found in JSON.");
         }
 
-        // --- ΒΗΜΑ 1: GLOBAL DEDUPLICATION & FILTER ---
+        // --- GLOBAL DEDUPLICATION & FILTER ---
         const cleanDataMap = new Map();
         
         rawData.forEach(entry => {
@@ -74,34 +87,30 @@ async function loadData() {
             }
         });
 
-        const cleanDataArray = Array.from(cleanDataMap.values()).sort((a, b) => {
+        globalData = Array.from(cleanDataMap.values()).sort((a, b) => {
             if (a.date !== b.date) return a.date.localeCompare(b.date);
             return a.target_hour - b.target_hour;
         });
 
-        // --- ΒΗΜΑ 2: LIVE TAB SELECTION ---
-        let validLiveData = null;
-        for (let i = cleanDataArray.length - 1; i >= 0; i--) {
-            let d = cleanDataArray[i];
+        // --- FIND ACTUAL "LIVE" RECORD ---
+        for (let i = globalData.length - 1; i >= 0; i--) {
+            let d = globalData[i];
             let totalGen = d.production_mix['TOTAL_PROD'] || 0;
             let demand = d.demand_mwh || 0;
             if (totalGen > 0 || demand > 0) {
-                validLiveData = d;
+                validLiveRecord = d;
                 break;
             }
         }
-        if (!validLiveData) validLiveData = cleanDataArray[cleanDataArray.length - 1];
+        if (!validLiveRecord) validLiveRecord = globalData[globalData.length - 1];
 
-        const fetchTime = new Date(validLiveData.fetch_timestamp).toLocaleString('en-GB');
-        const displayHour = validLiveData.target_hour.toString().padStart(2, '0') + ':00';
-        document.getElementById('last-updated').innerText = `Last Update: ${fetchTime} | Target Hour: ${displayHour}`;
+        // Initialize Global State
+        latestDateGlobal = validLiveRecord.date;
+        selectedHourLive = validLiveRecord.target_hour;
+        selectedDateDaily = validLiveRecord.date;
 
-        const todayDate = validLiveData.date;
-        const todayData = cleanDataArray.filter(d => d.date === todayDate);
-
-        // --- ΒΗΜΑ 3: RENDER ---
-        renderLiveTab(validLiveData);
-        renderDailyTab(todayData);
+        // Populate Dropdown & Trigger First Render
+        updateDropdownState();
 
     } catch (error) {
         console.error("Error loading data:", error);
@@ -109,7 +118,112 @@ async function loadData() {
     }
 }
 
-// --- 4. Render Logic for Tab 1 (Live) ---
+// --- 4. Context-Aware Dropdown Manager ---
+function updateDropdownState() {
+    const dropdown = document.getElementById('context-dropdown');
+    dropdown.innerHTML = '';
+    
+    if (currentActiveTab === 'tab-live') {
+        // Γεμίζει μόνο με τις ώρες της τρέχουσας/τελευταίας ημέρας (latestDateGlobal)
+        const todayRecords = globalData.filter(d => d.date === latestDateGlobal);
+        todayRecords.forEach(rec => {
+            let hrStr = rec.target_hour.toString().padStart(2, '0') + ':00';
+            let option = document.createElement('option');
+            option.value = rec.target_hour;
+            option.text = `Hour: ${hrStr}`;
+            dropdown.appendChild(option);
+        });
+        
+        // Διατηρεί την επιλεγμένη ώρα αν υπάρχει, αλλιώς πάει στη Live
+        if(todayRecords.find(r => r.target_hour === selectedHourLive)) {
+            dropdown.value = selectedHourLive;
+        } else {
+            dropdown.value = validLiveRecord.target_hour;
+            selectedHourLive = validLiveRecord.target_hour;
+        }
+        
+    } else {
+        // Γεμίζει με μοναδικές Ημερομηνίες για το Daily Dashboard (από τη νεότερη προς την παλαιότερη)
+        const uniqueDates = [...new Set(globalData.map(d => d.date))].reverse();
+        uniqueDates.forEach(dt => {
+            let option = document.createElement('option');
+            option.value = dt;
+            let formattedDate = `${dt.substring(6,8)}/${dt.substring(4,6)}/${dt.substring(0,4)}`;
+            if(dt === latestDateGlobal) formattedDate += " (Today)";
+            option.text = `Date: ${formattedDate}`;
+            dropdown.appendChild(option);
+        });
+        
+        // Διατηρεί την επιλεγμένη μέρα αν υπάρχει, αλλιώς πάει στη σημερινή
+        if(uniqueDates.includes(selectedDateDaily)) {
+            dropdown.value = selectedDateDaily;
+        } else {
+            dropdown.value = uniqueDates[0];
+            selectedDateDaily = uniqueDates[0];
+        }
+    }
+    
+    // Καλεί τη function αλλαγής για να σχεδιάσει τα γραφήματα
+    handleDropdownChange(); 
+}
+
+function handleDropdownChange() {
+    const dropdown = document.getElementById('context-dropdown');
+    const val = dropdown.value;
+    const pill = document.getElementById('live-status-pill');
+    
+    if (currentActiveTab === 'tab-live') {
+        selectedHourLive = parseInt(val);
+        const record = globalData.find(d => d.date === latestDateGlobal && d.target_hour === selectedHourLive);
+        
+        // UI Updates Info
+        const fetchTime = new Date(record.fetch_timestamp).toLocaleString('en-GB');
+        const displayHour = record.target_hour.toString().padStart(2, '0') + ':00';
+        document.getElementById('last-updated').innerText = `Last Update: ${fetchTime} | Target Hour: ${displayHour}`;
+        
+        // Pill Visual Cue (Live vs Historical Hour)
+        if (record.target_hour === validLiveRecord.target_hour) {
+            pill.innerHTML = '● Live Data Active';
+            pill.style.color = 'var(--accent-green)';
+            pill.style.borderColor = 'rgba(46, 204, 113, 0.3)';
+            pill.style.backgroundColor = 'rgba(46, 204, 113, 0.15)';
+        } else {
+            pill.innerHTML = '● Historical Hour';
+            pill.style.color = '#ffc000'; 
+            pill.style.borderColor = 'rgba(255, 192, 0, 0.3)';
+            pill.style.backgroundColor = 'rgba(255, 192, 0, 0.15)';
+        }
+        
+        renderLiveTab(record);
+        
+    } else {
+        selectedDateDaily = val;
+        const dailyRecords = globalData.filter(d => d.date === selectedDateDaily);
+        
+        // UI Updates Info
+        const latestRec = dailyRecords[dailyRecords.length - 1];
+        const fetchTime = new Date(latestRec.fetch_timestamp).toLocaleString('en-GB');
+        let formattedDate = `${selectedDateDaily.substring(6,8)}/${selectedDateDaily.substring(4,6)}/${selectedDateDaily.substring(0,4)}`;
+        document.getElementById('last-updated').innerText = `Last Update: ${fetchTime} | Selected Date: ${formattedDate}`;
+        
+        // Pill Visual Cue (Today vs Historical Day)
+        if (selectedDateDaily === latestDateGlobal) {
+            pill.innerHTML = '● Today';
+            pill.style.color = 'var(--accent-green)';
+            pill.style.borderColor = 'rgba(46, 204, 113, 0.3)';
+            pill.style.backgroundColor = 'rgba(46, 204, 113, 0.15)';
+        } else {
+            pill.innerHTML = '● Historical Day';
+            pill.style.color = '#ffc000'; 
+            pill.style.borderColor = 'rgba(255, 192, 0, 0.3)';
+            pill.style.backgroundColor = 'rgba(255, 192, 0, 0.15)';
+        }
+        
+        renderDailyTab(dailyRecords);
+    }
+}
+
+// --- 5. Render Logic for Tab 1 (Live) ---
 function renderLiveTab(latestData) {
     let live = {
         lignite: latestData.production_mix['TOTAL LIGNITE'] || 0,
@@ -196,7 +310,7 @@ function renderLiveTab(latestData) {
     });
 }
 
-// --- 5. Render Logic for Tab 2 (Daily) ---
+// --- 6. Render Logic for Tab 2 (Daily) ---
 function renderDailyTab(todayData) {
     let hours = [], arrLignite = [], arrGas = [], arrHydro = [], arrRes = [];
     let arrImports = [], arrStIn = [], arrDemand = [], arrMcp = [];
@@ -305,7 +419,6 @@ function renderDailyTab(todayData) {
                 let mcpParam = params.find(p => p.seriesName === 'MCP');
                 let mcpValue = mcpParam ? fmt(Math.abs(mcpParam.value)) : '-';
 
-                // Εδώ ενημερώθηκε το χρώμα της τιμής του MCP μέσα στο Tooltip (Cyan: #00e5ff)
                 let html = `<div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
                                 <b style="font-size:14px; color:#2ecc71;">Hour: ${hour}</b>
                                 <b style="font-size:14px; color:#00e5ff;">MCP: ${mcpValue} €/MWh</b>
@@ -345,7 +458,6 @@ function renderDailyTab(todayData) {
         xAxis: { type: 'category', data: hours, axisLabel: { color: '#fff' } },
         yAxis: [
             { type: 'value', name: 'Volume (MWh)', position: 'left', splitLine: { lineStyle: { color: '#2d333b', type: 'dashed' } }, axisLabel: { color: '#8892b0', formatter: (val) => fmt(Math.abs(val)) }, nameTextStyle: { color: '#8892b0' } },
-            // Ενημερώθηκε το χρώμα του δεξιού άξονα σε Cyan (#00e5ff)
             { type: 'value', name: 'Price (€/MWh)', position: 'right', splitLine: { show: false }, axisLabel: { color: '#00e5ff', fontWeight: 'bold' }, nameTextStyle: { color: '#00e5ff' } }
         ],
         series: [
@@ -359,7 +471,6 @@ function renderDailyTab(todayData) {
             { name: 'BESS Charge', type: 'bar', stack: 'Neg', data: arrStAbs, itemStyle: { color: '#b276a0' } },
             { name: 'Exports', type: 'bar', stack: 'Neg', data: arrExports, itemStyle: { color: '#e74c3c' } },
             { name: 'Domestic Demand', type: 'line', yAxisIndex: 0, data: arrDemand, symbol: 'none', smooth: true, lineStyle: { color: '#ffffff', width: 3, type: 'dashed' }, z: 10 },
-            // Ενημερώθηκε το χρώμα της σειράς του MCP σε Cyan (#00e5ff)
             { name: 'MCP', type: 'line', yAxisIndex: 1, data: arrMcp, symbol: 'circle', symbolSize: 6, lineStyle: { color: '#00e5ff', width: 3 }, itemStyle: { color: '#00e5ff' }, z: 10 }
         ]
     });
