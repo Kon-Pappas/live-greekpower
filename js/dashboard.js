@@ -25,10 +25,7 @@ function initCharts() {
     dailyDispatchChart = echarts.init(document.getElementById('dailyDispatchChart'), 'dark');
 
     window.addEventListener('resize', () => {
-        supplyChart.resize();
-        demandChart.resize();
-        flowsChart.resize();
-        dailyDispatchChart.resize();
+        supplyChart.resize(); demandChart.resize(); flowsChart.resize(); dailyDispatchChart.resize();
     });
 }
 
@@ -36,7 +33,6 @@ function setupTabSwitcher() {
     document.querySelectorAll('.nav-tab-item').forEach(tab => {
         tab.addEventListener('click', (e) => {
             e.preventDefault();
-            // Toggle Active Classes
             document.querySelectorAll('.nav-tab-item').forEach(t => t.classList.remove('active'));
             tab.classList.add('active');
             
@@ -44,14 +40,11 @@ function setupTabSwitcher() {
             const targetId = tab.getAttribute('data-target');
             document.getElementById(targetId).classList.add('active');
             
-            // Update Context State
             currentActiveTab = targetId;
             updateDropdownState();
             
-            // Force resize charts on tab change
             setTimeout(() => {
-                supplyChart.resize(); demandChart.resize(); 
-                flowsChart.resize(); dailyDispatchChart.resize();
+                supplyChart.resize(); demandChart.resize(); flowsChart.resize(); dailyDispatchChart.resize();
             }, 50);
         });
     });
@@ -63,13 +56,9 @@ async function loadData() {
         const response = await fetch('data/live_data.json');
         const rawData = await response.json();
         
-        if (!rawData || rawData.length === 0) {
-            throw new Error("No data found in JSON.");
-        }
+        if (!rawData || rawData.length === 0) throw new Error("No data found in JSON.");
 
-        // --- GLOBAL DEDUPLICATION & FILTER ---
         const cleanDataMap = new Map();
-        
         rawData.forEach(entry => {
             let hr = parseInt(entry.target_hour);
             if (hr === 0 || hr > 24) return; 
@@ -81,9 +70,7 @@ async function loadData() {
             } else {
                 const existingTime = new Date(cleanDataMap.get(key).fetch_timestamp).getTime();
                 const newTime = new Date(entry.fetch_timestamp).getTime();
-                if (newTime > existingTime) {
-                    cleanDataMap.set(key, entry);
-                }
+                if (newTime > existingTime) cleanDataMap.set(key, entry);
             }
         });
 
@@ -92,7 +79,6 @@ async function loadData() {
             return a.target_hour - b.target_hour;
         });
 
-        // --- FIND ACTUAL "LIVE" RECORD ---
         for (let i = globalData.length - 1; i >= 0; i--) {
             let d = globalData[i];
             let totalGen = d.production_mix['TOTAL_PROD'] || 0;
@@ -104,12 +90,10 @@ async function loadData() {
         }
         if (!validLiveRecord) validLiveRecord = globalData[globalData.length - 1];
 
-        // Initialize Global State
         latestDateGlobal = validLiveRecord.date;
         selectedHourLive = validLiveRecord.target_hour;
         selectedDateDaily = validLiveRecord.date;
 
-        // Populate Dropdown & Trigger First Render
         updateDropdownState();
 
     } catch (error) {
@@ -124,7 +108,6 @@ function updateDropdownState() {
     dropdown.innerHTML = '';
     
     if (currentActiveTab === 'tab-live') {
-        // Γεμίζει μόνο με τις ώρες της τρέχουσας/τελευταίας ημέρας (latestDateGlobal)
         const todayRecords = globalData.filter(d => d.date === latestDateGlobal);
         todayRecords.forEach(rec => {
             let hrStr = rec.target_hour.toString().padStart(2, '0') + ':00';
@@ -134,16 +117,10 @@ function updateDropdownState() {
             dropdown.appendChild(option);
         });
         
-        // Διατηρεί την επιλεγμένη ώρα αν υπάρχει, αλλιώς πάει στη Live
-        if(todayRecords.find(r => r.target_hour === selectedHourLive)) {
-            dropdown.value = selectedHourLive;
-        } else {
-            dropdown.value = validLiveRecord.target_hour;
-            selectedHourLive = validLiveRecord.target_hour;
-        }
+        if(todayRecords.find(r => r.target_hour === selectedHourLive)) dropdown.value = selectedHourLive;
+        else { dropdown.value = validLiveRecord.target_hour; selectedHourLive = validLiveRecord.target_hour; }
         
     } else {
-        // Γεμίζει με μοναδικές Ημερομηνίες για το Daily Dashboard (από τη νεότερη προς την παλαιότερη)
         const uniqueDates = [...new Set(globalData.map(d => d.date))].reverse();
         uniqueDates.forEach(dt => {
             let option = document.createElement('option');
@@ -154,16 +131,10 @@ function updateDropdownState() {
             dropdown.appendChild(option);
         });
         
-        // Διατηρεί την επιλεγμένη μέρα αν υπάρχει, αλλιώς πάει στη σημερινή
-        if(uniqueDates.includes(selectedDateDaily)) {
-            dropdown.value = selectedDateDaily;
-        } else {
-            dropdown.value = uniqueDates[0];
-            selectedDateDaily = uniqueDates[0];
-        }
+        if(uniqueDates.includes(selectedDateDaily)) dropdown.value = selectedDateDaily;
+        else { dropdown.value = uniqueDates[0]; selectedDateDaily = uniqueDates[0]; }
     }
     
-    // Καλεί τη function αλλαγής για να σχεδιάσει τα γραφήματα
     handleDropdownChange(); 
 }
 
@@ -176,22 +147,16 @@ function handleDropdownChange() {
         selectedHourLive = parseInt(val);
         const record = globalData.find(d => d.date === latestDateGlobal && d.target_hour === selectedHourLive);
         
-        // UI Updates Info
         const fetchTime = new Date(record.fetch_timestamp).toLocaleString('en-GB');
         const displayHour = record.target_hour.toString().padStart(2, '0') + ':00';
         document.getElementById('last-updated').innerText = `Last Update: ${fetchTime} | Target Hour: ${displayHour}`;
         
-        // Pill Visual Cue (Live vs Historical Hour)
         if (record.target_hour === validLiveRecord.target_hour) {
             pill.innerHTML = '● Live Data Active';
-            pill.style.color = 'var(--accent-green)';
-            pill.style.borderColor = 'rgba(46, 204, 113, 0.3)';
-            pill.style.backgroundColor = 'rgba(46, 204, 113, 0.15)';
+            pill.style.color = 'var(--accent-green)'; pill.style.borderColor = 'rgba(46, 204, 113, 0.3)'; pill.style.backgroundColor = 'rgba(46, 204, 113, 0.15)';
         } else {
             pill.innerHTML = '● Historical Hour';
-            pill.style.color = '#ffc000'; 
-            pill.style.borderColor = 'rgba(255, 192, 0, 0.3)';
-            pill.style.backgroundColor = 'rgba(255, 192, 0, 0.15)';
+            pill.style.color = '#ffc000'; pill.style.borderColor = 'rgba(255, 192, 0, 0.3)'; pill.style.backgroundColor = 'rgba(255, 192, 0, 0.15)';
         }
         
         renderLiveTab(record);
@@ -200,23 +165,17 @@ function handleDropdownChange() {
         selectedDateDaily = val;
         const dailyRecords = globalData.filter(d => d.date === selectedDateDaily);
         
-        // UI Updates Info
         const latestRec = dailyRecords[dailyRecords.length - 1];
         const fetchTime = new Date(latestRec.fetch_timestamp).toLocaleString('en-GB');
         let formattedDate = `${selectedDateDaily.substring(6,8)}/${selectedDateDaily.substring(4,6)}/${selectedDateDaily.substring(0,4)}`;
         document.getElementById('last-updated').innerText = `Last Update: ${fetchTime} | Selected Date: ${formattedDate}`;
         
-        // Pill Visual Cue (Today vs Historical Day)
         if (selectedDateDaily === latestDateGlobal) {
             pill.innerHTML = '● Today';
-            pill.style.color = 'var(--accent-green)';
-            pill.style.borderColor = 'rgba(46, 204, 113, 0.3)';
-            pill.style.backgroundColor = 'rgba(46, 204, 113, 0.15)';
+            pill.style.color = 'var(--accent-green)'; pill.style.borderColor = 'rgba(46, 204, 113, 0.3)'; pill.style.backgroundColor = 'rgba(46, 204, 113, 0.15)';
         } else {
             pill.innerHTML = '● Historical Day';
-            pill.style.color = '#ffc000'; 
-            pill.style.borderColor = 'rgba(255, 192, 0, 0.3)';
-            pill.style.backgroundColor = 'rgba(255, 192, 0, 0.15)';
+            pill.style.color = '#ffc000'; pill.style.borderColor = 'rgba(255, 192, 0, 0.3)'; pill.style.backgroundColor = 'rgba(255, 192, 0, 0.15)';
         }
         
         renderDailyTab(dailyRecords);
@@ -349,7 +308,6 @@ function renderDailyTab(todayData) {
         sum.stIn += sIn; sum.stAbs += sAbs; sum.imp += imp; sum.exp += exp; sum.pump += p; sum.dem += dem;
     });
 
-    // --- RENDER BALANCE EQUATION BANNER (2 Sub-lines, No Wrap) ---
     const balanceContainer = document.getElementById('daily-balance-equation');
     balanceContainer.innerHTML = `
         <div class="eq-subline">
@@ -372,7 +330,6 @@ function renderDailyTab(todayData) {
         </div>
     `;
 
-    // --- RENDER DYNAMIC SORTED LEADERBOARD ---
     const leaderboardItems = [
         { name: 'RES (ΑΠΕ)', value: sum.res, color: 'var(--color-res)' },
         { name: 'Natural Gas (Φ.Αεριο)', value: sum.gas, color: 'var(--color-gas)' },
@@ -400,7 +357,6 @@ function renderDailyTab(todayData) {
         </div>
     `).join('');
 
-    // 24H Dispatch Chart with Custom Tooltip
     dailyDispatchChart.setOption({
         backgroundColor: 'transparent',
         title: { text: '24-Hour Dispatch & Market Clearing Price', left: 'center', top: 5, textStyle: { color: '#ffffff', fontSize: 15 } },
@@ -474,4 +430,59 @@ function renderDailyTab(todayData) {
             { name: 'MCP', type: 'line', yAxisIndex: 1, data: arrMcp, symbol: 'circle', symbolSize: 6, lineStyle: { color: '#00e5ff', width: 3 }, itemStyle: { color: '#00e5ff' }, z: 10 }
         ]
     });
+}
+
+// --- 7. Modal Records Loader ---
+async function loadRecords() {
+    try {
+        const response = await fetch('data/records.json');
+        if (!response.ok) throw new Error("No records file");
+        const recs = await response.json();
+        
+        // Helper to generate a card for a category
+        const buildCard = (title, items, color, unit) => {
+            let listHtml = items.map((item, idx) => {
+                let rankCls = idx === 0 ? 'rec-rank-1' : '';
+                return `
+                    <div class="record-row">
+                        <span class="rec-rank ${rankCls}">#${idx+1}</span>
+                        <span class="rec-date">${item.id}</span>
+                        <span class="rec-val" style="color: ${color};">${fmt(item.value)} <span style="font-size:0.75rem;">${unit}</span></span>
+                    </div>
+                `;
+            }).join('');
+            
+            return `
+                <div class="col-md-6">
+                    <div class="record-box">
+                        <h6>${title}</h6>
+                        ${listHtml || '<div class="text-muted" style="font-size:0.85rem;">No data yet</div>'}
+                    </div>
+                </div>
+            `;
+        };
+
+        // Render Hourly
+        let hourlyHtml = '';
+        hourlyHtml += buildCard('Peak Demand', recs.hourly.demand, 'var(--color-demand)', 'MW');
+        hourlyHtml += buildCard('Peak Exports', recs.hourly.exports, 'var(--color-exports)', 'MW');
+        hourlyHtml += buildCard('Peak BESS Charge', recs.hourly.bess_chg, 'var(--color-storage-chg)', 'MW');
+        hourlyHtml += buildCard('Peak BESS Discharge', recs.hourly.bess_dis, 'var(--color-storage)', 'MW');
+        hourlyHtml += buildCard('Peak Network Load (Gross Supply)', recs.hourly.network_load, 'var(--accent-green)', 'MW');
+        document.getElementById('render-hourly-records').innerHTML = hourlyHtml;
+
+        // Render Daily
+        let dailyHtml = '';
+        dailyHtml += buildCard('Max Daily RES', recs.daily.res, 'var(--color-res)', 'MWh');
+        dailyHtml += buildCard('Max RES Share', recs.daily.res_share, 'var(--color-res)', '%');
+        dailyHtml += buildCard('Max Daily Exports', recs.daily.exports, 'var(--color-exports)', 'MWh');
+        dailyHtml += buildCard('Max BESS Charge + Pump', recs.daily.bess_chg_pump, 'var(--color-storage-chg)', 'MWh');
+        dailyHtml += buildCard('Max Daily BESS Discharge', recs.daily.bess_dis, 'var(--color-storage)', 'MWh');
+        document.getElementById('render-daily-records').innerHTML = dailyHtml;
+
+    } catch (error) {
+        console.error("No records.json found yet. It will be created on next python run.");
+        document.getElementById('render-hourly-records').innerHTML = '<div class="col-12"><p class="text-muted p-3">Waiting for first Python sync to generate records...</p></div>';
+        document.getElementById('render-daily-records').innerHTML = '<div class="col-12"><p class="text-muted p-3">Waiting for first Python sync to generate records...</p></div>';
+    }
 }
