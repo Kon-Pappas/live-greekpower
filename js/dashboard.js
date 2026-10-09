@@ -53,7 +53,8 @@ function setupTabSwitcher() {
 // --- 3. Main Data Fetcher & Deduplication ---
 async function loadData() {
     try {
-        const response = await fetch('data/live_data.json');
+        // Εδώ προστέθηκε το Cache Busting με το new Date().getTime()
+        const response = await fetch('data/live_data.json?v=' + new Date().getTime());
         const rawData = await response.json();
         
         if (!rawData || rawData.length === 0) throw new Error("No data found in JSON.");
@@ -435,7 +436,8 @@ function renderDailyTab(todayData) {
 // --- 7. Modal Records Loader ---
 async function loadRecords() {
     try {
-        const response = await fetch('data/records.json');
+        // Εδώ προστέθηκε το Cache Busting με το new Date().getTime()
+        const response = await fetch('data/records.json?v=' + new Date().getTime());
         if (!response.ok) throw new Error("No records file");
         const recs = await response.json();
         
