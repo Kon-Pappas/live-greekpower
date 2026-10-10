@@ -12,17 +12,21 @@ def get_target_dates():
 
     tz = pytz.timezone('Europe/Athens')
     today_dt = datetime.now(tz)
+    yesterday_dt = today_dt - timedelta(days=1)
+    
     today_str = today_dt.strftime("%Y%m%d")
+    yesterday_str = yesterday_dt.strftime("%Y%m%d")
 
-    start_str = start_env if start_env else today_str
-    end_str = end_env if end_env else start_str
+    # Αν δεν υπάρχουν inputs (π.χ. στο αυτόματο cron), ψάχνουμε από ΧΘΕΣ έως ΣΗΜΕΡΑ
+    start_str = start_env if start_env else yesterday_str
+    end_str = end_env if end_env else today_str
 
     try:
         start_dt = datetime.strptime(start_str, "%Y%m%d")
         end_dt = datetime.strptime(end_str, "%Y%m%d")
     except ValueError:
-        print("Μη έγκυρη μορφή ημερομηνίας. Γίνεται fallback στη σημερινή.")
-        start_dt = today_dt
+        print("Μη έγκυρη μορφή ημερομηνίας. Γίνεται fallback στο Χθες και Σήμερα.")
+        start_dt = yesterday_dt
         end_dt = today_dt
 
     dates = []
@@ -136,7 +140,7 @@ def update_records():
 
     clean_history = list(unique_hours.values())
 
-    # ΝΕΑ ΣΥΝΑΡΤΗΣΗ: Κρατάει μόνο τα Top 3
+    # Κρατάει μόνο τα Top 3
     def add_top3(lst, entry):
         existing = next((i for i in lst if i['id'] == entry['id']), None)
         if existing:
