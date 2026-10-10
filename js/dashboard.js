@@ -25,7 +25,10 @@ function initCharts() {
     dailyDispatchChart = echarts.init(document.getElementById('dailyDispatchChart'), 'dark');
 
     window.addEventListener('resize', () => {
-        supplyChart.resize(); demandChart.resize(); flowsChart.resize(); dailyDispatchChart.resize();
+        if(supplyChart) supplyChart.resize(); 
+        if(demandChart) demandChart.resize(); 
+        if(flowsChart) flowsChart.resize(); 
+        if(dailyDispatchChart) dailyDispatchChart.resize();
     });
 }
 
@@ -95,8 +98,6 @@ async function loadData() {
         selectedDateDaily = validLiveRecord.date;
 
         updateDropdownState();
-        
-        // Φόρτωση Records αθόρυβα στο background για να ελέγξουμε αν υπάρχει Badge
         loadRecords();
 
     } catch (error) {
@@ -210,54 +211,63 @@ function renderLiveTab(latestData) {
     let liveTotalSinks = live.pump + live.stAbs + live.exports;
     let liveDemand = liveTotalSupply - liveTotalSinks;
 
-    document.getElementById('val-production').innerText = `${fmt(live.totalGen)} MWh`;
-    document.getElementById('val-demand').innerText = `${fmt(liveDemand)} MWh`;
-    document.getElementById('val-price').innerText = `${fmt(live.mcp)} €`;
-
-    document.getElementById('eq-generation').innerHTML = `
-        <div class="eq-row c-lignite"><span class="eq-label">Lignite</span><span class="eq-operator"></span><span class="eq-value">${fmt(live.lignite)}</span></div>
-        <div class="eq-row c-gas"><span class="eq-label">Natural Gas</span><span class="eq-operator">+</span><span class="eq-value">${fmt(live.gas)}</span></div>
-        <div class="eq-row c-hydro"><span class="eq-label">Hydro</span><span class="eq-operator">+</span><span class="eq-value">${fmt(live.hydro)}</span></div>
-        <div class="eq-row c-res"><span class="eq-label">RES</span><span class="eq-operator">+</span><span class="eq-value">${fmt(live.res)}</span></div>
+    // --- Box 1: Generation Ledger ---
+    document.getElementById('render-gen-ledger').innerHTML = `
+        <div class="ledger-row c-lignite"><span class="ledger-label">Lignite</span><span class="ledger-operator"></span><span class="ledger-value">${fmt(live.lignite)}</span></div>
+        <div class="ledger-row c-gas"><span class="ledger-label">N. Gas</span><span class="ledger-operator">+</span><span class="ledger-value">${fmt(live.gas)}</span></div>
+        <div class="ledger-row c-hydro"><span class="ledger-label">Hydro</span><span class="ledger-operator">+</span><span class="ledger-value">${fmt(live.hydro)}</span></div>
+        <div class="ledger-row c-res"><span class="ledger-label">RES</span><span class="ledger-operator">+</span><span class="ledger-value">${fmt(live.res)}</span></div>
+        <div class="ledger-divider"></div>
+        <div class="ledger-total-row">
+            <span class="ledger-total-label">= SUM</span>
+            <span class="ledger-total-value text-white">${fmt(live.totalGen)}</span>
+        </div>
     `;
-    document.getElementById('eq-demand').innerHTML = `
-        <div class="eq-row text-white"><span class="eq-label">Generation</span><span class="eq-operator"></span><span class="eq-value">${fmt(live.totalGen)}</span></div>
-        <div class="eq-row c-imports"><span class="eq-label">Imports</span><span class="eq-operator">+</span><span class="eq-value">${fmt(live.imports)}</span></div>
-        <div class="eq-row c-exports"><span class="eq-label">Exports</span><span class="eq-operator">-</span><span class="eq-value">${fmt(live.exports)}</span></div>
-        <div class="eq-row c-storage"><span class="eq-label">Storage Disch.</span><span class="eq-operator">+</span><span class="eq-value">${fmt(live.stIn)}</span></div>
-        <div class="eq-row c-storage" style="color: #b276a0;"><span class="eq-label">Storage Charge</span><span class="eq-operator">-</span><span class="eq-value">${fmt(live.stAbs)}</span></div>
-        <div class="eq-row c-pump"><span class="eq-label">Pumping</span><span class="eq-operator">-</span><span class="eq-value">${fmt(live.pump)}</span></div>
+
+    // --- Box 4: Demand Ledger ---
+    document.getElementById('render-dem-ledger').innerHTML = `
+        <div class="ledger-row text-white"><span class="ledger-label">Generation</span><span class="ledger-operator"></span><span class="ledger-value">${fmt(live.totalGen)}</span></div>
+        <div class="ledger-row c-imports"><span class="ledger-label">Imports</span><span class="ledger-operator">+</span><span class="ledger-value">${fmt(live.imports)}</span></div>
+        <div class="ledger-row c-exports"><span class="ledger-label">Exports</span><span class="ledger-operator">-</span><span class="ledger-value">${fmt(live.exports)}</span></div>
+        <div class="ledger-row c-storage"><span class="ledger-label">St. Disch.</span><span class="ledger-operator">+</span><span class="ledger-value">${fmt(live.stIn)}</span></div>
+        <div class="ledger-row c-storage" style="color: var(--color-storage-chg);"><span class="ledger-label">St. Charge</span><span class="ledger-operator">-</span><span class="ledger-value">${fmt(live.stAbs)}</span></div>
+        <div class="ledger-row c-pump"><span class="ledger-label">Pumping</span><span class="ledger-operator">-</span><span class="ledger-value">${fmt(live.pump)}</span></div>
+        <div class="ledger-divider"></div>
+        <div class="ledger-total-row">
+            <span class="ledger-total-label">= NET</span>
+            <span class="ledger-total-value">${fmt(liveDemand)}</span>
+        </div>
     `;
 
     const getDonutOpt = (title, data) => ({
         backgroundColor: 'transparent',
         title: [
-            { text: title, left: 'center', top: 5, textStyle: { color: '#ffffff', fontSize: 14 } },
-            { text: `${fmt(liveTotalSupply)}\nMWh`, left: 'center', top: 'center', textStyle: { color: '#ffffff', fontSize: 18, fontWeight: 'bold' } }
+            { text: title, left: 'center', top: 5, textStyle: { color: '#ffffff', fontSize: 13 } },
+            { text: `${fmt(liveTotalSupply)}\nMWh`, left: 'center', top: 'center', textStyle: { color: '#ffffff', fontSize: 16, fontWeight: 'bold' } }
         ],
         tooltip: { trigger: 'item', formatter: (p) => `${p.name}: <br/> <b>${fmt(p.value)} MWh</b> (${p.percent}%)` },
-        legend: { top: 'bottom', textStyle: { color: '#8892b0' } },
-        series: [{ type: 'pie', radius: ['45%', '70%'], itemStyle: { borderRadius: 4, borderColor: '#1c2128', borderWidth: 2 }, label: { show: true, formatter: '{b}\n{d}%', color: '#fff', fontSize: 11 }, labelLine: { length: 10, length2: 15 }, data: data }]
+        legend: { top: 'bottom', textStyle: { color: '#8892b0', fontSize: 10 } },
+        series: [{ type: 'pie', radius: ['45%', '70%'], itemStyle: { borderRadius: 4, borderColor: '#1c2128', borderWidth: 2 }, label: { show: true, formatter: '{b}\n{d}%', color: '#fff', fontSize: 10 }, labelLine: { length: 8, length2: 10 }, data: data }]
     });
 
     let sData = [
         { value: live.lignite, name: 'Lignite', itemStyle: { color: '#b06a4b' } },
-        { value: live.gas, name: 'Natural Gas', itemStyle: { color: '#d18b57' } },
+        { value: live.gas, name: 'Nat. Gas', itemStyle: { color: '#d18b57' } },
         { value: live.hydro, name: 'Hydro', itemStyle: { color: '#5b9bd5' } },
         { value: live.res, name: 'RES', itemStyle: { color: '#70ad47' } },
-        { value: live.stIn, name: 'Storage Disch.', itemStyle: { color: '#e0c2cd' } },
+        { value: live.stIn, name: 'St. Disch.', itemStyle: { color: '#e0c2cd' } },
         { value: live.imports, name: 'Imports', itemStyle: { color: '#ffc000' } }
     ].filter(i => i.value > 0);
 
     let dData = [
         { value: live.pump, name: 'Pumping', itemStyle: { color: '#85c1e9' } },
-        { value: live.stAbs, name: 'Storage Charge', itemStyle: { color: '#b276a0' } },
+        { value: live.stAbs, name: 'St. Charge', itemStyle: { color: '#b276a0' } },
         { value: live.exports, name: 'Exports', itemStyle: { color: '#e74c3c' } },
-        { value: liveDemand, name: 'Domestic Demand', itemStyle: { color: '#4a5568' } }
+        { value: liveDemand, name: 'Demand', itemStyle: { color: '#4a5568' } }
     ].filter(i => i.value > 0);
 
     supplyChart.setOption(getDonutOpt('Supply Mix (Inflows)', sData));
-    demandChart.setOption(getDonutOpt('Demand & Sinks (Outflows)', dData));
+    demandChart.setOption(getDonutOpt('Demand (Outflows)', dData));
 
     flowsChart.setOption({
         backgroundColor: 'transparent', title: { text: 'Cross-Border Flows', left: 'center', top: 10, textStyle: { color: '#fff', fontSize: 14 } },
@@ -466,10 +476,8 @@ async function loadRecords() {
         }
 
         const buildCard = (title, items, color, unit) => {
-            // Το slice(0, 3) επιβάλλει στο UI να δείξει μόνο τα 3 πρώτα ακόμα κι αν το παλιό JSON έχει 5!
             let listHtml = items.slice(0, 3).map((item, idx) => {
                 
-                // Προσθήκη χρωμάτων (Χρυσό, Αργυρό, Χάλκινο) στους αριθμούς κατάταξης
                 let rankStyle = '';
                 if (idx === 0) rankStyle = 'color: #ffc000; font-size: 0.85rem; text-shadow: 0 0 5px rgba(255,192,0,0.3);'; // Gold
                 else if (idx === 1) rankStyle = 'color: #c0c0c0;'; // Silver
