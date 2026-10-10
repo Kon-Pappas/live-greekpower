@@ -321,28 +321,6 @@ function renderDailyTab(todayData) {
         sum.stIn += sIn; sum.stAbs += sAbs; sum.imp += imp; sum.exp += exp; sum.pump += p; sum.dem += dem;
     });
 
-    const balanceContainer = document.getElementById('daily-balance-equation');
-    balanceContainer.innerHTML = `
-        <div class="eq-subline">
-            <span class="eq-term text-white">Generation: <b>${fmt(sum.gen)}</b></span> <span class="eq-op">+</span>
-            <span class="eq-term" style="color: var(--color-imports);">Imports: <b>${fmt(sum.imp)}</b></span> <span class="eq-op">+</span>
-            <span class="eq-term" style="color: var(--color-storage);">Bess_Discharge: <b>${fmt(sum.stIn)}</b></span> 
-            <span class="eq-op">=</span> 
-            <span class="eq-term" style="color: var(--color-demand);">Demand: <b>${fmt(sum.dem)}</b></span> <span class="eq-op">+</span>
-            <span class="eq-term" style="color: var(--color-exports);">Exports: <b>${fmt(sum.exp)}</b></span> <span class="eq-op">+</span>
-            <span class="eq-term" style="color: var(--color-storage-chg);">Bess_Charge: <b>${fmt(sum.stAbs)}</b></span> <span class="eq-op">+</span>
-            <span class="eq-term" style="color: var(--color-pump);">Pump: <b>${fmt(sum.pump)}</b></span>
-        </div>
-        <div class="eq-subline" style="border-top: 1px dashed rgba(255,255,255,0.08); padding-top: 6px;">
-            <span class="eq-term text-white">Generation: <b>${fmt(sum.gen)}</b></span> 
-            <span class="eq-op">=</span> 
-            <span class="eq-term" style="color: var(--color-lignite);">Lignite: <b>${fmt(sum.lig)}</b></span> <span class="eq-op">+</span>
-            <span class="eq-term" style="color: var(--color-gas);">N.Gas: <b>${fmt(sum.gas)}</b></span> <span class="eq-op">+</span>
-            <span class="eq-term" style="color: var(--color-res);">RES: <b>${fmt(sum.res)}</b></span> <span class="eq-op">+</span>
-            <span class="eq-term" style="color: var(--color-hydro);">Hydro: <b>${fmt(sum.hyd)}</b></span>
-        </div>
-    `;
-
     const leaderboardItems = [
         { name: 'RES (ΑΠΕ)', value: sum.res, color: 'var(--color-res)' },
         { name: 'Natural Gas (Φ.Αεριο)', value: sum.gas, color: 'var(--color-gas)' },
