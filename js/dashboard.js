@@ -408,15 +408,16 @@ function renderDailyTab(todayData) {
             { type: 'value', name: 'Price (€/MWh)', position: 'right', splitLine: { show: false }, axisLabel: { color: '#00e5ff', fontWeight: 'bold' }, nameTextStyle: { color: '#00e5ff' } }
         ],
         series: [
-            { name: 'Lignite', type: 'bar', stack: 'Pos', data: arrLignite, itemStyle: { color: '#b06a4b' } },
-            { name: 'Natural Gas', type: 'bar', stack: 'Pos', data: arrGas, itemStyle: { color: '#d18b57' } },
-            { name: 'Imports', type: 'bar', stack: 'Pos', data: arrImports, itemStyle: { color: '#ffc000' } },
-            { name: 'BESS Discharge', type: 'bar', stack: 'Pos', data: arrStIn, itemStyle: { color: '#e0c2cd' } },
-            { name: 'RES', type: 'bar', stack: 'Pos', data: arrRes, itemStyle: { color: '#70ad47' } },
-            { name: 'Hydro', type: 'bar', stack: 'Pos', data: arrHydro, itemStyle: { color: '#5b9bd5' } },
-            { name: 'Pumping', type: 'bar', stack: 'Neg', data: arrPump, itemStyle: { color: '#85c1e9' } },
-            { name: 'BESS Charge', type: 'bar', stack: 'Neg', data: arrStAbs, itemStyle: { color: '#b276a0' } },
-            { name: 'Exports', type: 'bar', stack: 'Neg', data: arrExports, itemStyle: { color: '#e74c3c' } },
+            // Όλα τα stack έγιναν 'Total' και προστέθηκε barWidth: '70%'
+            { name: 'Lignite', type: 'bar', stack: 'Total', barWidth: '70%', data: arrLignite, itemStyle: { color: '#b06a4b' } },
+            { name: 'Natural Gas', type: 'bar', stack: 'Total', barWidth: '70%', data: arrGas, itemStyle: { color: '#d18b57' } },
+            { name: 'Imports', type: 'bar', stack: 'Total', barWidth: '70%', data: arrImports, itemStyle: { color: '#ffc000' } },
+            { name: 'BESS Discharge', type: 'bar', stack: 'Total', barWidth: '70%', data: arrStIn, itemStyle: { color: '#e0c2cd' } },
+            { name: 'RES', type: 'bar', stack: 'Total', barWidth: '70%', data: arrRes, itemStyle: { color: '#70ad47' } },
+            { name: 'Hydro', type: 'bar', stack: 'Total', barWidth: '70%', data: arrHydro, itemStyle: { color: '#5b9bd5' } },
+            { name: 'Pumping', type: 'bar', stack: 'Total', barWidth: '70%', data: arrPump, itemStyle: { color: '#85c1e9' } },
+            { name: 'BESS Charge', type: 'bar', stack: 'Total', barWidth: '70%', data: arrStAbs, itemStyle: { color: '#b276a0' } },
+            { name: 'Exports', type: 'bar', stack: 'Total', barWidth: '70%', data: arrExports, itemStyle: { color: '#e74c3c' } },
             { name: 'Domestic Demand', type: 'line', yAxisIndex: 0, data: arrDemand, symbol: 'none', smooth: true, lineStyle: { color: '#ffffff', width: 3, type: 'dashed' }, z: 10 },
             { name: 'MCP', type: 'line', yAxisIndex: 1, data: arrMcp, symbol: 'circle', symbolSize: 6, lineStyle: { color: '#00e5ff', width: 3 }, itemStyle: { color: '#00e5ff' }, z: 10 }
         ]
