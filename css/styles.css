@@ -52,49 +52,14 @@ body {
     width: auto;
 }
 .custom-dropdown:focus { border-color: var(--accent-green); background-color: var(--card-bg); color: var(--text-main); box-shadow: 0 0 0 2px rgba(46, 204, 113, 0.2); }
-
 .status-pill { background-color: rgba(46, 204, 113, 0.15); color: var(--accent-green); border: 1px solid rgba(46, 204, 113, 0.3); padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; transition: all 0.3s ease; }
 
 /* Records Button & Notification Badge */
-.records-btn-wrapper {
-    position: relative;
-    display: inline-block;
-}
-
-.btn-records {
-    background: linear-gradient(135deg, rgba(255,192,0,0.1), rgba(255,192,0,0.2));
-    border: 1px solid rgba(255,192,0,0.4);
-    color: #ffc000;
-    padding: 6px 16px;
-    border-radius: 20px;
-    font-size: 0.85rem;
-    font-weight: bold;
-    cursor: pointer;
-    transition: all 0.3s;
-}
+.records-btn-wrapper { position: relative; display: inline-block; }
+.btn-records { background: linear-gradient(135deg, rgba(255,192,0,0.1), rgba(255,192,0,0.2)); border: 1px solid rgba(255,192,0,0.4); color: #ffc000; padding: 6px 16px; border-radius: 20px; font-size: 0.85rem; font-weight: bold; cursor: pointer; transition: all 0.3s; }
 .btn-records:hover { background: rgba(255,192,0,0.3); color: #fff; border-color: #ffc000; box-shadow: 0 0 8px rgba(255,192,0,0.5); }
-
-.badge-pulse {
-    position: absolute;
-    top: -8px;
-    right: -10px;
-    background-color: var(--accent-green);
-    color: #111;
-    font-size: 0.75rem;
-    font-weight: bold;
-    padding: 3px 6px;
-    border-radius: 12px;
-    box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.7);
-    animation: pulse-badge 2s infinite;
-    z-index: 10;
-    pointer-events: none;
-}
-
-@keyframes pulse-badge {
-    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.7); }
-    70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(46, 204, 113, 0); }
-    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(46, 204, 113, 0); }
-}
+.badge-pulse { position: absolute; top: -8px; right: -10px; background-color: var(--accent-green); color: #111; font-size: 0.75rem; font-weight: bold; padding: 3px 6px; border-radius: 12px; box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.7); animation: pulse-badge 2s infinite; z-index: 10; pointer-events: none; }
+@keyframes pulse-badge { 0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.7); } 70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(46, 204, 113, 0); } 100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(46, 204, 113, 0); } }
 
 /* Tabs */
 .nav-tabs-container { border-bottom: 1px solid var(--border-color); padding: 0 30px; display: flex; gap: 30px; overflow-x: auto; white-space: nowrap; }
@@ -106,21 +71,34 @@ body {
 
 .main-container { padding: 30px; }
 
-/* Metrics & Cards */
-.metric-card { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 6px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); height: 100%; }
-.split-card-inner { display: flex; flex-direction: row; align-items: center; justify-content: space-between; height: 100%; }
-.split-left { text-align: center; padding-right: 20px; border-right: 1px solid var(--border-color); min-width: 40%; }
-.split-right { flex-grow: 1; padding-left: 20px; }
-.center-card { display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
-.metric-title { color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 15px; }
-.metric-value { font-size: 2.2rem; font-weight: 700; color: #ffffff; white-space: nowrap; }
+/* Custom Grid for Live Tab (20-30-30-20) */
+.live-dashboard-grid {
+    display: grid;
+    gap: 15px;
+    grid-template-columns: 1fr; /* Mobile */
+}
+@media (min-width: 1200px) {
+    .live-dashboard-grid {
+        grid-template-columns: 2fr 3fr 3fr 2fr; /* 20% 30% 30% 20% */
+    }
+}
 
-/* Equations */
-.breakdown-list { display: flex; flex-direction: column; gap: 8px; font-size: 0.85rem; }
-.eq-row { display: flex; align-items: center; justify-content: space-between; }
-.eq-label { flex: 1; text-align: left; font-weight: 600; }
-.eq-operator { color: #ffffff; font-weight: 800; font-size: 1rem; width: 30px; text-align: center; }
-.eq-value { width: 70px; text-align: right; font-weight: 600; font-family: 'Courier New', Courier, monospace; }
+/* Base Cards */
+.metric-card { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 6px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); height: 100%; }
+.chart-container { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 6px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+.metric-title { color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; font-weight: bold; letter-spacing: 0.5px; margin-bottom: 15px; text-align: center; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; }
+
+/* Ledger (Receipt) Styles for Boxes */
+.ledger-card { display: flex; flex-direction: column; justify-content: center; }
+.ledger-list { display: flex; flex-direction: column; gap: 10px; font-size: 0.85rem; width: 100%; }
+.ledger-row { display: flex; align-items: center; justify-content: space-between; }
+.ledger-label { flex: 1; text-align: left; font-weight: 600; }
+.ledger-operator { width: 25px; text-align: center; font-weight: 800; font-size: 1rem; color: #fff; }
+.ledger-value { width: 75px; text-align: right; font-weight: 700; font-family: 'Courier New', Courier, monospace; font-size: 0.95rem; }
+.ledger-divider { border-top: 2px dashed rgba(255,255,255,0.1); margin: 5px 0; }
+.ledger-total-row { display: flex; align-items: center; justify-content: space-between; margin-top: 5px; }
+.ledger-total-label { font-weight: bold; color: #fff; font-size: 1.1rem; }
+.ledger-total-value { font-size: 1.7rem; font-weight: bold; font-family: 'Courier New', Courier, monospace; text-align: right; text-shadow: 0 0 10px rgba(0,0,0,0.5); }
 
 /* Colors Utility Classes */
 .c-lignite { color: var(--color-lignite); }
@@ -149,11 +127,8 @@ body {
 .lb-name { font-size: 0.85rem; font-weight: 600; color: var(--text-muted); }
 .lb-rank { font-size: 0.75rem; color: var(--text-muted); background: rgba(255,255,255,0.05); padding: 2px 6px; border-radius: 10px; }
 .lb-value { font-size: 1.4rem; font-weight: 700; color: #fff; font-family: 'Courier New', Courier, monospace; }
-.chart-container { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 6px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
 
-/* ==================================
-   MODAL & RECORDS UI
-   ================================== */
+/* MODAL & RECORDS UI */
 .custom-modal { background-color: #121418; border: 1px solid var(--border-color); }
 .custom-modal-header { border-bottom: 1px solid var(--border-color); background-color: #171b21; }
 .modal-tabs-header { background-color: #171b21; padding: 0 20px; border-bottom: 1px solid var(--border-color); }
@@ -168,39 +143,11 @@ body {
 .record-box { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 6px; padding: 15px; margin-bottom: 20px; height: 100%; box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
 .record-box h6 { color: var(--text-muted); text-transform: uppercase; font-size: 0.85rem; font-weight: 700; letter-spacing: 0.5px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom: 15px; }
 
-/* NΕΟ: Η γραμμή πήρε position: relative για να κουμπώνει το badge */
 .record-row { position: relative; display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px dashed rgba(255,255,255,0.05); }
 .record-row:last-child { border-bottom: none; }
 .rec-rank { font-size: 0.75rem; font-weight: bold; width: 25px; color: #5b9bd5; }
-.rec-rank-1 { color: #ffc000; font-size: 0.85rem; } 
 .rec-date { font-size: 0.85rem; color: #fff; font-family: 'Courier New', Courier, monospace; }
 .rec-val { font-size: 1rem; font-weight: bold; font-family: 'Courier New', Courier, monospace; }
 
-/* NΕΟ: Το λοξό badge μέσα στο modal */
-.new-record-badge {
-    position: absolute;
-    right: -5px; 
-    top: -8px;    
-    background-color: var(--accent-green);
-    color: #111;
-    font-size: 0.65rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    padding: 2px 6px;
-    border-radius: 4px;
-    transform: rotate(15deg);
-    box-shadow: 0 2px 5px rgba(0,0,0,0.4);
-    pointer-events: none;
-    animation: pop-in 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-}
-
-@keyframes pop-in {
-    0% { opacity: 0; transform: scale(0.5) rotate(0deg); }
-    100% { opacity: 1; transform: scale(1) rotate(15deg); }
-}
-
-@media (max-width: 991px) {
-    .split-card-inner { flex-direction: column; }
-    .split-left { border-right: none; border-bottom: 1px solid var(--border-color); padding-right: 0; padding-bottom: 15px; margin-bottom: 15px; width: 100%; }
-    .split-right { padding-left: 0; width: 100%; }
-}
+.new-record-badge { position: absolute; right: -5px; top: -8px; background-color: var(--accent-green); color: #111; font-size: 0.65rem; font-weight: 800; text-transform: uppercase; padding: 2px 6px; border-radius: 4px; transform: rotate(15deg); box-shadow: 0 2px 5px rgba(0,0,0,0.4); pointer-events: none; animation: pop-in 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+@keyframes pop-in { 0% { opacity: 0; transform: scale(0.5) rotate(0deg); } 100% { opacity: 1; transform: scale(1) rotate(15deg); } }
