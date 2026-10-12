@@ -61,7 +61,7 @@ def fetch_api_supplement(date_str):
     }
     headers = {'User-Agent': 'live-greekpower-bot (Mozilla/5.0)', 'Accept': 'application/json'}
     
-    hourly_supp = {hr: {'mcp': 0, 'bess_disch': 0, 'bess_chg': 0, 'pump': 0} for hr in range(1, 25)}
+    hourly_supp = {hr: {'mcp': 0.0, 'bess_disch': 0.0, 'bess_chg': 0.0, 'pump': 0.0} for hr in range(1, 25)}
     
     try:
         resp_prod = requests.get(endpoints["production"], headers=headers, verify=False, timeout=15)
@@ -71,16 +71,16 @@ def fetch_api_supplement(date_str):
                 tech = item.get("itemname")
                 energy = item.get("energy")
                 if hr and tech:
-                    if tech == 'STORAGE_INJECTION': hourly_supp[hr]['bess_disch'] = energy
-                    elif tech == 'STORAGE_ABSORPTION': hourly_supp[hr]['bess_chg'] = abs(energy)
-                    elif tech == 'ΣΥΝΟΛΙΚΗ ΑΝΤΛΗΣΗ': hourly_supp[hr]['pump'] = energy
+                    if tech == 'STORAGE_INJECTION': hourly_supp[hr]['bess_disch'] = float(energy)
+                    elif tech == 'STORAGE_ABSORPTION': hourly_supp[hr]['bess_chg'] = float(abs(energy))
+                    elif tech == 'ΣΥΝΟΛΙΚΗ ΑΝΤΛΗΣΗ': hourly_supp[hr]['pump'] = float(energy)
         
         resp_dam = requests.get(endpoints["dam"], headers=headers, verify=False, timeout=15)
         if resp_dam.status_code == 200:
              for item in resp_dam.json().get("items", []):
                  hr = item.get("hr")
                  if hr and item.get("country") == "GR":
-                     hourly_supp[hr]['mcp'] = item.get("value", 0)
+                     hourly_supp[hr]['mcp'] = float(item.get("value", 0))
     except Exception as e:
         print(f"[{date_str}] Σφάλμα λήψης API (MCP/Storage): {e}")
         
@@ -140,10 +140,11 @@ def build_xray_for_date(date_str):
     for hr in range(1, 25):
         scada_col = str(hr + 1)
         
+        # 1. Υπολογισμοί SCADA (Κάνουμε ρητό cast σε float!)
         def get_val(df, mask):
-            return pd.to_numeric(df.loc[mask, scada_col], errors='coerce').fillna(0).sum()
+            val = pd.to_numeric(df.loc[mask, scada_col], errors='coerce').fillna(0).sum()
+            return float(val)
         
-        # 1. Υπολογισμοί SCADA
         scada_bh = get_val(hydro_df, hydro_df['1'].isin(big_hydro_names))
         scada_sh = get_val(hydro_df, hydro_df['1'].isin(small_hydro_names))
         
@@ -153,41 +154,42 @@ def build_xray_for_date(date_str):
         scada_cogen = get_val(res_df, is_cg)
         scada_wind = get_val(res_df, is_wind)
         
-        scada_total_res_row = pd.to_numeric(scada_df.loc[res_end, scada_col], errors='coerce')
-        if pd.isna(scada_total_res_row): scada_total_res_row = 0
+        raw_scada_total = pd.to_numeric(scada_df.loc[res_end, scada_col], errors='coerce')
+        scada_total_res_row = 0.0 if pd.isna(raw_scada_total) else float(raw_scada_total)
             
-        # Other RES: Ό,τι περισσεύει μεταξύ του επίσημου Total και των 5 επιμέρους μερών (για μαθηματική ακρίβεια)
+        # Other RES: Ό,τι περισσεύει
         sum_of_scada_parts = scada_myis + scada_solar + scada_biomass + scada_cogen + scada_wind
         scada_other_res = scada_total_res_row - sum_of_scada_parts
         
-        # 2. Υπολογισμοί RESMV (Μετατροπή KWh -> MWh)
+        # 2. Υπολογισμοί RESMV (Ρητό cast σε float!)
         resmv_row = resmv_df[resmv_df['ΩΡΑ'] == float(hr)]
         if not resmv_row.empty:
             r = resmv_row.iloc[0]
-            resmv_sh = r.get('ΜΥΗΣ ΕΝΕΡΓΕΙΑ KWh', 0) / 1000.0
-            resmv_solar = r.get('Φ/Β ΕΝΕΡΓΕΙΑ KWh', 0) / 1000.0
-            resmv_biomass = r.get('B/A ΕΝΕΡΓΕΙΑ KWh', 0) / 1000.0
-            resmv_cogen = r.get('ΣΗΘΥΑ ΕΝΕΡΓΕΙΑ KWh', 0) / 1000.0
+            resmv_sh = float(r.get('ΜΥΗΣ ΕΝΕΡΓΕΙΑ KWh', 0) / 1000.0)
+            resmv_solar = float(r.get('Φ/Β ΕΝΕΡΓΕΙΑ KWh', 0) / 1000.0)
+            resmv_biomass = float(r.get('B/A ΕΝΕΡΓΕΙΑ KWh', 0) / 1000.0)
+            resmv_cogen = float(r.get('ΣΗΘΥΑ ΕΝΕΡΓΕΙΑ KWh', 0) / 1000.0)
         else:
             resmv_sh = resmv_solar = resmv_biomass = resmv_cogen = 0.0
 
         # 3. Ενσωμάτωση δεδομένων
-        supp = api_supp.get(hr, {'mcp': 0, 'bess_disch': 0, 'bess_chg': 0, 'pump': 0})
+        supp = api_supp.get(hr, {'mcp': 0.0, 'bess_disch': 0.0, 'bess_chg': 0.0, 'pump': 0.0})
 
+        # 4. Χτίσιμο του JSON αντικειμένου, εξασφαλίζοντας ότι ΟΛΑ είναι Python floats/ints
         xray_records.append({
             "date": date_str,
-            "target_hour": hr,
-            "mcp": round(supp['mcp'], 2),
-            "big_hydro": round(scada_bh, 1),
-            "small_hydro": round(scada_sh + scada_myis + resmv_sh, 1),
-            "solar": round(scada_solar + resmv_solar, 1),
-            "biomass": round(scada_biomass + resmv_biomass, 1),
-            "cogen": round(scada_cogen + resmv_cogen, 1),
-            "wind": round(scada_wind, 1),
-            "other_res": round(scada_other_res, 1),
-            "bess_disch": round(supp['bess_disch'], 1),
-            "bess_chg": round(supp['bess_chg'], 1),
-            "pump": round(supp['pump'], 1)
+            "target_hour": int(hr),
+            "mcp": float(round(supp['mcp'], 2)),
+            "big_hydro": float(round(scada_bh, 1)),
+            "small_hydro": float(round(scada_sh + scada_myis + resmv_sh, 1)),
+            "solar": float(round(scada_solar + resmv_solar, 1)),
+            "biomass": float(round(scada_biomass + resmv_biomass, 1)),
+            "cogen": float(round(scada_cogen + resmv_cogen, 1)),
+            "wind": float(round(scada_wind, 1)),
+            "other_res": float(round(scada_other_res, 1)),
+            "bess_disch": float(round(supp['bess_disch'], 1)),
+            "bess_chg": float(round(supp['bess_chg'], 1)),
+            "pump": float(round(supp['pump'], 1))
         })
         
     return xray_records
