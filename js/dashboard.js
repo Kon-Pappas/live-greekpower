@@ -1,9 +1,10 @@
 // --- 1. Global ECharts Instances & State Management ---
-let supplyChart, demandChart, flowsChart, dailyDispatchChart;
+let supplyChart, demandChart, flowsChart, dailyDispatchChart, xrayChart;
 const fmt = (num) => new Intl.NumberFormat('en-US').format(Math.round(num));
 
 // Global State Variables
 let globalData = [];
+let globalXrayData = [];
 let latestDateGlobal = '';
 let currentActiveTab = 'tab-live';
 let validLiveRecord = null;
@@ -23,12 +24,14 @@ function initCharts() {
     demandChart = echarts.init(document.getElementById('demandChart'), 'dark');
     flowsChart = echarts.init(document.getElementById('flowsChart'), 'dark');
     dailyDispatchChart = echarts.init(document.getElementById('dailyDispatchChart'), 'dark');
+    xrayChart = echarts.init(document.getElementById('xrayChart'), 'dark');
 
     window.addEventListener('resize', () => {
         if(supplyChart) supplyChart.resize(); 
         if(demandChart) demandChart.resize(); 
         if(flowsChart) flowsChart.resize(); 
         if(dailyDispatchChart) dailyDispatchChart.resize();
+        if(xrayChart) xrayChart.resize();
     });
 }
 
@@ -47,7 +50,8 @@ function setupTabSwitcher() {
             updateDropdownState();
             
             setTimeout(() => {
-                supplyChart.resize(); demandChart.resize(); flowsChart.resize(); dailyDispatchChart.resize();
+                supplyChart.resize(); demandChart.resize(); flowsChart.resize(); 
+                dailyDispatchChart.resize(); xrayChart.resize();
             }, 50);
         });
     });
@@ -56,9 +60,18 @@ function setupTabSwitcher() {
 // --- 3. Main Data Fetcher & Deduplication ---
 async function loadData() {
     try {
+        // Fetch Live Data
         const response = await fetch('data/live_data.json?v=' + new Date().getTime());
         const rawData = await response.json();
         
+        // Fetch X-Ray Data
+        try {
+            const xrayResp = await fetch('data/xray_data.json?v=' + new Date().getTime());
+            globalXrayData = await xrayResp.json();
+        } catch(e) {
+            console.log("No X-Ray data found yet.");
+        }
+
         if (!rawData || rawData.length === 0) throw new Error("No data found in JSON.");
 
         const cleanDataMap = new Map();
@@ -124,7 +137,7 @@ function updateDropdownState() {
         if(todayRecords.find(r => r.target_hour === selectedHourLive)) dropdown.value = selectedHourLive;
         else { dropdown.value = validLiveRecord.target_hour; selectedHourLive = validLiveRecord.target_hour; }
         
-    } else {
+    } else if (currentActiveTab === 'tab-daily') {
         const uniqueDates = [...new Set(globalData.map(d => d.date))].reverse();
         uniqueDates.forEach(dt => {
             let option = document.createElement('option');
@@ -137,6 +150,25 @@ function updateDropdownState() {
         
         if(uniqueDates.includes(selectedDateDaily)) dropdown.value = selectedDateDaily;
         else { dropdown.value = uniqueDates[0]; selectedDateDaily = uniqueDates[0]; }
+        
+    } else if (currentActiveTab === 'tab-xray') {
+        const uniqueDatesXray = [...new Set(globalXrayData.map(d => d.date))].reverse();
+        if (uniqueDatesXray.length === 0) {
+            let option = document.createElement('option');
+            option.text = "No X-Ray Data Available";
+            dropdown.appendChild(option);
+            return;
+        }
+        uniqueDatesXray.forEach(dt => {
+            let option = document.createElement('option');
+            option.value = dt;
+            let formattedDate = `${dt.substring(6,8)}/${dt.substring(4,6)}/${dt.substring(0,4)}`;
+            option.text = `Date: ${formattedDate}`;
+            dropdown.appendChild(option);
+        });
+        
+        if(uniqueDatesXray.includes(selectedDateDaily)) dropdown.value = selectedDateDaily;
+        else { dropdown.value = uniqueDatesXray[0]; selectedDateDaily = uniqueDatesXray[0]; }
     }
     
     handleDropdownChange(); 
@@ -150,6 +182,7 @@ function handleDropdownChange() {
     if (currentActiveTab === 'tab-live') {
         selectedHourLive = parseInt(val);
         const record = globalData.find(d => d.date === latestDateGlobal && d.target_hour === selectedHourLive);
+        if(!record) return;
         
         const fetchTime = new Date(record.fetch_timestamp).toLocaleString('en-GB');
         const displayHour = record.target_hour.toString().padStart(2, '0') + ':00';
@@ -162,12 +195,12 @@ function handleDropdownChange() {
             pill.innerHTML = '● Historical Hour';
             pill.style.color = '#ffc000'; pill.style.borderColor = 'rgba(255, 192, 0, 0.3)'; pill.style.backgroundColor = 'rgba(255, 192, 0, 0.15)';
         }
-        
         renderLiveTab(record);
         
-    } else {
+    } else if (currentActiveTab === 'tab-daily') {
         selectedDateDaily = val;
         const dailyRecords = globalData.filter(d => d.date === selectedDateDaily);
+        if(!dailyRecords.length) return;
         
         const latestRec = dailyRecords[dailyRecords.length - 1];
         const fetchTime = new Date(latestRec.fetch_timestamp).toLocaleString('en-GB');
@@ -181,8 +214,23 @@ function handleDropdownChange() {
             pill.innerHTML = '● Historical Day';
             pill.style.color = '#ffc000'; pill.style.borderColor = 'rgba(255, 192, 0, 0.3)'; pill.style.backgroundColor = 'rgba(255, 192, 0, 0.15)';
         }
-        
         renderDailyTab(dailyRecords);
+        
+    } else if (currentActiveTab === 'tab-xray') {
+        selectedDateDaily = val;
+        const xrayRecords = globalXrayData.filter(d => d.date === selectedDateDaily);
+        if(!xrayRecords.length) {
+            xrayChart.clear();
+            return;
+        }
+        
+        let formattedDate = `${selectedDateDaily.substring(6,8)}/${selectedDateDaily.substring(4,6)}/${selectedDateDaily.substring(0,4)}`;
+        document.getElementById('last-updated').innerText = `X-Ray Built from SCADA/RESMV | Selected Date: ${formattedDate}`;
+        
+        pill.innerHTML = '● Ex-Post Validated';
+        pill.style.color = '#00e5ff'; pill.style.borderColor = 'rgba(0, 229, 255, 0.3)'; pill.style.backgroundColor = 'rgba(0, 229, 255, 0.15)';
+        
+        renderXrayTab(xrayRecords);
     }
 }
 
@@ -211,7 +259,6 @@ function renderLiveTab(latestData) {
     let liveTotalSinks = live.pump + live.stAbs + live.exports;
     let liveDemand = liveTotalSupply - liveTotalSinks;
 
-    // --- Box 1: Generation Ledger ---
     document.getElementById('render-gen-ledger').innerHTML = `
         <div class="ledger-row c-lignite"><span class="ledger-label">Lignite</span><span class="ledger-operator"></span><span class="ledger-value">${fmt(live.lignite)}</span></div>
         <div class="ledger-row c-gas"><span class="ledger-label">N. Gas</span><span class="ledger-operator">+</span><span class="ledger-value">${fmt(live.gas)}</span></div>
@@ -224,7 +271,6 @@ function renderLiveTab(latestData) {
         </div>
     `;
 
-    // --- Box 4: Demand Ledger ---
     document.getElementById('render-dem-ledger').innerHTML = `
         <div class="ledger-row text-white"><span class="ledger-label">Generation</span><span class="ledger-operator"></span><span class="ledger-value">${fmt(live.totalGen)}</span></div>
         <div class="ledger-row c-imports"><span class="ledger-label">Imports</span><span class="ledger-operator">+</span><span class="ledger-value">${fmt(live.imports)}</span></div>
@@ -352,17 +398,11 @@ function renderDailyTab(todayData) {
         backgroundColor: 'transparent',
         title: { text: '24-Hour Dispatch & Market Clearing Price', left: 'center', top: 5, textStyle: { color: '#ffffff', fontSize: 15 } },
         tooltip: {
-            trigger: 'axis',
-            axisPointer: { type: 'cross' },
-            backgroundColor: 'rgba(28, 33, 40, 0.95)',
-            borderColor: '#2d333b',
-            textStyle: { color: '#fff' },
+            trigger: 'axis', axisPointer: { type: 'cross' }, backgroundColor: 'rgba(28, 33, 40, 0.95)', borderColor: '#2d333b', textStyle: { color: '#fff' },
             formatter: function (params) {
                 let hour = params[0].axisValue;
-                
                 const supplyOrder = ['Hydro', 'RES', 'BESS Discharge', 'Imports', 'Natural Gas', 'Lignite'];
                 const demandOrder = ['Domestic Demand', 'Exports', 'BESS Charge', 'Pumping'];
-                
                 let mcpParam = params.find(p => p.seriesName === 'MCP');
                 let mcpValue = mcpParam ? fmt(Math.abs(mcpParam.value)) : '-';
 
@@ -389,14 +429,11 @@ function renderDailyTab(todayData) {
                     let p = params.find(item => item.seriesName === name);
                     if(p && p.value !== 0) html += renderRow(p); 
                 });
-
                 html += `<div style="height: 15px;"></div>`;
-
                 demandOrder.forEach(name => {
                     let p = params.find(item => item.seriesName === name);
                     if(p && p.value !== 0) html += renderRow(p); 
                 });
-
                 return html;
             }
         },
@@ -408,7 +445,6 @@ function renderDailyTab(todayData) {
             { type: 'value', name: 'Price (€/MWh)', position: 'right', splitLine: { show: false }, axisLabel: { color: '#00e5ff', fontWeight: 'bold' }, nameTextStyle: { color: '#00e5ff' } }
         ],
         series: [
-            // Όλα τα stack έγιναν 'Total' και προστέθηκε barWidth: '70%'
             { name: 'Lignite', type: 'bar', stack: 'Total', barWidth: '70%', data: arrLignite, itemStyle: { color: '#b06a4b' } },
             { name: 'Natural Gas', type: 'bar', stack: 'Total', barWidth: '70%', data: arrGas, itemStyle: { color: '#d18b57' } },
             { name: 'Imports', type: 'bar', stack: 'Total', barWidth: '70%', data: arrImports, itemStyle: { color: '#ffc000' } },
@@ -424,7 +460,95 @@ function renderDailyTab(todayData) {
     });
 }
 
-// --- 7. Modal Records Loader & Smart Notification Badge ---
+// --- 7. Render Logic for Tab 3 (Clean Energy X-Ray) ---
+function renderXrayTab(xrayData) {
+    let hours = [], arrSolar = [], arrWind = [], arrBiomass = [], arrCogen = [];
+    let arrSmallHydro = [], arrBigHydro = [], arrOther = [];
+    let arrBessDisch = [], arrBessChg = [], arrPump = [], arrMcp = [];
+
+    xrayData.forEach(d => {
+        hours.push(d.target_hour.toString().padStart(2, '0') + ':00');
+        arrSolar.push(d.solar || 0);
+        arrWind.push(d.wind || 0);
+        arrBiomass.push(d.biomass || 0);
+        arrCogen.push(d.cogen || 0);
+        arrSmallHydro.push(d.small_hydro || 0);
+        arrBigHydro.push(d.big_hydro || 0);
+        arrOther.push(d.other_res || 0);
+        arrBessDisch.push(d.bess_disch || 0);
+        
+        // Τα Sinks πάνε στον αρνητικό άξονα
+        arrBessChg.push(-(d.bess_chg || 0)); 
+        arrPump.push(-(d.pump || 0));       
+        
+        arrMcp.push(d.mcp || 0);
+    });
+
+    xrayChart.setOption({
+        backgroundColor: 'transparent',
+        title: { text: '24-Hour Clean Energy X-Ray & Flexibility Profile', left: 'center', top: 5, textStyle: { color: '#ffffff', fontSize: 15 } },
+        tooltip: {
+            trigger: 'axis', axisPointer: { type: 'cross' }, backgroundColor: 'rgba(28, 33, 40, 0.95)', borderColor: '#2d333b', textStyle: { color: '#fff' },
+            formatter: function (params) {
+                let hour = params[0].axisValue;
+                
+                // Διάταξη Εμφάνισης στο Tooltip 
+                const techOrder = [
+                    'Big Hydro & Mixed PSH', 'BESS Discharge', 'Solar PV', 'Wind', 'Biomass', 
+                    'Cogeneration', 'Small Hydro', 'Other RES / Deviation', 'BESS Charge', 'PSH Pumping'
+                ];
+                
+                let mcpParam = params.find(p => p.seriesName === 'MCP');
+                let mcpValue = mcpParam ? fmt(Math.abs(mcpParam.value)) : '-';
+
+                let html = `<div style="display: flex; justify-content: space-between; margin-bottom: 10px; border-bottom: 1px solid #2d333b; padding-bottom: 5px;">
+                                <b style="font-size:14px; color:#2ecc71;">Hour: ${hour}</b>
+                                <b style="font-size:14px; color:#00e5ff;">MCP: ${mcpValue} €/MWh</b>
+                            </div>`;
+
+                techOrder.forEach(name => {
+                    let p = params.find(item => item.seriesName === name);
+                    if(p && p.value !== 0) {
+                        let val = Math.abs(p.value);
+                        html += `<div style="margin-bottom: 3px;">
+                                    <span style="color:${p.color}; font-size:14px;">●</span> 
+                                    <span style="display:inline-block; width:160px; font-size:13px; color:#fff;">${name}:</span> 
+                                    <span style="font-size:13px; color:#fff; float:right;"><b>${fmt(val)}</b> MWh</span>
+                                 </div>`;
+                    }
+                });
+                return html;
+            }
+        },
+        legend: { top: 40, textStyle: { color: '#8892b0' }, icon: 'roundRect' },
+        grid: { top: 120, bottom: 40, left: 60, right: 60 },
+        xAxis: { type: 'category', data: hours, axisLabel: { color: '#fff' } },
+        yAxis: [
+            { type: 'value', name: 'Volume (MWh)', position: 'left', splitLine: { lineStyle: { color: '#2d333b', type: 'dashed' } }, axisLabel: { color: '#8892b0', formatter: (val) => fmt(Math.abs(val)) }, nameTextStyle: { color: '#8892b0' } },
+            { type: 'value', name: 'Price (€/MWh)', position: 'right', splitLine: { show: false }, axisLabel: { color: '#00e5ff', fontWeight: 'bold' }, nameTextStyle: { color: '#00e5ff' } }
+        ],
+        series: [
+            // --- POSITIVE AXIS (Production) ---
+            { name: 'Cogeneration', type: 'bar', stack: 'Total', barWidth: '70%', data: arrCogen, itemStyle: { color: 'var(--color-cogen)' } },
+            { name: 'Small Hydro', type: 'bar', stack: 'Total', barWidth: '70%', data: arrSmallHydro, itemStyle: { color: 'var(--color-small-hydro)' } },
+            { name: 'Biomass', type: 'bar', stack: 'Total', barWidth: '70%', data: arrBiomass, itemStyle: { color: 'var(--color-biomass)' } },
+            { name: 'Other RES / Deviation', type: 'bar', stack: 'Total', barWidth: '70%', data: arrOther, itemStyle: { color: 'var(--color-other-res)' } },
+            { name: 'Wind', type: 'bar', stack: 'Total', barWidth: '70%', data: arrWind, itemStyle: { color: 'var(--color-wind)' } },
+            { name: 'Solar PV', type: 'bar', stack: 'Total', barWidth: '70%', data: arrSolar, itemStyle: { color: 'var(--color-solar)' } },
+            { name: 'BESS Discharge', type: 'bar', stack: 'Total', barWidth: '70%', data: arrBessDisch, itemStyle: { color: 'var(--color-storage)' } },
+            { name: 'Big Hydro & Mixed PSH', type: 'bar', stack: 'Total', barWidth: '70%', data: arrBigHydro, itemStyle: { color: 'var(--color-hydro)' } },
+            
+            // --- NEGATIVE AXIS (Sinks) ---
+            { name: 'PSH Pumping', type: 'bar', stack: 'Total', barWidth: '70%', data: arrPump, itemStyle: { color: 'var(--color-pump)' } },
+            { name: 'BESS Charge', type: 'bar', stack: 'Total', barWidth: '70%', data: arrBessChg, itemStyle: { color: 'var(--color-storage-chg)' } },
+            
+            // --- MCP LINE ---
+            { name: 'MCP', type: 'line', yAxisIndex: 1, data: arrMcp, symbol: 'circle', symbolSize: 6, lineStyle: { color: '#00e5ff', width: 3 }, itemStyle: { color: '#00e5ff' }, z: 10 }
+        ]
+    });
+}
+
+// --- 8. Modal Records Loader ---
 async function loadRecords() {
     try {
         const response = await fetch('data/records.json?v=' + new Date().getTime());
@@ -456,11 +580,10 @@ async function loadRecords() {
 
         const buildCard = (title, items, color, unit) => {
             let listHtml = items.slice(0, 3).map((item, idx) => {
-                
                 let rankStyle = '';
-                if (idx === 0) rankStyle = 'color: #ffc000; font-size: 0.85rem; text-shadow: 0 0 5px rgba(255,192,0,0.3);'; // Gold
-                else if (idx === 1) rankStyle = 'color: #c0c0c0;'; // Silver
-                else if (idx === 2) rankStyle = 'color: #cd7f32;'; // Bronze
+                if (idx === 0) rankStyle = 'color: #ffc000; font-size: 0.85rem; text-shadow: 0 0 5px rgba(255,192,0,0.3);';
+                else if (idx === 1) rankStyle = 'color: #c0c0c0;';
+                else if (idx === 2) rankStyle = 'color: #cd7f32;';
                 
                 let isNew = todayFormatted && item.id.startsWith(todayFormatted);
                 let newBadgeHtml = isNew ? `<span class="new-record-badge">NEW!</span>` : '';
@@ -502,8 +625,6 @@ async function loadRecords() {
         document.getElementById('render-daily-records').innerHTML = dailyHtml;
 
     } catch (error) {
-        console.error("No records.json found yet. It will be created on next python run.");
-        document.getElementById('render-hourly-records').innerHTML = '<div class="col-12"><p class="text-muted p-3">Waiting for first Python sync to generate records...</p></div>';
-        document.getElementById('render-daily-records').innerHTML = '<div class="col-12"><p class="text-muted p-3">Waiting for first Python sync to generate records...</p></div>';
+        console.error("Waiting for first Python sync to generate records.");
     }
 }
