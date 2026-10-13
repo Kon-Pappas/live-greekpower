@@ -6,7 +6,7 @@
     --text-main: #ffffff;
     --text-muted: #8892b0;
     
-    /* Color Palette */
+    /* Color Palette - General */
     --color-lignite: #b06a4b; 
     --color-gas: #d18b57;     
     --color-hydro: #5b9bd5;   
@@ -18,6 +18,14 @@
     --color-pump: #85c1e9;    
     --color-demand: #cbd5e1;  
     --color-mcp: #00e5ff; 
+    
+    /* X-Ray Specific Colors */
+    --color-solar: #f1c40f;
+    --color-wind: #3498db;
+    --color-biomass: #8e44ad;
+    --color-cogen: #e67e22;
+    --color-small-hydro: #1abc9c;
+    --color-other-res: #7f8c8d;
 }
 
 body {
@@ -75,7 +83,7 @@ body {
 .live-dashboard-grid {
     display: grid;
     gap: 15px;
-    grid-template-columns: 1fr; /* Mobile */
+    grid-template-columns: 1fr;
 }
 @media (min-width: 1200px) {
     .live-dashboard-grid {
