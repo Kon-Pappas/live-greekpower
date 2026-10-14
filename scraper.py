@@ -5,8 +5,65 @@ import sys
 from datetime import datetime, timedelta
 import pytz
 
+# =====================================================================
+# 1. ΚΑΝΟΝΕΣ ΕΠΙΚΥΡΩΣΗΣ (SANITY CHECKS) & ΣΥΓΧΩΝΕΥΣΗΣ
+# =====================================================================
+
+def apply_live_sanity_checks(item):
+    """Εφαρμόζει τους κανόνες αποτροπής λανθασμένων 0 στο Live Mode."""
+    forbidden_root = ['demand_mwh', 'TOTAL_PROD'] 
+    forbidden_prod = ['CO2_FACTOR_GAS', 'CO2_FACTOR_LIGNITE', 'MARKET_LOAD', 'RES_PROD', 'TOTAL GAS']
+
+    # Καθαρισμός ρίζας
+    for field in forbidden_root:
+        if item.get(field) == 0:
+            item[field] = None
+            
+    # Καθαρισμός παραγωγής
+    if item.get('production_mix'):
+        for field in forbidden_prod:
+            if item['production_mix'].get(field) == 0:
+                item['production_mix'][field] = None
+
+    # Έλεγχος Διασυνδέσεων (Total Islanding)
+    if item.get('interconnections_mwh'):
+        inter = item['interconnections_mwh']
+        # Αν υπάρχουν κλειδιά και ΟΛΕΣ οι τιμές είναι ακριβώς 0
+        if len(inter) > 0 and all(v == 0 for v in inter.values()):
+            item['interconnections_mwh'] = None
+
+    return item
+
+def merge_hourly_record(old_record, new_record):
+    """Συγχωνεύει δεδομένα. Κρατάει την παλιά τιμή αν η νέα είναι None."""
+    merged = old_record.copy()
+    
+    for key in ['demand_mwh', 'dam_price_eur', 'co2_emissions']:
+        if new_record.get(key) is not None:
+            merged[key] = new_record[key]
+            
+    if new_record.get('production_mix'):
+        if not merged.get('production_mix'):
+            merged['production_mix'] = {}
+        for key, val in new_record['production_mix'].items():
+            if val is not None:
+                merged['production_mix'][key] = val
+                
+    if new_record.get('interconnections_mwh') is not None:
+        if not merged.get('interconnections_mwh'):
+            merged['interconnections_mwh'] = {}
+        for key, val in new_record['interconnections_mwh'].items():
+            if val is not None:
+                merged['interconnections_mwh'][key] = val
+
+    merged['fetch_timestamp'] = new_record.get('fetch_timestamp', merged.get('fetch_timestamp'))
+    return merged
+
+# =====================================================================
+# 2. ΑΝΤΛΗΣΗ & ΔΙΑΧΕΙΡΙΣΗ ΔΕΔΟΜΕΝΩΝ
+# =====================================================================
+
 def get_target_dates():
-    # Διαβάζει τα inputs από το GitHub Action (αφαιρεί τυχόν παύλες αν ο χρήστης βάλει 2026-10-09 αντί για 20261009)
     start_env = os.environ.get('START_DATE', '').strip().replace('-', '')
     end_env = os.environ.get('END_DATE', '').strip().replace('-', '')
 
@@ -17,7 +74,9 @@ def get_target_dates():
     today_str = today_dt.strftime("%Y%m%d")
     yesterday_str = yesterday_dt.strftime("%Y%m%d")
 
-    # Αν δεν υπάρχουν inputs (π.χ. στο αυτόματο cron), ψάχνουμε από ΧΘΕΣ έως ΣΗΜΕΡΑ
+    # Καθορισμός Mode (Live αν δεν δοθούν ημερομηνίες)
+    is_live_mode = not start_env and not end_env
+
     start_str = start_env if start_env else yesterday_str
     end_str = end_env if end_env else today_str
 
@@ -28,6 +87,7 @@ def get_target_dates():
         print("Μη έγκυρη μορφή ημερομηνίας. Γίνεται fallback στο Χθες και Σήμερα.")
         start_dt = yesterday_dt
         end_dt = today_dt
+        is_live_mode = True
 
     dates = []
     current = start_dt
@@ -35,7 +95,7 @@ def get_target_dates():
         dates.append(current.strftime("%Y%m%d"))
         current += timedelta(days=1)
 
-    return dates
+    return dates, is_live_mode, start_dt.strftime("%Y%m%d"), end_dt.strftime("%Y%m%d")
 
 def fetch_all_data(date_str):
     base_proxy = "https://iptoanalytics-api.admie.gr/iptoanalytics/api/ipto?endpoint=https:%2F%2Fmarket-public-api.admie.gr%2Frestws%2Fportal%2F"
@@ -59,15 +119,16 @@ def fetch_all_data(date_str):
 
     def get_or_create_hour(hr):
         if hr not in daily_data:
+            # Αρχικοποίηση με None, ΟΧΙ με 0, για να μην "βουτάνε" τα γραφήματα
             daily_data[hr] = {
                 "fetch_timestamp": fetch_timestamp,
                 "date": date_str,
                 "target_hour": hr,
-                "demand_mwh": 0,
+                "demand_mwh": None,
                 "production_mix": {},
-                "dam_price_eur": 0,
+                "dam_price_eur": None,
                 "interconnections_mwh": {},
-                "co2_emissions": 0
+                "co2_emissions": None
             }
         return daily_data[hr]
 
@@ -89,7 +150,7 @@ def fetch_all_data(date_str):
              for item in resp_dam.json().get("items", []):
                  hr = item.get("hr")
                  if hr is not None and item.get("country") == "GR":
-                     get_or_create_hour(hr)["dam_price_eur"] = item.get("value", 0) 
+                     get_or_create_hour(hr)["dam_price_eur"] = item.get("value") 
 
         resp_int = requests.get(endpoints["interconnections"], headers=headers)
         if resp_int.status_code == 200:
@@ -103,6 +164,50 @@ def fetch_all_data(date_str):
     except Exception as e:
         print(f"Σφάλμα κατά την άντληση {date_str}: {e}")
         return []
+
+def save_to_json(new_records, is_live_mode, start_str, end_str):
+    if not new_records: return
+    filepath = 'data/live_data.json'
+    os.makedirs('data', exist_ok=True)
+    history = []
+    
+    if os.path.exists(filepath):
+        try:
+            with open(filepath, 'r', encoding='utf-8') as f:
+                history = json.load(f)
+        except: pass 
+        
+    if is_live_mode:
+        print("Λειτουργία: LIVE (Εφαρμογή Sanity Checks & Ασφαλές Merging)")
+        history_map = { (rec.get("date"), rec.get("target_hour")): i for i, rec in enumerate(history) }
+        
+        for new_rec in new_records:
+            clean_rec = apply_live_sanity_checks(new_rec)
+            key = (clean_rec["date"], clean_rec["target_hour"])
+            
+            if key in history_map: 
+                idx = history_map[key]
+                history[idx] = merge_hourly_record(history[idx], clean_rec)
+            else:
+                history.append(clean_rec)
+                history_map[key] = len(history) - 1
+    else:
+        print(f"Λειτουργία: HISTORICAL (Clean Slate από {start_str} έως {end_str})")
+        # Διαγραφή παλιών εγγραφών για τις συγκεκριμένες ημερομηνίες και overwrite
+        history = [rec for rec in history if not (start_str <= rec.get("date", "") <= end_str)]
+        history.extend(new_records)
+            
+    history.sort(key=lambda x: (x.get("date", ""), x.get("target_hour", 0)))
+    
+    # Επέκταση σε 30 ημέρες
+    tz = pytz.timezone('Europe/Athens')
+    thirty_days_ago = datetime.now(tz) - timedelta(days=30)
+    cutoff = thirty_days_ago.strftime("%Y%m%d")
+    filtered_history = [rec for rec in history if rec.get("date", "") >= cutoff]
+
+    with open(filepath, 'w', encoding='utf-8') as f:
+        json.dump(filtered_history, f, ensure_ascii=False, indent=2)
+    print(f"✓ Δεδομένα αποθηκεύτηκαν στο {filepath}.")
 
 def update_records():
     records_path = 'data/records.json'
@@ -140,7 +245,6 @@ def update_records():
 
     clean_history = list(unique_hours.values())
 
-    # Κρατάει μόνο τα Top 3
     def add_top3(lst, entry):
         existing = next((i for i in lst if i['id'] == entry['id']), None)
         if existing:
@@ -161,6 +265,7 @@ def update_records():
             days_map[date_str] = {'res': 0, 'gen': 0, 'exp': 0, 'chg_pump': 0, 'dis': 0}
 
         mix = hr_data.get('production_mix', {}) or {}
+        # Το 'or 0' μας προστατεύει σε περίπτωση που η τιμή είναι None
         gen = mix.get('TOTAL_PROD') or 0
         res = mix.get('RES_PROD') or 0
         st_in = mix.get('STORAGE_INJECTION') or 0
@@ -208,41 +313,8 @@ def update_records():
         json.dump(records, f, ensure_ascii=False, indent=2)
     print(f"✓ Το records.json ενημερώθηκε (Top-3) σαρώνοντας {len(clean_history)} μοναδικές ώρες.")
 
-def save_to_json(new_records):
-    if not new_records: return
-    filepath = 'data/live_data.json'
-    os.makedirs('data', exist_ok=True)
-    history = []
-    if os.path.exists(filepath):
-        try:
-            with open(filepath, 'r', encoding='utf-8') as f:
-                history = json.load(f)
-        except: pass 
-        
-    history_map = { (rec.get("date"), rec.get("target_hour")): i for i, rec in enumerate(history) }
-    
-    for new_rec in new_records:
-        key = (new_rec["date"], new_rec["target_hour"])
-        if key in history_map: 
-            history[history_map[key]] = new_rec
-        else:
-            history.append(new_rec)
-            history_map[key] = len(history) - 1
-            
-    history.sort(key=lambda x: (x.get("date", ""), x.get("target_hour", 0)))
-    
-    # Επέκταση σε 30 ημέρες για να χωράει τα ιστορικά fetch
-    tz = pytz.timezone('Europe/Athens')
-    thirty_days_ago = datetime.now(tz) - timedelta(days=30)
-    cutoff = thirty_days_ago.strftime("%Y%m%d")
-    filtered_history = [rec for rec in history if rec.get("date", "") >= cutoff]
-
-    with open(filepath, 'w', encoding='utf-8') as f:
-        json.dump(filtered_history, f, ensure_ascii=False, indent=2)
-    print(f"✓ Δεδομένα αποθηκεύτηκαν στο {filepath}.")
-
 if __name__ == "__main__":
-    target_dates = get_target_dates()
+    target_dates, is_live_mode, start_str, end_str = get_target_dates()
     print(f"Θα αντληθούν δεδομένα για τις εξής {len(target_dates)} ημέρες: {target_dates}")
     
     all_new_data = []
@@ -251,5 +323,5 @@ if __name__ == "__main__":
         all_new_data.extend(daily_data)
         
     if all_new_data:
-        save_to_json(all_new_data)
+        save_to_json(all_new_data, is_live_mode, start_str, end_str)
         update_records()
