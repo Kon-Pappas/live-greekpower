@@ -53,12 +53,12 @@ function setupTabSwitcher() {
             updateDropdownState();
             
             setTimeout(() => {
-                supplyChart.resize(); 
-                demandChart.resize(); 
-                flowsChart.resize(); 
-                dailyDispatchChart.resize();
-                xrayChart.resize();
-                reconciliationChart.resize();
+                if(supplyChart) supplyChart.resize(); 
+                if(demandChart) demandChart.resize(); 
+                if(flowsChart) flowsChart.resize(); 
+                if(dailyDispatchChart) dailyDispatchChart.resize();
+                if(xrayChart) xrayChart.resize();
+                if(reconciliationChart) reconciliationChart.resize();
             }, 50);
         });
     });
@@ -68,6 +68,7 @@ function setupTabSwitcher() {
 async function loadData() {
     try {
         const ts = new Date().getTime();
+        // Fetch all data sources in parallel
         const [liveRes, xrayRes, entsoeRes] = await Promise.all([
             fetch(`data/live_data.json?v=${ts}`).then(r => r.ok ? r.json() : []),
             fetch(`data/xray_data.json?v=${ts}`).then(r => r.ok ? r.json() : []).catch(() => []),
@@ -442,11 +443,12 @@ function renderDailyTab(todayData) {
 // --- 7. Render Logic for Tab 3 (Clean Energy X-Ray Analytics) ---
 function renderXrayTab(targetDate) {
     let hours = [];
-    let arrBigHydro = [], arrSmallHydro = [], arrSolar = [], arrWind = [], arrBiomassCogen = [], arrUnallocated = [], arrMcp = [];
+    let arrBigHydro = [], arrSmallHydro = [], arrSolar = [], arrWind = [];
+    let arrBiomass = [], arrCogen = [], arrUnallocated = [], arrMcp = [];
     let arrEntsoeSolar = [], arrEntsoeWind = [], arrEntsoeHydro = [];
 
     let sum = {
-        bigHydro: 0, smallHydro: 0, solar: 0, wind: 0, biomassCogen: 0,
+        bigHydro: 0, smallHydro: 0, solar: 0, wind: 0, biomass: 0, cogen: 0,
         unallocated: 0, totalPhysClean: 0, totalLiveClean: 0,
         entsoeSolar: 0, entsoeWind: 0, entsoeHydro: 0
     };
@@ -462,14 +464,15 @@ function renderXrayTab(targetDate) {
         let sh = xRec.small_hydro || 0;
         let sol = xRec.solar || 0;
         let wnd = xRec.wind || 0;
-        let bioCog = (xRec.biomass || 0) + (xRec.cogen || 0);
+        let bio = xRec.biomass || 0;
+        let cog = xRec.cogen || 0;
         let mcp = xRec.mcp || lRec.dam_price_eur || 0;
 
         let liveRes = lRec.production_mix ? (lRec.production_mix['RES_PROD'] || 0) : 0;
         let liveHydro = lRec.production_mix ? (lRec.production_mix['TOTAL HYDRO'] || 0) : 0;
         let liveCleanTotal = liveRes + liveHydro;
 
-        let physCleanTotal = bh + sh + sol + wnd + bioCog;
+        let physCleanTotal = bh + sh + sol + wnd + bio + cog;
         let unallocated = liveCleanTotal - physCleanTotal;
         if (unallocated < 0) unallocated = 0; 
 
@@ -481,7 +484,8 @@ function renderXrayTab(targetDate) {
         arrSmallHydro.push(sh);
         arrSolar.push(sol);
         arrWind.push(wnd);
-        arrBiomassCogen.push(bioCog);
+        arrBiomass.push(bio);
+        arrCogen.push(cog);
         arrUnallocated.push(unallocated);
         arrMcp.push(mcp);
 
@@ -493,7 +497,8 @@ function renderXrayTab(targetDate) {
         sum.smallHydro += sh;
         sum.solar += sol;
         sum.wind += wnd;
-        sum.biomassCogen += bioCog;
+        sum.biomass += bio;
+        sum.cogen += cog;
         sum.unallocated += unallocated;
         sum.totalPhysClean += physCleanTotal;
         sum.totalLiveClean += liveCleanTotal;
@@ -503,14 +508,15 @@ function renderXrayTab(targetDate) {
     }
 
     const leaderboardItems = [
-        { name: 'Physical Solar (SCADA+DEDDIE)', value: sum.solar, color: '#f39c12' },
-        { name: 'Physical Wind (SCADA)', value: sum.wind, color: '#27ae60' },
-        { name: 'Unallocated Clean Energy', value: sum.unallocated, color: 'var(--color-unallocated)' },
-        { name: 'Big Hydro (SCADA)', value: sum.bigHydro, color: '#2980b9' },
-        { name: 'ENTSO-E Declared Solar', value: sum.entsoeSolar, color: 'var(--color-entsoe-solar)' },
-        { name: 'ENTSO-E Declared Wind', value: sum.entsoeWind, color: 'var(--color-entsoe-wind)' },
-        { name: 'Small Hydro (SCADA+DEDDIE)', value: sum.smallHydro, color: '#3498db' },
-        { name: 'Biomass & Cogen', value: sum.biomassCogen, color: '#8e44ad' }
+        { name: 'Solar', value: sum.solar, color: '#f39c12' },
+        { name: 'Wind', value: sum.wind, color: '#70ad47' },
+        { name: 'Unallocated Clean Energy', value: sum.unallocated, color: '#e74c3c' },
+        { name: 'Big Hydro', value: sum.bigHydro, color: '#5b9bd5' },
+        { name: 'ENTSO-E Declared Solar', value: sum.entsoeSolar, color: '#ff9f43' },
+        { name: 'ENTSO-E Declared Wind', value: sum.entsoeWind, color: '#10ac84' },
+        { name: 'Small Hydro', value: sum.smallHydro, color: '#3498db' },
+        { name: 'Cogen', value: sum.cogen, color: '#f1c40f' },
+        { name: 'Biomass', value: sum.biomass, color: '#8e44ad' }
     ];
 
     leaderboardItems.sort((a, b) => b.value - a.value);
@@ -527,7 +533,7 @@ function renderXrayTab(targetDate) {
 
     xrayChart.setOption({
         backgroundColor: 'transparent',
-        title: { text: 'Physical Clean Energy Dispatch vs Live Unallocated Energy (X-Ray)', left: 'center', top: 5, textStyle: { color: '#ffffff', fontSize: 15 } },
+        title: { text: 'Physical Clean Energy Dispatch vs Unallocated Energy (X-Ray)', left: 'center', top: 5, textStyle: { color: '#ffffff', fontSize: 15 } },
         tooltip: {
             trigger: 'axis',
             axisPointer: { type: 'cross' },
@@ -539,26 +545,51 @@ function renderXrayTab(targetDate) {
                 let mcpParam = params.find(p => p.seriesName === 'MCP');
                 let mcpValue = mcpParam ? fmt(Math.abs(mcpParam.value)) : '-';
 
-                let html = `<div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                                <b style="font-size:14px; color:#2ecc71;">Hour: ${hour}</b>
-                                <b style="font-size:14px; color:#00e5ff;">MCP: ${mcpValue} €/MWh</b>
+                // Header
+                let html = `<div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                                <b style="font-size:15px; color:#70ad47;">Hour: ${hour}</b>
+                                <b style="font-size:15px; color:#00e5ff;">MCP: ${mcpValue} €/MWh</b>
                             </div>`;
 
+                const renderRow = (seriesName) => {
+                    let p = params.find(item => item.seriesName === seriesName);
+                    if (!p) return '';
+                    return `<div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                                <span style="font-size:14px; color:#fff;">
+                                    <span style="color:${p.color}; font-size:16px; margin-right:4px;">●</span>${p.seriesName}:
+                                </span>
+                                <span style="font-size:14px; color:#fff;"><b>${fmt(p.value)}</b> MWh</span>
+                            </div>`;
+                };
+
+                // Block 1: Μεταβλητά
+                html += renderRow('Wind');
+                html += renderRow('Big Hydro');
+                html += renderRow('Solar');
+                
+                html += `<div style="border-bottom: 1px dashed rgba(255,255,255,0.2); margin: 8px 0;"></div>`;
+                
+                // Block 2: Unallocated
+                html += renderRow('Unallocated Clean Energy');
+
+                html += `<div style="border-bottom: 1px dashed rgba(255,255,255,0.2); margin: 8px 0;"></div>`;
+
+                // Block 3: Baseload
+                html += renderRow('Cogen');
+                html += renderRow('Small Hydro');
+                html += renderRow('Biomass');
+                
+                html += `<div style="border-bottom: 1px dashed rgba(255,255,255,0.2); margin: 8px 0;"></div>`;
+
+                // Footer (Total)
                 let cleanSum = 0;
                 params.forEach(p => {
-                    if (p.seriesName !== 'MCP') {
-                        cleanSum += p.value;
-                        html += `<div style="margin-bottom: 3px;">
-                                    <span style="color:${p.color}; font-size:14px;">●</span> 
-                                    <span style="display:inline-block; width:180px; font-size:13px; color:#fff;">${p.seriesName}:</span> 
-                                    <span style="font-size:13px; color:#fff; float:right;"><b>${fmt(p.value)}</b> MWh</span>
-                                </div>`;
-                    }
+                    if (p.seriesName !== 'MCP') cleanSum += p.value;
                 });
 
-                html += `<div style="border-top: 1px dashed #444; margin-top: 8px; padding-top: 5px;">
-                            <span style="font-size:13px; color:#aaa;">Total Clean Energy:</span> 
-                            <span style="font-size:13px; color:#2ecc71; float:right;"><b>${fmt(cleanSum)}</b> MWh</span>
+                html += `<div style="display: flex; justify-content: space-between; margin-top: 6px;">
+                            <span style="font-size:14px; color:#8892b0;">Total Clean Energy:</span> 
+                            <span style="font-size:14px; color:#70ad47;"><b>${fmt(cleanSum)}</b> MWh</span>
                         </div>`;
 
                 return html;
@@ -571,13 +602,15 @@ function renderXrayTab(targetDate) {
             { type: 'value', name: 'Volume (MWh)', position: 'left', splitLine: { lineStyle: { color: '#2d333b', type: 'dashed' } }, axisLabel: { color: '#8892b0', formatter: (val) => fmt(val) }, nameTextStyle: { color: '#8892b0' } },
             { type: 'value', name: 'Price (€/MWh)', position: 'right', splitLine: { show: false }, axisLabel: { color: '#00e5ff', fontWeight: 'bold' }, nameTextStyle: { color: '#00e5ff' } }
         ],
+        // Η σειρά του Stack καθορίζεται από τη θέση στο array (από κάτω προς τα πάνω)
         series: [
-            { name: 'Big Hydro (SCADA)', type: 'bar', stack: 'Clean', barWidth: '70%', data: arrBigHydro, itemStyle: { color: '#2980b9' } },
-            { name: 'Small Hydro (SCADA+DEDDIE)', type: 'bar', stack: 'Clean', barWidth: '70%', data: arrSmallHydro, itemStyle: { color: '#3498db' } },
-            { name: 'Biomass & Cogen', type: 'bar', stack: 'Clean', barWidth: '70%', data: arrBiomassCogen, itemStyle: { color: '#8e44ad' } },
-            { name: 'Wind (Physical SCADA)', type: 'bar', stack: 'Clean', barWidth: '70%', data: arrWind, itemStyle: { color: '#27ae60' } },
-            { name: 'Solar (Physical SCADA+DEDDIE)', type: 'bar', stack: 'Clean', barWidth: '70%', data: arrSolar, itemStyle: { color: '#f39c12' } },
-            { name: 'Unallocated Clean Energy', type: 'bar', stack: 'Clean', barWidth: '70%', data: arrUnallocated, itemStyle: { color: 'var(--color-unallocated)' } },
+            { name: 'Biomass', type: 'bar', stack: 'Clean', barWidth: '70%', data: arrBiomass, itemStyle: { color: '#8e44ad' } },
+            { name: 'Small Hydro', type: 'bar', stack: 'Clean', barWidth: '70%', data: arrSmallHydro, itemStyle: { color: '#3498db' } },
+            { name: 'Cogen', type: 'bar', stack: 'Clean', barWidth: '70%', data: arrCogen, itemStyle: { color: '#f1c40f' } },
+            { name: 'Unallocated Clean Energy', type: 'bar', stack: 'Clean', barWidth: '70%', data: arrUnallocated, itemStyle: { color: '#e74c3c' } },
+            { name: 'Solar', type: 'bar', stack: 'Clean', barWidth: '70%', data: arrSolar, itemStyle: { color: '#f39c12' } },
+            { name: 'Big Hydro', type: 'bar', stack: 'Clean', barWidth: '70%', data: arrBigHydro, itemStyle: { color: '#5b9bd5' } },
+            { name: 'Wind', type: 'bar', stack: 'Clean', barWidth: '70%', data: arrWind, itemStyle: { color: '#70ad47' } },
             { name: 'MCP', type: 'line', yAxisIndex: 1, data: arrMcp, symbol: 'circle', symbolSize: 6, lineStyle: { color: '#00e5ff', width: 3 }, itemStyle: { color: '#00e5ff' }, z: 10 }
         ]
     });
@@ -593,13 +626,14 @@ function renderXrayTab(targetDate) {
             textStyle: { color: '#fff' },
             formatter: function (params) {
                 let hour = params[0].axisValue;
-                let html = `<div style="margin-bottom: 8px;"><b style="font-size:14px; color:#2ecc71;">Hour: ${hour}</b></div>`;
+                let html = `<div style="margin-bottom: 8px;"><b style="font-size:15px; color:#70ad47;">Hour: ${hour}</b></div>`;
 
                 params.forEach(p => {
-                    html += `<div style="margin-bottom: 3px;">
-                                <span style="color:${p.color}; font-size:14px;">●</span> 
-                                <span style="display:inline-block; width:200px; font-size:13px; color:#fff;">${p.seriesName}:</span> 
-                                <span style="font-size:13px; color:#fff; float:right;"><b>${fmt(p.value)}</b> MWh</span>
+                    html += `<div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                                <span style="font-size:14px; color:#fff;">
+                                    <span style="color:${p.color}; font-size:16px; margin-right:4px;">●</span>${p.seriesName}:
+                                </span>
+                                <span style="font-size:14px; color:#fff; margin-left: 15px;"><b>${fmt(p.value)}</b> MWh</span>
                             </div>`;
                 });
 
@@ -611,9 +645,9 @@ function renderXrayTab(targetDate) {
         xAxis: { type: 'category', data: hours, axisLabel: { color: '#fff' } },
         yAxis: { type: 'value', name: 'Volume (MWh)', splitLine: { lineStyle: { color: '#2d333b', type: 'dashed' } }, axisLabel: { color: '#8892b0', formatter: (val) => fmt(val) }, nameTextStyle: { color: '#8892b0' } },
         series: [
-            { name: 'Physical Solar (SCADA+DEDDIE)', type: 'line', smooth: true, data: arrSolar, lineStyle: { color: '#f39c12', width: 3 }, itemStyle: { color: '#f39c12' } },
+            { name: 'Physical Solar (SCADA)', type: 'line', smooth: true, data: arrSolar, lineStyle: { color: '#f39c12', width: 3 }, itemStyle: { color: '#f39c12' } },
             { name: 'ENTSO-E Declared Solar', type: 'line', smooth: true, data: arrEntsoeSolar, lineStyle: { color: '#ff9f43', width: 3, type: 'dashed' }, itemStyle: { color: '#ff9f43' } },
-            { name: 'Physical Wind (SCADA)', type: 'line', smooth: true, data: arrWind, lineStyle: { color: '#27ae60', width: 3 }, itemStyle: { color: '#27ae60' } },
+            { name: 'Physical Wind (SCADA)', type: 'line', smooth: true, data: arrWind, lineStyle: { color: '#70ad47', width: 3 }, itemStyle: { color: '#70ad47' } },
             { name: 'ENTSO-E Declared Wind', type: 'line', smooth: true, data: arrEntsoeWind, lineStyle: { color: '#10ac84', width: 3, type: 'dashed' }, itemStyle: { color: '#10ac84' } }
         ]
     });
