@@ -42,11 +42,20 @@ function setupTabSwitcher() {
     document.querySelectorAll('.nav-tab-item').forEach(tab => {
         tab.addEventListener('click', (e) => {
             e.preventDefault();
+            const targetId = tab.getAttribute('data-target');
+            
+            // --- Auto-Fallback logic for Tab 3 (X-Ray) ---
+            if (targetId === 'tab-xray' && selectedDateDaily === latestDateGlobal) {
+                const uniqueDates = [...new Set(globalData.map(d => d.date))].reverse();
+                if (uniqueDates.length > 1) {
+                    selectedDateDaily = uniqueDates[1]; // Switch to yesterday automatically
+                }
+            }
+
             document.querySelectorAll('.nav-tab-item').forEach(t => t.classList.remove('active'));
             tab.classList.add('active');
             
             document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
-            const targetId = tab.getAttribute('data-target');
             document.getElementById(targetId).classList.add('active');
             
             currentActiveTab = targetId;
@@ -68,7 +77,6 @@ function setupTabSwitcher() {
 async function loadData() {
     try {
         const ts = new Date().getTime();
-        // Fetch all data sources in parallel
         const [liveRes, xrayRes, entsoeRes] = await Promise.all([
             fetch(`data/live_data.json?v=${ts}`).then(r => r.ok ? r.json() : []),
             fetch(`data/xray_data.json?v=${ts}`).then(r => r.ok ? r.json() : []).catch(() => []),
@@ -507,29 +515,37 @@ function renderXrayTab(targetDate) {
         sum.entsoeHydro += eHydro;
     }
 
-    const leaderboardItems = [
-        { name: 'Solar', value: sum.solar, color: '#f39c12' },
-        { name: 'Wind', value: sum.wind, color: '#70ad47' },
-        { name: 'Unallocated Clean Energy', value: sum.unallocated, color: '#e74c3c' },
-        { name: 'Big Hydro', value: sum.bigHydro, color: '#5b9bd5' },
-        { name: 'ENTSO-E Declared Solar', value: sum.entsoeSolar, color: '#ff9f43' },
-        { name: 'ENTSO-E Declared Wind', value: sum.entsoeWind, color: '#10ac84' },
-        { name: 'Small Hydro', value: sum.smallHydro, color: '#3498db' },
-        { name: 'Cogen', value: sum.cogen, color: '#f1c40f' },
-        { name: 'Biomass', value: sum.biomass, color: '#8e44ad' }
-    ];
+    // --- Update the 3 Inline Summary Boxes ---
+    document.getElementById('xb-stoch').innerHTML = `
+        <div class="xb-item"><span style="color: #70ad47;">Wind</span> <span class="text-white">${fmt(sum.wind)} MWh</span></div>
+        <div class="xb-item"><span style="color: #5b9bd5;">Big Hydro</span> <span class="text-white">${fmt(sum.bigHydro)} MWh</span></div>
+        <div class="xb-item"><span style="color: #f39c12;">Solar</span> <span class="text-white">${fmt(sum.solar)} MWh</span></div>
+    `;
 
-    leaderboardItems.sort((a, b) => b.value - a.value);
-
-    document.getElementById('xray-leaderboard').innerHTML = leaderboardItems.map((item, index) => `
-        <div class="leaderboard-item">
-            <div class="lb-top">
-                <span class="lb-name" style="color: ${item.color};">${item.name}</span>
-                <span class="lb-rank">#${index + 1}</span>
-            </div>
-            <div class="lb-value">${fmt(item.value)} <span style="font-size: 0.9rem; font-weight: normal; color: var(--text-muted);">MWh</span></div>
+    document.getElementById('xb-uce').innerHTML = `
+        <div class="xb-item" style="justify-content: center; margin-top: 10px;">
+            <span style="color: #e74c3c; font-size: 1.1rem; margin-right: 10px;">UCE</span> 
+            <span class="text-white" style="font-size: 1.1rem;">${fmt(sum.unallocated)} MWh</span>
         </div>
-    `).join('');
+    `;
+
+    document.getElementById('xb-base').innerHTML = `
+        <div class="xb-item"><span style="color: #f1c40f;">Cogen</span> <span class="text-white">${fmt(sum.cogen)} MWh</span></div>
+        <div class="xb-item"><span style="color: #3498db;">Small Hydro</span> <span class="text-white">${fmt(sum.smallHydro)} MWh</span></div>
+        <div class="xb-item"><span style="color: #8e44ad;">Biomass</span> <span class="text-white">${fmt(sum.biomass)} MWh</span></div>
+    `;
+
+    // --- Watermark Logic (If user forces 'Today' on Tab 3) ---
+    const xrayWrapper = document.getElementById('xray-wrapper');
+    const watermark = document.getElementById('xray-watermark');
+    
+    if (targetDate === latestDateGlobal) {
+        xrayWrapper.classList.add('faded-charts');
+        watermark.classList.remove('d-none');
+    } else {
+        xrayWrapper.classList.remove('faded-charts');
+        watermark.classList.add('d-none');
+    }
 
     xrayChart.setOption({
         backgroundColor: 'transparent',
@@ -569,8 +585,8 @@ function renderXrayTab(targetDate) {
                 
                 html += `<div style="border-bottom: 1px dashed rgba(255,255,255,0.2); margin: 8px 0;"></div>`;
                 
-                // Block 2: Unallocated
-                html += renderRow('Unallocated Clean Energy');
+                // Block 2: Unallocated (UCE)
+                html += renderRow('UCE');
 
                 html += `<div style="border-bottom: 1px dashed rgba(255,255,255,0.2); margin: 8px 0;"></div>`;
 
@@ -602,12 +618,11 @@ function renderXrayTab(targetDate) {
             { type: 'value', name: 'Volume (MWh)', position: 'left', splitLine: { lineStyle: { color: '#2d333b', type: 'dashed' } }, axisLabel: { color: '#8892b0', formatter: (val) => fmt(val) }, nameTextStyle: { color: '#8892b0' } },
             { type: 'value', name: 'Price (€/MWh)', position: 'right', splitLine: { show: false }, axisLabel: { color: '#00e5ff', fontWeight: 'bold' }, nameTextStyle: { color: '#00e5ff' } }
         ],
-        // Η σειρά του Stack καθορίζεται από τη θέση στο array (από κάτω προς τα πάνω)
         series: [
             { name: 'Biomass', type: 'bar', stack: 'Clean', barWidth: '70%', data: arrBiomass, itemStyle: { color: '#8e44ad' } },
             { name: 'Small Hydro', type: 'bar', stack: 'Clean', barWidth: '70%', data: arrSmallHydro, itemStyle: { color: '#3498db' } },
             { name: 'Cogen', type: 'bar', stack: 'Clean', barWidth: '70%', data: arrCogen, itemStyle: { color: '#f1c40f' } },
-            { name: 'Unallocated Clean Energy', type: 'bar', stack: 'Clean', barWidth: '70%', data: arrUnallocated, itemStyle: { color: '#e74c3c' } },
+            { name: 'UCE', type: 'bar', stack: 'Clean', barWidth: '70%', data: arrUnallocated, itemStyle: { color: '#e74c3c' } },
             { name: 'Solar', type: 'bar', stack: 'Clean', barWidth: '70%', data: arrSolar, itemStyle: { color: '#f39c12' } },
             { name: 'Big Hydro', type: 'bar', stack: 'Clean', barWidth: '70%', data: arrBigHydro, itemStyle: { color: '#5b9bd5' } },
             { name: 'Wind', type: 'bar', stack: 'Clean', barWidth: '70%', data: arrWind, itemStyle: { color: '#70ad47' } },
