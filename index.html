@@ -14,17 +14,13 @@
 <body>
 
     <div class="top-nav d-flex align-items-center" style="font-size: 1.1rem;">
-        <!-- Clickable Hub Link -->
         <a href="https://kon-pappas.github.io/" style="text-decoration: none; color: #38bdf8; display: flex; align-items: center; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
-            <!-- Home SVG Icon -->
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px; margin-bottom: 2px;">
                 <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
                 <polyline points="9 22 9 12 15 12 15 22"></polyline>
             </svg>
             Konstantinos Pappas Hub
         </a>
-        
-        <!-- Non-clickable Separator & Dashboard Name -->
         <span style="color: #6b7280; margin: 0 10px;">/</span>
         <span style="color: #f3f4f6;">Live Greek Power</span>
     </div>
@@ -35,14 +31,11 @@
             <div class="update-info" id="last-updated">Last Update: Loading...</div>
         </div>
         <div class="controls-wrapper">
-            <!-- Records Button with Notification Badge -->
             <div class="records-btn-wrapper">
                 <button class="btn-records" data-bs-toggle="modal" data-bs-target="#recordsModal" onclick="loadRecords()">🏆 Records</button>
                 <span id="records-badge" class="badge-pulse d-none"></span>
             </div>
-            <!-- Context-Aware Dropdown -->
             <select id="context-dropdown" class="form-select custom-dropdown"></select>
-            <!-- Status Pill -->
             <div class="status-pill" id="live-status-pill">● Live Data Active</div>
         </div>
     </div>
@@ -73,7 +66,6 @@
                     <div class="ledger-list" id="render-dem-ledger"></div>
                 </div>
             </div>
-
             <div class="row">
                 <div class="col-12 mb-4">
                     <div class="chart-container" id="flowsChart" style="height: 380px;"></div>
@@ -96,20 +88,46 @@
 
         <!-- TAB 3: CLEAN ENERGY ANALYTICS (X-RAY & ENTSO-E) -->
         <div id="tab-xray" class="tab-pane">
-            <div class="daily-section-card mb-4">
-                <div class="section-header">Clean Energy Breakdown & Reconciliation Summary</div>
-                <div class="leaderboard-grid" id="xray-leaderboard"></div>
-            </div>
-
-            <div class="row mb-4">
-                <div class="col-12">
-                    <div class="chart-container" id="xrayChart" style="height: 600px;"></div>
+            
+            <!-- Wrapper for Watermark Fade effect -->
+            <div class="xray-wrapper position-relative" id="xray-wrapper">
+                
+                <!-- The Watermark -->
+                <div id="xray-watermark" class="watermark-overlay d-none">
+                    <div class="watermark-text">EX-POST DATA PENDING</div>
                 </div>
-            </div>
 
-            <div class="row">
-                <div class="col-12">
-                    <div class="chart-container" id="reconciliationChart" style="height: 500px;"></div>
+                <!-- Inner Content (that gets faded) -->
+                <div class="xray-content" id="xray-content">
+                    
+                    <!-- Top Summary Boxes (Inline Flex) -->
+                    <div class="xray-summary-boxes mb-4" id="xray-summary">
+                        <div class="xray-box">
+                            <div class="xb-title">Stochastic & Dispatchable</div>
+                            <div class="xb-content" id="xb-stoch"></div>
+                        </div>
+                        <div class="xray-box">
+                            <div class="xb-title">Unallocated Clean Energy</div>
+                            <div class="xb-content" id="xb-uce"></div>
+                        </div>
+                        <div class="xray-box">
+                            <div class="xb-title">Baseload</div>
+                            <div class="xb-content" id="xb-base"></div>
+                        </div>
+                    </div>
+
+                    <!-- Charts -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="chart-container" id="xrayChart" style="height: 600px;"></div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="chart-container" id="reconciliationChart" style="height: 500px;"></div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </div>
@@ -123,7 +141,6 @@
                     <h5 class="modal-title" style="color: #ffc000; font-weight: bold;">🏆 All-Time Records</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                
                 <div class="modal-tabs-header">
                     <ul class="nav nav-tabs custom-nav-tabs" id="recordsTab" role="tablist">
                         <li class="nav-item" role="presentation">
@@ -134,7 +151,6 @@
                         </li>
                     </ul>
                 </div>
-
                 <div class="modal-body custom-modal-body">
                     <div class="tab-content">
                         <div class="tab-pane fade show active" id="rec-hourly">
@@ -149,9 +165,7 @@
         </div>
     </div>
 
-    <!-- Bootstrap Bundle JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Custom JS -->
     <script src="js/dashboard.js"></script>
 </body>
 </html>
