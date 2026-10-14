@@ -1,4 +1,4 @@
-name: Build Daily Clean Energy X-Ray
+name: Build Daily Clean Energy X-Ray & ENTSOE Ref
 
 on:
   schedule:
@@ -19,7 +19,7 @@ permissions:
   contents: write
 
 jobs:
-  build-xray:
+  build-xray-and-ref:
     runs-on: ubuntu-latest
     
     steps:
@@ -41,11 +41,18 @@ jobs:
           START_DATE: ${{ github.event.inputs.start_date }}
           END_DATE: ${{ github.event.inputs.end_date }}
         run: python xray_builder.py
+
+      - name: Run ENTSO-E Reference Builder
+        env:
+          START_DATE: ${{ github.event.inputs.start_date }}
+          END_DATE: ${{ github.event.inputs.end_date }}
+          ENTSOE_TOKEN: ${{ secrets.ENTSOE_TOKEN }}
+        run: python entsoe_builder.py
         
       - name: Commit and push changes
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action Bot"
-          git add data/xray_data.json
-          git diff --quiet && git diff --staged --quiet || git commit -m "Ενημέρωση X-Ray δεδομένων: $(date +'%Y-%m-%d %H:%M')"
+          git add data/xray_data.json data/entsoe_ref.json
+          git diff --quiet && git diff --staged --quiet || git commit -m "Ενημέρωση X-Ray & ENTSO-E δεδομένων: $(date +'%Y-%m-%d %H:%M')"
           git push
