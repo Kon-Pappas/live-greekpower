@@ -1,58 +1,55 @@
-name: Build Daily Clean Energy X-Ray & ENTSOE Ref
+name: X-Ray & ENTSO-E Backfill
 
 on:
-  schedule:
-    # 08:30 & 09:30 UTC -> 11:30 & 12:30 Ώρα Ελλάδος
-    - cron: '30 8,9 * * *'
   workflow_dispatch:
     inputs:
       start_date:
-        description: 'Από (YYYYMMDD). Άστο κενό για Χθες.'
-        required: false
-        type: string
+        description: 'Start Date (YYYYMMDD)'
+        required: true
+        default: '20260901'
       end_date:
-        description: 'Εώς (YYYYMMDD). Άστο κενό για Χθες.'
-        required: false
-        type: string
-
-permissions:
-  contents: write
+        description: 'End Date (YYYYMMDD)'
+        required: true
+        default: '20260930'
 
 jobs:
   build-xray-and-ref:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
-        
-      - name: Setup Python
-        uses: actions/setup-python@v4
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Απαραίτητο για να έχει το ιστορικό ώστε να κάνει επιτυχημένο rebase
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
           python-version: '3.10'
-          
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install requests pytz pandas xlrd openpyxl
-          
+
       - name: Run X-Ray Builder
         env:
           START_DATE: ${{ github.event.inputs.start_date }}
           END_DATE: ${{ github.event.inputs.end_date }}
         run: python xray_builder.py
 
-      - name: Run ENTSO-E Reference Builder
+      - name: Run ENTSO-E Builder
         env:
           START_DATE: ${{ github.event.inputs.start_date }}
           END_DATE: ${{ github.event.inputs.end_date }}
           ENTSOE_TOKEN: ${{ secrets.ENTSOE_TOKEN }}
         run: python entsoe_builder.py
-        
-      - name: Commit and push changes
+
+      - name: Commit and Push changes
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action Bot"
           git add data/xray_data.json data/entsoe_ref.json
           git diff --quiet && git diff --staged --quiet || git commit -m "Ενημέρωση X-Ray & ENTSO-E δεδομένων: $(date +'%Y-%m-%d %H:%M')"
+          git pull --rebase origin main
           git push
