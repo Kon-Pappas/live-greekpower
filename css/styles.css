@@ -18,6 +18,11 @@
     --color-pump: #85c1e9;    
     --color-demand: #cbd5e1;  
     --color-mcp: #00e5ff; 
+
+    /* New X-Ray & ENTSO-E Palette */
+    --color-unallocated: #f1c40f;
+    --color-entsoe-solar: #ff9f43;
+    --color-entsoe-wind: #10ac84;
 }
 
 body {
@@ -75,11 +80,11 @@ body {
 .live-dashboard-grid {
     display: grid;
     gap: 15px;
-    grid-template-columns: 1fr; /* Mobile */
+    grid-template-columns: 1fr;
 }
 @media (min-width: 1200px) {
     .live-dashboard-grid {
-        grid-template-columns: 2fr 3fr 3fr 2fr; /* 20% 30% 30% 20% */
+        grid-template-columns: 2fr 3fr 3fr 2fr;
     }
 }
 
@@ -110,7 +115,7 @@ body {
 .c-storage { color: var(--color-storage); }
 .c-pump { color: var(--color-pump); }
 
-/* Daily Full-Width Sections */
+/* Daily & X-Ray Full-Width Sections */
 .daily-section-card { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 6px; padding: 20px 25px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
 .section-header { color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; }
 
