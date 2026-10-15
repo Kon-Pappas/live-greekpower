@@ -211,8 +211,10 @@ def save_to_json(new_records, is_live_mode, start_str, end_str):
 
 def update_records():
     records_path = 'data/records.json'
+    
+    # Προστέθηκαν τα νέα κλειδιά (wind, solar, hydro)
     records = {
-        "daily": {"res": [], "res_share": [], "exports": [], "bess_chg_pump": [], "bess_dis": []},
+        "daily": {"res": [], "res_share": [], "exports": [], "bess_chg_pump": [], "bess_dis": [], "wind": [], "solar": [], "hydro": []},
         "hourly": {"demand": [], "exports": [], "bess_chg": [], "bess_dis": [], "network_load": []}
     }
     
@@ -222,28 +224,23 @@ def update_records():
                 records = json.load(f)
         except: pass
 
-    all_history = []
-    if os.path.exists('data'):
-        for filename in os.listdir('data'):
-            if filename.endswith('.json') and filename != 'records.json':
-                filepath = os.path.join('data', filename)
-                try:
-                    with open(filepath, 'r', encoding='utf-8') as f:
-                        data = json.load(f)
-                        if isinstance(data, list):
-                            all_history.extend(data)
-                except: pass
+    # --- 1. Διάβασμα Live Δεδομένων (Για τα Live Records) ---
+    all_live = []
+    live_filepath = 'data/live_data.json'
+    if os.path.exists(live_filepath):
+        try:
+            with open(live_filepath, 'r', encoding='utf-8') as f:
+                all_live = json.load(f)
+        except: pass
 
-    if not all_history: return
-
-    unique_hours = {}
-    for hr_data in all_history:
-        date_str = hr_data.get('date')
-        hr = hr_data.get('target_hour')
-        if not date_str or hr == 0 or hr > 24: continue
-        unique_hours[f"{date_str}_{hr}"] = hr_data
-
-    clean_history = list(unique_hours.values())
+    # --- 2. Διάβασμα X-Ray Δεδομένων (Για τα Clean Energy Records) ---
+    all_xray = []
+    xray_filepath = 'data/xray_data.json'
+    if os.path.exists(xray_filepath):
+        try:
+            with open(xray_filepath, 'r', encoding='utf-8') as f:
+                all_xray = json.load(f)
+        except: pass
 
     def add_top3(lst, entry):
         existing = next((i for i in lst if i['id'] == entry['id']), None)
@@ -254,64 +251,100 @@ def update_records():
         lst.sort(key=lambda x: x['value'], reverse=True)
         return lst[:3]
 
-    days_map = {}
     country_keys = ['ΑΛΒΑΝΙΑ', 'ΒΟΥΛΓΑΡΙΑ', 'ΙΤΑΛΙΑ', 'ΤΟΥΡΚΙΑ', 'FYROM']
 
-    for hr_data in clean_history:
-        date_str = hr_data.get('date')
-        hr = hr_data.get('target_hour')
-        
-        if date_str not in days_map:
-            days_map[date_str] = {'res': 0, 'gen': 0, 'exp': 0, 'chg_pump': 0, 'dis': 0}
+    # --- Υπολογισμός LIVE Records (Hourly & Daily Demand/Storage/Exports/RES-Total) ---
+    days_map = {}
+    if all_live:
+        unique_live = {}
+        for hr_data in all_live:
+            date_str = hr_data.get('date')
+            hr = hr_data.get('target_hour')
+            if not date_str or hr == 0 or hr > 24: continue
+            unique_live[f"{date_str}_{hr}"] = hr_data
 
-        mix = hr_data.get('production_mix', {}) or {}
-        # Το 'or 0' μας προστατεύει σε περίπτωση που η τιμή είναι None
-        gen = mix.get('TOTAL_PROD') or 0
-        res = mix.get('RES_PROD') or 0
-        st_in = mix.get('STORAGE_INJECTION') or 0
-        st_abs = abs(mix.get('STORAGE_ABSORPTION') or 0)
-        pump = mix.get('ΣΥΝΟΛΙΚΗ ΑΝΤΛΗΣΗ') or 0
-        
-        imp, exp = 0, 0
-        interchanges = hr_data.get('interconnections_mwh', {}) or {}
-        for c in country_keys:
-            imp += interchanges.get(f"{c}_IMP") or 0
-            exp += abs(interchanges.get(f"{c}_EXP") or 0)
+        for hr_data in unique_live.values():
+            date_str = hr_data.get('date')
+            hr = hr_data.get('target_hour')
             
-        demand = gen + imp + st_in - exp - st_abs - pump
-        net_load = gen + imp + st_in
-        
-        days_map[date_str]['res'] += res
-        days_map[date_str]['gen'] += gen
-        days_map[date_str]['exp'] += exp
-        days_map[date_str]['chg_pump'] += (st_abs + pump)
-        days_map[date_str]['dis'] += st_in
-        
-        hr_id = f"{date_str[:4]}-{date_str[4:6]}-{date_str[6:]}, {hr:02d}:00"
-        records['hourly']['demand'] = add_top3(records['hourly']['demand'], {'id': hr_id, 'value': round(demand, 1)})
-        records['hourly']['exports'] = add_top3(records['hourly']['exports'], {'id': hr_id, 'value': round(exp, 1)})
-        records['hourly']['bess_chg'] = add_top3(records['hourly']['bess_chg'], {'id': hr_id, 'value': round(st_abs, 1)})
-        records['hourly']['bess_dis'] = add_top3(records['hourly']['bess_dis'], {'id': hr_id, 'value': round(st_in, 1)})
-        records['hourly']['network_load'] = add_top3(records['hourly']['network_load'], {'id': hr_id, 'value': round(net_load, 1)})
+            if date_str not in days_map:
+                days_map[date_str] = {'res': 0, 'gen': 0, 'exp': 0, 'chg_pump': 0, 'dis': 0}
 
-    for date_str, d_vals in days_map.items():
-        date_formatted = f"{date_str[:4]}-{date_str[4:6]}-{date_str[6:]}"
-        d_res = d_vals['res']
-        d_gen = d_vals['gen']
-        d_exp = d_vals['exp']
-        d_chg_pump = d_vals['chg_pump']
-        d_dis = d_vals['dis']
-        d_res_share = (d_res / d_gen * 100) if d_gen > 0 else 0
+            mix = hr_data.get('production_mix', {}) or {}
+            gen = mix.get('TOTAL_PROD') or 0
+            res = mix.get('RES_PROD') or 0
+            st_in = mix.get('STORAGE_INJECTION') or 0
+            st_abs = abs(mix.get('STORAGE_ABSORPTION') or 0)
+            pump = mix.get('ΣΥΝΟΛΙΚΗ ΑΝΤΛΗΣΗ') or 0
+            
+            imp, exp = 0, 0
+            interchanges = hr_data.get('interconnections_mwh', {}) or {}
+            for c in country_keys:
+                imp += interchanges.get(f"{c}_IMP") or 0
+                exp += abs(interchanges.get(f"{c}_EXP") or 0)
+                
+            demand = gen + imp + st_in - exp - st_abs - pump
+            net_load = gen + imp + st_in
+            
+            days_map[date_str]['res'] += res
+            days_map[date_str]['gen'] += gen
+            days_map[date_str]['exp'] += exp
+            days_map[date_str]['chg_pump'] += (st_abs + pump)
+            days_map[date_str]['dis'] += st_in
+            
+            hr_id = f"{date_str[:4]}-{date_str[4:6]}-{date_str[6:]}, {hr:02d}:00"
+            records['hourly']['demand'] = add_top3(records['hourly']['demand'], {'id': hr_id, 'value': round(demand, 1)})
+            records['hourly']['exports'] = add_top3(records['hourly']['exports'], {'id': hr_id, 'value': round(exp, 1)})
+            records['hourly']['bess_chg'] = add_top3(records['hourly']['bess_chg'], {'id': hr_id, 'value': round(st_abs, 1)})
+            records['hourly']['bess_dis'] = add_top3(records['hourly']['bess_dis'], {'id': hr_id, 'value': round(st_in, 1)})
+            records['hourly']['network_load'] = add_top3(records['hourly']['network_load'], {'id': hr_id, 'value': round(net_load, 1)})
 
-        records['daily']['res'] = add_top3(records['daily']['res'], {'id': date_formatted, 'value': round(d_res, 1)})
-        records['daily']['res_share'] = add_top3(records['daily']['res_share'], {'id': date_formatted, 'value': round(d_res_share, 2)})
-        records['daily']['exports'] = add_top3(records['daily']['exports'], {'id': date_formatted, 'value': round(d_exp, 1)})
-        records['daily']['bess_chg_pump'] = add_top3(records['daily']['bess_chg_pump'], {'id': date_formatted, 'value': round(d_chg_pump, 1)})
-        records['daily']['bess_dis'] = add_top3(records['daily']['bess_dis'], {'id': date_formatted, 'value': round(d_dis, 1)})
+        for date_str, d_vals in days_map.items():
+            date_formatted = f"{date_str[:4]}-{date_str[4:6]}-{date_str[6:]}"
+            d_res = d_vals['res']
+            d_gen = d_vals['gen']
+            d_res_share = (d_res / d_gen * 100) if d_gen > 0 else 0
+
+            records['daily']['res'] = add_top3(records['daily']['res'], {'id': date_formatted, 'value': round(d_res, 1)})
+            records['daily']['res_share'] = add_top3(records['daily']['res_share'], {'id': date_formatted, 'value': round(d_res_share, 2)})
+            records['daily']['exports'] = add_top3(records['daily']['exports'], {'id': date_formatted, 'value': round(d_vals['exp'], 1)})
+            records['daily']['bess_chg_pump'] = add_top3(records['daily']['bess_chg_pump'], {'id': date_formatted, 'value': round(d_vals['chg_pump'], 1)})
+            records['daily']['bess_dis'] = add_top3(records['daily']['bess_dis'], {'id': date_formatted, 'value': round(d_vals['dis'], 1)})
+
+    # --- Υπολογισμός X-RAY Records (Daily Wind, Solar, Hydro) ---
+    if all_xray:
+        xray_days = {}
+        for hr_data in all_xray:
+            date_str = hr_data.get('date')
+            hr = hr_data.get('target_hour')
+            if not date_str or hr == 0 or hr > 24: continue
+            
+            if date_str not in xray_days:
+                xray_days[date_str] = {'wind': 0, 'solar': 0, 'hydro': 0}
+                
+            xray_days[date_str]['wind'] += hr_data.get('wind', 0)
+            xray_days[date_str]['solar'] += hr_data.get('solar', 0)
+            xray_days[date_str]['hydro'] += (hr_data.get('big_hydro', 0) + hr_data.get('small_hydro', 0))
+
+        for date_str, x_vals in xray_days.items():
+            # Αν τα δεδομένα είναι 0 (π.χ. δεν βγήκε ακόμα το RESMV), μην τα βάλεις στα ρεκόρ!
+            if x_vals['wind'] + x_vals['solar'] == 0:
+                continue
+
+            date_formatted = f"{date_str[:4]}-{date_str[4:6]}-{date_str[6:]}"
+            
+            # Διασφάλιση ότι θα δημιουργηθούν οι λίστες αν ήταν παλιό json
+            if 'wind' not in records['daily']: records['daily']['wind'] = []
+            if 'solar' not in records['daily']: records['daily']['solar'] = []
+            if 'hydro' not in records['daily']: records['daily']['hydro'] = []
+            
+            records['daily']['wind'] = add_top3(records['daily']['wind'], {'id': date_formatted, 'value': round(x_vals['wind'], 1)})
+            records['daily']['solar'] = add_top3(records['daily']['solar'], {'id': date_formatted, 'value': round(x_vals['solar'], 1)})
+            records['daily']['hydro'] = add_top3(records['daily']['hydro'], {'id': date_formatted, 'value': round(x_vals['hydro'], 1)})
 
     with open(records_path, 'w', encoding='utf-8') as f:
         json.dump(records, f, ensure_ascii=False, indent=2)
-    print(f"✓ Το records.json ενημερώθηκε (Top-3) σαρώνοντας {len(clean_history)} μοναδικές ώρες.")
+    print(f"✓ Το records.json (Υβριδικό Live/X-Ray) ενημερώθηκε επιτυχώς.")
 
 if __name__ == "__main__":
     target_dates, is_live_mode, start_str, end_str = get_target_dates()
