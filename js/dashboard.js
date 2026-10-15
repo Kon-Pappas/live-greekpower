@@ -681,10 +681,14 @@ async function loadRecords() {
             let todayRecordsCount = 0;
 
             for (const category in recs.daily) {
-                recs.daily[category].forEach(item => { if (item.id === todayFormatted) todayRecordsCount++; });
+                if (recs.daily[category]) {
+                    recs.daily[category].forEach(item => { if (item.id === todayFormatted) todayRecordsCount++; });
+                }
             }
             for (const category in recs.hourly) {
-                recs.hourly[category].forEach(item => { if (item.id.startsWith(todayFormatted)) todayRecordsCount++; });
+                if (recs.hourly[category]) {
+                    recs.hourly[category].forEach(item => { if (item.id.startsWith(todayFormatted)) todayRecordsCount++; });
+                }
             }
 
             const badge = document.getElementById('records-badge-tab');
@@ -701,7 +705,7 @@ async function loadRecords() {
         const buildCard = (title, items, color, unit) => {
             if (!items || items.length === 0) {
                 return `
-                    <div class="col-md-6 col-lg-4">
+                    <div class="col-md-6 col-lg-3">
                         <div class="record-box">
                             <h6>${title}</h6>
                             <div class="text-muted" style="font-size:0.85rem;">No data yet</div>
@@ -728,8 +732,9 @@ async function loadRecords() {
                 `;
             }).join('');
             
+            // Αλλαγή σε col-lg-3 για 4 κάρτες ανά σειρά!
             return `
-                <div class="col-md-6 col-lg-4">
+                <div class="col-md-6 col-lg-3">
                     <div class="record-box">
                         <h6>${title}</h6>
                         ${listHtml}
@@ -738,27 +743,30 @@ async function loadRecords() {
             `;
         };
 
-        // Κατασκευή Hourly Grid
+        // --- Κατασκευή Hourly Grid (8 κάρτες) ---
         let hourlyHtml = '';
-        hourlyHtml += buildCard('Peak Demand', recs.hourly.demand, 'var(--color-demand)', 'MW');
-        hourlyHtml += buildCard('Peak Exports', recs.hourly.exports, 'var(--color-exports)', 'MW');
-        hourlyHtml += buildCard('Peak Network Load', recs.hourly.network_load, 'var(--accent-green)', 'MW');
         hourlyHtml += buildCard('Peak BESS Charge', recs.hourly.bess_chg, 'var(--color-storage-chg)', 'MW');
         hourlyHtml += buildCard('Peak BESS Discharge', recs.hourly.bess_dis, 'var(--color-storage)', 'MW');
+        hourlyHtml += buildCard('Peak Exports', recs.hourly.exports, 'var(--color-exports)', 'MW');
+        hourlyHtml += buildCard('Peak Imports', recs.hourly.imports, 'var(--color-imports)', 'MW');
+        
+        hourlyHtml += buildCard('Peak RES', recs.hourly.res, 'var(--color-res)', 'MW');
+        hourlyHtml += buildCard('Peak Generation', recs.hourly.gen, 'var(--accent-green)', 'MW');
+        hourlyHtml += buildCard('Peak Demand', recs.hourly.demand, 'var(--color-demand)', 'MW');
+        hourlyHtml += buildCard('Peak Network Load', recs.hourly.network_load, 'var(--accent-green)', 'MW');
         document.getElementById('render-hourly-records').innerHTML = hourlyHtml;
 
-        // Κατασκευή Daily Grid (Με τα 3 νέα πεδία)
+        // --- Κατασκευή Daily Grid (8 κάρτες) ---
         let dailyHtml = '';
-        dailyHtml += buildCard('Max Daily RES (Total)', recs.daily.res, 'var(--color-res)', 'MWh');
-        dailyHtml += buildCard('Max Wind Generation', recs.daily.wind, 'var(--color-res)', 'MWh');
         dailyHtml += buildCard('Max Solar Generation', recs.daily.solar, '#f39c12', 'MWh');
-        
-        dailyHtml += buildCard('Max Total Hydro (Big+Small)', recs.daily.hydro, 'var(--color-hydro)', 'MWh');
-        dailyHtml += buildCard('Max RES Share', recs.daily.res_share, 'var(--color-res)', '%');
-        dailyHtml += buildCard('Max Daily Exports', recs.daily.exports, 'var(--color-exports)', 'MWh');
+        dailyHtml += buildCard('Max Wind Generation', recs.daily.wind, 'var(--color-res)', 'MWh');
+        dailyHtml += buildCard('Max Big Hydro', recs.daily.big_hydro, 'var(--color-hydro)', 'MWh');
+        dailyHtml += buildCard('Max Total Baseload', recs.daily.baseload, '#8e44ad', 'MWh');
         
         dailyHtml += buildCard('Max BESS Charge + Pump', recs.daily.bess_chg_pump, 'var(--color-storage-chg)', 'MWh');
         dailyHtml += buildCard('Max BESS Discharge', recs.daily.bess_dis, 'var(--color-storage)', 'MWh');
+        dailyHtml += buildCard('Max Daily Exports', recs.daily.exports, 'var(--color-exports)', 'MWh');
+        dailyHtml += buildCard('Max Daily Imports', recs.daily.imports, 'var(--color-imports)', 'MWh');
         document.getElementById('render-daily-records').innerHTML = dailyHtml;
 
     } catch (error) {
