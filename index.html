@@ -31,10 +31,6 @@
             <div class="update-info" id="last-updated">Last Update: Loading...</div>
         </div>
         <div class="controls-wrapper">
-            <div class="records-btn-wrapper">
-                <button class="btn-records" data-bs-toggle="modal" data-bs-target="#recordsModal" onclick="loadRecords()">🏆 Records</button>
-                <span id="records-badge" class="badge-pulse d-none"></span>
-            </div>
             <select id="context-dropdown" class="form-select custom-dropdown"></select>
             <div class="status-pill" id="live-status-pill">● Live Data Active</div>
         </div>
@@ -45,6 +41,11 @@
         <a class="nav-tab-item active" data-target="tab-live">Live Analytics (Hour by Hour)</a>
         <a class="nav-tab-item" data-target="tab-daily">Daily Analytics (Inc. Today)</a>
         <a class="nav-tab-item" data-target="tab-xray">Daily Clean Energy Analytics (Excl. Today)</a>
+        <!-- ΝΕΟ TAB GIA RECORDS -->
+        <a class="nav-tab-item tab-records-btn" data-target="tab-records">
+            🏆 All-Time Records
+            <span id="records-badge-tab" class="badge-pulse d-none"></span>
+        </a>
     </div>
 
     <div class="main-container">
@@ -88,19 +89,11 @@
 
         <!-- TAB 3: CLEAN ENERGY ANALYTICS (X-RAY & ENTSO-E) -->
         <div id="tab-xray" class="tab-pane">
-            
-            <!-- Wrapper for Watermark Fade effect -->
             <div class="xray-wrapper position-relative" id="xray-wrapper">
-                
-                <!-- The Watermark -->
                 <div id="xray-watermark" class="watermark-overlay d-none">
                     <div class="watermark-text">EX-POST DATA PENDING</div>
                 </div>
-
-                <!-- Inner Content (that gets faded) -->
                 <div class="xray-content" id="xray-content">
-                    
-                    <!-- Top Summary Boxes (Inline Flex) -->
                     <div class="xray-summary-boxes mb-4" id="xray-summary">
                         <div class="xray-box">
                             <div class="xb-title">Stochastic & Dispatchable</div>
@@ -115,8 +108,6 @@
                             <div class="xb-content" id="xb-base"></div>
                         </div>
                     </div>
-
-                    <!-- Charts -->
                     <div class="row mb-4">
                         <div class="col-12">
                             <div class="chart-container" id="xrayChart" style="height: 600px;"></div>
@@ -127,42 +118,31 @@
                             <div class="chart-container" id="reconciliationChart" style="height: 500px;"></div>
                         </div>
                     </div>
-
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- ALL-TIME RECORDS MODAL -->
-    <div class="modal fade" id="recordsModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-xl modal-dialog-scrollable">
-            <div class="modal-content custom-modal">
-                <div class="modal-header custom-modal-header">
-                    <h5 class="modal-title" style="color: #ffc000; font-weight: bold;">🏆 All-Time Records</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        <!-- TAB 4: ALL-TIME RECORDS -->
+        <div id="tab-records" class="tab-pane">
+            <ul class="nav nav-pills custom-pills mb-4" id="recordsPills" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="pills-hourly-tab" data-bs-toggle="pill" data-bs-target="#pills-hourly" type="button" role="tab">Hourly Records (MW)</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="pills-daily-tab" data-bs-toggle="pill" data-bs-target="#pills-daily" type="button" role="tab">Daily Records (MWh / %)</button>
+                </li>
+            </ul>
+            
+            <div class="tab-content" id="recordsPillsContent">
+                <div class="tab-pane fade show active" id="pills-hourly" role="tabpanel">
+                    <div class="row" id="render-hourly-records"></div>
                 </div>
-                <div class="modal-tabs-header">
-                    <ul class="nav nav-tabs custom-nav-tabs" id="recordsTab" role="tablist">
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#rec-hourly" type="button">Hourly (MW)</button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#rec-daily" type="button">Daily (MWh / %)</button>
-                        </li>
-                    </ul>
-                </div>
-                <div class="modal-body custom-modal-body">
-                    <div class="tab-content">
-                        <div class="tab-pane fade show active" id="rec-hourly">
-                            <div class="row" id="render-hourly-records"></div>
-                        </div>
-                        <div class="tab-pane fade" id="rec-daily">
-                            <div class="row" id="render-daily-records"></div>
-                        </div>
-                    </div>
+                <div class="tab-pane fade" id="pills-daily" role="tabpanel">
+                    <div class="row" id="render-daily-records"></div>
                 </div>
             </div>
         </div>
+
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
