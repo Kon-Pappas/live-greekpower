@@ -10,19 +10,27 @@ def get_target_dates():
     end_env = os.environ.get('END_DATE', '').strip().replace('-', '')
 
     tz = pytz.timezone('Europe/Athens')
-    # Default: ΧΘΕΣ
-    yesterday_dt = datetime.now(tz) - timedelta(days=1)
-    yesterday_str = yesterday_dt.strftime("%Y%m%d")
-
-    start_str = start_env if start_env else yesterday_str
-    end_str = end_env if end_env else start_str
+    now = datetime.now(tz)
+    
+    # Αν δεν δοθούν ημερομηνίες (π.χ. cron-job), βάλε Προχθές και Χθες
+    if not start_env or not end_env:
+        yesterday_dt = now - timedelta(days=1)
+        day_before_dt = now - timedelta(days=2)
+        start_str = day_before_dt.strftime("%Y%m%d")
+        end_str = yesterday_dt.strftime("%Y%m%d")
+    else:
+        start_str = start_env
+        end_str = end_env
 
     try:
         start_dt = datetime.strptime(start_str, "%Y%m%d")
         end_dt = datetime.strptime(end_str, "%Y%m%d")
     except ValueError:
-        print("Μη έγκυρη μορφή ημερομηνίας. Γίνεται fallback στο Χθες.")
-        start_dt = end_dt = yesterday_dt
+        print("Μη έγκυρη μορφή ημερομηνίας. Γίνεται fallback (Προχθές - Χθες).")
+        yesterday_dt = now - timedelta(days=1)
+        day_before_dt = now - timedelta(days=2)
+        start_dt = day_before_dt
+        end_dt = yesterday_dt
 
     dates = []
     current = start_dt
