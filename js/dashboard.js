@@ -535,11 +535,11 @@ function renderXrayTab(targetDate) {
         <div class="xb-item"><span style="color: #8e44ad;">Biomass</span> <span class="text-white">${fmt(sum.biomass)} MWh</span></div>
     `;
 
-    // --- Watermark Logic (If user forces 'Today' on Tab 3) ---
+    // --- Watermark Logic (Dynamic: Today OR Missing X-Ray Data for Yesterday) ---
     const xrayWrapper = document.getElementById('xray-wrapper');
     const watermark = document.getElementById('xray-watermark');
     
-    if (targetDate === latestDateGlobal) {
+    if (targetDate === latestDateGlobal || sum.totalPhysClean < 1) {
         xrayWrapper.classList.add('faded-charts');
         watermark.classList.remove('d-none');
     } else {
