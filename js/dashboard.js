@@ -668,7 +668,7 @@ function renderXrayTab(targetDate) {
     });
 }
 
-// --- 8. Modal Records Loader & Smart Notification Badge ---
+// --- 8. Tab Records Loader & Smart Notification Badge ---
 async function loadRecords() {
     try {
         const response = await fetch('data/records.json?v=' + new Date().getTime());
@@ -687,7 +687,7 @@ async function loadRecords() {
                 recs.hourly[category].forEach(item => { if (item.id.startsWith(todayFormatted)) todayRecordsCount++; });
             }
 
-            const badge = document.getElementById('records-badge');
+            const badge = document.getElementById('records-badge-tab');
             if (badge) {
                 if (todayRecordsCount > 0) {
                     badge.innerText = `${todayRecordsCount} New!`;
@@ -699,9 +699,19 @@ async function loadRecords() {
         }
 
         const buildCard = (title, items, color, unit) => {
+            if (!items || items.length === 0) {
+                return `
+                    <div class="col-md-6 col-lg-4">
+                        <div class="record-box">
+                            <h6>${title}</h6>
+                            <div class="text-muted" style="font-size:0.85rem;">No data yet</div>
+                        </div>
+                    </div>`;
+            }
+
             let listHtml = items.slice(0, 3).map((item, idx) => {
                 let rankStyle = '';
-                if (idx === 0) rankStyle = 'color: #ffc000; font-size: 0.85rem; text-shadow: 0 0 5px rgba(255,192,0,0.3);'; 
+                if (idx === 0) rankStyle = 'color: #ffc000; font-size: 0.9rem; text-shadow: 0 0 5px rgba(255,192,0,0.3);'; 
                 else if (idx === 1) rankStyle = 'color: #c0c0c0;'; 
                 else if (idx === 2) rankStyle = 'color: #cd7f32;'; 
                 
@@ -712,41 +722,48 @@ async function loadRecords() {
                     <div class="record-row">
                         <span class="rec-rank" style="${rankStyle}">#${idx+1}</span>
                         <span class="rec-date">${item.id}</span>
-                        <span class="rec-val" style="color: ${color};">${fmt(item.value)} <span style="font-size:0.75rem;">${unit}</span></span>
+                        <span class="rec-val" style="color: ${color};">${fmt(item.value)} <span style="font-size:0.75rem; color:var(--text-muted); font-weight:normal;">${unit}</span></span>
                         ${newBadgeHtml}
                     </div>
                 `;
             }).join('');
             
             return `
-                <div class="col-md-6">
+                <div class="col-md-6 col-lg-4">
                     <div class="record-box">
                         <h6>${title}</h6>
-                        ${listHtml || '<div class="text-muted" style="font-size:0.85rem;">No data yet</div>'}
+                        ${listHtml}
                     </div>
                 </div>
             `;
         };
 
+        // Κατασκευή Hourly Grid
         let hourlyHtml = '';
         hourlyHtml += buildCard('Peak Demand', recs.hourly.demand, 'var(--color-demand)', 'MW');
         hourlyHtml += buildCard('Peak Exports', recs.hourly.exports, 'var(--color-exports)', 'MW');
+        hourlyHtml += buildCard('Peak Network Load', recs.hourly.network_load, 'var(--accent-green)', 'MW');
         hourlyHtml += buildCard('Peak BESS Charge', recs.hourly.bess_chg, 'var(--color-storage-chg)', 'MW');
         hourlyHtml += buildCard('Peak BESS Discharge', recs.hourly.bess_dis, 'var(--color-storage)', 'MW');
-        hourlyHtml += buildCard('Peak Network Load (Gross Supply)', recs.hourly.network_load, 'var(--accent-green)', 'MW');
         document.getElementById('render-hourly-records').innerHTML = hourlyHtml;
 
+        // Κατασκευή Daily Grid (Με τα 3 νέα πεδία)
         let dailyHtml = '';
-        dailyHtml += buildCard('Max Daily RES', recs.daily.res, 'var(--color-res)', 'MWh');
+        dailyHtml += buildCard('Max Daily RES (Total)', recs.daily.res, 'var(--color-res)', 'MWh');
+        dailyHtml += buildCard('Max Wind Generation', recs.daily.wind, 'var(--color-res)', 'MWh');
+        dailyHtml += buildCard('Max Solar Generation', recs.daily.solar, '#f39c12', 'MWh');
+        
+        dailyHtml += buildCard('Max Total Hydro (Big+Small)', recs.daily.hydro, 'var(--color-hydro)', 'MWh');
         dailyHtml += buildCard('Max RES Share', recs.daily.res_share, 'var(--color-res)', '%');
         dailyHtml += buildCard('Max Daily Exports', recs.daily.exports, 'var(--color-exports)', 'MWh');
+        
         dailyHtml += buildCard('Max BESS Charge + Pump', recs.daily.bess_chg_pump, 'var(--color-storage-chg)', 'MWh');
-        dailyHtml += buildCard('Max Daily BESS Discharge', recs.daily.bess_dis, 'var(--color-storage)', 'MWh');
+        dailyHtml += buildCard('Max BESS Discharge', recs.daily.bess_dis, 'var(--color-storage)', 'MWh');
         document.getElementById('render-daily-records').innerHTML = dailyHtml;
 
     } catch (error) {
-        console.error("No records.json found yet.");
-        document.getElementById('render-hourly-records').innerHTML = '<div class="col-12"><p class="text-muted p-3">Waiting for first Python sync...</p></div>';
-        document.getElementById('render-daily-records').innerHTML = '<div class="col-12"><p class="text-muted p-3">Waiting for first Python sync...</p></div>';
+        console.error("No records.json found yet or error loading it:", error);
+        document.getElementById('render-hourly-records').innerHTML = '<div class="col-12"><p class="text-muted p-3">Waiting for python sync...</p></div>';
+        document.getElementById('render-daily-records').innerHTML = '<div class="col-12"><p class="text-muted p-3">Waiting for python sync...</p></div>';
     }
 }
