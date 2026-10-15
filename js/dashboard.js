@@ -632,7 +632,7 @@ function renderXrayTab(targetDate) {
 
     reconciliationChart.setOption({
         backgroundColor: 'transparent',
-        title: { text: 'ENTSO-E vs SCADA Transparency Radar (Solar & Wind Comparison)', left: 'center', top: 5, textStyle: { color: '#ffffff', fontSize: 15 } },
+        title: { text: 'ENTSO-E vs Admie Transparency Radar (Solar & Wind Comparison)', left: 'center', top: 5, textStyle: { color: '#ffffff', fontSize: 15 } },
         tooltip: {
             trigger: 'axis',
             axisPointer: { type: 'shadow' },
