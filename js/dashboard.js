@@ -660,10 +660,10 @@ function renderXrayTab(targetDate) {
         xAxis: { type: 'category', data: hours, axisLabel: { color: '#fff' } },
         yAxis: { type: 'value', name: 'Volume (MWh)', splitLine: { lineStyle: { color: '#2d333b', type: 'dashed' } }, axisLabel: { color: '#8892b0', formatter: (val) => fmt(val) }, nameTextStyle: { color: '#8892b0' } },
         series: [
-            { name: 'Physical Solar (SCADA)', type: 'line', smooth: true, data: arrSolar, lineStyle: { color: '#f39c12', width: 3 }, itemStyle: { color: '#f39c12' } },
-            { name: 'ENTSO-E Declared Solar', type: 'line', smooth: true, data: arrEntsoeSolar, lineStyle: { color: '#ff9f43', width: 3, type: 'dashed' }, itemStyle: { color: '#ff9f43' } },
-            { name: 'Physical Wind (SCADA)', type: 'line', smooth: true, data: arrWind, lineStyle: { color: '#70ad47', width: 3 }, itemStyle: { color: '#70ad47' } },
-            { name: 'ENTSO-E Declared Wind', type: 'line', smooth: true, data: arrEntsoeWind, lineStyle: { color: '#10ac84', width: 3, type: 'dashed' }, itemStyle: { color: '#10ac84' } }
+            { name: 'Solar - Admie', type: 'line', smooth: true, data: arrSolar, lineStyle: { color: '#f39c12', width: 3 }, itemStyle: { color: '#f39c12' } },
+            { name: 'Solar ENTSO-E', type: 'line', smooth: true, data: arrEntsoeSolar, lineStyle: { color: '#ff9f43', width: 3, type: 'dashed' }, itemStyle: { color: '#ff9f43' } },
+            { name: 'Wind - Admie', type: 'line', smooth: true, data: arrWind, lineStyle: { color: '#70ad47', width: 3 }, itemStyle: { color: '#70ad47' } },
+            { name: 'Wind  ENTSO-E', type: 'line', smooth: true, data: arrEntsoeWind, lineStyle: { color: '#10ac84', width: 3, type: 'dashed' }, itemStyle: { color: '#10ac84' } }
         ]
     });
 }
