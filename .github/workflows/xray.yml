@@ -4,17 +4,21 @@ on:
   workflow_dispatch:
     inputs:
       start_date:
-        description: 'Start Date (YYYYMMDD)'
-        required: true
-        default: '20260901'
+        description: 'Start Date (YYYYMMDD) - Leave empty for Auto (Day Before to Yesterday)'
+        required: false
+        default: ''
       end_date:
-        description: 'End Date (YYYYMMDD)'
-        required: true
-        default: '20260930'
+        description: 'End Date (YYYYMMDD) - Leave empty for Auto'
+        required: false
+        default: ''
 
 jobs:
   build-xray-and-ref:
     runs-on: ubuntu-latest
+    
+    # Δικαιώματα εγγραφής για να μην χτυπάει error 403 στο git push
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout repository
