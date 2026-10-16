@@ -41,7 +41,7 @@
         <a class="nav-tab-item active" data-target="tab-live">Live Analytics (Hour by Hour)</a>
         <a class="nav-tab-item" data-target="tab-daily">Daily Analytics (Inc. Today)</a>
         <a class="nav-tab-item" data-target="tab-xray">Daily Clean Energy Analytics (Excl. Today)</a>
-        <!-- ΝΕΟ TAB GIA RECORDS -->
+        <!-- TAB GIA RECORDS -->
         <a class="nav-tab-item tab-records-btn" data-target="tab-records">
             🏆 All-Time Records
             <span id="records-badge-tab" class="badge-pulse d-none"></span>
@@ -122,22 +122,27 @@
             </div>
         </div>
 
-        <!-- TAB 4: ALL-TIME RECORDS -->
+        <!-- TAB 4: ALL-TIME RECORDS (SPLIT SCREEN) -->
         <div id="tab-records" class="tab-pane">
-            <ul class="nav nav-pills custom-pills mb-4" id="recordsPills" role="tablist">
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link active" id="pills-hourly-tab" data-bs-toggle="pill" data-bs-target="#pills-hourly" type="button" role="tab">Hourly Records (MW)</button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="pills-daily-tab" data-bs-toggle="pill" data-bs-target="#pills-daily" type="button" role="tab">Daily Records (MWh / %)</button>
-                </li>
-            </ul>
-            
-            <div class="tab-content" id="recordsPillsContent">
-                <div class="tab-pane fade show active" id="pills-hourly" role="tabpanel">
+            <div class="row position-relative">
+                <!-- Κάθετη γραμμή στη μέση (ορατή μόνο σε xl οθόνες) -->
+                <div class="d-none d-xl-block" style="position: absolute; left: 50%; top: 0; bottom: 0; width: 1px; background-color: rgba(255,255,255,0.05); transform: translateX(-50%); z-index: 0;"></div>
+
+                <!-- ΑΡΙΣΤΕΡΗ ΠΛΕΥΡΑ: Hourly -->
+                <div class="col-12 col-xl-6 position-relative z-1 pe-xl-4 mb-5 mb-xl-0">
+                    <h4 class="text-center mb-4" style="color: #ffc000; font-size: 1rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;">
+                        Hourly Records (MW)
+                    </h4>
+                    <!-- 2 στήλες εσωτερικά -->
                     <div class="row" id="render-hourly-records"></div>
                 </div>
-                <div class="tab-pane fade" id="pills-daily" role="tabpanel">
+
+                <!-- ΔΕΞΙΑ ΠΛΕΥΡΑ: Daily -->
+                <div class="col-12 col-xl-6 position-relative z-1 ps-xl-4">
+                    <h4 class="text-center mb-4" style="color: #ffc000; font-size: 1rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;">
+                        Daily Records (MWh / %)
+                    </h4>
+                    <!-- 2 στήλες εσωτερικά -->
                     <div class="row" id="render-daily-records"></div>
                 </div>
             </div>
