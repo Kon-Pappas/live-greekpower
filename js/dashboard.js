@@ -656,7 +656,6 @@ function renderXrayTab(targetDate) {
     });
 }
 
-
 // --- Helper για συμπίεση ημερομηνίας ---
 function formatRecordDate(dateStr) {
     const months = ['Jan.', 'Feb.', 'Mar.', 'Apr.', 'May', 'Jun.', 'Jul.', 'Aug.', 'Sep.', 'Oct.', 'Nov.', 'Dec.'];
@@ -665,16 +664,16 @@ function formatRecordDate(dateStr) {
         let dParts = parts[0].split('-'); // "YYYY-MM-DD"
         if (dParts.length === 3) {
             let monthIdx = parseInt(dParts[1], 10) - 1;
-            let day = parseInt(dParts[2], 10); // αφαίρεση μηδενικών (π.χ. 05 -> 5)
+            let day = parseInt(dParts[2], 10); 
             let formatted = `${day} ${months[monthIdx]}`;
-            if (parts[1]) formatted += `, ${parts[1]}`; // προσθήκη ώρας αν υπάρχει
+            if (parts[1]) formatted += `, ${parts[1]}`; 
             return formatted;
         }
     } catch(e) {}
     return dateStr;
 }
 
-// --- 8. Tab Records Loader (Split-Screen & Compact Dates) ---
+// --- 8. Tab Records Loader (Με τη νέα αυστηρή 7άδα σε σειρά) ---
 async function loadRecords() {
     try {
         const response = await fetch('data/records.json?v=' + new Date().getTime());
@@ -728,7 +727,6 @@ async function loadRecords() {
                 let isNew = todayFormatted && item.id.startsWith(todayFormatted);
                 let newBadgeHtml = isNew ? `<span class="new-record-badge">NEW!</span>` : '';
                 
-                // Εφαρμογή της νέας μορφής ημερομηνίας
                 let displayDate = formatRecordDate(item.id);
                 
                 return `
@@ -741,7 +739,6 @@ async function loadRecords() {
                 `;
             }).join('');
             
-            // Κάθε κάρτα πιάνει το μισό του γονέα της (col-md-6) 
             return `
                 <div class="col-md-6">
                     <div class="record-box">
@@ -752,30 +749,26 @@ async function loadRecords() {
             `;
         };
 
-        // --- Κατασκευή Hourly Grid (8 κάρτες, Αριστερή Πλευρά) ---
+        // --- HOURLY GRID (Οι 7 κάρτες με την ακριβή σειρά που ζήτησες) ---
         let hourlyHtml = '';
+        hourlyHtml += buildCard('Peak Solar', recs.hourly.solar, '#f39c12', 'MW');
+        hourlyHtml += buildCard('Peak Wind', recs.hourly.wind, 'var(--color-res)', 'MW');
+        hourlyHtml += buildCard('Peak Exports', recs.hourly.exports, 'var(--color-exports)', 'MW');
         hourlyHtml += buildCard('Peak BESS Charge', recs.hourly.bess_chg, 'var(--color-storage-chg)', 'MW');
         hourlyHtml += buildCard('Peak BESS Discharge', recs.hourly.bess_dis, 'var(--color-storage)', 'MW');
-        hourlyHtml += buildCard('Peak Exports', recs.hourly.exports, 'var(--color-exports)', 'MW');
-        hourlyHtml += buildCard('Peak Imports', recs.hourly.imports, 'var(--color-imports)', 'MW');
-        
-        hourlyHtml += buildCard('Peak RES', recs.hourly.res, 'var(--color-res)', 'MW');
-        hourlyHtml += buildCard('Peak Generation', recs.hourly.gen, 'var(--accent-green)', 'MW');
-        hourlyHtml += buildCard('Peak Demand', recs.hourly.demand, 'var(--color-demand)', 'MW');
+        hourlyHtml += buildCard('Peak BESS + Pump Chg.', recs.hourly.bess_chg_pump, 'var(--color-pump)', 'MW');
         hourlyHtml += buildCard('Peak Network Load', recs.hourly.network_load, 'var(--accent-green)', 'MW');
         document.getElementById('render-hourly-records').innerHTML = hourlyHtml;
 
-        // --- Κατασκευή Daily Grid (8 κάρτες, Δεξιά Πλευρά) ---
+        // --- DAILY GRID (Οι 7 κάρτες με την ακριβή σειρά που ζήτησες) ---
         let dailyHtml = '';
-        dailyHtml += buildCard('Max Solar Gen.', recs.daily.solar, '#f39c12', 'MWh');
-        dailyHtml += buildCard('Max Wind Gen.', recs.daily.wind, 'var(--color-res)', 'MWh');
-        dailyHtml += buildCard('Max Big Hydro', recs.daily.big_hydro, 'var(--color-hydro)', 'MWh');
-        dailyHtml += buildCard('Total Baseload', recs.daily.baseload, '#8e44ad', 'MWh');
-        
-        dailyHtml += buildCard('Max BESS Chg + Pump', recs.daily.bess_chg_pump, 'var(--color-storage-chg)', 'MWh');
-        dailyHtml += buildCard('Max BESS Discharge', recs.daily.bess_dis, 'var(--color-storage)', 'MWh');
+        dailyHtml += buildCard('Max Solar', recs.daily.solar, '#f39c12', 'MWh');
+        dailyHtml += buildCard('Max Wind', recs.daily.wind, 'var(--color-res)', 'MWh');
         dailyHtml += buildCard('Max Daily Exports', recs.daily.exports, 'var(--color-exports)', 'MWh');
-        dailyHtml += buildCard('Max Daily Imports', recs.daily.imports, 'var(--color-imports)', 'MWh');
+        dailyHtml += buildCard('Max BESS Charge', recs.daily.bess_chg, 'var(--color-storage-chg)', 'MWh');
+        dailyHtml += buildCard('Max BESS Discharge', recs.daily.bess_dis, 'var(--color-storage)', 'MWh');
+        dailyHtml += buildCard('Max BESS + Pump Chg.', recs.daily.bess_chg_pump, 'var(--color-pump)', 'MWh');
+        dailyHtml += buildCard('Max RES (Total)', recs.daily.res, 'var(--color-res)', 'MWh');
         document.getElementById('render-daily-records').innerHTML = dailyHtml;
 
     } catch (error) {
