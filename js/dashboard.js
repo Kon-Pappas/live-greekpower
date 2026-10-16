@@ -535,7 +535,7 @@ function renderXrayTab(targetDate) {
         <div class="xb-item"><span style="color: #8e44ad;">Biomass</span> <span class="text-white">${fmt(sum.biomass)} MWh</span></div>
     `;
 
-    // --- Watermark Logic (Dynamic: Today OR Missing X-Ray Data for Yesterday) ---
+    // --- Watermark Logic ---
     const xrayWrapper = document.getElementById('xray-wrapper');
     const watermark = document.getElementById('xray-watermark');
     
@@ -561,7 +561,6 @@ function renderXrayTab(targetDate) {
                 let mcpParam = params.find(p => p.seriesName === 'MCP');
                 let mcpValue = mcpParam ? fmt(Math.abs(mcpParam.value)) : '-';
 
-                // Header
                 let html = `<div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
                                 <b style="font-size:15px; color:#70ad47;">Hour: ${hour}</b>
                                 <b style="font-size:15px; color:#00e5ff;">MCP: ${mcpValue} €/MWh</b>
@@ -578,30 +577,19 @@ function renderXrayTab(targetDate) {
                             </div>`;
                 };
 
-                // Block 1: Μεταβλητά
                 html += renderRow('Wind');
                 html += renderRow('Big Hydro');
                 html += renderRow('Solar');
-                
                 html += `<div style="border-bottom: 1px dashed rgba(255,255,255,0.2); margin: 8px 0;"></div>`;
-                
-                // Block 2: Unallocated (UCE)
                 html += renderRow('UCE');
-
                 html += `<div style="border-bottom: 1px dashed rgba(255,255,255,0.2); margin: 8px 0;"></div>`;
-
-                // Block 3: Baseload
                 html += renderRow('Cogen');
                 html += renderRow('Small Hydro');
                 html += renderRow('Biomass');
-                
                 html += `<div style="border-bottom: 1px dashed rgba(255,255,255,0.2); margin: 8px 0;"></div>`;
 
-                // Footer (Total)
                 let cleanSum = 0;
-                params.forEach(p => {
-                    if (p.seriesName !== 'MCP') cleanSum += p.value;
-                });
+                params.forEach(p => { if (p.seriesName !== 'MCP') cleanSum += p.value; });
 
                 html += `<div style="display: flex; justify-content: space-between; margin-top: 6px;">
                             <span style="font-size:14px; color:#8892b0;">Total Clean Energy:</span> 
@@ -668,7 +656,25 @@ function renderXrayTab(targetDate) {
     });
 }
 
-// --- 8. Tab Records Loader & Smart Notification Badge ---
+
+// --- Helper για συμπίεση ημερομηνίας ---
+function formatRecordDate(dateStr) {
+    const months = ['Jan.', 'Feb.', 'Mar.', 'Apr.', 'May', 'Jun.', 'Jul.', 'Aug.', 'Sep.', 'Oct.', 'Nov.', 'Dec.'];
+    try {
+        let parts = dateStr.split(', ');
+        let dParts = parts[0].split('-'); // "YYYY-MM-DD"
+        if (dParts.length === 3) {
+            let monthIdx = parseInt(dParts[1], 10) - 1;
+            let day = parseInt(dParts[2], 10); // αφαίρεση μηδενικών (π.χ. 05 -> 5)
+            let formatted = `${day} ${months[monthIdx]}`;
+            if (parts[1]) formatted += `, ${parts[1]}`; // προσθήκη ώρας αν υπάρχει
+            return formatted;
+        }
+    } catch(e) {}
+    return dateStr;
+}
+
+// --- 8. Tab Records Loader (Split-Screen & Compact Dates) ---
 async function loadRecords() {
     try {
         const response = await fetch('data/records.json?v=' + new Date().getTime());
@@ -705,7 +711,7 @@ async function loadRecords() {
         const buildCard = (title, items, color, unit) => {
             if (!items || items.length === 0) {
                 return `
-                    <div class="col-md-6 col-lg-3">
+                    <div class="col-md-6">
                         <div class="record-box">
                             <h6>${title}</h6>
                             <div class="text-muted" style="font-size:0.85rem;">No data yet</div>
@@ -722,19 +728,22 @@ async function loadRecords() {
                 let isNew = todayFormatted && item.id.startsWith(todayFormatted);
                 let newBadgeHtml = isNew ? `<span class="new-record-badge">NEW!</span>` : '';
                 
+                // Εφαρμογή της νέας μορφής ημερομηνίας
+                let displayDate = formatRecordDate(item.id);
+                
                 return `
                     <div class="record-row">
                         <span class="rec-rank" style="${rankStyle}">#${idx+1}</span>
-                        <span class="rec-date">${item.id}</span>
-                        <span class="rec-val" style="color: ${color};">${fmt(item.value)} <span style="font-size:0.75rem; color:var(--text-muted); font-weight:normal;">${unit}</span></span>
+                        <span class="rec-date">${displayDate}</span>
+                        <span class="rec-val" style="color: ${color};">${fmt(item.value)} <span style="font-size:0.7rem; color:var(--text-muted); font-weight:normal;">${unit}</span></span>
                         ${newBadgeHtml}
                     </div>
                 `;
             }).join('');
             
-            // Αλλαγή σε col-lg-3 για 4 κάρτες ανά σειρά!
+            // Κάθε κάρτα πιάνει το μισό του γονέα της (col-md-6) 
             return `
-                <div class="col-md-6 col-lg-3">
+                <div class="col-md-6">
                     <div class="record-box">
                         <h6>${title}</h6>
                         ${listHtml}
@@ -743,7 +752,7 @@ async function loadRecords() {
             `;
         };
 
-        // --- Κατασκευή Hourly Grid (8 κάρτες) ---
+        // --- Κατασκευή Hourly Grid (8 κάρτες, Αριστερή Πλευρά) ---
         let hourlyHtml = '';
         hourlyHtml += buildCard('Peak BESS Charge', recs.hourly.bess_chg, 'var(--color-storage-chg)', 'MW');
         hourlyHtml += buildCard('Peak BESS Discharge', recs.hourly.bess_dis, 'var(--color-storage)', 'MW');
@@ -756,22 +765,22 @@ async function loadRecords() {
         hourlyHtml += buildCard('Peak Network Load', recs.hourly.network_load, 'var(--accent-green)', 'MW');
         document.getElementById('render-hourly-records').innerHTML = hourlyHtml;
 
-        // --- Κατασκευή Daily Grid (8 κάρτες) ---
+        // --- Κατασκευή Daily Grid (8 κάρτες, Δεξιά Πλευρά) ---
         let dailyHtml = '';
-        dailyHtml += buildCard('Max Solar Generation', recs.daily.solar, '#f39c12', 'MWh');
-        dailyHtml += buildCard('Max Wind Generation', recs.daily.wind, 'var(--color-res)', 'MWh');
+        dailyHtml += buildCard('Max Solar Gen.', recs.daily.solar, '#f39c12', 'MWh');
+        dailyHtml += buildCard('Max Wind Gen.', recs.daily.wind, 'var(--color-res)', 'MWh');
         dailyHtml += buildCard('Max Big Hydro', recs.daily.big_hydro, 'var(--color-hydro)', 'MWh');
-        dailyHtml += buildCard('Max Total Baseload', recs.daily.baseload, '#8e44ad', 'MWh');
+        dailyHtml += buildCard('Total Baseload', recs.daily.baseload, '#8e44ad', 'MWh');
         
-        dailyHtml += buildCard('Max BESS Charge + Pump', recs.daily.bess_chg_pump, 'var(--color-storage-chg)', 'MWh');
+        dailyHtml += buildCard('Max BESS Chg + Pump', recs.daily.bess_chg_pump, 'var(--color-storage-chg)', 'MWh');
         dailyHtml += buildCard('Max BESS Discharge', recs.daily.bess_dis, 'var(--color-storage)', 'MWh');
         dailyHtml += buildCard('Max Daily Exports', recs.daily.exports, 'var(--color-exports)', 'MWh');
         dailyHtml += buildCard('Max Daily Imports', recs.daily.imports, 'var(--color-imports)', 'MWh');
         document.getElementById('render-daily-records').innerHTML = dailyHtml;
 
     } catch (error) {
-        console.error("No records.json found yet or error loading it:", error);
-        document.getElementById('render-hourly-records').innerHTML = '<div class="col-12"><p class="text-muted p-3">Waiting for python sync...</p></div>';
-        document.getElementById('render-daily-records').innerHTML = '<div class="col-12"><p class="text-muted p-3">Waiting for python sync...</p></div>';
+        console.error("No records.json found:", error);
+        document.getElementById('render-hourly-records').innerHTML = '<div class="col-12"><p class="text-muted p-3 text-center">Waiting for python sync...</p></div>';
+        document.getElementById('render-daily-records').innerHTML = '<div class="col-12"><p class="text-muted p-3 text-center">Waiting for python sync...</p></div>';
     }
 }
