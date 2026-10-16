@@ -62,7 +62,7 @@ body {
 /* Tabs */
 .nav-tabs-container { 
     border-bottom: 1px solid var(--border-color); 
-    padding: 15px 30px 0 30px; /* Προσθήκη padding-top 15px για να μην κόβεται το badge! */
+    padding: 15px 30px 0 30px; /* Για να μην κόβεται το badge */
     display: flex; 
     gap: 30px; 
     overflow-x: auto; 
@@ -76,24 +76,16 @@ body {
 
 .main-container { padding: 30px; }
 
-/* Custom Grid for Live Tab (20-30-30-20) */
-.live-dashboard-grid {
-    display: grid;
-    gap: 15px;
-    grid-template-columns: 1fr;
-}
-@media (min-width: 1200px) {
-    .live-dashboard-grid {
-        grid-template-columns: 2fr 3fr 3fr 2fr;
-    }
-}
+/* Custom Grid for Live Tab */
+.live-dashboard-grid { display: grid; gap: 15px; grid-template-columns: 1fr; }
+@media (min-width: 1200px) { .live-dashboard-grid { grid-template-columns: 2fr 3fr 3fr 2fr; } }
 
 /* Base Cards */
 .metric-card { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 6px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); height: 100%; }
 .chart-container { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 6px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
 .metric-title { color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; font-weight: bold; letter-spacing: 0.5px; margin-bottom: 15px; text-align: center; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; }
 
-/* Ledger (Receipt) Styles for Boxes */
+/* Ledger Styles */
 .ledger-card { display: flex; flex-direction: column; justify-content: center; }
 .ledger-list { display: flex; flex-direction: column; gap: 10px; font-size: 0.85rem; width: 100%; }
 .ledger-row { display: flex; align-items: center; justify-content: space-between; }
@@ -115,11 +107,9 @@ body {
 .c-storage { color: var(--color-storage); }
 .c-pump { color: var(--color-pump); }
 
-/* Daily & X-Ray Full-Width Sections */
+/* Daily Section */
 .daily-section-card { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 6px; padding: 20px 25px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
 .section-header { color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; }
-
-/* Leaderboard Grid */
 .leaderboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; }
 .leaderboard-item { background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 6px; padding: 15px; display: flex; flex-direction: column; justify-content: space-between; }
 .lb-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
@@ -127,16 +117,12 @@ body {
 .lb-rank { font-size: 0.75rem; color: var(--text-muted); background: rgba(255,255,255,0.05); padding: 2px 6px; border-radius: 10px; }
 .lb-value { font-size: 1.4rem; font-weight: 700; color: #fff; font-family: 'Courier New', Courier, monospace; }
 
-/* ---------------------------------
-   X-RAY 3-BOX SUMMARY & WATERMARK
-   --------------------------------- */
+/* X-RAY Section */
 .xray-summary-boxes { display: flex; gap: 15px; flex-wrap: nowrap; width: 100%; }
 .xray-box { flex: 1; background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 6px; padding: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); min-width: 0; }
 .xb-title { color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 10px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; text-align: center; }
 .xb-content { display: flex; flex-direction: column; gap: 5px; }
 .xb-item { display: flex; justify-content: space-between; font-size: 0.95rem; font-weight: 600; }
-
-/* Watermark Overlay */
 .watermark-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: center; z-index: 1000; pointer-events: none; }
 .watermark-text { color: rgba(231, 76, 60, 0.4); font-size: 3.5rem; font-weight: 900; text-transform: uppercase; transform: rotate(-20deg); border: 8px solid rgba(231, 76, 60, 0.4); padding: 20px 40px; border-radius: 15px; letter-spacing: 5px; text-shadow: 2px 2px 10px rgba(0,0,0,0.5); white-space: nowrap; }
 .faded-charts .xray-content { opacity: 0.25; filter: grayscale(80%); pointer-events: none; transition: all 0.3s ease; }
@@ -151,7 +137,7 @@ body {
 /* Notification Badge on Tab */
 .badge-pulse { 
     position: absolute; 
-    top: 4px; /* Το κατεβάσαμε λίγο για ισορροπία με το padding-top */
+    top: 4px; 
     right: -25px; 
     background-color: var(--accent-green); 
     color: #111; 
@@ -160,7 +146,7 @@ body {
     padding: 3px 6px; 
     border-radius: 12px; 
     box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.7); 
-    transform: rotate(20deg); /* Περιστροφή 20 μοίρες */
+    transform: rotate(20deg); 
     animation: pulse-badge 2s infinite; 
     pointer-events: none; 
 }
@@ -170,21 +156,31 @@ body {
     100% { transform: scale(0.95) rotate(20deg); box-shadow: 0 0 0 0 rgba(46, 204, 113, 0); } 
 }
 
-/* Custom Nav Pills for Records Sub-menu */
-.custom-pills .nav-link { color: var(--text-muted); border-radius: 20px; padding: 8px 20px; margin-right: 10px; font-weight: 600; transition: all 0.3s; background-color: rgba(255,255,255,0.02); border: 1px solid var(--border-color); }
-.custom-pills .nav-link:hover { color: #fff; background-color: rgba(255,255,255,0.05); }
-.custom-pills .nav-link.active { background-color: #ffc000; color: #111; border-color: #ffc000; box-shadow: 0 4px 10px rgba(255,192,0,0.3); }
-
-/* Record Boxes Layout */
-.record-box { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 6px; padding: 15px 20px; margin-bottom: 20px; height: calc(100% - 20px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
-.record-box h6 { color: var(--text-muted); text-transform: uppercase; font-size: 0.85rem; font-weight: 700; letter-spacing: 0.5px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom: 15px; }
-.record-row { position: relative; display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px dashed rgba(255,255,255,0.05); }
+/* Record Boxes Layout (Compact for Split Screen) */
+.record-box { 
+    background: var(--card-bg); border: 1px solid var(--border-color); 
+    border-radius: 6px; padding: 12px 15px; 
+    margin-bottom: 15px; height: calc(100% - 15px); 
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15); 
+}
+.record-box h6 { 
+    color: var(--text-muted); text-transform: uppercase; 
+    font-size: 0.75rem; font-weight: 700; letter-spacing: 0.5px; 
+    border-bottom: 1px solid var(--border-color); 
+    padding-bottom: 8px; margin-bottom: 10px; 
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; 
+}
+.record-row { 
+    position: relative; display: flex; justify-content: space-between; 
+    align-items: center; padding: 8px 0; 
+    border-bottom: 1px dashed rgba(255,255,255,0.05); 
+}
 .record-row:last-child { border-bottom: none; }
-.rec-rank { font-size: 0.85rem; font-weight: bold; width: 30px; color: #5b9bd5; }
-.rec-date { font-size: 0.9rem; color: #fff; font-family: 'Courier New', Courier, monospace; flex-grow: 1;}
-.rec-val { font-size: 1.1rem; font-weight: bold; font-family: 'Courier New', Courier, monospace; }
+.rec-rank { font-size: 0.85rem; font-weight: bold; width: 25px; color: #5b9bd5; }
+.rec-date { font-size: 0.85rem; color: #fff; font-family: 'Courier New', Courier, monospace; flex-grow: 1;}
+.rec-val { font-size: 1rem; font-weight: bold; font-family: 'Courier New', Courier, monospace; }
 
-/* The 20-Degree Rotated "NEW!" Badge (Inside the cards) */
+/* Inside Card "NEW!" Badge */
 .new-record-badge { 
     position: absolute; right: -10px; top: -12px; 
     background-color: var(--accent-green); color: #111; 
