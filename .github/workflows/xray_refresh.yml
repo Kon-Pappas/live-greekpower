@@ -1,0 +1,111 @@
+name: X-Ray history refresh
+
+# Ξανακατεβάζει τα αρχεία SCADA και RESMV του ΑΔΜΗΕ για ένα διάστημα και ξαναγράφει
+# τα αρχεία data/xray/ (D36: ροές Κρήτης και NET LOAD). Τρέχει μόνο χειροκίνητα.
+# Το προεπιλεγμένο «Έως» είναι 3 ημέρες πριν από σήμερα, ώστε να μη συναντά ποτέ
+# τις ημέρες που γράφει το καθημερινό X-Ray (προχθές, χθες).
+on:
+  workflow_dispatch:
+    inputs:
+      start_date:
+        description: 'Από (YYYYMMDD)'
+        required: true
+        default: '20260401'
+      end_date:
+        description: 'Έως (YYYYMMDD) · κενό = πριν από 3 ημέρες'
+        required: false
+        default: ''
+      chunk_days:
+        description: 'Ημέρες ανά κομμάτι (commit μετά από κάθε κομμάτι)'
+        required: true
+        default: '15'
+      pause_seconds:
+        description: 'Παύση ανάμεσα στις ημέρες (δευτερόλεπτα)'
+        required: true
+        default: '5'
+      chunk_pause_seconds:
+        description: 'Παύση ανάμεσα στα κομμάτια (δευτερόλεπτα)'
+        required: true
+        default: '60'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: xray-refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests pytz pandas xlrd openpyxl
+
+      - name: Refresh in chunks
+        env:
+          BF_START: ${{ github.event.inputs.start_date }}
+          BF_END: ${{ github.event.inputs.end_date }}
+          BF_CHUNK: ${{ github.event.inputs.chunk_days }}
+          BF_PAUSE: ${{ github.event.inputs.pause_seconds }}
+          BF_CHUNK_PAUSE: ${{ github.event.inputs.chunk_pause_seconds }}
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action Bot"
+
+          commit_push () {
+            git add -A data
+            if git diff --staged --quiet; then
+              echo "Καμία αλλαγή."
+              return 0
+            fi
+            git commit -m "$1"
+            for i in 1 2 3; do
+              git pull --rebase origin main && git push && return 0
+              echo "Push απέτυχε (προσπάθεια $i), νέα δοκιμή σε 10s..."
+              sleep 10
+            done
+            echo "Το push απέτυχε μετά από 3 προσπάθειες."
+            return 1
+          }
+
+          python - > chunks.txt <<'PY'
+          import os
+          from datetime import datetime, timedelta
+          import pytz
+          today = datetime.now(pytz.timezone('Europe/Athens')).replace(tzinfo=None)
+          s = datetime.strptime(os.environ['BF_START'], '%Y%m%d')
+          end = (os.environ.get('BF_END') or '').strip()
+          e = datetime.strptime(end, '%Y%m%d') if end else (today - timedelta(days=3))
+          n = max(1, int(os.environ['BF_CHUNK']))
+          while s.date() <= e.date():
+              c = min(e, s + timedelta(days=n - 1))
+              print(s.strftime('%Y%m%d'), c.strftime('%Y%m%d'))
+              s = c + timedelta(days=1)
+          PY
+          echo "Κομμάτια:"; cat chunks.txt
+
+          first=1
+          while read -r CS CE; do
+            if [ "$first" -eq 0 ]; then
+              echo "Παύση ${BF_CHUNK_PAUSE}s πριν το επόμενο κομμάτι..."
+              sleep "$BF_CHUNK_PAUSE"
+            fi
+            first=0
+            echo "=== X-Ray $CS → $CE ==="
+            START_DATE="$CS" END_DATE="$CE" PAUSE_SECONDS="$BF_PAUSE" python xray_builder.py
+            commit_push "X-Ray refresh: $CS–$CE"
+          done < chunks.txt
+          rm -f chunks.txt
