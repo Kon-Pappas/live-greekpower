@@ -5,6 +5,7 @@ import json
 from datetime import datetime, timedelta
 import pytz
 from jsonio import load_json_strict, write_json_atomic
+import contract
 
 def get_target_dates():
     start_env = os.environ.get('START_DATE', '').strip().replace('-', '')
@@ -189,3 +190,5 @@ if __name__ == "__main__":
         
     if all_entsoe_data:
         save_entsoe_data(all_entsoe_data)
+        # --- Νέα δομή (schema v1): ένα αρχείο ανά ημέρα ---
+        contract.write_entsoe_days(all_entsoe_data)

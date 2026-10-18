@@ -5,6 +5,7 @@ import sys
 from datetime import datetime, timedelta
 import pytz
 from jsonio import load_json_strict, write_json_atomic
+import contract
 import pandas as pd
 import io
 import urllib3
@@ -239,3 +240,5 @@ if __name__ == "__main__":
         
     if all_xray_data:
         save_xray_data(all_xray_data)
+        # --- Νέα δομή (schema v1): ένα αρχείο ανά ημέρα ---
+        contract.write_xray_days(all_xray_data)

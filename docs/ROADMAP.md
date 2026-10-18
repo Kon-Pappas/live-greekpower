@@ -8,7 +8,7 @@ Future hours removed from the Live selector, freshness-aware status pill, strict
 ## Phase 1b: Daylight saving (after 25 Oct 2026)
 Check what ADMIE returned for 25 Oct, handle a 25-hour (and 23-hour) day in the scraper, the records and the page, then re-run 25 Oct (K01).
 
-## Phase 2: Data contract
+## Phase 2: Data contract (code done 18 Oct 2026, D15–D20; migration to run once)
 - The builders compute what the page now computes in the browser: demand, UCE (signed, K03), daily totals. The records then use exactly the numbers the visitor sees.
 - `xray_data.json` and `entsoe_ref.json` split into monthly files (K04).
 - A small `manifest.json`: last update, next update, available dates. It drives the Last/Next Update row.
