@@ -1,282 +1,588 @@
 {
   "schema": 1,
   "date": "2026-04-17",
-  "source": "ENTSO-E Transparency Platform, A75 actual generation per type (GR)",
-  "updated": "2026-10-18T09:36:22+03:00",
+  "source": "ENTSO-E Transparency Platform: A75 actual generation per type, A65 actual total load (GR)",
+  "updated": "2026-10-18T21:56:18+03:00",
+  "status": "final",
   "totals": {
     "solar": 28159.0,
     "wind": 65851.0,
-    "hydro_ror": 0.0,
+    "hydro_ror": null,
     "hydro_res": 6857.0,
     "hydro": 6857.0,
-    "biomass": 0.0,
+    "biomass": null,
     "gas": 30515.0,
-    "lignite": 2832.0
+    "lignite": 2832.0,
+    "load": 119267.3
   },
   "hours": [
     {
       "hr": 1,
       "solar": 0.0,
       "wind": 3226.0,
-      "hydro_ror": 0.0,
+      "hydro_ror": null,
       "hydro_res": 232.0,
       "hydro": 232.0,
-      "biomass": 0.0,
+      "biomass": null,
       "gas": 2202.0,
-      "lignite": 191.0
+      "lignite": 191.0,
+      "load": 4620.5
     },
     {
       "hr": 2,
-      "solar": 0.0,
+      "solar": null,
       "wind": 3185.0,
-      "hydro_ror": 0.0,
+      "hydro_ror": null,
       "hydro_res": 115.0,
       "hydro": 115.0,
-      "biomass": 0.0,
+      "biomass": null,
       "gas": 1808.0,
-      "lignite": 0.0
+      "lignite": null,
+      "load": 4237.0
     },
     {
       "hr": 3,
-      "solar": 0.0,
+      "solar": null,
       "wind": 3100.0,
-      "hydro_ror": 0.0,
+      "hydro_ror": null,
       "hydro_res": 114.0,
       "hydro": 114.0,
-      "biomass": 0.0,
+      "biomass": null,
       "gas": 1150.0,
-      "lignite": 190.0
+      "lignite": 190.0,
+      "load": 4038.2
     },
     {
       "hr": 4,
-      "solar": 0.0,
+      "solar": null,
       "wind": 3073.0,
-      "hydro_ror": 0.0,
+      "hydro_ror": null,
       "hydro_res": 91.0,
       "hydro": 91.0,
-      "biomass": 0.0,
+      "biomass": null,
       "gas": 1089.0,
-      "lignite": 189.0
+      "lignite": 189.0,
+      "load": 4000.5
     },
     {
       "hr": 5,
-      "solar": 0.0,
+      "solar": null,
       "wind": 3146.0,
-      "hydro_ror": 0.0,
-      "hydro_res": 0.0,
-      "hydro": 0.0,
-      "biomass": 0.0,
+      "hydro_ror": null,
+      "hydro_res": null,
+      "hydro": null,
+      "biomass": null,
       "gas": 967.0,
-      "lignite": 0.0
+      "lignite": null,
+      "load": 3939.0
     },
     {
       "hr": 6,
-      "solar": 0.0,
+      "solar": null,
       "wind": 3205.0,
-      "hydro_ror": 0.0,
+      "hydro_ror": null,
       "hydro_res": 97.0,
       "hydro": 97.0,
-      "biomass": 0.0,
+      "biomass": null,
       "gas": 1069.0,
-      "lignite": 190.0
+      "lignite": 190.0,
+      "load": 4016.0
     },
     {
       "hr": 7,
       "solar": 3.0,
       "wind": 3287.0,
-      "hydro_ror": 0.0,
+      "hydro_ror": null,
       "hydro_res": 325.0,
       "hydro": 325.0,
-      "biomass": 0.0,
+      "biomass": null,
       "gas": 1143.0,
-      "lignite": 176.0
+      "lignite": 176.0,
+      "load": 4267.2
     },
     {
       "hr": 8,
       "solar": 256.0,
       "wind": 3440.0,
-      "hydro_ror": 0.0,
+      "hydro_ror": null,
       "hydro_res": 629.0,
       "hydro": 629.0,
-      "biomass": 0.0,
+      "biomass": null,
       "gas": 1019.0,
-      "lignite": 190.0
+      "lignite": 190.0,
+      "load": 4651.0
     },
     {
       "hr": 9,
       "solar": 1003.0,
       "wind": 3374.0,
-      "hydro_ror": 0.0,
+      "hydro_ror": null,
       "hydro_res": 417.0,
       "hydro": 417.0,
-      "biomass": 0.0,
+      "biomass": null,
       "gas": 960.0,
-      "lignite": 189.0
+      "lignite": 189.0,
+      "load": 5169.5
     },
     {
       "hr": 10,
       "solar": 2025.0,
       "wind": 3189.0,
-      "hydro_ror": 0.0,
+      "hydro_ror": null,
       "hydro_res": 177.0,
       "hydro": 177.0,
-      "biomass": 0.0,
+      "biomass": null,
       "gas": 1033.0,
-      "lignite": 187.0
+      "lignite": 187.0,
+      "load": 5543.2
     },
     {
       "hr": 11,
       "solar": 2520.0,
       "wind": 2333.0,
-      "hydro_ror": 0.0,
+      "hydro_ror": null,
       "hydro_res": 81.0,
       "hydro": 81.0,
-      "biomass": 0.0,
+      "biomass": null,
       "gas": 1435.0,
-      "lignite": 188.0
+      "lignite": 188.0,
+      "load": 5703.8
     },
     {
       "hr": 12,
       "solar": 3091.0,
       "wind": 1994.0,
-      "hydro_ror": 0.0,
-      "hydro_res": 0.0,
-      "hydro": 0.0,
-      "biomass": 0.0,
+      "hydro_ror": null,
+      "hydro_res": null,
+      "hydro": null,
+      "biomass": null,
       "gas": 1280.0,
-      "lignite": 189.0
+      "lignite": 189.0,
+      "load": 5735.5
     },
     {
       "hr": 13,
       "solar": 3458.0,
       "wind": 1753.0,
-      "hydro_ror": 0.0,
+      "hydro_ror": null,
       "hydro_res": 82.0,
       "hydro": 82.0,
-      "biomass": 0.0,
+      "biomass": null,
       "gas": 942.0,
-      "lignite": 191.0
+      "lignite": 191.0,
+      "load": 5752.5
     },
     {
       "hr": 14,
       "solar": 3487.0,
       "wind": 1647.0,
-      "hydro_ror": 0.0,
+      "hydro_ror": null,
       "hydro_res": 81.0,
       "hydro": 81.0,
-      "biomass": 0.0,
+      "biomass": null,
       "gas": 944.0,
-      "lignite": 190.0
+      "lignite": 190.0,
+      "load": 5677.0
     },
     {
       "hr": 15,
       "solar": 3255.0,
       "wind": 1570.0,
-      "hydro_ror": 0.0,
+      "hydro_ror": null,
       "hydro_res": 109.0,
       "hydro": 109.0,
-      "biomass": 0.0,
+      "biomass": null,
       "gas": 941.0,
-      "lignite": 0.0
+      "lignite": null,
+      "load": 5385.5
     },
     {
       "hr": 16,
       "solar": 2835.0,
       "wind": 1595.0,
-      "hydro_ror": 0.0,
+      "hydro_ror": null,
       "hydro_res": 144.0,
       "hydro": 144.0,
-      "biomass": 0.0,
+      "biomass": null,
       "gas": 965.0,
-      "lignite": 0.0
+      "lignite": null,
+      "load": 5100.5
     },
     {
       "hr": 17,
       "solar": 2437.0,
       "wind": 1909.0,
-      "hydro_ror": 0.0,
+      "hydro_ror": null,
       "hydro_res": 156.0,
       "hydro": 156.0,
-      "biomass": 0.0,
+      "biomass": null,
       "gas": 943.0,
-      "lignite": 0.0
+      "lignite": null,
+      "load": 4955.7
     },
     {
       "hr": 18,
       "solar": 2187.0,
       "wind": 2384.0,
-      "hydro_ror": 0.0,
-      "hydro_res": 0.0,
-      "hydro": 0.0,
-      "biomass": 0.0,
+      "hydro_ror": null,
+      "hydro_res": null,
+      "hydro": null,
+      "biomass": null,
       "gas": 1175.0,
-      "lignite": 191.0
+      "lignite": 191.0,
+      "load": 4928.8
     },
     {
       "hr": 19,
       "solar": 1262.0,
       "wind": 2856.0,
-      "hydro_ror": 0.0,
+      "hydro_ror": null,
       "hydro_res": 211.0,
       "hydro": 211.0,
-      "biomass": 0.0,
+      "biomass": null,
       "gas": 1267.0,
-      "lignite": 190.0
+      "lignite": 190.0,
+      "load": 5054.8
     },
     {
       "hr": 20,
       "solar": 335.0,
       "wind": 2855.0,
-      "hydro_ror": 0.0,
+      "hydro_ror": null,
       "hydro_res": 739.0,
       "hydro": 739.0,
-      "biomass": 0.0,
+      "biomass": null,
       "gas": 1745.0,
-      "lignite": 191.0
+      "lignite": 191.0,
+      "load": 5227.8
     },
     {
       "hr": 21,
       "solar": 5.0,
       "wind": 3022.0,
-      "hydro_ror": 0.0,
+      "hydro_ror": null,
       "hydro_res": 970.0,
       "hydro": 970.0,
-      "biomass": 0.0,
+      "biomass": null,
       "gas": 1818.0,
-      "lignite": 0.0
+      "lignite": null,
+      "load": 5582.5
     },
     {
       "hr": 22,
       "solar": 0.0,
       "wind": 3152.0,
-      "hydro_ror": 0.0,
+      "hydro_ror": null,
       "hydro_res": 996.0,
       "hydro": 996.0,
-      "biomass": 0.0,
+      "biomass": null,
       "gas": 1734.0,
-      "lignite": 0.0
+      "lignite": null,
+      "load": 5647.5
     },
     {
       "hr": 23,
-      "solar": 0.0,
+      "solar": null,
       "wind": 3261.0,
-      "hydro_ror": 0.0,
+      "hydro_ror": null,
       "hydro_res": 683.0,
       "hydro": 683.0,
-      "biomass": 0.0,
+      "biomass": null,
       "gas": 1454.0,
-      "lignite": 0.0
+      "lignite": null,
+      "load": 5235.5
     },
     {
       "hr": 24,
-      "solar": 0.0,
+      "solar": null,
       "wind": 3295.0,
-      "hydro_ror": 0.0,
+      "hydro_ror": null,
       "hydro_res": 408.0,
       "hydro": 408.0,
-      "biomass": 0.0,
+      "biomass": null,
       "gas": 1432.0,
-      "lignite": 0.0
+      "lignite": null,
+      "load": 4797.8
     }
-  ]
+  ],
+  "first": {
+    "fetched": "2026-10-18T09:36:22+03:00",
+    "totals": {
+      "solar": 28159.0,
+      "wind": 65851.0,
+      "hydro_ror": 0.0,
+      "hydro_res": 6857.0,
+      "hydro": 6857.0,
+      "biomass": 0.0,
+      "gas": 30515.0,
+      "lignite": 2832.0
+    },
+    "hours": [
+      {
+        "hr": 1,
+        "solar": 0.0,
+        "wind": 3226.0,
+        "hydro_ror": 0.0,
+        "hydro_res": 232.0,
+        "hydro": 232.0,
+        "biomass": 0.0,
+        "gas": 2202.0,
+        "lignite": 191.0
+      },
+      {
+        "hr": 2,
+        "solar": 0.0,
+        "wind": 3185.0,
+        "hydro_ror": 0.0,
+        "hydro_res": 115.0,
+        "hydro": 115.0,
+        "biomass": 0.0,
+        "gas": 1808.0,
+        "lignite": 0.0
+      },
+      {
+        "hr": 3,
+        "solar": 0.0,
+        "wind": 3100.0,
+        "hydro_ror": 0.0,
+        "hydro_res": 114.0,
+        "hydro": 114.0,
+        "biomass": 0.0,
+        "gas": 1150.0,
+        "lignite": 190.0
+      },
+      {
+        "hr": 4,
+        "solar": 0.0,
+        "wind": 3073.0,
+        "hydro_ror": 0.0,
+        "hydro_res": 91.0,
+        "hydro": 91.0,
+        "biomass": 0.0,
+        "gas": 1089.0,
+        "lignite": 189.0
+      },
+      {
+        "hr": 5,
+        "solar": 0.0,
+        "wind": 3146.0,
+        "hydro_ror": 0.0,
+        "hydro_res": 0.0,
+        "hydro": 0.0,
+        "biomass": 0.0,
+        "gas": 967.0,
+        "lignite": 0.0
+      },
+      {
+        "hr": 6,
+        "solar": 0.0,
+        "wind": 3205.0,
+        "hydro_ror": 0.0,
+        "hydro_res": 97.0,
+        "hydro": 97.0,
+        "biomass": 0.0,
+        "gas": 1069.0,
+        "lignite": 190.0
+      },
+      {
+        "hr": 7,
+        "solar": 3.0,
+        "wind": 3287.0,
+        "hydro_ror": 0.0,
+        "hydro_res": 325.0,
+        "hydro": 325.0,
+        "biomass": 0.0,
+        "gas": 1143.0,
+        "lignite": 176.0
+      },
+      {
+        "hr": 8,
+        "solar": 256.0,
+        "wind": 3440.0,
+        "hydro_ror": 0.0,
+        "hydro_res": 629.0,
+        "hydro": 629.0,
+        "biomass": 0.0,
+        "gas": 1019.0,
+        "lignite": 190.0
+      },
+      {
+        "hr": 9,
+        "solar": 1003.0,
+        "wind": 3374.0,
+        "hydro_ror": 0.0,
+        "hydro_res": 417.0,
+        "hydro": 417.0,
+        "biomass": 0.0,
+        "gas": 960.0,
+        "lignite": 189.0
+      },
+      {
+        "hr": 10,
+        "solar": 2025.0,
+        "wind": 3189.0,
+        "hydro_ror": 0.0,
+        "hydro_res": 177.0,
+        "hydro": 177.0,
+        "biomass": 0.0,
+        "gas": 1033.0,
+        "lignite": 187.0
+      },
+      {
+        "hr": 11,
+        "solar": 2520.0,
+        "wind": 2333.0,
+        "hydro_ror": 0.0,
+        "hydro_res": 81.0,
+        "hydro": 81.0,
+        "biomass": 0.0,
+        "gas": 1435.0,
+        "lignite": 188.0
+      },
+      {
+        "hr": 12,
+        "solar": 3091.0,
+        "wind": 1994.0,
+        "hydro_ror": 0.0,
+        "hydro_res": 0.0,
+        "hydro": 0.0,
+        "biomass": 0.0,
+        "gas": 1280.0,
+        "lignite": 189.0
+      },
+      {
+        "hr": 13,
+        "solar": 3458.0,
+        "wind": 1753.0,
+        "hydro_ror": 0.0,
+        "hydro_res": 82.0,
+        "hydro": 82.0,
+        "biomass": 0.0,
+        "gas": 942.0,
+        "lignite": 191.0
+      },
+      {
+        "hr": 14,
+        "solar": 3487.0,
+        "wind": 1647.0,
+        "hydro_ror": 0.0,
+        "hydro_res": 81.0,
+        "hydro": 81.0,
+        "biomass": 0.0,
+        "gas": 944.0,
+        "lignite": 190.0
+      },
+      {
+        "hr": 15,
+        "solar": 3255.0,
+        "wind": 1570.0,
+        "hydro_ror": 0.0,
+        "hydro_res": 109.0,
+        "hydro": 109.0,
+        "biomass": 0.0,
+        "gas": 941.0,
+        "lignite": 0.0
+      },
+      {
+        "hr": 16,
+        "solar": 2835.0,
+        "wind": 1595.0,
+        "hydro_ror": 0.0,
+        "hydro_res": 144.0,
+        "hydro": 144.0,
+        "biomass": 0.0,
+        "gas": 965.0,
+        "lignite": 0.0
+      },
+      {
+        "hr": 17,
+        "solar": 2437.0,
+        "wind": 1909.0,
+        "hydro_ror": 0.0,
+        "hydro_res": 156.0,
+        "hydro": 156.0,
+        "biomass": 0.0,
+        "gas": 943.0,
+        "lignite": 0.0
+      },
+      {
+        "hr": 18,
+        "solar": 2187.0,
+        "wind": 2384.0,
+        "hydro_ror": 0.0,
+        "hydro_res": 0.0,
+        "hydro": 0.0,
+        "biomass": 0.0,
+        "gas": 1175.0,
+        "lignite": 191.0
+      },
+      {
+        "hr": 19,
+        "solar": 1262.0,
+        "wind": 2856.0,
+        "hydro_ror": 0.0,
+        "hydro_res": 211.0,
+        "hydro": 211.0,
+        "biomass": 0.0,
+        "gas": 1267.0,
+        "lignite": 190.0
+      },
+      {
+        "hr": 20,
+        "solar": 335.0,
+        "wind": 2855.0,
+        "hydro_ror": 0.0,
+        "hydro_res": 739.0,
+        "hydro": 739.0,
+        "biomass": 0.0,
+        "gas": 1745.0,
+        "lignite": 191.0
+      },
+      {
+        "hr": 21,
+        "solar": 5.0,
+        "wind": 3022.0,
+        "hydro_ror": 0.0,
+        "hydro_res": 970.0,
+        "hydro": 970.0,
+        "biomass": 0.0,
+        "gas": 1818.0,
+        "lignite": 0.0
+      },
+      {
+        "hr": 22,
+        "solar": 0.0,
+        "wind": 3152.0,
+        "hydro_ror": 0.0,
+        "hydro_res": 996.0,
+        "hydro": 996.0,
+        "biomass": 0.0,
+        "gas": 1734.0,
+        "lignite": 0.0
+      },
+      {
+        "hr": 23,
+        "solar": 0.0,
+        "wind": 3261.0,
+        "hydro_ror": 0.0,
+        "hydro_res": 683.0,
+        "hydro": 683.0,
+        "biomass": 0.0,
+        "gas": 1454.0,
+        "lignite": 0.0
+      },
+      {
+        "hr": 24,
+        "solar": 0.0,
+        "wind": 3295.0,
+        "hydro_ror": 0.0,
+        "hydro_res": 408.0,
+        "hydro": 408.0,
+        "biomass": 0.0,
+        "gas": 1432.0,
+        "lignite": 0.0
+      }
+    ],
+    "status": "unknown"
+  }
 }
