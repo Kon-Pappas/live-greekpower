@@ -3,154 +3,238 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Greek Power Market Analytics</title>
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- ECharts -->
-    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
-    <!-- Custom CSS -->
-    <link href="css/styles.css" rel="stylesheet">
+    <title id="pageTitle">Greek Power Live</title>
+    <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+    <script>
+        // ΕΝΑ σημείο για το accent της σελίδας (D09: πλατίνα). Αλλάζεις μόνο αυτές τις τιμές.
+        window.ACCENT = { 200: '#f1f5f9', 300: '#e2e8f0', 400: '#cbd5e1', 500: '#94a3b8' };
+        tailwind.config = { theme: { extend: { colors: { acc: window.ACCENT } } } };
+        document.documentElement.style.setProperty('--acc', window.ACCENT[400]);
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"></script>
+    <style>
+        body { font-variant-numeric: tabular-nums; }
+        :focus-visible { outline: 2px solid var(--acc); outline-offset: 2px; }
+        .scroll-thin::-webkit-scrollbar { width: 6px; }
+        .scroll-thin::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+        @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; } }
+    </style>
 </head>
-<body>
+<body class="bg-slate-900 text-slate-100 min-h-screen p-4 md:p-8 flex flex-col justify-between relative">
 
-    <div class="top-nav d-flex align-items-center" style="font-size: 0.9rem;">
-        <a href="https://kon-pappas.github.io/" style="text-decoration: none; color: #38bdf8; display: flex; align-items: center; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
-            <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px; margin-bottom: 2px;">
-                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-                <polyline points="9 22 9 12 15 12 15 22"></polyline>
-            </svg>
-            Konstantinos Pappas Hub
-        </a>
-        <span style="color: #6b7280; margin: 0 10px;">/</span>
-        <span style="color: #f3f4f6;">Live Greek Power</span>
+    <!-- Loading overlay (house style: βήματα με ρυθμό που μπορεί να ακολουθήσει το μάτι) -->
+    <div id="loading-overlay" class="fixed inset-0 z-[9999] bg-slate-900/95 backdrop-blur-sm flex flex-col items-center justify-center transition-opacity duration-500 px-4">
+        <div class="w-full max-w-sm bg-slate-800 border border-slate-700 rounded-2xl shadow-2xl p-5 flex flex-col gap-4">
+            <div class="flex items-center gap-3 mb-1 border-b border-slate-700/50 pb-3">
+                <div class="w-5 h-5 border-2 border-slate-600 border-t-acc-400 rounded-full animate-spin" id="mainSpinner"></div>
+                <h2 class="text-white text-base font-bold tracking-wide" id="loadTitle">System Initialization</h2>
+            </div>
+            <div class="bg-slate-900/50 rounded-xl p-3 border border-slate-700/50 flex flex-col gap-2">
+                <div class="flex items-center gap-2 mb-1">
+                    <svg class="w-3.5 h-3.5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" /></svg>
+                    <span class="text-[10px] font-bold text-slate-400 tracking-wider" id="loadGroup1">Data fetching</span>
+                </div>
+                <div class="load-row opacity-0 transition-opacity duration-300" data-step="1">
+                    <div class="flex justify-between items-end mb-1"><span class="text-xs text-slate-300" data-load-label>Reading the data index</span><span class="text-[10px] font-mono text-emerald-400 font-bold" data-load-pct>0%</span></div>
+                    <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden"><div class="bg-blue-500 h-full rounded-full w-0 transition-all duration-300 ease-out" data-load-bar></div></div>
+                </div>
+            </div>
+            <div class="bg-slate-900/50 rounded-xl p-3 border border-slate-700/50 flex flex-col gap-3 mt-1">
+                <div class="flex items-center gap-2 mb-1">
+                    <svg class="w-3.5 h-3.5 text-acc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+                    <span class="text-[10px] font-bold text-slate-400 tracking-wider" id="loadGroup2">Analytics</span>
+                </div>
+                <div class="load-row opacity-0 transition-opacity duration-300" data-step="2">
+                    <div class="flex justify-between items-end mb-1"><span class="text-xs text-slate-300" data-load-label>Live balance</span><span class="text-[10px] font-mono text-emerald-400 font-bold" data-load-pct>0%</span></div>
+                    <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden"><div class="bg-acc-500 h-full rounded-full w-0 transition-all duration-300 ease-out" data-load-bar></div></div>
+                </div>
+                <div class="load-row opacity-0 transition-opacity duration-300" data-step="3">
+                    <div class="flex justify-between items-end mb-1"><span class="text-xs text-slate-300" data-load-label>Daily dispatch</span><span class="text-[10px] font-mono text-emerald-400 font-bold" data-load-pct>0%</span></div>
+                    <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden"><div class="bg-acc-500 h-full rounded-full w-0 transition-all duration-300 ease-out" data-load-bar></div></div>
+                </div>
+                <div class="load-row opacity-0 transition-opacity duration-300" data-step="4">
+                    <div class="flex justify-between items-end mb-1"><span class="text-xs text-slate-300" data-load-label>Clean energy cross-check</span><span class="text-[10px] font-mono text-emerald-400 font-bold" data-load-pct>0%</span></div>
+                    <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden"><div class="bg-acc-500 h-full rounded-full w-0 transition-all duration-300 ease-out" data-load-bar></div></div>
+                </div>
+                <div class="load-row opacity-0 transition-opacity duration-300" data-step="5">
+                    <div class="flex justify-between items-end mb-1"><span class="text-xs text-slate-300" data-load-label>Records</span><span class="text-[10px] font-mono text-emerald-400 font-bold" data-load-pct>0%</span></div>
+                    <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden"><div class="bg-acc-500 h-full rounded-full w-0 transition-all duration-300 ease-out" data-load-bar></div></div>
+                </div>
+            </div>
+            <div class="opacity-0 transition-all duration-500 transform translate-y-2 flex items-center justify-center p-3 mt-1 rounded-xl border border-emerald-500/30 bg-emerald-500/10 gap-2" id="loadRowFinal">
+                <svg class="w-5 h-5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span class="text-emerald-400 font-bold text-sm tracking-wide" id="loadReady">Dashboard is ready!</span>
+            </div>
+            <p class="hidden text-sm text-red-300 text-center" id="loadError"></p>
+        </div>
     </div>
 
-    <div class="header-section">
-        <div>
-            <h1 class="dashboard-title">Greek Power Market Analytics</h1>
-            <div class="update-info" id="last-updated">Last Update: Loading...</div>
-        </div>
-        <div class="controls-wrapper">
-            <select id="context-dropdown" class="form-select custom-dropdown"></select>
-            <div class="status-pill" id="live-status-pill">● Live Data Active</div>
-        </div>
-    </div>
-
-    <!-- TABS MENU -->
-    <div class="nav-tabs-container">
-        <a class="nav-tab-item active" data-target="tab-live">Live Analytics (Hour by Hour)</a>
-        <a class="nav-tab-item" data-target="tab-daily">Daily Analytics (Inc. Today)</a>
-        <a class="nav-tab-item" data-target="tab-xray">Clean Energy (Res+Hydro) Analytics (Excl. Today)</a>
-        <!-- TAB GIA RECORDS -->
-        <a class="nav-tab-item tab-records-btn" data-target="tab-records">
-            🏆 All-Time Records
-            <span id="records-badge-tab" class="badge-pulse d-none"></span>
-        </a>
-    </div>
-
-    <div class="main-container">
-        <!-- TAB 1: LIVE ANALYTICS -->
-        <div id="tab-live" class="tab-pane active">
-            <div class="live-dashboard-grid mb-4">
-                <div class="metric-card ledger-card">
-                    <div class="metric-title">TOTAL GENERATION</div>
-                    <div class="ledger-list" id="render-gen-ledger"></div>
-                </div>
-                <div class="chart-container" style="padding: 10px;">
-                    <div id="supplyChart" style="height: 400px; width: 100%;"></div>
-                </div>
-                <div class="chart-container" style="padding: 10px;">
-                    <div id="demandChart" style="height: 400px; width: 100%;"></div>
-                </div>
-                <div class="metric-card ledger-card">
-                    <div class="metric-title">TOTAL DEMAND</div>
-                    <div class="ledger-list" id="render-dem-ledger"></div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-12 mb-4">
-                    <div class="chart-container" id="flowsChart" style="height: 380px;"></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- TAB 2: DAILY DASHBOARD -->
-        <div id="tab-daily" class="tab-pane">
-            <div class="daily-section-card mb-4">
-                <div class="section-header">Daily Volume Ranking (Sorted by Cumulative MWh)</div>
-                <div class="leaderboard-grid" id="daily-leaderboard"></div>
-            </div>
-            <div class="row">
-                <div class="col-12">
-                    <div class="chart-container" id="dailyDispatchChart" style="height: 650px;"></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- TAB 3: CLEAN ENERGY ANALYTICS (X-RAY & ENTSO-E) -->
-        <div id="tab-xray" class="tab-pane">
-            <div class="xray-wrapper position-relative" id="xray-wrapper">
-                <div id="xray-watermark" class="watermark-overlay d-none">
-                    <div class="watermark-text">EX-POST DATA PENDING</div>
-                </div>
-                <div class="xray-content" id="xray-content">
-                    <div class="xray-summary-boxes mb-4" id="xray-summary">
-                        <div class="xray-box">
-                            <div class="xb-title">Stochastic & Dispatchable</div>
-                            <div class="xb-content" id="xb-stoch"></div>
-                        </div>
-                        <div class="xray-box">
-                            <div class="xb-title">Unallocated Clean Energy</div>
-                            <div class="xb-content" id="xb-uce"></div>
-                        </div>
-                        <div class="xray-box">
-                            <div class="xb-title">Baseload</div>
-                            <div class="xb-content" id="xb-base"></div>
-                        </div>
+    <!-- Methodology modal: σταθερό header (τίτλος + X σε πλαίσιο), body που κυλά, σταθερό footer -->
+    <div id="methodologyModal" class="fixed inset-0 z-[9998] bg-slate-900/80 backdrop-blur-sm hidden items-center justify-center px-4 transition-opacity duration-300 opacity-0" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <div class="bg-slate-800 border border-slate-700 rounded-xl shadow-2xl w-full max-w-2xl transform transition-transform duration-300 scale-95 flex flex-col max-h-[85vh]" id="modalContent">
+            <div class="flex items-center justify-between gap-3 p-5 border-b border-slate-700 shrink-0">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-full bg-acc-400/15 flex items-center justify-center text-acc-400">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" /></svg>
                     </div>
-                    <div class="row mb-4">
-                        <div class="col-12">
-                            <div class="chart-container" id="xrayChart" style="height: 600px;"></div>
-                        </div>
+                    <h3 class="text-lg font-bold text-slate-100" id="modalTitle">Methodology &amp; Data Sources</h3>
+                </div>
+                <button type="button" data-close-modal class="shrink-0 w-9 h-9 flex items-center justify-center rounded-lg border border-slate-600 bg-slate-900/40 text-slate-300 hover:text-white hover:border-slate-400 transition" aria-label="Close">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+            <div class="p-6 text-sm text-slate-300 leading-relaxed overflow-y-auto flex-1 scroll-thin" id="modalBody"></div>
+            <div class="p-4 border-t border-slate-700 flex justify-end shrink-0">
+                <button type="button" data-close-modal class="px-4 py-2 border border-slate-600 bg-slate-700 hover:bg-slate-600 text-white text-sm font-semibold rounded-lg transition" id="modalCloseBtn">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto space-y-6 w-full">
+
+        <!-- Header -->
+        <header class="border-b border-slate-700 pb-4">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div class="flex flex-col items-start w-full md:w-auto">
+                    <a href="https://kon-pappas.github.io/" class="inline-flex items-center gap-1.5 text-sm text-slate-400 hover:text-acc-300 transition-colors mb-2.5 group w-fit">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 group-hover:-translate-x-0.5 transition-transform"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" /></svg>
+                        <span class="font-medium tracking-wide">Konstantinos Pappas Hub <span class="text-slate-600 ml-0.5 font-bold">/</span></span>
+                    </a>
+                    <h1 class="text-3xl font-bold text-acc-400" id="mainTitle">Greek Power Live</h1>
+                    <div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-slate-400 mt-2">
+                        <div><span id="lastUpdateLabel">Last update:</span> <strong id="lastUpdateVal" class="text-acc-300">–</strong></div>
+                        <div><span id="nextUpdateLabel">Next update:</span> <strong id="nextUpdateVal" class="text-slate-200">–</strong></div>
+                        <span id="statusPill" class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full border text-[11px] font-bold"></span>
                     </div>
-                    <div class="row">
-                        <div class="col-12">
-                            <div class="chart-container" id="reconciliationChart" style="height: 500px;"></div>
+                </div>
+
+                <div class="flex flex-col md:items-end w-full md:w-auto mt-2 md:mt-0 gap-3">
+                    <div id="pickerBox" class="w-full md:w-auto flex items-center justify-between md:justify-end gap-2 bg-slate-800 p-1 rounded-lg border border-slate-700 shadow-sm h-12 md:h-10 pl-3 pr-1">
+                        <label for="contextSelect" class="text-xs text-slate-300 font-medium whitespace-nowrap" id="pickerLabel">Hour:</label>
+                        <select id="contextSelect" class="bg-slate-900 text-slate-200 text-sm font-semibold rounded p-1 outline-none border border-slate-700 focus:border-acc-400 transition cursor-pointer w-full md:w-auto"></select>
+                    </div>
+                    <div class="w-full md:w-auto flex flex-col-reverse md:flex-row gap-3">
+                        <button type="button" id="btnMethodologyWrap" class="w-full md:w-auto flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg px-4 text-xs text-slate-300 transition shadow-sm h-12 md:h-10">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 text-slate-400"><path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" /></svg>
+                            <span id="btnMethodology">Methodology &amp; Sources</span>
+                        </button>
+                        <div class="w-full md:w-auto flex gap-1 bg-slate-800 border border-slate-700 rounded-lg p-1 text-xs font-bold shadow-sm h-12 md:h-10" role="group" aria-label="Language">
+                            <button type="button" data-lang="el" class="lang-btn flex-1 md:flex-none flex items-center justify-center px-4 rounded transition">GR</button>
+                            <button type="button" data-lang="en" class="lang-btn flex-1 md:flex-none flex items-center justify-center px-4 rounded transition">EN</button>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </header>
 
-        <!-- TAB 4: ALL-TIME RECORDS (SPLIT SCREEN) -->
-        <div id="tab-records" class="tab-pane">
-            <div class="row position-relative">
-                <!-- Κάθετη γραμμή στη μέση (ορατή μόνο σε xl οθόνες) -->
-                <div class="d-none d-xl-block" style="position: absolute; left: 50%; top: 0; bottom: 0; width: 1px; background-color: rgba(255,255,255,0.05); transform: translateX(-50%); z-index: 0;"></div>
+        <!-- Tabs -->
+        <nav class="pt-5 mt-2 border-t border-slate-700/50 md:border-none md:pt-0 md:mt-0" role="tablist">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-0 md:border-b md:border-slate-800">
+                <button type="button" role="tab" data-tab="live" class="tab-btn relative flex items-center justify-center text-xs md:text-base font-bold rounded-lg md:rounded-none h-12 w-full transition whitespace-nowrap px-2 border md:border-0 md:border-b-2"></button>
+                <button type="button" role="tab" data-tab="daily" class="tab-btn relative flex items-center justify-center text-xs md:text-base font-bold rounded-lg md:rounded-none h-12 w-full transition whitespace-nowrap px-2 border md:border-0 md:border-b-2"></button>
+                <button type="button" role="tab" data-tab="clean" class="tab-btn relative flex items-center justify-center text-xs md:text-base font-bold rounded-lg md:rounded-none h-12 w-full transition whitespace-nowrap px-2 border md:border-0 md:border-b-2"></button>
+                <button type="button" role="tab" data-tab="records" class="tab-btn relative flex items-center justify-center text-xs md:text-base font-bold rounded-lg md:rounded-none h-12 w-full transition whitespace-nowrap px-2 border md:border-0 md:border-b-2"></button>
+            </div>
+        </nav>
 
-                <!-- ΑΡΙΣΤΕΡΗ ΠΛΕΥΡΑ: Hourly -->
-                <div class="col-12 col-xl-6 position-relative z-1 pe-xl-4 mb-5 mb-xl-0">
-                    <h4 class="text-center mb-4" style="color: #ffc000; font-size: 1rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;">
-                        Hourly Records (MW)
-                    </h4>
-                    <!-- 2 στήλες εσωτερικά -->
-                    <div class="row" id="render-hourly-records"></div>
+        <!-- VIEW: LIVE -->
+        <section id="view-live" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+                <div class="bg-slate-800/40 p-5 rounded-xl border border-slate-700">
+                    <h2 class="text-sm font-semibold text-slate-300 mb-3" id="genLedgerTitle">Generation</h2>
+                    <div id="genLedger"></div>
                 </div>
-
-                <!-- ΔΕΞΙΑ ΠΛΕΥΡΑ: Daily -->
-                <div class="col-12 col-xl-6 position-relative z-1 ps-xl-4">
-                    <h4 class="text-center mb-4" style="color: #ffc000; font-size: 1rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;">
-                        Daily Records (MWh)
-                    </h4>
-                    <!-- 2 στήλες εσωτερικά -->
-                    <div class="row" id="render-daily-records"></div>
+                <div class="bg-slate-800/40 p-4 rounded-xl border border-slate-700">
+                    <h2 class="text-sm font-semibold text-slate-300 text-center" id="supplyDonutTitle">Where the energy came from</h2>
+                    <div class="relative h-[260px] mt-2"><canvas id="supplyDonut"></canvas></div>
+                </div>
+                <div class="bg-slate-800/40 p-4 rounded-xl border border-slate-700">
+                    <h2 class="text-sm font-semibold text-slate-300 text-center" id="usesDonutTitle">Where it went</h2>
+                    <div class="relative h-[260px] mt-2"><canvas id="usesDonut"></canvas></div>
+                </div>
+                <div class="bg-slate-800/40 p-5 rounded-xl border border-slate-700">
+                    <h2 class="text-sm font-semibold text-slate-300 mb-3" id="balLedgerTitle">System balance</h2>
+                    <div id="balLedger"></div>
                 </div>
             </div>
-        </div>
+            <div class="bg-slate-800/40 p-6 rounded-xl border border-slate-700">
+                <h2 class="text-lg font-semibold text-slate-200" id="flowsTitle">Cross-border flows</h2>
+                <p class="text-xs text-slate-400" id="flowsSub">Imports above zero, exports below.</p>
+                <p class="hidden text-xs text-orange-300 mt-1" id="flowsMismatch"></p>
+                <div class="relative h-[320px] mt-4"><canvas id="flowsChart"></canvas></div>
+            </div>
+        </section>
 
+        <!-- VIEW: DAILY -->
+        <section id="view-daily" class="space-y-6 hidden">
+            <div class="flex flex-wrap gap-x-6 gap-y-2 text-sm text-slate-400" id="dailyStats"></div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <div class="bg-slate-800/40 p-5 rounded-xl border border-slate-700">
+                    <h2 class="text-sm font-semibold text-slate-300 mb-4" id="supplyRankTitle">Where the energy came from</h2>
+                    <div id="supplyRank" class="space-y-3"></div>
+                </div>
+                <div class="bg-slate-800/40 p-5 rounded-xl border border-slate-700">
+                    <h2 class="text-sm font-semibold text-slate-300 mb-4" id="usesRankTitle">Where it went</h2>
+                    <div id="usesRank" class="space-y-3"></div>
+                </div>
+            </div>
+            <div class="bg-slate-800/40 p-6 rounded-xl border border-slate-700">
+                <h2 class="text-lg font-semibold text-slate-200" id="dispatchTitle">24-hour dispatch and day-ahead price</h2>
+                <p class="text-xs text-slate-400" id="dispatchSub"></p>
+                <div class="relative h-[420px] md:h-[520px] mt-4"><canvas id="dispatchChart"></canvas></div>
+            </div>
+        </section>
+
+        <!-- VIEW: CLEAN ENERGY -->
+        <section id="view-clean" class="space-y-6 hidden">
+            <p class="text-sm text-slate-400 max-w-3xl" id="cleanIntro"></p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-slate-800/40 p-5 rounded-xl border border-slate-700">
+                    <h2 class="text-sm font-semibold text-slate-300 mb-3" id="boxVarTitle">Variable &amp; dispatchable</h2>
+                    <div id="boxVar" class="space-y-2"></div>
+                </div>
+                <div class="bg-slate-800/40 p-5 rounded-xl border border-slate-700">
+                    <h2 class="text-sm font-semibold text-slate-300 mb-3" id="boxUceTitle">Unallocated clean energy (UCE)</h2>
+                    <div id="boxUce" class="space-y-2"></div>
+                </div>
+                <div class="bg-slate-800/40 p-5 rounded-xl border border-slate-700">
+                    <h2 class="text-sm font-semibold text-slate-300 mb-3" id="boxBaseTitle">Baseload</h2>
+                    <div id="boxBase" class="space-y-2"></div>
+                </div>
+            </div>
+            <div class="bg-slate-800/40 p-6 rounded-xl border border-slate-700">
+                <h2 class="text-lg font-semibold text-slate-200" id="xrayTitle">Physical clean generation and UCE</h2>
+                <p class="text-xs text-slate-400" id="xraySub"></p>
+                <div class="relative h-[420px] md:h-[500px] mt-4"><canvas id="xrayChart"></canvas></div>
+            </div>
+            <div class="bg-slate-800/40 p-6 rounded-xl border border-slate-700">
+                <h2 class="text-lg font-semibold text-slate-200" id="reconTitle">ADMIE vs ENTSO-E: solar and wind</h2>
+                <p class="text-xs text-slate-400" id="reconSub"></p>
+                <div class="relative h-[360px] md:h-[420px] mt-4"><canvas id="reconChart"></canvas></div>
+            </div>
+        </section>
+
+        <!-- VIEW: RECORDS -->
+        <section id="view-records" class="space-y-6 hidden">
+            <p class="text-sm text-slate-400 max-w-3xl" id="recordsIntro"></p>
+            <div class="grid grid-cols-1 xl:grid-cols-2 gap-8">
+                <div>
+                    <h2 class="text-base font-semibold text-acc-300 mb-4" id="recHourlyTitle">Hourly records</h2>
+                    <div id="recHourly" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
+                </div>
+                <div>
+                    <h2 class="text-base font-semibold text-acc-300 mb-4" id="recDailyTitle">Daily records</h2>
+                    <div id="recDaily" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
+                </div>
+            </div>
+        </section>
+
+        <footer class="mt-12 pb-2 text-center">
+            <p class="text-slate-400 text-sm font-medium">Konstantinos Pappas <span class="mx-1 text-slate-600">|</span> Energy Market Analyst</p>
+            <p class="text-slate-500 text-xs mt-1">Business Operations &amp; Risk Management <span class="mx-1 text-slate-600">|</span> Data Insights on Energy Transition &amp; Grid Stability</p>
+        </footer>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="js/dashboard.js"></script>
 </body>
 </html>

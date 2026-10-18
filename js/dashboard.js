@@ -1,816 +1,770 @@
-// --- 1. Global ECharts Instances & State Management ---
-let supplyChart, demandChart, flowsChart, dailyDispatchChart, xrayChart, reconciliationChart;
-const fmt = (num) => new Intl.NumberFormat('en-US').format(Math.round(num));
+'use strict';
+/* =====================================================================
+   Greek Power Live — dashboard (φάση 3)
+   Διαβάζει ΜΟΝΟ τη νέα δομή δεδομένων (schema v1, βλ. contract.py):
+     data/manifest.json, data/live|xray|entsoe/YYYY-MM-DD.json, data/records.json
+   Όλοι οι υπολογισμοί (ζήτηση, σύνολα, UCE, ρεκόρ) γίνονται στο Python·
+   εδώ μόνο σχεδιάζουμε.
+   ===================================================================== */
 
-// Global State Variables
-let globalData = [];
-let xrayData = [];
-let entsoeData = [];
-let latestDateGlobal = '';
-let currentActiveTab = 'tab-live';
-let validLiveRecord = null;
-let selectedHourLive = null;
-let selectedDateDaily = null;
-
-// Μια ώρα έχει «πραγματικά» δεδομένα όταν υπάρχει παραγωγή ή ζήτηση.
-// (Ο ΑΔΜΗΕ δίνει τιμή DAM για όλο το 24ωρο από την προηγούμενη μέρα,
-//  οπότε υπάρχουν εγγραφές και για ώρες που δεν έχουν γίνει ακόμα.)
-const hasRealData = (rec) => {
-    const gen = (rec.production_mix && rec.production_mix['TOTAL_PROD']) || 0;
-    const dem = rec.demand_mwh || 0;
-    return gen > 0 || dem > 0;
+// ---------------------------------------------------------------------
+// 1. Χρώματα (ένα σημείο για όλη τη σελίδα)
+// ---------------------------------------------------------------------
+const C = {
+    lignite: '#b06a4b', gas: '#d18b57', hydro: '#5b9bd5', res: '#70ad47',
+    dis: '#e0c2cd', chg: '#b276a0', imports: '#ffc000', exports: '#e74c3c',
+    pumping: '#85c1e9', demand: '#e2e8f0', price: '#00e5ff',
+    wind: '#70ad47', bigHydro: '#5b9bd5', solar: '#f39c12', uce: '#e74c3c',
+    cogen: '#f1c40f', smallHydro: '#3498db', biomass: '#8e44ad',
+    entsoeSolar: '#ff9f43', entsoeWind: '#10ac84',
+    accent: (window.ACCENT && window.ACCENT[400]) || '#cbd5e1', grid: 'rgba(71, 85, 105, 0.35)', muted: '#94a3b8'
 };
 
-// Πόσα λεπτά έχουν περάσει από το ΤΕΛΟΣ της ώρας της εγγραφής, σε ώρα Αθήνας,
-// ανεξάρτητα από τη ζώνη ώρας του επισκέπτη. Ο ΑΔΜΗΕ μετρά hr = 1..24
-// (hr 1 = 00:00–01:00), άρα το τέλος της ώρας hr είναι η ώρα hr της ημέρας.
-function minutesSinceHourEnd(rec) {
-    const parts = Object.fromEntries(
-        new Intl.DateTimeFormat('en-GB', {
-            timeZone: 'Europe/Athens', hourCycle: 'h23',
-            year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit'
-        }).formatToParts(new Date()).map(p => [p.type, p.value])
-    );
-    const nowAthens = Date.UTC(+parts.year, +parts.month - 1, +parts.day, +parts.hour, +parts.minute);
-    const y = +rec.date.substring(0, 4), m = +rec.date.substring(4, 6) - 1, d = +rec.date.substring(6, 8);
-    const hourEnd = Date.UTC(y, m, d, rec.target_hour); // hr 24 → 00:00 της επόμενης μέρας
-    return Math.round((nowAthens - hourEnd) / 60000);
-}
-
-// Όρια: το cron τρέχει στο :05, άρα κανονικά η τελευταία ώρα είναι 5–65' «παλιά».
-const STALE_DELAYED_MIN = 75;   // χάθηκε ένα run
-const STALE_STALE_MIN = 180;    // κάτι δεν πάει καλά στη ροή
-
-const PILL_STYLES = {
-    green: { color: 'var(--accent-green)', border: 'rgba(46, 204, 113, 0.3)', bg: 'rgba(46, 204, 113, 0.15)' },
-    amber: { color: '#ffc000',             border: 'rgba(255, 192, 0, 0.3)',  bg: 'rgba(255, 192, 0, 0.15)' },
-    red:   { color: '#e74c3c',             border: 'rgba(231, 76, 60, 0.35)', bg: 'rgba(231, 76, 60, 0.15)' }
+// ---------------------------------------------------------------------
+// 2. Κείμενα (EN / GR)
+// ---------------------------------------------------------------------
+const T = {
+    en: {
+        locale: 'en-GB', title: 'Greek Power Live',
+        lastUpdate: 'Last update:', nextUpdate: 'Next update:', methodology: 'Methodology & Sources',
+        tabs: { live: 'Live (hour)', daily: 'Daily', clean: 'Clean energy', records: 'Records' },
+        pickerHour: 'Hour:', pickerDate: 'Date:', today: 'today',
+        pill: { live: 'Live', delayed: 'Delayed', stale: 'Stale data', histHour: 'Past hour', today: 'Today', histDay: 'Past day', expost: 'Ex-post data' },
+        load: { title: 'System Initialization', g1: 'Data fetching', g2: 'Analytics', s1: 'Reading the data index', s2: 'Live balance', s3: 'Daily dispatch', s4: 'Clean energy cross-check', s5: 'Records', ready: 'Dashboard is ready!', error: 'The data could not be loaded. Reload the page in a few minutes.' },
+        names: { lignite: 'Lignite', gas: 'Natural gas', hydro: 'Hydro', res: 'Renewables (RES)', dis: 'BESS discharge', chg: 'BESS charge', imports: 'Imports', exports: 'Exports', pumping: 'Pumping', demand: 'Domestic demand', price: 'Day-ahead price', total: 'Total generation',
+                 wind: 'Wind', bigHydro: 'Large hydro', solar: 'Solar', cogen: 'Cogeneration', smallHydro: 'Small hydro', biomass: 'Biomass', uce: 'UCE', entsoeSolar: 'Solar (ENTSO-E)', entsoeWind: 'Wind (ENTSO-E)', admieSolar: 'Solar (ADMIE)', admieWind: 'Wind (ADMIE)' },
+        countries: { AL: 'Albania', BG: 'Bulgaria', IT: 'Italy', TR: 'Türkiye', MK: 'North Macedonia' },
+        genLedger: 'Generation', balLedger: 'System balance', ledgerTotal: 'Total', ledgerDemand: 'Demand',
+        balanceOk: 'Matches ADMIE total load', balanceOff: 'Differs from ADMIE total load',
+        supplyTitle: 'Where the energy came from', usesTitle: 'Where it went',
+        flowsTitle: 'Cross-border flows', flowsSub: 'Imports above zero, exports below. MWh in the selected hour.',
+        flowsMismatch: 'In this hour the per-country flows do not add up to ADMIE\'s official totals; the balance uses the totals.',
+        avgPrice: 'Average day-ahead price', hoursData: 'Hours with data', dayInProgress: 'day in progress',
+        dispatchTitle: '24-hour dispatch and day-ahead price',
+        dispatchSub: 'Sources above zero, exports, charging and pumping below. Hours that have not happened yet show the price only.',
+        hourAxis: 'Hour (start, Greek time)', mwh: 'MWh', eur: '€/MWh',
+        cleanIntro: 'Clean generation from ADMIE\'s ex-post files, published one to two days later, compared with the live renewables and hydro figure of the same hours. The difference is the unallocated clean energy (UCE): positive when the live figure is higher, negative when the ex-post files show more.',
+        boxVar: 'Variable & dispatchable', boxUce: 'Unallocated clean energy (UCE)', boxBase: 'Baseload',
+        uceNet: 'Net for the day', ucePos: 'Hours with live higher', uceNeg: 'Hours with ex-post higher',
+        uceNA: 'Not available: live data start on {d}.',
+        xrayTitle: 'Physical clean generation and UCE', xraySub: 'Ex-post generation by technology, UCE stacked on top (below zero when negative), day-ahead price on the right axis.',
+        reconTitle: 'ADMIE vs ENTSO-E: solar and wind', reconSub: 'Solid lines: ADMIE ex-post files. Dashed lines: ENTSO-E Transparency Platform (actual generation per type).',
+        reconNA: 'No ENTSO-E data for this day.',
+        recordsIntro: 'Top three since tracking began. Recomputed every hour from the stored history (live data from {l}, clean-energy data from {x}); earlier entries are kept as first recorded. Hourly values are MWh in one hour, equal to the average MW.',
+        recHourly: 'Hourly records', recDaily: 'Daily records', newBadge: 'NEW', noData: 'No data yet',
+        rec: { solar: 'Solar', wind: 'Wind', exports: 'Exports', bess_chg: 'BESS charge', bess_dis: 'BESS discharge', bess_chg_pump: 'BESS charge + pumping', network_load: 'Network load', res: 'Renewables (RES)' },
+        close: 'Close', modalTitle: 'Methodology & Data Sources'
+    },
+    el: {
+        locale: 'el-GR', title: 'Greek Power Live',
+        lastUpdate: 'Τελευταία ενημέρωση:', nextUpdate: 'Επόμενη:', methodology: 'Μεθοδολογία & Πηγές',
+        tabs: { live: 'Live (ώρα)', daily: 'Ημέρα', clean: 'Καθαρή ενέργεια', records: 'Ρεκόρ' },
+        pickerHour: 'Ώρα:', pickerDate: 'Ημέρα:', today: 'σήμερα',
+        pill: { live: 'Live', delayed: 'Καθυστέρηση', stale: 'Παλιά δεδομένα', histHour: 'Προηγούμενη ώρα', today: 'Σήμερα', histDay: 'Προηγούμενη ημέρα', expost: 'Εκ των υστέρων' },
+        load: { title: 'Εκκίνηση', g1: 'Λήψη δεδομένων', g2: 'Ανάλυση', s1: 'Ανάγνωση ευρετηρίου', s2: 'Ισοζύγιο ώρας', s3: 'Κατανομή ημέρας', s4: 'Διασταύρωση καθαρής ενέργειας', s5: 'Ρεκόρ', ready: 'Το dashboard είναι έτοιμο!', error: 'Τα δεδομένα δεν φορτώθηκαν. Ανανεώστε τη σελίδα σε λίγα λεπτά.' },
+        names: { lignite: 'Λιγνίτης', gas: 'Φυσικό αέριο', hydro: 'Υδροηλεκτρικά', res: 'ΑΠΕ', dis: 'Εκφόρτιση BESS', chg: 'Φόρτιση BESS', imports: 'Εισαγωγές', exports: 'Εξαγωγές', pumping: 'Άντληση', demand: 'Εγχώρια ζήτηση', price: 'Τιμή DAM', total: 'Συνολική παραγωγή',
+                 wind: 'Αιολικά', bigHydro: 'Μεγάλα υδροηλεκτρικά', solar: 'Φωτοβολταϊκά', cogen: 'Συμπαραγωγή', smallHydro: 'Μικρά υδροηλεκτρικά', biomass: 'Βιομάζα', uce: 'UCE', entsoeSolar: 'Φ/Β (ENTSO-E)', entsoeWind: 'Αιολικά (ENTSO-E)', admieSolar: 'Φ/Β (ΑΔΜΗΕ)', admieWind: 'Αιολικά (ΑΔΜΗΕ)' },
+        countries: { AL: 'Αλβανία', BG: 'Βουλγαρία', IT: 'Ιταλία', TR: 'Τουρκία', MK: 'Βόρεια Μακεδονία' },
+        genLedger: 'Παραγωγή', balLedger: 'Ισοζύγιο συστήματος', ledgerTotal: 'Σύνολο', ledgerDemand: 'Ζήτηση',
+        balanceOk: 'Συμφωνεί με το συνολικό φορτίο του ΑΔΜΗΕ', balanceOff: 'Διαφέρει από το συνολικό φορτίο του ΑΔΜΗΕ',
+        supplyTitle: 'Από πού ήρθε η ενέργεια', usesTitle: 'Πού πήγε',
+        flowsTitle: 'Διασυνοριακές ροές', flowsSub: 'Εισαγωγές πάνω από το μηδέν, εξαγωγές κάτω. MWh στην επιλεγμένη ώρα.',
+        flowsMismatch: 'Σε αυτή την ώρα οι ροές ανά χώρα δεν αθροίζουν στα επίσημα σύνολα του ΑΔΜΗΕ· το ισοζύγιο χρησιμοποιεί τα σύνολα.',
+        avgPrice: 'Μέση τιμή DAM', hoursData: 'Ώρες με δεδομένα', dayInProgress: 'η ημέρα εξελίσσεται',
+        dispatchTitle: 'Κατανομή 24ώρου και τιμή επόμενης ημέρας',
+        dispatchSub: 'Πηγές πάνω από το μηδέν· εξαγωγές, φόρτιση και άντληση κάτω. Για τις ώρες που δεν έχουν γίνει ακόμα φαίνεται μόνο η τιμή.',
+        hourAxis: 'Ώρα (έναρξη, ώρα Ελλάδας)', mwh: 'MWh', eur: '€/MWh',
+        cleanIntro: 'Καθαρή παραγωγή από τα εκ των υστέρων αρχεία του ΑΔΜΗΕ, που δημοσιεύονται μία με δύο ημέρες αργότερα, σε σύγκριση με τα live στοιχεία ΑΠΕ και υδροηλεκτρικών των ίδιων ωρών. Η διαφορά είναι η μη κατανεμημένη καθαρή ενέργεια (UCE): θετική όταν το live στοιχείο είναι μεγαλύτερο, αρνητική όταν τα εκ των υστέρων αρχεία δείχνουν περισσότερη.',
+        boxVar: 'Μεταβλητές & κατανεμόμενες', boxUce: 'Μη κατανεμημένη καθαρή ενέργεια (UCE)', boxBase: 'Βάσης',
+        uceNet: 'Καθαρό για την ημέρα', ucePos: 'Ώρες με μεγαλύτερο το live', uceNeg: 'Ώρες με μεγαλύτερα τα εκ των υστέρων',
+        uceNA: 'Μη διαθέσιμο: τα live δεδομένα ξεκινούν στις {d}.',
+        xrayTitle: 'Φυσική καθαρή παραγωγή και UCE', xraySub: 'Εκ των υστέρων παραγωγή ανά τεχνολογία, με το UCE από πάνω (κάτω από το μηδέν όταν είναι αρνητικό) και την τιμή DAM στον δεξιό άξονα.',
+        reconTitle: 'ΑΔΜΗΕ και ENTSO-E: φωτοβολταϊκά και αιολικά', reconSub: 'Συνεχείς γραμμές: εκ των υστέρων αρχεία ΑΔΜΗΕ. Διακεκομμένες: ENTSO-E Transparency Platform (πραγματική παραγωγή ανά τύπο).',
+        reconNA: 'Δεν υπάρχουν δεδομένα ENTSO-E για αυτή την ημέρα.',
+        recordsIntro: 'Οι τρεις κορυφαίες τιμές από την έναρξη της καταγραφής. Υπολογίζονται κάθε ώρα από το αποθηκευμένο ιστορικό (live δεδομένα από {l}, δεδομένα καθαρής ενέργειας από {x})· οι παλαιότερες εγγραφές κρατιούνται όπως καταγράφηκαν. Οι ωριαίες τιμές είναι MWh σε μία ώρα, ίσες με τα μέσα MW.',
+        recHourly: 'Ωριαία ρεκόρ', recDaily: 'Ημερήσια ρεκόρ', newBadge: 'ΝΕΟ', noData: 'Δεν υπάρχουν ακόμα δεδομένα',
+        rec: { solar: 'Φωτοβολταϊκά', wind: 'Αιολικά', exports: 'Εξαγωγές', bess_chg: 'Φόρτιση BESS', bess_dis: 'Εκφόρτιση BESS', bess_chg_pump: 'Φόρτιση BESS + άντληση', network_load: 'Φορτίο δικτύου', res: 'ΑΠΕ' },
+        close: 'Κλείσιμο', modalTitle: 'Μεθοδολογία & Πηγές Δεδομένων'
+    }
 };
-function setPill(pill, text, tone) {
-    const st = PILL_STYLES[tone];
-    pill.innerHTML = '● ' + text;
-    pill.style.color = st.color; pill.style.borderColor = st.border; pill.style.backgroundColor = st.bg;
+
+const METHODOLOGY = {
+    en: `
+<h4 class="text-acc-300 font-semibold mb-1">Data sources</h4>
+<p class="mb-4">Live figures come from ADMIE/IPTO's market portal (generation mix and load, day-ahead market, SCADA interconnection flows) and are fetched every hour at minute 5. The clean-energy breakdown comes from ADMIE's ex-post operation files, published one to two days later. ENTSO-E's Transparency Platform (actual generation per type) is used as an independent cross-check.</p>
+<h4 class="text-acc-300 font-semibold mb-1">Hours</h4>
+<p class="mb-4">All times are Greek local time. ADMIE numbers hours 1 to 24; hour 1 is 00:00–01:00. The page labels each hour by its start (00–01, 01–02, …). Values are MWh in one hour, which equals the average MW of that hour.</p>
+<h4 class="text-acc-300 font-semibold mb-1">System balance and demand</h4>
+<p class="mb-4">Demand is ADMIE's total load. It equals generation + imports − exports + BESS discharge − BESS charge − pumping; the page checks this for every hour and says when it does not hold. Imports and exports are ADMIE's official totals; the per-country flows are shown as a breakdown.</p>
+<h4 class="text-acc-300 font-semibold mb-1">Unallocated clean energy (UCE)</h4>
+<p class="mb-4">Live clean energy is renewables plus hydro from the live data. Physical clean energy is large hydro + small hydro + solar + wind + biomass + cogeneration from the ex-post files. UCE is the difference, live minus physical, and keeps its sign: a negative hour means the ex-post files show more clean generation than the live figure.</p>
+<h4 class="text-acc-300 font-semibold mb-1">Prices</h4>
+<p class="mb-4">The day-ahead price is the hourly value for Greece as published on ADMIE's portal.</p>
+<h4 class="text-acc-300 font-semibold mb-1">Records</h4>
+<p class="mb-4">The three highest values since tracking began, recomputed every hour from the full history, so a correction by ADMIE also corrects a record.</p>
+<h4 class="text-acc-300 font-semibold mb-1">Status</h4>
+<p>“Live” means the latest hour ended less than 75 minutes ago. “Delayed” means up to three hours, usually one missed update. “Stale data” means longer than that.</p>`,
+    el: `
+<h4 class="text-acc-300 font-semibold mb-1">Πηγές δεδομένων</h4>
+<p class="mb-4">Τα live στοιχεία προέρχονται από την πύλη αγοράς του ΑΔΜΗΕ (μείγμα παραγωγής και φορτίο, αγορά επόμενης ημέρας, ροές διασυνδέσεων SCADA) και λαμβάνονται κάθε ώρα στο 5ο λεπτό. Η ανάλυση της καθαρής ενέργειας προέρχεται από τα εκ των υστέρων αρχεία λειτουργίας του ΑΔΜΗΕ, που δημοσιεύονται μία με δύο ημέρες αργότερα. Η ENTSO-E Transparency Platform (πραγματική παραγωγή ανά τύπο) χρησιμοποιείται ως ανεξάρτητη διασταύρωση.</p>
+<h4 class="text-acc-300 font-semibold mb-1">Ώρες</h4>
+<p class="mb-4">Όλες οι ώρες είναι ώρα Ελλάδας. Ο ΑΔΜΗΕ αριθμεί τις ώρες από 1 έως 24· η ώρα 1 είναι 00:00–01:00. Η σελίδα ονομάζει κάθε ώρα από την έναρξή της (00–01, 01–02, …). Οι τιμές είναι MWh σε μία ώρα, ίσες με τα μέσα MW της ώρας.</p>
+<h4 class="text-acc-300 font-semibold mb-1">Ισοζύγιο και ζήτηση</h4>
+<p class="mb-4">Η ζήτηση είναι το συνολικό φορτίο του ΑΔΜΗΕ. Ισούται με παραγωγή + εισαγωγές − εξαγωγές + εκφόρτιση BESS − φόρτιση BESS − άντληση· η σελίδα το ελέγχει για κάθε ώρα και το επισημαίνει όταν δεν ισχύει. Οι εισαγωγές και οι εξαγωγές είναι τα επίσημα σύνολα του ΑΔΜΗΕ· οι ροές ανά χώρα εμφανίζονται ως ανάλυση.</p>
+<h4 class="text-acc-300 font-semibold mb-1">Μη κατανεμημένη καθαρή ενέργεια (UCE)</h4>
+<p class="mb-4">Η live καθαρή ενέργεια είναι ΑΠΕ συν υδροηλεκτρικά από τα live δεδομένα. Η φυσική καθαρή ενέργεια είναι μεγάλα + μικρά υδροηλεκτρικά + φωτοβολταϊκά + αιολικά + βιομάζα + συμπαραγωγή από τα εκ των υστέρων αρχεία. Το UCE είναι η διαφορά, live μείον φυσική, με το πρόσημό της: μια αρνητική ώρα σημαίνει ότι τα εκ των υστέρων αρχεία δείχνουν περισσότερη καθαρή παραγωγή από το live στοιχείο.</p>
+<h4 class="text-acc-300 font-semibold mb-1">Τιμές</h4>
+<p class="mb-4">Η τιμή επόμενης ημέρας είναι η ωριαία τιμή για την Ελλάδα όπως δημοσιεύεται στην πύλη του ΑΔΜΗΕ.</p>
+<h4 class="text-acc-300 font-semibold mb-1">Ρεκόρ</h4>
+<p class="mb-4">Οι τρεις υψηλότερες τιμές από την έναρξη της καταγραφής, που υπολογίζονται κάθε ώρα από όλο το ιστορικό· έτσι μια διόρθωση του ΑΔΜΗΕ διορθώνει και το ρεκόρ.</p>
+<h4 class="text-acc-300 font-semibold mb-1">Κατάσταση</h4>
+<p>«Live» σημαίνει ότι η τελευταία ώρα τελείωσε πριν από λιγότερα από 75 λεπτά. «Καθυστέρηση» σημαίνει έως τρεις ώρες, συνήθως μία ενημέρωση που χάθηκε. «Παλιά δεδομένα» σημαίνει περισσότερο.</p>`
+};
+
+// ---------------------------------------------------------------------
+// 3. Κατάσταση
+// ---------------------------------------------------------------------
+const S = {
+    lang: 'en', tab: 'live',
+    manifest: null, records: null,
+    cache: {},                 // 'live/2026-10-18' → json | null
+    liveDate: null, hourSel: null,
+    dailyDate: null, cleanDate: null,
+    charts: {}
+};
+try { const l = localStorage.getItem('kp_lang'); if (l === 'el' || l === 'en') S.lang = l; } catch (e) { /* ιδιωτική περιήγηση */ }
+
+// Όρια φρεσκάδας (D07): το cron τρέχει στο :05.
+const STALE_DELAYED_MIN = 75, STALE_STALE_MIN = 180;
+
+// ---------------------------------------------------------------------
+// 4. Βοηθητικά
+// ---------------------------------------------------------------------
+const $ = (id) => document.getElementById(id);
+const t = () => T[S.lang];
+const pad = (n) => String(n).padStart(2, '0');
+const fmt = (v, digits = 0) => (v === null || v === undefined || Number.isNaN(v)) ? '–'
+    : new Intl.NumberFormat(t().locale, { maximumFractionDigits: digits, minimumFractionDigits: digits }).format(v);
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+// hr 1 = 00:00–01:00 (ΑΔΜΗΕ) → ετικέτα από την έναρξη
+const hourTick = (hr) => pad(hr - 1);
+const hourRange = (hr) => `${pad(hr - 1)}:00–${pad(hr)}:00`;
+
+function fmtDate(iso, withYear = true) {
+    const [y, m, d] = iso.split('-').map(Number);
+    return new Intl.DateTimeFormat(t().locale, { day: 'numeric', month: 'short', year: withYear ? 'numeric' : undefined, timeZone: 'UTC' })
+        .format(new Date(Date.UTC(y, m - 1, d)));
 }
-const fmtLag = (min) => min < 120 ? `${min}'` : `${Math.floor(min / 60)}h ${String(min % 60).padStart(2, '0')}'`;
-
-// --- 2. Initialize App ---
-document.addEventListener('DOMContentLoaded', () => {
-    initCharts();
-    setupTabSwitcher();
-    document.getElementById('context-dropdown').addEventListener('change', handleDropdownChange);
-    loadData();
-});
-
-function initCharts() {
-    supplyChart = echarts.init(document.getElementById('supplyChart'), 'dark');
-    demandChart = echarts.init(document.getElementById('demandChart'), 'dark');
-    flowsChart = echarts.init(document.getElementById('flowsChart'), 'dark');
-    dailyDispatchChart = echarts.init(document.getElementById('dailyDispatchChart'), 'dark');
-    xrayChart = echarts.init(document.getElementById('xrayChart'), 'dark');
-    reconciliationChart = echarts.init(document.getElementById('reconciliationChart'), 'dark');
-
-    window.addEventListener('resize', () => {
-        if(supplyChart) supplyChart.resize(); 
-        if(demandChart) demandChart.resize(); 
-        if(flowsChart) flowsChart.resize(); 
-        if(dailyDispatchChart) dailyDispatchChart.resize();
-        if(xrayChart) xrayChart.resize();
-        if(reconciliationChart) reconciliationChart.resize();
-    });
+function fmtTimeAthens(isoTs, withDate = false) {
+    if (!isoTs) return '–';
+    const opts = { hour: '2-digit', minute: '2-digit', hourCycle: 'h23', timeZone: 'Europe/Athens' };
+    if (withDate) { opts.day = 'numeric'; opts.month = 'short'; }
+    return new Intl.DateTimeFormat(t().locale, opts).format(new Date(isoTs));
 }
 
-function setupTabSwitcher() {
-    document.querySelectorAll('.nav-tab-item').forEach(tab => {
-        tab.addEventListener('click', (e) => {
-            e.preventDefault();
-            const targetId = tab.getAttribute('data-target');
-            
-            // --- Auto-Fallback logic for Tab 3 (X-Ray) ---
-            if (targetId === 'tab-xray' && selectedDateDaily === latestDateGlobal) {
-                const uniqueDates = [...new Set(globalData.map(d => d.date))].reverse();
-                if (uniqueDates.length > 1) {
-                    selectedDateDaily = uniqueDates[1]; // Switch to yesterday automatically
-                }
-            }
-
-            document.querySelectorAll('.nav-tab-item').forEach(t => t.classList.remove('active'));
-            tab.classList.add('active');
-            
-            document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
-            document.getElementById(targetId).classList.add('active');
-            
-            currentActiveTab = targetId;
-            updateDropdownState();
-            
-            setTimeout(() => {
-                if(supplyChart) supplyChart.resize(); 
-                if(demandChart) demandChart.resize(); 
-                if(flowsChart) flowsChart.resize(); 
-                if(dailyDispatchChart) dailyDispatchChart.resize();
-                if(xrayChart) xrayChart.resize();
-                if(reconciliationChart) reconciliationChart.resize();
-            }, 50);
-        });
-    });
+// Λεπτά από το ΤΕΛΟΣ της ώρας hr της ημέρας iso, σε ώρα Αθήνας
+function minutesSinceHourEnd(iso, hr) {
+    const p = Object.fromEntries(new Intl.DateTimeFormat('en-GB', {
+        timeZone: 'Europe/Athens', hourCycle: 'h23', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit'
+    }).formatToParts(new Date()).map((x) => [x.type, x.value]));
+    const now = Date.UTC(+p.year, +p.month - 1, +p.day, +p.hour, +p.minute);
+    const [y, m, d] = iso.split('-').map(Number);
+    return Math.round((now - Date.UTC(y, m - 1, d, hr)) / 60000);
 }
+const fmtLag = (min) => min < 120 ? `${min}′` : `${Math.floor(min / 60)}h ${pad(min % 60)}′`;
 
-// --- 3. Main Data Fetcher & Deduplication ---
-async function loadData() {
+// Λήψη JSON με μνήμη. Τα αρχεία που αλλάζουν συχνά παίρνουν cache-busting.
+async function getJSON(path, bust = false) {
+    if (!bust && path in S.cache) return S.cache[path];
+    const url = `data/${path}.json` + (bust ? `?v=${Date.now()}` : '');
+    let json = null;
     try {
-        const ts = new Date().getTime();
-        const [liveRes, xrayRes, entsoeRes] = await Promise.all([
-            fetch(`data/live_data.json?v=${ts}`).then(r => r.ok ? r.json() : []),
-            fetch(`data/xray_data.json?v=${ts}`).then(r => r.ok ? r.json() : []).catch(() => []),
-            fetch(`data/entsoe_ref.json?v=${ts}`).then(r => r.ok ? r.json() : []).catch(() => [])
-        ]);
-        
-        if (!liveRes || liveRes.length === 0) throw new Error("No data found in live_data.json.");
+        const r = await fetch(url);
+        json = r.ok ? await r.json() : null;
+    } catch (e) { json = null; }
+    S.cache[path] = json;
+    return json;
+}
+// Ενεργές ημέρες (σήμερα/χθες) αλλάζουν κάθε ώρα· οι παλαιότερες όχι.
+function isActiveDay(iso) {
+    const days = (S.manifest && S.manifest.live_days) || [];
+    return days.slice(-2).includes(iso);
+}
+// Πρώτη λήψη ενεργής ημέρας: πάντα φρέσκια· μετά από τη μνήμη (το refresh τη σβήνει).
+const getLive = (iso) => getJSON(`live/${iso}`, isActiveDay(iso) && !(`live/${iso}` in S.cache));
+const getXray = (iso) => getJSON(`xray/${iso}`);
+const getEntsoe = (iso) => getJSON(`entsoe/${iso}`);
 
-        xrayData = xrayRes || [];
-        entsoeData = entsoeRes || [];
-
-        const cleanDataMap = new Map();
-        liveRes.forEach(entry => {
-            let hr = parseInt(entry.target_hour);
-            if (hr === 0 || hr > 24) return; 
-            entry.target_hour = hr; 
-            
-            const key = `${entry.date}_${hr}`;
-            if (!cleanDataMap.has(key)) {
-                cleanDataMap.set(key, entry);
-            } else {
-                const existingTime = new Date(cleanDataMap.get(key).fetch_timestamp).getTime();
-                const newTime = new Date(entry.fetch_timestamp).getTime();
-                if (newTime > existingTime) cleanDataMap.set(key, entry);
-            }
-        });
-
-        globalData = Array.from(cleanDataMap.values()).sort((a, b) => {
-            if (a.date !== b.date) return a.date.localeCompare(b.date);
-            return a.target_hour - b.target_hour;
-        });
-
-        for (let i = globalData.length - 1; i >= 0; i--) {
-            if (hasRealData(globalData[i])) {
-                validLiveRecord = globalData[i];
-                break;
-            }
-        }
-        if (!validLiveRecord) validLiveRecord = globalData[globalData.length - 1];
-
-        latestDateGlobal = validLiveRecord.date;
-        selectedHourLive = validLiveRecord.target_hour;
-        selectedDateDaily = validLiveRecord.date;
-
-        updateDropdownState();
-        loadRecords();
-
-    } catch (error) {
-        console.error("Error loading data:", error);
-        document.getElementById('last-updated').innerText = "Failed to load data.";
-    }
+// Ενιαίες ρυθμίσεις Chart.js
+function chartDefaults() {
+    Chart.defaults.color = C.muted;
+    Chart.defaults.borderColor = C.grid;
+    Chart.defaults.font.family = getComputedStyle(document.body).fontFamily;
+    Chart.defaults.font.size = 12;
+    Chart.defaults.plugins.legend.labels.boxWidth = 12;
+    Chart.defaults.plugins.legend.labels.boxHeight = 12;
+    Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(15, 23, 42, 0.96)';
+    Chart.defaults.plugins.tooltip.borderColor = '#334155';
+    Chart.defaults.plugins.tooltip.borderWidth = 1;
+    Chart.defaults.plugins.tooltip.padding = 10;
+    Chart.defaults.maintainAspectRatio = false;
+    Chart.defaults.animation.duration = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 400;
+}
+function upsertChart(id, config) {
+    if (S.charts[id]) S.charts[id].destroy();
+    S.charts[id] = new Chart($(id), config);
 }
 
-// --- 4. Context-Aware Dropdown Manager ---
-function updateDropdownState() {
-    const dropdown = document.getElementById('context-dropdown');
-    dropdown.innerHTML = '';
-    
-    if (currentActiveTab === 'tab-live') {
-        const todayRecords = globalData.filter(d => d.date === latestDateGlobal && hasRealData(d));
-        todayRecords.forEach(rec => {
-            let hrStr = rec.target_hour.toString().padStart(2, '0') + ':00';
-            let option = document.createElement('option');
-            option.value = rec.target_hour;
-            option.text = `Hour: ${hrStr}`;
-            dropdown.appendChild(option);
-        });
-        
-        if(todayRecords.find(r => r.target_hour === selectedHourLive)) dropdown.value = selectedHourLive;
-        else { dropdown.value = validLiveRecord.target_hour; selectedHourLive = validLiveRecord.target_hour; }
-        
+// Plugin: σύνολο στο κέντρο του donut
+const centerText = {
+    id: 'centerText',
+    afterDraw(chart, _args, opts) {
+        if (!opts || !opts.text) return;
+        const { ctx, chartArea: a } = chart;
+        const x = (a.left + a.right) / 2, y = (a.top + a.bottom) / 2;
+        ctx.save();
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillStyle = '#f1f5f9'; ctx.font = `700 18px ${Chart.defaults.font.family}`;
+        ctx.fillText(opts.text, x, y - 8);
+        ctx.fillStyle = C.muted; ctx.font = `12px ${Chart.defaults.font.family}`;
+        ctx.fillText(opts.sub || '', x, y + 12);
+        ctx.restore();
+    }
+};
+
+// ---------------------------------------------------------------------
+// 5. Header: ενημέρωση, κατάσταση, επιλογέας
+// ---------------------------------------------------------------------
+const PILL = {
+    green: 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400',
+    orange: 'bg-orange-500/10 border-orange-400/40 text-orange-300',
+    red: 'bg-red-500/10 border-red-500/40 text-red-300',
+    slate: 'bg-slate-700/40 border-slate-600 text-slate-300'
+};
+function setPill(text, tone) {
+    const el = $('statusPill');
+    el.className = `inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full border text-[11px] font-bold ${PILL[tone]}`;
+    el.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-current"></span>${esc(text)}`;
+}
+function updateHeader() {
+    const m = S.manifest;
+    $('lastUpdateVal').textContent = m && m.last_live ? fmtTimeAthens(m.last_live.fetched, true) : '–';
+    $('nextUpdateVal').textContent = m ? fmtTimeAthens(m.next_update) : '–';
+    updatePill();
+}
+function updatePill() {
+    const p = t().pill, last = S.manifest && S.manifest.last_live;
+    if (S.tab === 'clean') return setPill(p.expost, 'slate');
+    if (S.tab === 'daily') return setPill(S.dailyDate === S.liveDate ? p.today : p.histDay, S.dailyDate === S.liveDate ? 'green' : 'slate');
+    if (S.tab === 'live' && last && S.hourSel !== last.hr) return setPill(p.histHour, 'slate');
+    if (!last) return setPill(p.stale, 'red');
+    const lag = minutesSinceHourEnd(last.date, last.hr);
+    if (lag <= STALE_DELAYED_MIN) setPill(p.live, 'green');
+    else if (lag <= STALE_STALE_MIN) setPill(`${p.delayed} · ${fmtLag(lag)}`, 'orange');
+    else setPill(`${p.stale} · ${fmtLag(lag)}`, 'red');
+}
+
+function fillPicker() {
+    const sel = $('contextSelect'), box = $('pickerBox'), m = S.manifest;
+    if (S.tab === 'records') { box.classList.add('hidden'); return; }
+    box.classList.remove('hidden');
+    let opts = [], value;
+    if (S.tab === 'live') {
+        $('pickerLabel').textContent = t().pickerHour;
+        const day = S.cache[`live/${S.liveDate}`];
+        const hrs = day ? day.hours.filter((h) => h.has_data).map((h) => h.hr).reverse() : [];
+        opts = hrs.map((hr) => [hr, hourRange(hr)]);
+        value = S.hourSel;
     } else {
-        const uniqueDates = [...new Set(globalData.map(d => d.date))].reverse();
-        uniqueDates.forEach(dt => {
-            let option = document.createElement('option');
-            option.value = dt;
-            let formattedDate = `${dt.substring(6,8)}/${dt.substring(4,6)}/${dt.substring(0,4)}`;
-            if(dt === latestDateGlobal) formattedDate += " (Today)";
-            option.text = `Date: ${formattedDate}`;
-            dropdown.appendChild(option);
-        });
-        
-        if(uniqueDates.includes(selectedDateDaily)) dropdown.value = selectedDateDaily;
-        else { dropdown.value = uniqueDates[0]; selectedDateDaily = uniqueDates[0]; }
+        $('pickerLabel').textContent = t().pickerDate;
+        const days = ((S.tab === 'daily' ? m.live_days : m.xray_days) || []).slice().reverse();
+        opts = days.map((d) => [d, fmtDate(d) + (d === S.liveDate && S.tab === 'daily' ? ` (${t().today})` : '')]);
+        value = S.tab === 'daily' ? S.dailyDate : S.cleanDate;
     }
-    
-    handleDropdownChange(); 
+    sel.innerHTML = opts.map(([v, l]) => `<option value="${esc(v)}">${esc(l)}</option>`).join('');
+    sel.value = String(value);
 }
 
-function handleDropdownChange() {
-    const dropdown = document.getElementById('context-dropdown');
-    const val = dropdown.value;
-    const pill = document.getElementById('live-status-pill');
-    
-    if (currentActiveTab === 'tab-live') {
-        selectedHourLive = parseInt(val);
-        const record = globalData.find(d => d.date === latestDateGlobal && d.target_hour === selectedHourLive);
-        
-        const fetchTime = new Date(record.fetch_timestamp).toLocaleString('en-GB');
-        const displayHour = record.target_hour.toString().padStart(2, '0') + ':00';
-        document.getElementById('last-updated').innerText = `Last Update: ${fetchTime} | Target Hour: ${displayHour}`;
-        
-        if (record.target_hour === validLiveRecord.target_hour) {
-            const lag = minutesSinceHourEnd(record);
-            if (lag <= STALE_DELAYED_MIN)      setPill(pill, 'Live Data Active', 'green');
-            else if (lag <= STALE_STALE_MIN)   setPill(pill, `Delayed · ${fmtLag(lag)}`, 'amber');
-            else                               setPill(pill, `Stale Data · ${fmtLag(lag)}`, 'red');
-        } else {
-            setPill(pill, 'Historical Hour', 'amber');
-        }
-        
-        renderLiveTab(record);
-        
-    } else {
-        selectedDateDaily = val;
-        const dailyRecords = globalData.filter(d => d.date === selectedDateDaily);
-        
-        const latestRec = dailyRecords[dailyRecords.length - 1] || {};
-        const fetchTime = latestRec.fetch_timestamp ? new Date(latestRec.fetch_timestamp).toLocaleString('en-GB') : '-';
-        let formattedDate = `${selectedDateDaily.substring(6,8)}/${selectedDateDaily.substring(4,6)}/${selectedDateDaily.substring(0,4)}`;
-        document.getElementById('last-updated').innerText = `Last Update: ${fetchTime} | Selected Date: ${formattedDate}`;
-        
-        if (selectedDateDaily === latestDateGlobal) {
-            setPill(pill, 'Today', 'green');
-        } else {
-            setPill(pill, 'Historical Day', 'amber');
-        }
-        
-        if (currentActiveTab === 'tab-daily') {
-            renderDailyTab(dailyRecords);
-        } else if (currentActiveTab === 'tab-xray') {
-            renderXrayTab(selectedDateDaily);
-        }
-    }
+async function onPickerChange() {
+    const v = $('contextSelect').value;
+    if (S.tab === 'live') { S.hourSel = Number(v); renderLive(); }
+    else if (S.tab === 'daily') { S.dailyDate = v; await renderDaily(); }
+    else if (S.tab === 'clean') { S.cleanDate = v; await renderClean(); }
+    updatePill();
 }
 
-// --- 5. Render Logic for Tab 1 (Live) ---
-function renderLiveTab(latestData) {
-    let live = {
-        lignite: latestData.production_mix['TOTAL LIGNITE'] || 0,
-        gas: latestData.production_mix['TOTAL GAS'] || 0,
-        hydro: latestData.production_mix['TOTAL HYDRO'] || 0,
-        res: latestData.production_mix['RES_PROD'] || 0,
-        totalGen: latestData.production_mix['TOTAL_PROD'] || 0,
-        stIn: latestData.production_mix['STORAGE_INJECTION'] || 0,
-        stAbs: Math.abs(latestData.production_mix['STORAGE_ABSORPTION'] || 0),
-        pump: latestData.production_mix['ΣΥΝΟΛΙΚΗ ΑΝΤΛΗΣΗ'] || 0,
-        imports: 0, exports: 0,
-        mcp: latestData.dam_price_eur || 0
+// ---------------------------------------------------------------------
+// 6. Tabs, γλώσσα, modal
+// ---------------------------------------------------------------------
+const TAB_ON = ['bg-acc-400', 'text-slate-900', 'border-acc-400', 'md:bg-transparent', 'md:text-acc-400', 'md:border-b-acc-400'];
+const TAB_OFF = ['bg-slate-800', 'text-slate-400', 'border-slate-700', 'hover:text-white', 'md:bg-transparent', 'md:border-transparent', 'md:hover:text-acc-200'];
+
+function setTab(tab) {
+    S.tab = tab;
+    document.querySelectorAll('.tab-btn').forEach((b) => {
+        const on = b.dataset.tab === tab;
+        b.classList.remove(...TAB_ON, ...TAB_OFF);
+        b.classList.add(...(on ? TAB_ON : TAB_OFF));
+        b.setAttribute('aria-selected', on ? 'true' : 'false');
+    });
+    ['live', 'daily', 'clean', 'records'].forEach((v) => $(`view-${v}`).classList.toggle('hidden', v !== tab));
+    fillPicker();
+    updatePill();
+    // Τα γραφήματα σε κρυφό tab έχουν μηδενικό μέγεθος· τα ξαναμετράμε.
+    requestAnimationFrame(() => Object.values(S.charts).forEach((c) => c.resize()));
+}
+
+function applyStaticText() {
+    const x = t();
+    document.documentElement.lang = S.lang === 'el' ? 'el' : 'en';
+    $('pageTitle').textContent = x.title; $('mainTitle').textContent = x.title;
+    $('lastUpdateLabel').textContent = x.lastUpdate; $('nextUpdateLabel').textContent = x.nextUpdate;
+    $('btnMethodology').textContent = x.methodology;
+    document.querySelectorAll('.tab-btn').forEach((b) => {
+        const badge = b.querySelector('[data-badge]');
+        b.textContent = x.tabs[b.dataset.tab];
+        if (badge) b.appendChild(badge);
+    });
+    document.querySelectorAll('.lang-btn').forEach((b) => {
+        const on = b.dataset.lang === S.lang;
+        b.className = `lang-btn flex-1 md:flex-none flex items-center justify-center px-4 rounded transition ${on ? 'bg-acc-400 text-slate-900' : 'text-slate-400 hover:text-white'}`;
+        b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+    const ids = {
+        genLedgerTitle: x.genLedger, balLedgerTitle: x.balLedger, supplyDonutTitle: x.supplyTitle, usesDonutTitle: x.usesTitle,
+        flowsTitle: x.flowsTitle, flowsSub: x.flowsSub, supplyRankTitle: x.supplyTitle, usesRankTitle: x.usesTitle,
+        dispatchTitle: x.dispatchTitle, dispatchSub: x.dispatchSub, cleanIntro: x.cleanIntro,
+        boxVarTitle: x.boxVar, boxUceTitle: x.boxUce, boxBaseTitle: x.boxBase,
+        xrayTitle: x.xrayTitle, xraySub: x.xraySub, reconTitle: x.reconTitle,
+        recHourlyTitle: x.recHourly, recDailyTitle: x.recDaily, modalTitle: x.modalTitle, modalCloseBtn: x.close,
+        loadTitle: x.load.title, loadGroup1: x.load.g1, loadGroup2: x.load.g2, loadReady: x.load.ready
     };
-    
-    const countryKeys = ['ΑΛΒΑΝΙΑ', 'ΒΟΥΛΓΑΡΙΑ', 'ΙΤΑΛΙΑ', 'ΤΟΥΡΚΙΑ', 'FYROM'];
-    countryKeys.forEach(c => {
-        live.imports += (latestData.interconnections_mwh[`${c}_IMP`] || 0);
-        live.exports += (latestData.interconnections_mwh[`${c}_EXP`] || 0);
-    });
-
-    let liveTotalSupply = live.totalGen + live.stIn + live.imports;
-    let liveTotalSinks = live.pump + live.stAbs + live.exports;
-    let liveDemand = liveTotalSupply - liveTotalSinks;
-
-    document.getElementById('render-gen-ledger').innerHTML = `
-        <div class="ledger-row c-lignite"><span class="ledger-label">Lignite</span><span class="ledger-operator"></span><span class="ledger-value">${fmt(live.lignite)}</span></div>
-        <div class="ledger-row c-gas"><span class="ledger-label">N. Gas</span><span class="ledger-operator">+</span><span class="ledger-value">${fmt(live.gas)}</span></div>
-        <div class="ledger-row c-hydro"><span class="ledger-label">Hydro</span><span class="ledger-operator">+</span><span class="ledger-value">${fmt(live.hydro)}</span></div>
-        <div class="ledger-row c-res"><span class="ledger-label">RES</span><span class="ledger-operator">+</span><span class="ledger-value">${fmt(live.res)}</span></div>
-        <div class="ledger-divider"></div>
-        <div class="ledger-total-row">
-            <span class="ledger-total-label">= SUM</span>
-            <span class="ledger-total-value text-white">${fmt(live.totalGen)}</span>
-        </div>
-    `;
-
-    document.getElementById('render-dem-ledger').innerHTML = `
-        <div class="ledger-row text-white"><span class="ledger-label">Generation</span><span class="ledger-operator"></span><span class="ledger-value">${fmt(live.totalGen)}</span></div>
-        <div class="ledger-row c-imports"><span class="ledger-label">Imports</span><span class="ledger-operator">+</span><span class="ledger-value">${fmt(live.imports)}</span></div>
-        <div class="ledger-row c-exports"><span class="ledger-label">Exports</span><span class="ledger-operator">-</span><span class="ledger-value">${fmt(live.exports)}</span></div>
-        <div class="ledger-row c-storage"><span class="ledger-label">St. Disch.</span><span class="ledger-operator">+</span><span class="ledger-value">${fmt(live.stIn)}</span></div>
-        <div class="ledger-row c-storage" style="color: var(--color-storage-chg);"><span class="ledger-label">St. Charge</span><span class="ledger-operator">-</span><span class="ledger-value">${fmt(live.stAbs)}</span></div>
-        <div class="ledger-row c-pump"><span class="ledger-label">Pumping</span><span class="ledger-operator">-</span><span class="ledger-value">${fmt(live.pump)}</span></div>
-        <div class="ledger-divider"></div>
-        <div class="ledger-total-row">
-            <span class="ledger-total-label">= NET</span>
-            <span class="ledger-total-value">${fmt(liveDemand)}</span>
-        </div>
-    `;
-
-    const getDonutOpt = (title, data) => ({
-        backgroundColor: 'transparent',
-        title: [
-            { text: title, left: 'center', top: 5, textStyle: { color: '#ffffff', fontSize: 13 } },
-            { text: `${fmt(liveTotalSupply)}\nMWh`, left: 'center', top: 'center', textStyle: { color: '#ffffff', fontSize: 16, fontWeight: 'bold' } }
-        ],
-        tooltip: { trigger: 'item', formatter: (p) => `${p.name}: <br/> <b>${fmt(p.value)} MWh</b> (${p.percent}%)` },
-        legend: { top: 'bottom', textStyle: { color: '#8892b0', fontSize: 10 } },
-        series: [{ type: 'pie', radius: ['45%', '70%'], itemStyle: { borderRadius: 4, borderColor: '#1c2128', borderWidth: 2 }, label: { show: true, formatter: '{b}\n{d}%', color: '#fff', fontSize: 10 }, labelLine: { length: 8, length2: 10 }, data: data }]
-    });
-
-    let sData = [
-        { value: live.lignite, name: 'Lignite', itemStyle: { color: '#b06a4b' } },
-        { value: live.gas, name: 'Nat. Gas', itemStyle: { color: '#d18b57' } },
-        { value: live.hydro, name: 'Hydro', itemStyle: { color: '#5b9bd5' } },
-        { value: live.res, name: 'RES', itemStyle: { color: '#70ad47' } },
-        { value: live.stIn, name: 'St. Disch.', itemStyle: { color: '#e0c2cd' } },
-        { value: live.imports, name: 'Imports', itemStyle: { color: '#ffc000' } }
-    ].filter(i => i.value > 0);
-
-    let dData = [
-        { value: live.pump, name: 'Pumping', itemStyle: { color: '#85c1e9' } },
-        { value: live.stAbs, name: 'St. Charge', itemStyle: { color: '#b276a0' } },
-        { value: live.exports, name: 'Exports', itemStyle: { color: '#e74c3c' } },
-        { value: liveDemand, name: 'Demand', itemStyle: { color: '#4a5568' } }
-    ].filter(i => i.value > 0);
-
-    supplyChart.setOption(getDonutOpt('Supply Mix (Inflows)', sData));
-    demandChart.setOption(getDonutOpt('Demand (Outflows)', dData));
-
-    flowsChart.setOption({
-        backgroundColor: 'transparent', title: { text: 'Cross-Border Flows', left: 'center', top: 10, textStyle: { color: '#fff', fontSize: 14 } },
-        tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' }, formatter: (params) => { let h = params[0].name + '<br/>'; params.forEach(p => h += `${p.marker} ${p.seriesName}: ${fmt(Math.abs(p.value))} MWh<br/>`); return h; }},
-        legend: { top: 40, textStyle: { color: '#8892b0', fontSize: 11 } }, grid: { top: 90, bottom: 40, left: 50, right: 20 },
-        xAxis: { type: 'category', data: ['ALBANIA', 'BULGARIA', 'ITALY', 'TURKEY', 'NORTH MACEDONIA'], axisLabel: { color: '#fff', interval: 0, rotate: 15, fontSize: 11 } },
-        yAxis: { type: 'value', splitLine: { lineStyle: { color: '#2d333b', type: 'dashed' } }, axisLabel: { color: '#8892b0', fontSize: 11, formatter: (val) => fmt(Math.abs(val)) } },
-        series: [
-            { name: 'Imports', type: 'bar', stack: 'Flow', itemStyle: { color: '#ffc000' }, data: countryKeys.map(c => latestData.interconnections_mwh[`${c}_IMP`] || 0) },
-            { name: 'Exports', type: 'bar', stack: 'Flow', itemStyle: { color: '#e74c3c' }, data: countryKeys.map(c => -(latestData.interconnections_mwh[`${c}_EXP`] || 0)) }
-        ]
-    });
+    Object.entries(ids).forEach(([id, txt]) => { const el = $(id); if (el) el.textContent = txt; });
+    document.querySelectorAll('.load-row').forEach((r) => { r.querySelector('[data-load-label]').textContent = x.load[`s${r.dataset.step}`]; });
+    $('modalBody').innerHTML = METHODOLOGY[S.lang];
 }
 
-// --- 6. Render Logic for Tab 2 (Daily) ---
-function renderDailyTab(todayData) {
-    let hours = [], arrLignite = [], arrGas = [], arrHydro = [], arrRes = [];
-    let arrImports = [], arrStIn = [], arrDemand = [], arrMcp = [];
-    let arrPump = [], arrStAbs = [], arrExports = []; 
-    
-    let sum = { gen:0, lig:0, gas:0, hyd:0, res:0, dem:0, stIn:0, stAbs:0, imp:0, exp:0, pump:0 };
-    const countryKeys = ['ΑΛΒΑΝΙΑ', 'ΒΟΥΛΓΑΡΙΑ', 'ΙΤΑΛΙΑ', 'ΤΟΥΡΚΙΑ', 'FYROM'];
+async function setLang(lang) {
+    if (lang === S.lang) return;
+    S.lang = lang;
+    try { localStorage.setItem('kp_lang', lang); } catch (e) { /* */ }
+    applyStaticText();
+    updateHeader();
+    fillPicker();
+    await renderAll();
+}
 
-    todayData.forEach(d => {
-        hours.push(d.target_hour.toString().padStart(2, '0') + ':00');
+function toggleModal(open) {
+    const modal = $('methodologyModal'), content = $('modalContent');
+    if (open) {
+        modal.classList.remove('hidden'); modal.classList.add('flex');
+        document.body.style.overflow = 'hidden';
+        requestAnimationFrame(() => { modal.classList.remove('opacity-0'); content.classList.remove('scale-95'); });
+        modal.querySelector('[data-close-modal]').focus();
+    } else {
+        modal.classList.add('opacity-0'); content.classList.add('scale-95');
+        document.body.style.overflow = '';
+        setTimeout(() => { modal.classList.add('hidden'); modal.classList.remove('flex'); $('btnMethodologyWrap').focus(); }, 300);
+    }
+}
 
-        let l = d.production_mix['TOTAL LIGNITE'] || 0;
-        let g = d.production_mix['TOTAL GAS'] || 0;
-        let h = d.production_mix['TOTAL HYDRO'] || 0;
-        let r = d.production_mix['RES_PROD'] || 0;
-        let gen = d.production_mix['TOTAL_PROD'] || 0;
-        
-        let sIn = d.production_mix['STORAGE_INJECTION'] || 0;
-        let sAbs = Math.abs(d.production_mix['STORAGE_ABSORPTION'] || 0);
-        let p = d.production_mix['ΣΥΝΟΛΙΚΗ ΑΝΤΛΗΣΗ'] || 0;
-        
-        let imp = 0, exp = 0;
-        countryKeys.forEach(c => {
-            imp += (d.interconnections_mwh[`${c}_IMP`] || 0);
-            exp += (d.interconnections_mwh[`${c}_EXP`] || 0);
+// ---------------------------------------------------------------------
+// 7. LIVE
+// ---------------------------------------------------------------------
+function ledgerRow(label, op, value, color, strong = false) {
+    return `<div class="grid grid-cols-[1fr_auto_auto] items-baseline gap-3 py-1.5 ${strong ? 'text-base font-bold text-white' : 'text-sm'}">
+        <span class="flex items-center gap-2 ${strong ? '' : 'text-slate-300'}">${color ? `<span class="w-2.5 h-2.5 rounded-sm shrink-0" style="background:${color}"></span>` : ''}${esc(label)}</span>
+        <span class="text-slate-500 w-3 text-center">${op}</span>
+        <span class="text-right min-w-[5.5rem] ${strong ? 'text-acc-300' : 'text-slate-100'}">${fmt(value)} <span class="text-[11px] font-normal text-slate-500">MWh</span></span>
+    </div>`;
+}
+const ledgerRule = '<div class="border-t border-slate-600 my-1.5"></div>';
+
+function renderLive() {
+    const day = S.cache[`live/${S.liveDate}`];
+    const h = day && day.hours.find((x) => x.hr === S.hourSel && x.has_data);
+    if (!h) return;
+    const n = t().names, g = h.gen;
+
+    $('genLedger').innerHTML =
+        ledgerRow(n.lignite, '', g.lignite, C.lignite) + ledgerRow(n.gas, '+', g.gas, C.gas) +
+        ledgerRow(n.hydro, '+', g.hydro, C.hydro) + ledgerRow(n.res, '+', g.res, C.res) +
+        ledgerRule + ledgerRow(t().ledgerTotal, '=', g.total, null, true);
+
+    const check = h.balance_ok === true ? `<p class="mt-3 text-xs text-emerald-400">✓ ${esc(t().balanceOk)}</p>`
+        : h.balance_ok === false ? `<p class="mt-3 text-xs text-orange-300">${esc(t().balanceOff)}</p>` : '';
+    $('balLedger').innerHTML =
+        ledgerRow(n.total, '', g.total, null) + ledgerRow(n.imports, '+', h.imports, C.imports) +
+        ledgerRow(n.exports, '−', h.exports, C.exports) + ledgerRow(n.dis, '+', h.storage.dis, C.dis) +
+        ledgerRow(n.chg, '−', h.storage.chg, C.chg) + ledgerRow(n.pumping, '−', h.pumping, C.pumping) +
+        ledgerRule + ledgerRow(t().ledgerDemand, '=', h.demand, null, true) + check;
+
+    const totalIn = g.total + h.imports + h.storage.dis;
+    const donut = (id, items) => {
+        const data = items.filter((i) => i.v > 0);
+        upsertChart(id, {
+            type: 'doughnut',
+            data: { labels: data.map((i) => i.l), datasets: [{ data: data.map((i) => i.v), backgroundColor: data.map((i) => i.c), borderColor: '#1e293b', borderWidth: 2 }] },
+            options: {
+                cutout: '62%',
+                plugins: {
+                    legend: { position: 'bottom', labels: { font: { size: 11 } } },
+                    tooltip: { callbacks: { label: (c) => ` ${c.label}: ${fmt(c.raw)} MWh (${fmt(100 * c.raw / totalIn, 1)}%)` } },
+                    centerText: { text: fmt(totalIn), sub: 'MWh' }
+                }
+            },
+            plugins: [centerText]
         });
-        
-        let dem = gen + imp - exp + sIn - sAbs - p;
-        let mcp = d.dam_price_eur || 0;
+    };
+    donut('supplyDonut', [
+        { l: n.lignite, v: g.lignite, c: C.lignite }, { l: n.gas, v: g.gas, c: C.gas }, { l: n.hydro, v: g.hydro, c: C.hydro },
+        { l: n.res, v: g.res, c: C.res }, { l: n.dis, v: h.storage.dis, c: C.dis }, { l: n.imports, v: h.imports, c: C.imports }
+    ]);
+    donut('usesDonut', [
+        { l: n.demand, v: h.demand, c: '#64748b' }, { l: n.exports, v: h.exports, c: C.exports },
+        { l: n.chg, v: h.storage.chg, c: C.chg }, { l: n.pumping, v: h.pumping, c: C.pumping }
+    ]);
 
-        arrLignite.push(l); arrGas.push(g); arrHydro.push(h); arrRes.push(r);
-        arrImports.push(imp); arrStIn.push(sIn); arrDemand.push(dem); arrMcp.push(mcp);
-        arrPump.push(-p); arrStAbs.push(-sAbs); arrExports.push(-exp);
-
-        sum.lig += l; sum.gas += g; sum.hyd += h; sum.res += r; sum.gen += gen;
-        sum.stIn += sIn; sum.stAbs += sAbs; sum.imp += imp; sum.exp += exp; sum.pump += p; sum.dem += dem;
+    const codes = ['AL', 'BG', 'IT', 'TR', 'MK'];
+    upsertChart('flowsChart', {
+        type: 'bar',
+        data: {
+            labels: codes.map((c) => t().countries[c]),
+            datasets: [
+                { label: n.imports, data: codes.map((c) => h.flows[c].imp), backgroundColor: C.imports, stack: 'f', borderRadius: 3 },
+                { label: n.exports, data: codes.map((c) => -(h.flows[c].exp || 0)), backgroundColor: C.exports, stack: 'f', borderRadius: 3 }
+            ]
+        },
+        options: {
+            scales: { x: { stacked: true, grid: { display: false } }, y: { stacked: true, ticks: { callback: (v) => fmt(Math.abs(v)) }, title: { display: true, text: 'MWh' } } },
+            plugins: { legend: { position: 'bottom' }, tooltip: { callbacks: { label: (c) => ` ${c.dataset.label}: ${fmt(Math.abs(c.raw))} MWh` } } }
+        }
     });
+    $('flowsMismatch').textContent = t().flowsMismatch;
+    $('flowsMismatch').classList.toggle('hidden', h.flows_match !== false);
+}
 
-    const leaderboardItems = [
-        { name: 'RES (ΑΠΕ)', value: sum.res, color: 'var(--color-res)' },
-        { name: 'Natural Gas (Φ.Αεριο)', value: sum.gas, color: 'var(--color-gas)' },
-        { name: 'Domestic Demand (Ζήτηση)', value: sum.dem, color: 'var(--text-main)' },
-        { name: 'Total Generation (Παραγωγή)', value: sum.gen, color: 'var(--accent-green)' },
-        { name: 'Imports (Εισαγωγές)', value: sum.imp, color: 'var(--color-imports)' },
-        { name: 'Exports (Εξαγωγές)', value: sum.exp, color: 'var(--color-exports)' },
-        { name: 'Hydro (Υδροηλεκτρικά)', value: sum.hyd, color: 'var(--color-hydro)' },
-        { name: 'BESS Discharge (Αποφόρτιση)', value: sum.stIn, color: 'var(--color-storage)' },
-        { name: 'BESS Charge (Φόρτιση)', value: sum.stAbs, color: 'var(--color-storage-chg)' },
-        { name: 'Lignite (Λιγνίτης)', value: sum.lig, color: 'var(--color-lignite)' },
-        { name: 'Pumping (Άντληση)', value: sum.pump, color: 'var(--color-pump)' }
-    ];
-
-    leaderboardItems.sort((a, b) => b.value - a.value);
-
-    document.getElementById('daily-leaderboard').innerHTML = leaderboardItems.map((item, index) => `
-        <div class="leaderboard-item">
-            <div class="lb-top">
-                <span class="lb-name" style="color: ${item.color};">${item.name}</span>
-                <span class="lb-rank">#${index + 1}</span>
+// ---------------------------------------------------------------------
+// 8. DAILY
+// ---------------------------------------------------------------------
+function rankList(items, total) {
+    const rows = items.filter((i) => i.v !== null).sort((a, b) => b.v - a.v);
+    return rows.map((i) => {
+        const share = total > 0 ? 100 * i.v / total : 0;
+        return `<div>
+            <div class="flex justify-between items-baseline text-sm gap-3">
+                <span class="flex items-center gap-2 text-slate-200"><span class="w-2.5 h-2.5 rounded-sm" style="background:${i.c}"></span>${esc(i.l)}</span>
+                <span class="text-slate-100 font-semibold">${fmt(i.v)} <span class="text-[11px] font-normal text-slate-500">MWh</span><span class="text-slate-400 font-normal w-14 inline-block text-right">${fmt(share, 1)}%</span></span>
             </div>
-            <div class="lb-value">${fmt(item.value)} <span style="font-size: 0.9rem; font-weight: normal; color: var(--text-muted);">MWh</span></div>
-        </div>
-    `).join('');
-
-    dailyDispatchChart.setOption({
-        backgroundColor: 'transparent',
-        title: { text: '24-Hour Dispatch & Market Clearing Price', left: 'center', top: 5, textStyle: { color: '#ffffff', fontSize: 15 } },
-        tooltip: {
-            trigger: 'axis',
-            axisPointer: { type: 'cross' },
-            backgroundColor: 'rgba(28, 33, 40, 0.95)',
-            borderColor: '#2d333b',
-            textStyle: { color: '#fff' },
-            formatter: function (params) {
-                let hour = params[0].axisValue;
-                const supplyOrder = ['Hydro', 'RES', 'BESS Discharge', 'Imports', 'Natural Gas', 'Lignite'];
-                const demandOrder = ['Domestic Demand', 'Exports', 'BESS Charge', 'Pumping'];
-                
-                let mcpParam = params.find(p => p.seriesName === 'MCP');
-                let mcpValue = mcpParam ? fmt(Math.abs(mcpParam.value)) : '-';
-
-                let html = `<div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                                <b style="font-size:14px; color:#2ecc71;">Hour: ${hour}</b>
-                                <b style="font-size:14px; color:#00e5ff;">MCP: ${mcpValue} €/MWh</b>
-                            </div>`;
-
-                const renderRow = (p) => {
-                    if (!p) return '';
-                    let val = Math.abs(p.value);
-                    let isDemand = p.seriesName === 'Domestic Demand';
-                    let label = isDemand ? `<b>${p.seriesName}</b>` : p.seriesName;
-                    return `<div style="margin-bottom: 3px;">
-                                <span style="color:${p.color}; font-size:14px;">●</span> 
-                                <span style="display:inline-block; width:130px; font-size:13px; color:#fff;">${label}:</span> 
-                                <span style="font-size:13px; color:#fff; float:right;"><b>${fmt(val)}</b> MWh</span>
-                            </div>`;
-                };
-
-                supplyOrder.forEach(name => {
-                    let p = params.find(item => item.seriesName === name);
-                    if(p && p.value !== 0) html += renderRow(p); 
-                });
-
-                html += `<div style="height: 15px;"></div>`;
-
-                demandOrder.forEach(name => {
-                    let p = params.find(item => item.seriesName === name);
-                    if(p && p.value !== 0) html += renderRow(p); 
-                });
-
-                return html;
-            }
-        },
-        legend: { top: 40, textStyle: { color: '#8892b0' }, icon: 'roundRect' },
-        grid: { top: 100, bottom: 40, left: 60, right: 60 },
-        xAxis: { type: 'category', data: hours, axisLabel: { color: '#fff' } },
-        yAxis: [
-            { type: 'value', name: 'Volume (MWh)', position: 'left', splitLine: { lineStyle: { color: '#2d333b', type: 'dashed' } }, axisLabel: { color: '#8892b0', formatter: (val) => fmt(Math.abs(val)) }, nameTextStyle: { color: '#8892b0' } },
-            { type: 'value', name: 'Price (€/MWh)', position: 'right', splitLine: { show: false }, axisLabel: { color: '#00e5ff', fontWeight: 'bold' }, nameTextStyle: { color: '#00e5ff' } }
-        ],
-        series: [
-            { name: 'Lignite', type: 'bar', stack: 'Total', barWidth: '70%', data: arrLignite, itemStyle: { color: '#b06a4b' } },
-            { name: 'Natural Gas', type: 'bar', stack: 'Total', barWidth: '70%', data: arrGas, itemStyle: { color: '#d18b57' } },
-            { name: 'Imports', type: 'bar', stack: 'Total', barWidth: '70%', data: arrImports, itemStyle: { color: '#ffc000' } },
-            { name: 'BESS Discharge', type: 'bar', stack: 'Total', barWidth: '70%', data: arrStIn, itemStyle: { color: '#e0c2cd' } },
-            { name: 'RES', type: 'bar', stack: 'Total', barWidth: '70%', data: arrRes, itemStyle: { color: '#70ad47' } },
-            { name: 'Hydro', type: 'bar', stack: 'Total', barWidth: '70%', data: arrHydro, itemStyle: { color: '#5b9bd5' } },
-            { name: 'Pumping', type: 'bar', stack: 'Total', barWidth: '70%', data: arrPump, itemStyle: { color: '#85c1e9' } },
-            { name: 'BESS Charge', type: 'bar', stack: 'Total', barWidth: '70%', data: arrStAbs, itemStyle: { color: '#b276a0' } },
-            { name: 'Exports', type: 'bar', stack: 'Total', barWidth: '70%', data: arrExports, itemStyle: { color: '#e74c3c' } },
-            { name: 'Domestic Demand', type: 'line', yAxisIndex: 0, data: arrDemand, symbol: 'none', smooth: true, lineStyle: { color: '#ffffff', width: 3, type: 'dashed' }, z: 10 },
-            { name: 'MCP', type: 'line', yAxisIndex: 1, data: arrMcp, symbol: 'circle', symbolSize: 6, lineStyle: { color: '#00e5ff', width: 3 }, itemStyle: { color: '#00e5ff' }, z: 10 }
-        ]
-    });
+            <div class="h-1.5 bg-slate-700/50 rounded-full mt-1.5 overflow-hidden"><div class="h-full rounded-full" style="width:${share.toFixed(2)}%;background:${i.c}"></div></div>
+        </div>`;
+    }).join('');
 }
 
-// --- 7. Render Logic for Tab 3 (Clean Energy X-Ray Analytics) ---
-function renderXrayTab(targetDate) {
-    let hours = [];
-    let arrBigHydro = [], arrSmallHydro = [], arrSolar = [], arrWind = [];
-    let arrBiomass = [], arrCogen = [], arrUnallocated = [], arrMcp = [];
-    let arrEntsoeSolar = [], arrEntsoeWind = [], arrEntsoeHydro = [];
+async function renderDaily() {
+    const day = await getLive(S.dailyDate);
+    if (!day) return;
+    const n = t().names, tot = day.totals, x = t();
+    const nHours = day.hours.length;
 
-    let sum = {
-        bigHydro: 0, smallHydro: 0, solar: 0, wind: 0, biomass: 0, cogen: 0,
-        unallocated: 0, totalPhysClean: 0, totalLiveClean: 0,
-        entsoeSolar: 0, entsoeWind: 0, entsoeHydro: 0
-    };
+    const stats = [`${x.avgPrice}: <strong class="text-slate-100">${fmt(tot.dam_price_avg, 2)} €/MWh</strong>`,
+        `${x.hoursData}: <strong class="text-slate-100">${tot.hours_with_data}/${nHours}</strong>${tot.hours_with_data < nHours && S.dailyDate === S.liveDate ? ` <span class="text-slate-500">(${x.dayInProgress})</span>` : ''}`];
+    $('dailyStats').innerHTML = stats.map((s) => `<span>${s}</span>`).join('');
 
-    for (let hr = 1; hr <= 24; hr++) {
-        hours.push(hr.toString().padStart(2, '0') + ':00');
-
-        let xRec = xrayData.find(d => d.date === targetDate && d.target_hour === hr) || {};
-        let eRec = entsoeData.find(d => d.date === targetDate && d.target_hour === hr) || {};
-        let lRec = globalData.find(d => d.date === targetDate && d.target_hour === hr) || {};
-
-        let bh = xRec.big_hydro || 0;
-        let sh = xRec.small_hydro || 0;
-        let sol = xRec.solar || 0;
-        let wnd = xRec.wind || 0;
-        let bio = xRec.biomass || 0;
-        let cog = xRec.cogen || 0;
-        let mcp = xRec.mcp || lRec.dam_price_eur || 0;
-
-        let liveRes = lRec.production_mix ? (lRec.production_mix['RES_PROD'] || 0) : 0;
-        let liveHydro = lRec.production_mix ? (lRec.production_mix['TOTAL HYDRO'] || 0) : 0;
-        let liveCleanTotal = liveRes + liveHydro;
-
-        let physCleanTotal = bh + sh + sol + wnd + bio + cog;
-        let unallocated = liveCleanTotal - physCleanTotal;
-        if (unallocated < 0) unallocated = 0; 
-
-        let eSolar = eRec.entsoe_solar || 0;
-        let eWind = eRec.entsoe_wind || 0;
-        let eHydro = eRec.entsoe_hydro || 0;
-
-        arrBigHydro.push(bh);
-        arrSmallHydro.push(sh);
-        arrSolar.push(sol);
-        arrWind.push(wnd);
-        arrBiomass.push(bio);
-        arrCogen.push(cog);
-        arrUnallocated.push(unallocated);
-        arrMcp.push(mcp);
-
-        arrEntsoeSolar.push(eSolar);
-        arrEntsoeWind.push(eWind);
-        arrEntsoeHydro.push(eHydro);
-
-        sum.bigHydro += bh;
-        sum.smallHydro += sh;
-        sum.solar += sol;
-        sum.wind += wnd;
-        sum.biomass += bio;
-        sum.cogen += cog;
-        sum.unallocated += unallocated;
-        sum.totalPhysClean += physCleanTotal;
-        sum.totalLiveClean += liveCleanTotal;
-        sum.entsoeSolar += eSolar;
-        sum.entsoeWind += eWind;
-        sum.entsoeHydro += eHydro;
-    }
-
-    // --- Update the 3 Inline Summary Boxes ---
-    document.getElementById('xb-stoch').innerHTML = `
-        <div class="xb-item"><span style="color: #70ad47;">Wind</span> <span class="text-white">${fmt(sum.wind)} MWh</span></div>
-        <div class="xb-item"><span style="color: #5b9bd5;">Big Hydro</span> <span class="text-white">${fmt(sum.bigHydro)} MWh</span></div>
-        <div class="xb-item"><span style="color: #f39c12;">Solar</span> <span class="text-white">${fmt(sum.solar)} MWh</span></div>
-    `;
-
-    document.getElementById('xb-uce').innerHTML = `
-        <div class="xb-item" style="justify-content: center; margin-top: 10px;">
-            <span style="color: #e74c3c; font-size: 1.1rem; margin-right: 10px;">UCE</span> 
-            <span class="text-white" style="font-size: 1.1rem;">${fmt(sum.unallocated)} MWh</span>
-        </div>
-    `;
-
-    document.getElementById('xb-base').innerHTML = `
-        <div class="xb-item"><span style="color: #f1c40f;">Cogen</span> <span class="text-white">${fmt(sum.cogen)} MWh</span></div>
-        <div class="xb-item"><span style="color: #3498db;">Small Hydro</span> <span class="text-white">${fmt(sum.smallHydro)} MWh</span></div>
-        <div class="xb-item"><span style="color: #8e44ad;">Biomass</span> <span class="text-white">${fmt(sum.biomass)} MWh</span></div>
-    `;
-
-    // --- Watermark Logic ---
-    const xrayWrapper = document.getElementById('xray-wrapper');
-    const watermark = document.getElementById('xray-watermark');
-    
-    if (targetDate === latestDateGlobal || sum.totalPhysClean < 1) {
-        xrayWrapper.classList.add('faded-charts');
-        watermark.classList.remove('d-none');
+    if (tot.hours_with_data > 0) {
+        const supply = [
+            { l: n.res, v: tot.gen.res, c: C.res }, { l: n.gas, v: tot.gen.gas, c: C.gas }, { l: n.lignite, v: tot.gen.lignite, c: C.lignite },
+            { l: n.hydro, v: tot.gen.hydro, c: C.hydro }, { l: n.imports, v: tot.imports, c: C.imports }, { l: n.dis, v: tot.storage.dis, c: C.dis }
+        ];
+        const uses = [
+            { l: n.demand, v: tot.demand, c: C.demand }, { l: n.exports, v: tot.exports, c: C.exports },
+            { l: n.chg, v: tot.storage.chg, c: C.chg }, { l: n.pumping, v: tot.pumping, c: C.pumping }
+        ];
+        const sumOf = (a) => a.reduce((s, i) => s + (i.v || 0), 0);
+        $('supplyRank').innerHTML = rankList(supply, sumOf(supply));
+        $('usesRank').innerHTML = rankList(uses, sumOf(uses));
     } else {
-        xrayWrapper.classList.remove('faded-charts');
-        watermark.classList.add('d-none');
+        $('supplyRank').innerHTML = $('usesRank').innerHTML = `<p class="text-sm text-slate-500">${esc(x.noData)}</p>`;
     }
 
-    xrayChart.setOption({
-        backgroundColor: 'transparent',
-        title: { text: 'Physical Clean Energy Dispatch vs Unallocated Energy (X-Ray)', left: 'center', top: 5, textStyle: { color: '#ffffff', fontSize: 15 } },
-        tooltip: {
-            trigger: 'axis',
-            axisPointer: { type: 'cross' },
-            backgroundColor: 'rgba(28, 33, 40, 0.95)',
-            borderColor: '#2d333b',
-            textStyle: { color: '#fff' },
-            formatter: function (params) {
-                let hour = params[0].axisValue;
-                let mcpParam = params.find(p => p.seriesName === 'MCP');
-                let mcpValue = mcpParam ? fmt(Math.abs(mcpParam.value)) : '-';
-
-                let html = `<div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
-                                <b style="font-size:15px; color:#70ad47;">Hour: ${hour}</b>
-                                <b style="font-size:15px; color:#00e5ff;">MCP: ${mcpValue} €/MWh</b>
-                            </div>`;
-
-                const renderRow = (seriesName) => {
-                    let p = params.find(item => item.seriesName === seriesName);
-                    if (!p) return '';
-                    return `<div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
-                                <span style="font-size:14px; color:#fff;">
-                                    <span style="color:${p.color}; font-size:16px; margin-right:4px;">●</span>${p.seriesName}:
-                                </span>
-                                <span style="font-size:14px; color:#fff;"><b>${fmt(p.value)}</b> MWh</span>
-                            </div>`;
-                };
-
-                html += renderRow('Wind');
-                html += renderRow('Big Hydro');
-                html += renderRow('Solar');
-                html += `<div style="border-bottom: 1px dashed rgba(255,255,255,0.2); margin: 8px 0;"></div>`;
-                html += renderRow('UCE');
-                html += `<div style="border-bottom: 1px dashed rgba(255,255,255,0.2); margin: 8px 0;"></div>`;
-                html += renderRow('Cogen');
-                html += renderRow('Small Hydro');
-                html += renderRow('Biomass');
-                html += `<div style="border-bottom: 1px dashed rgba(255,255,255,0.2); margin: 8px 0;"></div>`;
-
-                let cleanSum = 0;
-                params.forEach(p => { if (p.seriesName !== 'MCP') cleanSum += p.value; });
-
-                html += `<div style="display: flex; justify-content: space-between; margin-top: 6px;">
-                            <span style="font-size:14px; color:#8892b0;">Total Clean Energy:</span> 
-                            <span style="font-size:14px; color:#70ad47;"><b>${fmt(cleanSum)}</b> MWh</span>
-                        </div>`;
-
-                return html;
-            }
+    const H = day.hours;
+    const val = (fn) => H.map((h) => (h.has_data ? fn(h) : null));
+    const bar = (label, data, color) => ({ type: 'bar', label, data, backgroundColor: color, stack: 's', yAxisID: 'y', order: 2 });
+    upsertChart('dispatchChart', {
+        data: {
+            labels: H.map((h) => hourTick(h.hr)),
+            datasets: [
+                bar(n.lignite, val((h) => h.gen.lignite), C.lignite), bar(n.gas, val((h) => h.gen.gas), C.gas),
+                bar(n.hydro, val((h) => h.gen.hydro), C.hydro), bar(n.res, val((h) => h.gen.res), C.res),
+                bar(n.dis, val((h) => h.storage.dis), C.dis), bar(n.imports, val((h) => h.imports), C.imports),
+                bar(n.exports, val((h) => -h.exports), C.exports), bar(n.chg, val((h) => -h.storage.chg), C.chg),
+                bar(n.pumping, val((h) => -h.pumping), C.pumping),
+                { type: 'line', label: n.demand, data: val((h) => h.demand), borderColor: C.demand, borderDash: [6, 4], borderWidth: 2, pointRadius: 0, yAxisID: 'y', order: 1, spanGaps: false },
+                { type: 'line', label: n.price, data: H.map((h) => h.dam_price), borderColor: C.price, backgroundColor: C.price, borderWidth: 2, pointRadius: 2.5, yAxisID: 'y1', order: 0 }
+            ]
         },
-        legend: { top: 35, textStyle: { color: '#8892b0' }, icon: 'roundRect' },
-        grid: { top: 95, bottom: 40, left: 60, right: 60 },
-        xAxis: { type: 'category', data: hours, axisLabel: { color: '#fff' } },
-        yAxis: [
-            { type: 'value', name: 'Volume (MWh)', position: 'left', splitLine: { lineStyle: { color: '#2d333b', type: 'dashed' } }, axisLabel: { color: '#8892b0', formatter: (val) => fmt(val) }, nameTextStyle: { color: '#8892b0' } },
-            { type: 'value', name: 'Price (€/MWh)', position: 'right', splitLine: { show: false }, axisLabel: { color: '#00e5ff', fontWeight: 'bold' }, nameTextStyle: { color: '#00e5ff' } }
-        ],
-        series: [
-            { name: 'Biomass', type: 'bar', stack: 'Clean', barWidth: '70%', data: arrBiomass, itemStyle: { color: '#8e44ad' } },
-            { name: 'Small Hydro', type: 'bar', stack: 'Clean', barWidth: '70%', data: arrSmallHydro, itemStyle: { color: '#3498db' } },
-            { name: 'Cogen', type: 'bar', stack: 'Clean', barWidth: '70%', data: arrCogen, itemStyle: { color: '#f1c40f' } },
-            { name: 'UCE', type: 'bar', stack: 'Clean', barWidth: '70%', data: arrUnallocated, itemStyle: { color: '#e74c3c' } },
-            { name: 'Solar', type: 'bar', stack: 'Clean', barWidth: '70%', data: arrSolar, itemStyle: { color: '#f39c12' } },
-            { name: 'Big Hydro', type: 'bar', stack: 'Clean', barWidth: '70%', data: arrBigHydro, itemStyle: { color: '#5b9bd5' } },
-            { name: 'Wind', type: 'bar', stack: 'Clean', barWidth: '70%', data: arrWind, itemStyle: { color: '#70ad47' } },
-            { name: 'MCP', type: 'line', yAxisIndex: 1, data: arrMcp, symbol: 'circle', symbolSize: 6, lineStyle: { color: '#00e5ff', width: 3 }, itemStyle: { color: '#00e5ff' }, z: 10 }
-        ]
-    });
-
-    reconciliationChart.setOption({
-        backgroundColor: 'transparent',
-        title: { text: 'ENTSO-E vs Admie Transparency Radar (Solar & Wind Comparison)', left: 'center', top: 5, textStyle: { color: '#ffffff', fontSize: 15 } },
-        tooltip: {
-            trigger: 'axis',
-            axisPointer: { type: 'shadow' },
-            backgroundColor: 'rgba(28, 33, 40, 0.95)',
-            borderColor: '#2d333b',
-            textStyle: { color: '#fff' },
-            formatter: function (params) {
-                let hour = params[0].axisValue;
-                let html = `<div style="margin-bottom: 8px;"><b style="font-size:15px; color:#70ad47;">Hour: ${hour}</b></div>`;
-
-                params.forEach(p => {
-                    html += `<div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
-                                <span style="font-size:14px; color:#fff;">
-                                    <span style="color:${p.color}; font-size:16px; margin-right:4px;">●</span>${p.seriesName}:
-                                </span>
-                                <span style="font-size:14px; color:#fff; margin-left: 15px;"><b>${fmt(p.value)}</b> MWh</span>
-                            </div>`;
-                });
-
-                return html;
-            }
-        },
-        legend: { top: 35, textStyle: { color: '#8892b0' }, icon: 'roundRect' },
-        grid: { top: 90, bottom: 40, left: 60, right: 20 },
-        xAxis: { type: 'category', data: hours, axisLabel: { color: '#fff' } },
-        yAxis: { type: 'value', name: 'Volume (MWh)', splitLine: { lineStyle: { color: '#2d333b', type: 'dashed' } }, axisLabel: { color: '#8892b0', formatter: (val) => fmt(val) }, nameTextStyle: { color: '#8892b0' } },
-        series: [
-            { name: 'Solar - Admie', type: 'line', smooth: true, data: arrSolar, lineStyle: { color: '#f39c12', width: 3 }, itemStyle: { color: '#f39c12' } },
-            { name: 'Solar ENTSO-E', type: 'line', smooth: true, data: arrEntsoeSolar, lineStyle: { color: '#ff9f43', width: 3, type: 'dashed' }, itemStyle: { color: '#ff9f43' } },
-            { name: 'Wind - Admie', type: 'line', smooth: true, data: arrWind, lineStyle: { color: '#70ad47', width: 3 }, itemStyle: { color: '#70ad47' } },
-            { name: 'Wind  ENTSO-E', type: 'line', smooth: true, data: arrEntsoeWind, lineStyle: { color: '#10ac84', width: 3, type: 'dashed' }, itemStyle: { color: '#10ac84' } }
-        ]
-    });
-}
-
-// --- Helper για συμπίεση ημερομηνίας ---
-function formatRecordDate(dateStr) {
-    const months = ['Jan.', 'Feb.', 'Mar.', 'Apr.', 'May', 'Jun.', 'Jul.', 'Aug.', 'Sep.', 'Oct.', 'Nov.', 'Dec.'];
-    try {
-        let parts = dateStr.split(', ');
-        let dParts = parts[0].split('-'); // "YYYY-MM-DD"
-        if (dParts.length === 3) {
-            let monthIdx = parseInt(dParts[1], 10) - 1;
-            let day = parseInt(dParts[2], 10); 
-            let formatted = `${day} ${months[monthIdx]}`;
-            if (parts[1]) formatted += `, ${parts[1]}`; 
-            return formatted;
-        }
-    } catch(e) {}
-    return dateStr;
-}
-
-// --- 8. Tab Records Loader (Με τη νέα αυστηρή 7άδα σε σειρά) ---
-async function loadRecords() {
-    try {
-        const response = await fetch('data/records.json?v=' + new Date().getTime());
-        if (!response.ok) throw new Error("No records file");
-        const recs = await response.json();
-        
-        let todayFormatted = '';
-        if (latestDateGlobal) { 
-            todayFormatted = `${latestDateGlobal.substring(0,4)}-${latestDateGlobal.substring(4,6)}-${latestDateGlobal.substring(6,8)}`;
-            let todayRecordsCount = 0;
-
-            for (const category in recs.daily) {
-                if (recs.daily[category]) {
-                    recs.daily[category].forEach(item => { if (item.id === todayFormatted) todayRecordsCount++; });
-                }
-            }
-            for (const category in recs.hourly) {
-                if (recs.hourly[category]) {
-                    recs.hourly[category].forEach(item => { if (item.id.startsWith(todayFormatted)) todayRecordsCount++; });
-                }
-            }
-
-            const badge = document.getElementById('records-badge-tab');
-            if (badge) {
-                if (todayRecordsCount > 0) {
-                    badge.innerText = `${todayRecordsCount} New!`;
-                    badge.classList.remove('d-none');
-                } else {
-                    badge.classList.add('d-none');
+        options: {
+            interaction: { mode: 'index', intersect: false },
+            scales: {
+                x: { stacked: true, grid: { display: false }, title: { display: true, text: x.hourAxis } },
+                y: { stacked: true, title: { display: true, text: 'MWh' }, ticks: { callback: (v) => fmt(Math.abs(v)) } },
+                y1: { position: 'right', grid: { display: false }, title: { display: true, text: '€/MWh', color: C.price }, ticks: { color: C.price } }
+            },
+            plugins: {
+                legend: { position: 'bottom' },
+                tooltip: {
+                    filter: (c) => c.raw !== null && c.raw !== 0,
+                    callbacks: {
+                        title: (items) => hourRange(H[items[0].dataIndex].hr),
+                        label: (c) => c.dataset.yAxisID === 'y1' ? ` ${c.dataset.label}: ${fmt(c.raw, 2)} €/MWh` : ` ${c.dataset.label}: ${fmt(Math.abs(c.raw))} MWh`
+                    }
                 }
             }
         }
-
-        const buildCard = (title, items, color, unit) => {
-            if (!items || items.length === 0) {
-                return `
-                    <div class="col-md-6">
-                        <div class="record-box">
-                            <h6>${title}</h6>
-                            <div class="text-muted" style="font-size:0.85rem;">No data yet</div>
-                        </div>
-                    </div>`;
-            }
-
-            let listHtml = items.slice(0, 3).map((item, idx) => {
-                let rankStyle = '';
-                if (idx === 0) rankStyle = 'color: #ffc000; font-size: 0.9rem; text-shadow: 0 0 5px rgba(255,192,0,0.3);'; 
-                else if (idx === 1) rankStyle = 'color: #c0c0c0;'; 
-                else if (idx === 2) rankStyle = 'color: #cd7f32;'; 
-                
-                let isNew = todayFormatted && item.id.startsWith(todayFormatted);
-                let newBadgeHtml = isNew ? `<span class="new-record-badge">NEW!</span>` : '';
-                
-                let displayDate = formatRecordDate(item.id);
-                
-                return `
-                    <div class="record-row">
-                        <span class="rec-rank" style="${rankStyle}">#${idx+1}</span>
-                        <span class="rec-date">${displayDate}</span>
-                        <span class="rec-val" style="color: ${color};">${fmt(item.value)} <span style="font-size:0.7rem; color:var(--text-muted); font-weight:normal;">${unit}</span></span>
-                        ${newBadgeHtml}
-                    </div>
-                `;
-            }).join('');
-            
-            return `
-                <div class="col-md-6">
-                    <div class="record-box">
-                        <h6>${title}</h6>
-                        ${listHtml}
-                    </div>
-                </div>
-            `;
-        };
-
-        // --- HOURLY GRID (Οι 7 κάρτες με την ακριβή σειρά που ζήτησες) ---
-        let hourlyHtml = '';
-        hourlyHtml += buildCard('Peak Solar', recs.hourly.solar, '#f39c12', 'MW');
-        hourlyHtml += buildCard('Peak Wind', recs.hourly.wind, 'var(--color-res)', 'MW');
-        hourlyHtml += buildCard('Peak Exports', recs.hourly.exports, 'var(--color-exports)', 'MW');
-        hourlyHtml += buildCard('Peak BESS Charge', recs.hourly.bess_chg, 'var(--color-storage-chg)', 'MW');
-        hourlyHtml += buildCard('Peak BESS Discharge', recs.hourly.bess_dis, 'var(--color-storage)', 'MW');
-        hourlyHtml += buildCard('Peak BESS + Pump Chg.', recs.hourly.bess_chg_pump, 'var(--color-pump)', 'MW');
-        hourlyHtml += buildCard('Peak Network Load', recs.hourly.network_load, 'var(--accent-green)', 'MW');
-        document.getElementById('render-hourly-records').innerHTML = hourlyHtml;
-
-        // --- DAILY GRID (Οι 7 κάρτες με την ακριβή σειρά που ζήτησες) ---
-        let dailyHtml = '';
-        dailyHtml += buildCard('Max Solar', recs.daily.solar, '#f39c12', 'MWh');
-        dailyHtml += buildCard('Max Wind', recs.daily.wind, 'var(--color-res)', 'MWh');
-        dailyHtml += buildCard('Max Daily Exports', recs.daily.exports, 'var(--color-exports)', 'MWh');
-        dailyHtml += buildCard('Max BESS Charge', recs.daily.bess_chg, 'var(--color-storage-chg)', 'MWh');
-        dailyHtml += buildCard('Max BESS Discharge', recs.daily.bess_dis, 'var(--color-storage)', 'MWh');
-        dailyHtml += buildCard('Max BESS + Pump Chg.', recs.daily.bess_chg_pump, 'var(--color-pump)', 'MWh');
-        dailyHtml += buildCard('Max RES (Total)', recs.daily.res, 'var(--color-res)', 'MWh');
-        document.getElementById('render-daily-records').innerHTML = dailyHtml;
-
-    } catch (error) {
-        console.error("No records.json found:", error);
-        document.getElementById('render-hourly-records').innerHTML = '<div class="col-12"><p class="text-muted p-3 text-center">Waiting for python sync...</p></div>';
-        document.getElementById('render-daily-records').innerHTML = '<div class="col-12"><p class="text-muted p-3 text-center">Waiting for python sync...</p></div>';
-    }
+    });
 }
+
+// ---------------------------------------------------------------------
+// 9. CLEAN ENERGY
+// ---------------------------------------------------------------------
+function boxRow(label, value, color, sign = false) {
+    const v = value === null || value === undefined ? '–' : (sign && value > 0 ? '+' : '') + fmt(value);
+    return `<div class="flex justify-between items-baseline text-sm gap-3">
+        <span class="flex items-center gap-2 text-slate-300">${color ? `<span class="w-2.5 h-2.5 rounded-sm" style="background:${color}"></span>` : ''}${esc(label)}</span>
+        <span class="text-slate-100 font-semibold">${v} <span class="text-[11px] font-normal text-slate-500">MWh</span></span>
+    </div>`;
+}
+
+async function renderClean() {
+    const [xr, en] = await Promise.all([getXray(S.cleanDate), getEntsoe(S.cleanDate)]);
+    if (!xr) return;
+    const n = t().names, x = t(), tot = xr.totals, H = xr.hours;
+
+    $('boxVar').innerHTML = boxRow(n.wind, tot.wind, C.wind) + boxRow(n.bigHydro, tot.big_hydro, C.bigHydro) + boxRow(n.solar, tot.solar, C.solar);
+    $('boxBase').innerHTML = boxRow(n.cogen, tot.cogen, C.cogen) + boxRow(n.smallHydro, tot.small_hydro, C.smallHydro) + boxRow(n.biomass, tot.biomass, C.biomass);
+    if (tot.uce === null) {
+        const first = (S.manifest.live_days || [])[0];
+        $('boxUce').innerHTML = `<p class="text-sm text-slate-400">${esc(x.uceNA.replace('{d}', first ? fmtDate(first) : '–'))}</p>`;
+    } else {
+        $('boxUce').innerHTML = `<div class="flex justify-between items-baseline gap-3 pb-2 mb-1 border-b border-slate-700">
+                <span class="text-sm text-slate-300">${esc(x.uceNet)}</span>
+                <span class="text-xl font-bold ${tot.uce < 0 ? 'text-sky-300' : 'text-red-300'}">${tot.uce > 0 ? '+' : ''}${fmt(tot.uce)} <span class="text-xs font-normal text-slate-500">MWh</span></span>
+            </div>` + boxRow(x.ucePos, tot.uce_positive || 0, null, true) + boxRow(x.uceNeg, tot.uce_negative || 0, null, true);
+    }
+
+    const bar = (label, key, color) => ({ type: 'bar', label, data: H.map((h) => h[key]), backgroundColor: color, stack: 'c', yAxisID: 'y', order: 2 });
+    upsertChart('xrayChart', {
+        data: {
+            labels: H.map((h) => hourTick(h.hr)),
+            datasets: [
+                bar(n.biomass, 'biomass', C.biomass), bar(n.smallHydro, 'small_hydro', C.smallHydro), bar(n.cogen, 'cogen', C.cogen),
+                bar(n.solar, 'solar', C.solar), bar(n.bigHydro, 'big_hydro', C.bigHydro), bar(n.wind, 'wind', C.wind),
+                bar(n.uce, 'uce', C.uce),
+                { type: 'line', label: n.price, data: H.map((h) => h.mcp), borderColor: C.price, backgroundColor: C.price, borderWidth: 2, pointRadius: 2.5, yAxisID: 'y1', order: 0 }
+            ]
+        },
+        options: {
+            interaction: { mode: 'index', intersect: false },
+            scales: {
+                x: { stacked: true, grid: { display: false }, title: { display: true, text: x.hourAxis } },
+                y: { stacked: true, title: { display: true, text: 'MWh' }, ticks: { callback: (v) => fmt(v) } },
+                y1: { position: 'right', grid: { display: false }, title: { display: true, text: '€/MWh', color: C.price }, ticks: { color: C.price } }
+            },
+            plugins: {
+                legend: { position: 'bottom' },
+                tooltip: {
+                    filter: (c) => c.raw !== null,
+                    callbacks: {
+                        title: (items) => hourRange(H[items[0].dataIndex].hr),
+                        label: (c) => c.dataset.yAxisID === 'y1' ? ` ${c.dataset.label}: ${fmt(c.raw, 2)} €/MWh`
+                            : ` ${c.dataset.label}: ${c.dataset.label === n.uce && c.raw > 0 ? '+' : ''}${fmt(c.raw)} MWh`,
+                        footer: (items) => {
+                            const h = H[items[0].dataIndex];
+                            return `${S.lang === 'el' ? 'Φυσική καθαρή' : 'Physical clean'}: ${fmt(h.phys_clean)} MWh` +
+                                (h.live_clean !== null ? `\n${S.lang === 'el' ? 'Live καθαρή' : 'Live clean'}: ${fmt(h.live_clean)} MWh` : '');
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    const enByHr = en ? Object.fromEntries(en.hours.map((h) => [h.hr, h])) : {};
+    const line = (label, data, color, dashed) => ({ type: 'line', label, data, borderColor: color, backgroundColor: color, borderWidth: 2.5, pointRadius: 0, tension: 0.3, borderDash: dashed ? [7, 5] : [] });
+    const ds = [line(n.admieSolar, H.map((h) => h.solar), C.solar, false), line(n.admieWind, H.map((h) => h.wind), C.wind, false)];
+    if (en) ds.push(line(n.entsoeSolar, H.map((h) => (enByHr[h.hr] || {}).solar ?? null), C.entsoeSolar, true),
+                    line(n.entsoeWind, H.map((h) => (enByHr[h.hr] || {}).wind ?? null), C.entsoeWind, true));
+    upsertChart('reconChart', {
+        type: 'line',
+        data: { labels: H.map((h) => hourTick(h.hr)), datasets: ds },
+        options: {
+            interaction: { mode: 'index', intersect: false },
+            scales: { x: { grid: { display: false }, title: { display: true, text: x.hourAxis } }, y: { title: { display: true, text: 'MWh' }, ticks: { callback: (v) => fmt(v) } } },
+            plugins: {
+                legend: { position: 'bottom' },
+                tooltip: { callbacks: { title: (items) => hourRange(H[items[0].dataIndex].hr), label: (c) => ` ${c.dataset.label}: ${fmt(c.raw)} MWh` } }
+            }
+        }
+    });
+    $('reconSub').textContent = en ? x.reconSub : x.reconNA;
+}
+
+// ---------------------------------------------------------------------
+// 10. RECORDS
+// ---------------------------------------------------------------------
+const REC_ORDER = {
+    hourly: [['solar', C.solar], ['wind', C.wind], ['exports', C.exports], ['bess_chg', C.chg], ['bess_dis', C.dis], ['bess_chg_pump', C.pumping], ['network_load', C.accent]],
+    daily: [['solar', C.solar], ['wind', C.wind], ['exports', C.exports], ['bess_chg', C.chg], ['bess_dis', C.dis], ['bess_chg_pump', C.pumping], ['res', C.res]]
+};
+const MEDAL = ['text-acc-300', 'text-slate-400', 'text-slate-500'];
+
+function recordWhen(id) {
+    // 'YYYY-MM-DD' ή 'YYYY-MM-DD, HH:00' (HH = hr του ΑΔΜΗΕ, δηλ. τέλος της ώρας)
+    const [d, hh] = id.split(', ');
+    const date = `<span class="whitespace-nowrap">${esc(fmtDate(d, true))}</span>`;
+    return hh ? `${date}, <span class="whitespace-nowrap">${esc(hourRange(parseInt(hh, 10)).replace(/:00/g, ''))}</span>` : date;
+}
+
+function renderRecords() {
+    const R = S.records, x = t(), m = S.manifest;
+    $('recordsIntro').textContent = x.recordsIntro
+        .replace('{l}', m.live_days && m.live_days.length ? fmtDate(m.live_days[0]) : '–')
+        .replace('{x}', m.xray_days && m.xray_days.length ? fmtDate(m.xray_days[0]) : '–');
+    let newCount = 0;
+    const card = (scope, key, color) => {
+        const items = (R && R[scope] && R[scope][key]) || [];
+        const rows = items.slice(0, 3).map((it, i) => {
+            const isNew = S.liveDate && it.id.startsWith(S.liveDate);
+            if (isNew) newCount++;
+            return `<div class="flex items-baseline gap-3 py-1.5 text-sm">
+                <span class="font-bold w-6 ${MEDAL[i]}">#${i + 1}</span>
+                <span class="text-slate-400 flex-1">${recordWhen(it.id)}${isNew ? ` <span class="ml-1 px-1.5 py-0.5 rounded bg-acc-400 text-slate-900 text-[10px] font-bold">${esc(x.newBadge)}</span>` : ''}</span>
+                <span class="font-semibold" style="color:${color}">${fmt(it.value)} <span class="text-[11px] font-normal text-slate-500">MWh</span></span>
+            </div>`;
+        }).join('') || `<p class="text-sm text-slate-500">${esc(x.noData)}</p>`;
+        return `<div class="bg-slate-800/40 p-4 rounded-xl border border-slate-700"><h3 class="text-sm font-semibold text-slate-200 mb-2">${esc(x.rec[key])}</h3>${rows}</div>`;
+    };
+    $('recHourly').innerHTML = REC_ORDER.hourly.map(([k, c]) => card('hourly', k, c)).join('');
+    $('recDaily').innerHTML = REC_ORDER.daily.map(([k, c]) => card('daily', k, c)).join('');
+
+    // Σήμα στο tab όταν υπάρχουν νέα ρεκόρ σήμερα
+    const btn = document.querySelector('.tab-btn[data-tab="records"]');
+    let badge = btn.querySelector('[data-badge]');
+    if (newCount > 0) {
+        if (!badge) { badge = document.createElement('span'); badge.dataset.badge = '1'; btn.appendChild(badge); }
+        badge.className = 'ml-2 px-1.5 py-0.5 rounded-full bg-acc-400 text-slate-900 text-[10px] font-bold';
+        badge.textContent = `${newCount} ${x.newBadge}`;
+    } else if (badge) badge.remove();
+}
+
+async function renderAll() {
+    renderLive();
+    await Promise.all([renderDaily(), renderClean()]);
+    renderRecords();
+}
+
+// ---------------------------------------------------------------------
+// 11. Εκκίνηση (house style: βήματα με ρυθμό)
+// ---------------------------------------------------------------------
+function animateStep(step) {
+    return new Promise((resolve) => {
+        const row = document.querySelector(`.load-row[data-step="${step}"]`);
+        const bar = row.querySelector('[data-load-bar]'), pct = row.querySelector('[data-load-pct]');
+        row.classList.remove('opacity-0');
+        setTimeout(() => {
+            bar.style.width = '100%';
+            let p = 0;
+            const iv = setInterval(() => {
+                p = Math.min(100, p + 12);
+                pct.textContent = `${p}%`;
+                if (p >= 100) {
+                    clearInterval(iv);
+                    pct.innerHTML = '<svg class="w-3.5 h-3.5 text-emerald-400 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" /></svg>';
+                    bar.classList.remove('bg-blue-500', 'bg-acc-500'); bar.classList.add('bg-emerald-500');
+                }
+            }, 30);
+            setTimeout(resolve, 500);
+        }, 50);
+    });
+}
+
+function loadFailed(err) {
+    console.error(err);
+    $('mainSpinner').classList.add('hidden');
+    $('loadError').textContent = t().load.error;
+    $('loadError').classList.remove('hidden');
+}
+
+async function boot() {
+    chartDefaults();
+    applyStaticText();
+    setTab('live');
+    try {
+        await animateStep(1);
+        S.manifest = await getJSON('manifest', true);
+        if (!S.manifest || !S.manifest.last_live) throw new Error('manifest.json missing or empty');
+        S.liveDate = S.manifest.last_live.date;
+        S.hourSel = S.manifest.last_live.hr;
+        S.dailyDate = S.liveDate;
+        S.cleanDate = (S.manifest.xray_days || []).slice(-1)[0] || null;
+        updateHeader();
+
+        await animateStep(2);
+        if (!(await getLive(S.liveDate))) throw new Error(`live/${S.liveDate}.json missing`);
+        renderLive();
+        fillPicker();
+
+        await animateStep(3);
+        await renderDaily();
+
+        await animateStep(4);
+        if (S.cleanDate) await renderClean();
+
+        await animateStep(5);
+        S.records = await getJSON('records', true);
+        renderRecords();
+
+        $('mainSpinner').classList.add('hidden');
+        $('loadRowFinal').classList.remove('opacity-0', 'translate-y-2');
+        setTimeout(() => {
+            const ov = $('loading-overlay');
+            ov.classList.add('opacity-0');
+            setTimeout(() => { ov.style.display = 'none'; }, 500);
+        }, 800);
+    } catch (err) { loadFailed(err); }
+}
+
+// Κάθε 5 λεπτά: αν υπάρχει νέα ώρα, φόρτωσέ την. Κάθε λεπτό: ξαναϋπολόγισε την κατάσταση.
+async function refresh() {
+    const m = await getJSON('manifest', true);
+    if (!m || !m.last_live || !S.manifest) return;
+    const prev = S.manifest.last_live;
+    S.manifest = m;
+    if (m.last_live.date !== prev.date || m.last_live.hr !== prev.hr) {
+        const wasOnLatest = S.hourSel === prev.hr && S.liveDate === prev.date;
+        const wasOnToday = S.dailyDate === S.liveDate;
+        S.liveDate = m.last_live.date;
+        delete S.cache[`live/${prev.date}`];
+        await getJSON(`live/${S.liveDate}`, true);
+        if (wasOnLatest) S.hourSel = m.last_live.hr;
+        if (wasOnToday) S.dailyDate = S.liveDate;
+        S.records = await getJSON('records', true);
+        await renderAll();
+        fillPicker();
+    }
+    updateHeader();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.tab-btn').forEach((b) => b.addEventListener('click', () => setTab(b.dataset.tab)));
+    document.querySelectorAll('.lang-btn').forEach((b) => b.addEventListener('click', () => setLang(b.dataset.lang)));
+    $('contextSelect').addEventListener('change', onPickerChange);
+    $('btnMethodologyWrap').addEventListener('click', () => toggleModal(true));
+    document.querySelectorAll('[data-close-modal]').forEach((b) => b.addEventListener('click', () => toggleModal(false)));
+    $('methodologyModal').addEventListener('click', (e) => { if (e.target.id === 'methodologyModal') toggleModal(false); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('methodologyModal').classList.contains('hidden')) toggleModal(false); });
+    boot();
+    setInterval(refresh, 5 * 60 * 1000);
+    setInterval(updatePill, 60 * 1000);
+});
