@@ -90,6 +90,34 @@
         </div>
     </div>
 
+    <!-- Record modal (D39): εξέλιξη του #1 και τα 5 κορυφαία -->
+    <div id="recordModal" class="fixed inset-0 z-[9998] bg-slate-900/80 backdrop-blur-sm hidden items-center justify-center px-4 transition-opacity duration-300 opacity-0" role="dialog" aria-modal="true" aria-labelledby="recModalTitle">
+        <div class="bg-slate-800 border border-slate-700 rounded-xl shadow-2xl w-full max-w-3xl transform transition-transform duration-300 scale-95 flex flex-col max-h-[90vh]" id="recModalContent">
+            <div class="flex items-center justify-between gap-3 p-5 border-b border-slate-700 shrink-0">
+                <div>
+                    <h3 class="text-lg font-bold text-slate-100" id="recModalTitle"></h3>
+                    <p class="text-xs text-slate-400" id="recModalSub"></p>
+                </div>
+                <button type="button" data-close-rec class="shrink-0 w-9 h-9 flex items-center justify-center rounded-lg border border-slate-600 bg-slate-900/40 text-slate-300 hover:text-white hover:border-slate-400 transition" aria-label="Close">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+            <div class="p-5 overflow-y-auto flex-1 scroll-thin space-y-5">
+                <div>
+                    <h4 class="text-sm font-semibold text-slate-300 mb-2" id="recProgTitle">Record progression</h4>
+                    <div class="relative h-[280px]"><canvas id="recProgChart"></canvas></div>
+                </div>
+                <div>
+                    <h4 class="text-sm font-semibold text-slate-300 mb-2" id="recTopTitle">Top five</h4>
+                    <div id="recTopTable"></div>
+                </div>
+            </div>
+            <div class="p-4 border-t border-slate-700 flex justify-end shrink-0">
+                <button type="button" data-close-rec class="px-4 py-2 border border-slate-600 bg-slate-700 hover:bg-slate-600 text-white text-sm font-semibold rounded-lg transition" id="recModalClose">Close</button>
+            </div>
+        </div>
+    </div>
+
     <div class="max-w-7xl mx-auto space-y-6 w-full">
 
         <!-- Header -->
@@ -138,36 +166,52 @@
         </nav>
 
         <!-- VIEW: LIVE -->
-        <section id="view-live" class="space-y-6">
-            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+        <!-- Διάταξη (D38): σειρά 1 Παραγωγή 30% | donuts 70% · σειρά 2 Ροές 70% | Ισοζύγιο + MCP 30%.
+             Τα όρια (30% / 70%) δεν συμπίπτουν με τα όρια των tabs, ώστε να μη «διαβάζονται» ως περιεχόμενο κάθε tab. -->
+        <section id="view-live" class="space-y-4">
+            <div class="grid grid-cols-1 lg:grid-cols-[3fr_7fr] gap-4">
                 <div class="bg-slate-800/40 p-5 rounded-xl border border-slate-700">
                     <h2 class="text-sm font-semibold text-slate-300 mb-3" id="genLedgerTitle">Generation</h2>
                     <div id="genLedger"></div>
                 </div>
                 <div class="bg-slate-800/40 p-4 rounded-xl border border-slate-700">
-                    <h2 class="text-sm font-semibold text-slate-300 text-center" id="supplyDonutTitle">Where the energy came from</h2>
-                    <div class="relative h-[260px] mt-2"><canvas id="supplyDonut"></canvas></div>
-                </div>
-                <div class="bg-slate-800/40 p-4 rounded-xl border border-slate-700">
-                    <h2 class="text-sm font-semibold text-slate-300 text-center" id="usesDonutTitle">Where it went</h2>
-                    <div class="relative h-[260px] mt-2"><canvas id="usesDonut"></canvas></div>
-                </div>
-                <div class="bg-slate-800/40 p-5 rounded-xl border border-slate-700">
-                    <h2 class="text-sm font-semibold text-slate-300 mb-3" id="balLedgerTitle">System balance</h2>
-                    <div id="balLedger"></div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <h2 class="text-sm font-semibold text-slate-300 text-center" id="supplyDonutTitle">Where the energy came from</h2>
+                            <div class="relative h-[300px] mt-1"><canvas id="supplyDonut"></canvas></div>
+                            <p class="text-[11px] text-slate-500 text-center mt-1 min-h-[1rem]" id="supplyDonutMinor"></p>
+                        </div>
+                        <div>
+                            <h2 class="text-sm font-semibold text-slate-300 text-center" id="usesDonutTitle">Where it went</h2>
+                            <div class="relative h-[300px] mt-1"><canvas id="usesDonut"></canvas></div>
+                            <p class="text-[11px] text-slate-500 text-center mt-1 min-h-[1rem]" id="usesDonutMinor"></p>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="bg-slate-800/40 p-6 rounded-xl border border-slate-700">
-                <h2 class="text-lg font-semibold text-slate-200" id="flowsTitle">Cross-border flows</h2>
-                <p class="text-xs text-slate-400" id="flowsSub">Imports above zero, exports below.</p>
-                <p class="hidden text-xs text-orange-300 mt-1" id="flowsMismatch"></p>
-                <div class="relative h-[320px] mt-4"><canvas id="flowsChart"></canvas></div>
+            <div class="grid grid-cols-1 lg:grid-cols-[7fr_3fr] gap-4">
+                <div class="bg-slate-800/40 p-6 rounded-xl border border-slate-700 flex flex-col">
+                    <h2 class="text-lg font-semibold text-slate-200" id="flowsTitle">Cross-border flows</h2>
+                    <p class="text-xs text-slate-400" id="flowsSub">Imports above zero, exports below.</p>
+                    <p class="hidden text-xs text-orange-300 mt-1" id="flowsMismatch"></p>
+                    <div class="relative h-[320px] lg:h-auto lg:flex-1 lg:min-h-[320px] mt-4"><canvas id="flowsChart"></canvas></div>
+                </div>
+                <div class="flex flex-col gap-4">
+                    <div class="bg-slate-800/40 p-5 rounded-xl border border-slate-700">
+                        <h2 class="text-sm font-semibold text-slate-300 mb-3" id="balLedgerTitle">System balance</h2>
+                        <div id="balLedger"></div>
+                    </div>
+                    <div class="bg-slate-800/40 p-5 rounded-xl border border-slate-700">
+                        <h2 class="text-sm font-semibold text-slate-300 mb-2" id="mcpTitle">Day-ahead price (MCP)</h2>
+                        <div id="mcpBox"></div>
+                    </div>
+                </div>
             </div>
         </section>
 
         <!-- VIEW: DAILY -->
         <section id="view-daily" class="space-y-6 hidden">
-            <div class="flex flex-wrap gap-x-6 gap-y-2 text-sm text-slate-400" id="dailyStats"></div>
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 max-w-5xl mx-auto" id="dailyStats"></div>
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 <div class="bg-slate-800/40 p-5 rounded-xl border border-slate-700">
                     <h2 class="text-sm font-semibold text-slate-300 mb-4" id="supplyRankTitle">Where the energy came from</h2>
@@ -187,7 +231,7 @@
 
         <!-- VIEW: CLEAN ENERGY -->
         <section id="view-clean" class="space-y-6 hidden">
-            <p class="text-sm text-slate-400 max-w-3xl" id="cleanIntro"></p>
+            <p class="text-sm text-slate-400 max-w-3xl"><span id="cleanIntro"></span> <button type="button" class="text-acc-300 hover:text-white underline underline-offset-2 whitespace-nowrap" data-method="m-uce" id="cleanMore">Methodology →</button></p>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div class="bg-slate-800/40 p-5 rounded-xl border border-slate-700">
                     <h2 class="text-sm font-semibold text-slate-300 mb-3" id="boxVarTitle">Variable &amp; dispatchable</h2>
@@ -214,7 +258,7 @@
             </div>
             <div class="bg-slate-800/40 p-6 rounded-xl border border-slate-700">
                 <h2 class="text-lg font-semibold text-slate-200" id="gapTitle">ADMIE and ENTSO-E: the day at a glance</h2>
-                <p class="text-xs text-slate-400 max-w-4xl" id="gapSub"></p>
+                <p class="text-xs text-slate-400 max-w-4xl"><span id="gapSub"></span> <button type="button" class="text-acc-300 hover:text-white underline underline-offset-2 whitespace-nowrap" data-method="m-entsoe" id="gapMore">Methodology →</button></p>
                 <div id="gapBox" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mt-4"></div>
             </div>
             <div class="bg-slate-800/40 p-6 rounded-xl border border-slate-700">
@@ -239,7 +283,7 @@
             </div>
         </section>
 
-        <footer class="mt-12 pb-2 text-center">
+        <footer class="mt-12 pt-6 pb-2 text-center border-t border-slate-800">
             <p class="text-slate-400 text-sm font-medium">Konstantinos Pappas <span class="mx-1 text-slate-600">|</span> Energy Market Analyst</p>
             <p class="text-slate-500 text-xs mt-1">Business Operations &amp; Risk Management <span class="mx-1 text-slate-600">|</span> Data Insights on Energy Transition &amp; Grid Stability</p>
         </footer>

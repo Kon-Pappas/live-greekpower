@@ -13,10 +13,10 @@ ENTSO-E: από πού ήρθε η ενέργεια κάθε ώρας και π�
 ## What the page shows
 | Tab | Content |
 |---|---|
-| Live (hour) | Generation ledger (lignite + gas + hydro + RES = total) and system-balance ledger (generation + imports − exports + BESS discharge − BESS charge − pumping = demand, checked against ADMIE's total load), two donuts (sources, uses) and cross-border flows per country |
+| Live (hour) | Generation ledger (lignite + gas + hydro + RES = total, with clean and fossil shares), two donuts with labelled slices (sources, uses), cross-border flows per country, system-balance ledger (generation + imports − exports + BESS discharge − BESS charge − pumping = demand, checked against ADMIE's total load) and the hour's day-ahead price |
 | Daily | Where the day's energy came from and where it went, with shares; 24-hour stacked dispatch with demand and the day-ahead price |
 | Clean energy | Metered clean generation (ADMIE ex-post SCADA + medium-voltage RESMV, cogeneration excluded) against ADMIE's live RES + hydro (cogeneration removed as well); the difference is the unallocated clean energy (UCE, signed): distribution-level generation ADMIE estimates but does not meter. ADMIE vs ENTSO-E for solar and wind, the day's ADMIE–ENTSO-E comparison (clean share, RES, solar revision, load) and total load |
-| Records | Top three hourly and daily values since tracking began, recomputed every hour; new records are flagged |
+| Records | The #1 hourly and daily value per category since tracking began; each opens its progression and the top five; new records are flagged |
 
 On the Live and Daily tabs, "RES" is ADMIE's figure, which includes cogeneration (CHP).
 

@@ -26,6 +26,13 @@ const C = {
 const T = {
     en: {
         locale: 'en-GB', title: 'Greek Power Live',
+        mcpTitle: 'Day-ahead price (MCP)', mcpUnit: '€/MWh', mcpDayAvg: 'Day average', mcpRank: 'Rank in the day', mcpRankOf: 'of', mcpRankHigh: 'most expensive',
+        cleanEnergy: 'Clean energy', fossilFuels: 'Fossil fuels', cleanHint: 'RES (incl. CHP, as ADMIE reports) + hydro', cleanHintShort: 'RES incl. CHP + hydro', fossilHint: 'lignite + natural gas', shareOfGen: 'of generation',
+        minorOther: 'Other', methodLink: 'Methodology →',
+        short: { lignite: 'Lignite', gas: 'Gas', hydro: 'Hydro', res: 'RES', dis: 'BESS out', imports: 'Imports', demand: 'Demand', exports: 'Exports', chg: 'BESS in', pumping: 'Pumping' },
+        priceRange: 'Price range', dayClean: 'Clean share of generation',
+        recProgTitle: 'Progression of the #1', recTopTitle: 'Top five', viewHistory: 'history →', trackingStart: 'tracking starts',
+        newTop5: 'new in the top five', recRank: 'Rank', recWhen: 'When', recValue: 'Value',
         lastUpdate: 'Last update:', nextUpdate: 'Next update:', methodology: 'Methodology & Sources',
         tabs: { live: 'Live (hour)', daily: 'Daily', clean: 'Clean energy', records: 'Records' },
         pickerHour: 'Hour:', pickerDate: 'Date:', today: 'today',
@@ -43,7 +50,7 @@ const T = {
         dispatchTitle: '24-hour dispatch and day-ahead price',
         dispatchSub: 'Sources above zero, exports, charging and pumping below. Hours that have not happened yet show the price only.',
         hourAxis: 'Hour (start, Greek time)', mwh: 'MWh', eur: '€/MWh',
-        cleanIntro: 'Metered clean generation from ADMIE\'s ex-post files (transmission SCADA plus the medium-voltage RESMV file), published one to two days later, against ADMIE\'s live renewables and hydro of the same hours. Cogeneration (CHP) is not clean and is removed from both sides. The difference is the unallocated clean energy (UCE): distribution-level generation that ADMIE estimates but does not meter, mainly rooftop and other low-voltage solar, distribution-connected wind and small low-voltage units. A negative hour is an estimation error, not consumption.',
+        cleanIntro: 'ADMIE’s metered clean generation compared with its own live figures. The difference (UCE) is distribution-level generation that ADMIE estimates but does not meter, mostly rooftop solar.',
         boxVar: 'Variable & dispatchable', boxUce: 'Unallocated clean energy (UCE)', boxBase: 'Baseload',
         uceNet: 'Net for the day', ucePos: 'Hours with live higher', uceNeg: 'Hours with ex-post higher',
         uceNA: 'Not available: live data start on {d}.',
@@ -51,19 +58,26 @@ const T = {
         reconTitle: 'ADMIE vs ENTSO-E: solar and wind', reconSub: 'Solid lines: ADMIE ex-post files. Dashed lines: ENTSO-E Transparency Platform (actual generation per type).',
         reconNA: 'No ENTSO-E data for this day.',
         gapTitle: 'ADMIE and ENTSO-E: the day at a glance',
-        gapSub: 'ADMIE publishes renewables including an estimate of low-voltage generation that is not metered. ENTSO-E first shows a similar figure and, about ten days later, revises it to metered generation only. The cards set the two sources side by side; the clean share is computed the way ADMIE computes it (RES incl. CHP + hydro, over RES + hydro + gas + lignite).',
+        gapSub: 'The same day in ADMIE’s figures and in ENTSO-E’s. ENTSO-E revises solar about ten days later to metered generation only.',
         gapShare: 'Clean share', gapClean: 'RES + hydro', gapRevision: 'ENTSO-E solar: revision', gapLoad: 'Total load',
         gapMissing: 'not in ENTSO-E', gapPoints: 'points', gapFirst: 'first version', gapNow: 'current version',
         gapProvisional: 'provisional', gapFinal: 'final', gapUnknown: 'earliest kept', gapNotYet: 'not revised yet', gapNoLoad: 'ENTSO-E load not loaded yet for this day', gapNoHistory: 'No version history kept yet for this day',
         loadTitle: 'Total load: ADMIE and ENTSO-E', loadSub: 'ADMIE live total load against ENTSO-E actual total load (A65). Dotted: ENTSO-E first version, when it differs from the current one.',
         admieLoad: 'ADMIE total load', entsoeLoad: 'ENTSO-E load', entsoeLoadFirst: 'ENTSO-E load (first version)', entsoeSolarFirst: 'Solar (ENTSO-E, first version)',
-        recordsIntro: 'Top three since tracking began. Recomputed every hour from the stored history (live data from {l}, clean-energy data from {x}); earlier entries are kept as first recorded. Hourly values are MWh in one hour, equal to the average MW.',
+        recordsIntro: 'The highest values since tracking began on {l}. Select a record for its progression and the top five.',
         recHourly: 'Hourly records', recDaily: 'Daily records', newBadge: 'NEW', noData: 'No data yet',
         rec: { solar: 'Solar', wind: 'Wind', exports: 'Exports', bess_chg: 'BESS charge', bess_dis: 'BESS discharge', bess_chg_pump: 'BESS charge + pumping', network_load: 'Network load', res: 'RES (incl. CHP)' },
         close: 'Close', modalTitle: 'Methodology & Data Sources'
     },
     el: {
         locale: 'el-GR', title: 'Greek Power Live',
+        mcpTitle: 'Τιμή επόμενης ημέρας (MCP)', mcpUnit: '€/MWh', mcpDayAvg: 'Μέση ημέρας', mcpRank: 'Θέση στην ημέρα', mcpRankOf: 'από', mcpRankHigh: 'ακριβότερη',
+        cleanEnergy: 'Καθαρή ενέργεια', fossilFuels: 'Ορυκτά καύσιμα', cleanHint: 'ΑΠΕ (με ΣΗΘΥΑ, όπως τις δημοσιεύει ο ΑΔΜΗΕ) + υδροηλεκτρικά', cleanHintShort: 'ΑΠΕ με ΣΗΘΥΑ + υδρο', fossilHint: 'λιγνίτης + φυσικό αέριο', shareOfGen: 'της παραγωγής',
+        minorOther: 'Λοιπά', methodLink: 'Μεθοδολογία →',
+        short: { lignite: 'Λιγνίτης', gas: 'Αέριο', hydro: 'Υδρο', res: 'ΑΠΕ', dis: 'Εκφόρτιση', imports: 'Εισαγωγές', demand: 'Ζήτηση', exports: 'Εξαγωγές', chg: 'Φόρτιση', pumping: 'Άντληση' },
+        priceRange: 'Εύρος τιμής', dayClean: 'Μερίδιο καθαρής στην παραγωγή',
+        recProgTitle: 'Εξέλιξη του #1', recTopTitle: 'Οι πέντε κορυφαίες', viewHistory: 'ιστορικό →', trackingStart: 'έναρξη καταγραφής',
+        newTop5: 'νέα είσοδος στις πέντε κορυφαίες', recRank: 'Θέση', recWhen: 'Πότε', recValue: 'Τιμή',
         lastUpdate: 'Τελευταία ενημέρωση:', nextUpdate: 'Επόμενη:', methodology: 'Μεθοδολογία & Πηγές',
         tabs: { live: 'Live (ώρα)', daily: 'Ημέρα', clean: 'Καθαρή ενέργεια', records: 'Ρεκόρ' },
         pickerHour: 'Ώρα:', pickerDate: 'Ημέρα:', today: 'σήμερα',
@@ -81,7 +95,7 @@ const T = {
         dispatchTitle: 'Κατανομή 24ώρου και τιμή επόμενης ημέρας',
         dispatchSub: 'Πηγές πάνω από το μηδέν· εξαγωγές, φόρτιση και άντληση κάτω. Για τις ώρες που δεν έχουν γίνει ακόμα φαίνεται μόνο η τιμή.',
         hourAxis: 'Ώρα (έναρξη, ώρα Ελλάδας)', mwh: 'MWh', eur: '€/MWh',
-        cleanIntro: 'Μετρημένη καθαρή παραγωγή από τα εκ των υστέρων αρχεία του ΑΔΜΗΕ (SCADA μεταφοράς και αρχείο μέσης τάσης RESMV), που δημοσιεύονται μία με δύο ημέρες αργότερα, σε σύγκριση με τα live ΑΠΕ και υδροηλεκτρικά του ΑΔΜΗΕ των ίδιων ωρών. Η συμπαραγωγή (ΣΗΘΥΑ) δεν είναι καθαρή και αφαιρείται και από τις δύο πλευρές. Η διαφορά είναι η μη κατανεμημένη καθαρή ενέργεια (UCE): παραγωγή της διανομής που ο ΑΔΜΗΕ εκτιμά αλλά δεν μετρά, κυρίως φ/β στέγης και λοιπά φ/β χαμηλής τάσης, αιολικά της διανομής και μικρές μονάδες χαμηλής τάσης. Μια αρνητική ώρα είναι σφάλμα εκτίμησης, όχι κατανάλωση.',
+        cleanIntro: 'Η μετρημένη καθαρή παραγωγή του ΑΔΜΗΕ σε σύγκριση με τα δικά του live στοιχεία. Η διαφορά (UCE) είναι παραγωγή της διανομής που ο ΑΔΜΗΕ εκτιμά αλλά δεν μετρά, κυρίως φ/β στέγης.',
         boxVar: 'Μεταβλητές & κατανεμόμενες', boxUce: 'Μη κατανεμημένη καθαρή ενέργεια (UCE)', boxBase: 'Βάσης',
         uceNet: 'Καθαρό για την ημέρα', ucePos: 'Ώρες με μεγαλύτερο το live', uceNeg: 'Ώρες με μεγαλύτερα τα εκ των υστέρων',
         uceNA: 'Μη διαθέσιμο: τα live δεδομένα ξεκινούν στις {d}.',
@@ -89,13 +103,13 @@ const T = {
         reconTitle: 'ΑΔΜΗΕ και ENTSO-E: φωτοβολταϊκά και αιολικά', reconSub: 'Συνεχείς γραμμές: εκ των υστέρων αρχεία ΑΔΜΗΕ. Διακεκομμένες: ENTSO-E Transparency Platform (πραγματική παραγωγή ανά τύπο).',
         reconNA: 'Δεν υπάρχουν δεδομένα ENTSO-E για αυτή την ημέρα.',
         gapTitle: 'ΑΔΜΗΕ και ENTSO-E: η εικόνα της ημέρας',
-        gapSub: 'Ο ΑΔΜΗΕ δημοσιεύει τις ΑΠΕ μαζί με εκτίμηση της παραγωγής χαμηλής τάσης που δεν μετριέται. Η ENTSO-E δείχνει αρχικά παρόμοιο στοιχείο και, περίπου δέκα ημέρες μετά, το αναθεωρεί σε μόνο μετρημένη παραγωγή. Οι κάρτες βάζουν τις δύο πηγές δίπλα-δίπλα· το μερίδιο καθαρής υπολογίζεται όπως το υπολογίζει ο ΑΔΜΗΕ (ΑΠΕ με ΣΗΘΥΑ + υδροηλεκτρικά, προς ΑΠΕ + υδρο + αέριο + λιγνίτη).',
+        gapSub: 'Η ίδια ημέρα στα στοιχεία του ΑΔΜΗΕ και της ENTSO-E. Η ENTSO-E αναθεωρεί τα φ/β περίπου δέκα ημέρες μετά σε μόνο μετρημένη παραγωγή.',
         gapShare: 'Μερίδιο καθαρής', gapClean: 'ΑΠΕ + υδροηλεκτρικά', gapRevision: 'Φ/β ENTSO-E: αναθεώρηση', gapLoad: 'Συνολικό φορτίο',
         gapMissing: 'λείπουν από την ENTSO-E', gapPoints: 'μονάδες', gapFirst: 'πρώτη έκδοση', gapNow: 'τρέχουσα έκδοση',
         gapProvisional: 'προσωρινά', gapFinal: 'τελικά', gapUnknown: 'παλαιότερη που κρατήθηκε', gapNotYet: 'δεν έχει αναθεωρηθεί ακόμα', gapNoLoad: 'Το φορτίο της ENTSO-E δεν έχει φορτωθεί ακόμα για αυτή την ημέρα', gapNoHistory: 'Δεν υπάρχει ακόμα ιστορικό εκδόσεων για αυτή την ημέρα',
         loadTitle: 'Συνολικό φορτίο: ΑΔΜΗΕ και ENTSO-E', loadSub: 'Live συνολικό φορτίο του ΑΔΜΗΕ έναντι του πραγματικού συνολικού φορτίου της ENTSO-E (A65). Με τελείες: η πρώτη έκδοση της ENTSO-E, όταν διαφέρει από την τρέχουσα.',
         admieLoad: 'Φορτίο ΑΔΜΗΕ', entsoeLoad: 'Φορτίο ENTSO-E', entsoeLoadFirst: 'Φορτίο ENTSO-E (πρώτη έκδοση)', entsoeSolarFirst: 'Φ/Β (ENTSO-E, πρώτη έκδοση)',
-        recordsIntro: 'Οι τρεις κορυφαίες τιμές από την έναρξη της καταγραφής. Υπολογίζονται κάθε ώρα από το αποθηκευμένο ιστορικό (live δεδομένα από {l}, δεδομένα καθαρής ενέργειας από {x})· οι παλαιότερες εγγραφές κρατιούνται όπως καταγράφηκαν. Οι ωριαίες τιμές είναι MWh σε μία ώρα, ίσες με τα μέσα MW.',
+        recordsIntro: 'Οι υψηλότερες τιμές από την έναρξη της καταγραφής, {l}. Πατήστε σε ένα ρεκόρ για την εξέλιξή του και τις πέντε κορυφαίες.',
         recHourly: 'Ωριαία ρεκόρ', recDaily: 'Ημερήσια ρεκόρ', newBadge: 'ΝΕΟ', noData: 'Δεν υπάρχουν ακόμα δεδομένα',
         rec: { solar: 'Φωτοβολταϊκά', wind: 'Αιολικά', exports: 'Εξαγωγές', bess_chg: 'Φόρτιση BESS', bess_dis: 'Εκφόρτιση BESS', bess_chg_pump: 'Φόρτιση BESS + άντληση', network_load: 'Φορτίο δικτύου', res: 'ΑΠΕ (με ΣΗΘΥΑ)' },
         close: 'Κλείσιμο', modalTitle: 'Μεθοδολογία & Πηγές Δεδομένων'
@@ -110,14 +124,14 @@ const METHODOLOGY = {
 <p class="mb-4">All times are Greek local time. ADMIE numbers hours 1 to 24; hour 1 is 00:00–01:00. The page labels each hour by its start (00–01, 01–02, …). Values are MWh in one hour, which equals the average MW of that hour.</p>
 <h4 class="text-acc-300 font-semibold mb-1">System balance and demand</h4>
 <p class="mb-4">Demand is ADMIE's total load. It equals generation + imports − exports + BESS discharge − BESS charge − pumping; the page checks this for every hour and says when it does not hold. Imports and exports are ADMIE's official totals; the per-country flows are shown as a breakdown.</p>
-<h4 class="text-acc-300 font-semibold mb-1">Unallocated clean energy (UCE)</h4>
+<h4 id="m-uce" class="text-acc-300 font-semibold mb-1 scroll-mt-4">Unallocated clean energy (UCE)</h4>
 <p class="mb-4">ADMIE's live “RES” figure includes cogeneration (CHP) and an estimate of distribution-level generation that is not metered. Physical clean energy is the metered part: large hydro + small hydro + solar + wind + biomass, from the transmission SCADA file and the medium-voltage RESMV file. Live clean energy is live RES + hydro minus cogeneration; cogeneration is removed from both sides because it is mostly gas-fired. UCE is live minus physical and keeps its sign. It is mainly rooftop and other low-voltage solar (its daily shape follows medium-voltage solar closely), distribution-connected wind (RESMV has no wind) and small low-voltage hydro and biomass. Crete is in neither source: both see it only through its two interconnection cables. A negative hour means ADMIE's estimate came out below the metered value, for example through losses; it is not consumption. On the Live and Daily tabs, “RES” is ADMIE's figure, cogeneration included.</p>
 <h4 class="text-acc-300 font-semibold mb-1">Prices</h4>
 <p class="mb-4">The day-ahead price is the hourly value for Greece as published on ADMIE's portal.</p>
-<h4 class="text-acc-300 font-semibold mb-1">ADMIE and ENTSO-E</h4>
+<h4 id="m-entsoe" class="text-acc-300 font-semibold mb-1 scroll-mt-4">ADMIE and ENTSO-E</h4>
 <p class="mb-4">ADMIE's own statistics split renewables into system RES (transmission) and network RES (distribution); network RES include medium-voltage generation metered in the RESMV file and an estimate of low-voltage generation that is not metered hourly. On the ENTSO-E Transparency Platform the first published solar figure is close to that total; about ten days later it is revised to metered generation only, and biomass is not reported. The page keeps both ENTSO-E versions (the first one and the latest, marked provisional or final after 14 days) and the ENTSO-E actual total load, so the two sources can be compared day by day.</p>
 <h4 class="text-acc-300 font-semibold mb-1">Records</h4>
-<p class="mb-4">The three highest values since tracking began, recomputed every hour from the full history, so a correction by ADMIE also corrects a record.</p>
+<p class="mb-4">The five highest values since tracking began (1 April 2026), recomputed every hour from the full history, so a correction by ADMIE also corrects a record. Each record shows how the #1 progressed; in the first weeks of tracking almost every day is a “record”, which is why that period is shaded. Hourly values are MWh in one hour, equal to the average MW.</p>
 <h4 class="text-acc-300 font-semibold mb-1">Status</h4>
 <p>“Live” means the latest hour ended less than 75 minutes ago. “Delayed” means up to three hours, usually one missed update. “Stale data” means longer than that.</p>`,
     el: `
@@ -127,14 +141,14 @@ const METHODOLOGY = {
 <p class="mb-4">Όλες οι ώρες είναι ώρα Ελλάδας. Ο ΑΔΜΗΕ αριθμεί τις ώρες από 1 έως 24· η ώρα 1 είναι 00:00–01:00. Η σελίδα ονομάζει κάθε ώρα από την έναρξή της (00–01, 01–02, …). Οι τιμές είναι MWh σε μία ώρα, ίσες με τα μέσα MW της ώρας.</p>
 <h4 class="text-acc-300 font-semibold mb-1">Ισοζύγιο και ζήτηση</h4>
 <p class="mb-4">Η ζήτηση είναι το συνολικό φορτίο του ΑΔΜΗΕ. Ισούται με παραγωγή + εισαγωγές − εξαγωγές + εκφόρτιση BESS − φόρτιση BESS − άντληση· η σελίδα το ελέγχει για κάθε ώρα και το επισημαίνει όταν δεν ισχύει. Οι εισαγωγές και οι εξαγωγές είναι τα επίσημα σύνολα του ΑΔΜΗΕ· οι ροές ανά χώρα εμφανίζονται ως ανάλυση.</p>
-<h4 class="text-acc-300 font-semibold mb-1">Μη κατανεμημένη καθαρή ενέργεια (UCE)</h4>
+<h4 id="m-uce" class="text-acc-300 font-semibold mb-1 scroll-mt-4">Μη κατανεμημένη καθαρή ενέργεια (UCE)</h4>
 <p class="mb-4">Το live «ΑΠΕ» του ΑΔΜΗΕ περιέχει τη συμπαραγωγή (ΣΗΘΥΑ) και μια εκτίμηση της παραγωγής της διανομής που δεν μετριέται. Η φυσική καθαρή ενέργεια είναι το μετρημένο κομμάτι: μεγάλα + μικρά υδροηλεκτρικά + φωτοβολταϊκά + αιολικά + βιομάζα, από το SCADA μεταφοράς και το αρχείο μέσης τάσης RESMV. Η live καθαρή ενέργεια είναι live ΑΠΕ + υδροηλεκτρικά μείον τη συμπαραγωγή· η συμπαραγωγή αφαιρείται και από τις δύο πλευρές, γιατί είναι κυρίως με φυσικό αέριο. Το UCE είναι live μείον φυσική, με το πρόσημό του. Είναι κυρίως φ/β στέγης και λοιπά φ/β χαμηλής τάσης (το ημερήσιο σχήμα του ακολουθεί στενά τα φ/β μέσης τάσης), αιολικά της διανομής (το RESMV δεν έχει αιολικά) και μικρά υδροηλεκτρικά και βιομάζα χαμηλής τάσης. Η Κρήτη δεν υπάρχει σε καμία από τις δύο πηγές: και οι δύο τη βλέπουν μόνο μέσα από τα δύο καλώδια διασύνδεσης. Μια αρνητική ώρα σημαίνει ότι η εκτίμηση του ΑΔΜΗΕ βγήκε κάτω από τη μέτρηση, για παράδειγμα λόγω απωλειών· δεν είναι κατανάλωση. Στα tabs Live και Ημέρα, το «ΑΠΕ» είναι το στοιχείο του ΑΔΜΗΕ, μαζί με τη συμπαραγωγή.</p>
 <h4 class="text-acc-300 font-semibold mb-1">Τιμές</h4>
 <p class="mb-4">Η τιμή επόμενης ημέρας είναι η ωριαία τιμή για την Ελλάδα όπως δημοσιεύεται στην πύλη του ΑΔΜΗΕ.</p>
-<h4 class="text-acc-300 font-semibold mb-1">ΑΔΜΗΕ και ENTSO-E</h4>
+<h4 id="m-entsoe" class="text-acc-300 font-semibold mb-1 scroll-mt-4">ΑΔΜΗΕ και ENTSO-E</h4>
 <p class="mb-4">Τα στατιστικά του ίδιου του ΑΔΜΗΕ χωρίζουν τις ΑΠΕ σε ΑΠΕ συστήματος (μεταφορά) και ΑΠΕ δικτύου (διανομή)· οι ΑΠΕ δικτύου περιέχουν την παραγωγή μέσης τάσης που μετριέται στο αρχείο RESMV και μια εκτίμηση της παραγωγής χαμηλής τάσης που δεν μετριέται ωριαία. Στην ENTSO-E Transparency Platform η πρώτη δημοσιευμένη τιμή των φ/β είναι κοντά σε αυτό το σύνολο· περίπου δέκα ημέρες μετά αναθεωρείται σε μόνο μετρημένη παραγωγή, και η βιομάζα δεν δηλώνεται. Η σελίδα κρατά και τις δύο εκδόσεις της ENTSO-E (την πρώτη και την πιο πρόσφατη, με ένδειξη προσωρινή ή τελική μετά από 14 ημέρες) και το πραγματικό συνολικό φορτίο της ENTSO-E, ώστε οι δύο πηγές να συγκρίνονται ημέρα προς ημέρα.</p>
 <h4 class="text-acc-300 font-semibold mb-1">Ρεκόρ</h4>
-<p class="mb-4">Οι τρεις υψηλότερες τιμές από την έναρξη της καταγραφής, που υπολογίζονται κάθε ώρα από όλο το ιστορικό· έτσι μια διόρθωση του ΑΔΜΗΕ διορθώνει και το ρεκόρ.</p>
+<p class="mb-4">Οι πέντε υψηλότερες τιμές από την έναρξη της καταγραφής (1 Απριλίου 2026), που υπολογίζονται κάθε ώρα από όλο το ιστορικό· έτσι μια διόρθωση του ΑΔΜΗΕ διορθώνει και το ρεκόρ. Κάθε ρεκόρ δείχνει πώς εξελίχθηκε το #1· τις πρώτες εβδομάδες σχεδόν κάθε μέρα είναι «ρεκόρ», γι’ αυτό η περίοδος αυτή είναι σκιασμένη. Οι ωριαίες τιμές είναι MWh σε μία ώρα, ίσες με τα μέσα MW.</p>
 <h4 class="text-acc-300 font-semibold mb-1">Κατάσταση</h4>
 <p>«Live» σημαίνει ότι η τελευταία ώρα τελείωσε πριν από λιγότερα από 75 λεπτά. «Καθυστέρηση» σημαίνει έως τρεις ώρες, συνήθως μία ενημέρωση που χάθηκε. «Παλιά δεδομένα» σημαίνει περισσότερο.</p>`
 };
@@ -167,6 +181,12 @@ const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&
 
 // hr 1 = 00:00–01:00 (ΑΔΜΗΕ) → ετικέτα από την έναρξη
 const hourTick = (hr) => pad(hr - 1);
+// 1η, 2η… / 1st, 2nd…
+function ordinal(n) {
+    if (S.lang === 'el') return `${n}η`;
+    const v = n % 100, suf = (v >= 11 && v <= 13) ? 'th' : ({ 1: 'st', 2: 'nd', 3: 'rd' }[n % 10] || 'th');
+    return `${n}${suf}`;
+}
 const hourRange = (hr) => `${pad(hr - 1)}:00–${pad(hr)}:00`;
 
 function fmtDate(iso, withYear = true) {
@@ -247,6 +267,64 @@ const centerText = {
         ctx.fillText(opts.text, x, y - 8);
         ctx.fillStyle = C.muted; ctx.font = `12px ${Chart.defaults.font.family}`;
         ctx.fillText(opts.sub || '', x, y + 12);
+        ctx.restore();
+    }
+};
+
+// Plugin: ετικέτες με «βελάκι» έξω από κάθε φέτα (D38).
+// Μόνο φέτες ≥ minShare· οι ετικέτες κάθε πλευράς απλώνονται κάθετα ώστε να μην πέφτουν η μία στην άλλη.
+const CALLOUT_MIN_WIDTH = 380;
+const calloutLabels = {
+    id: 'calloutLabels',
+    afterDatasetsDraw(chart, _args, opts) {
+        if (!opts || !opts.enabled || chart.width < CALLOUT_MIN_WIDTH) return;
+        const meta = chart.getDatasetMeta(0), ds = chart.data.datasets[0];
+        const total = ds.data.reduce((a, b) => a + (b || 0), 0);
+        if (!total) return;
+        const { ctx, chartArea: area } = chart;
+        const font = Chart.defaults.font.family, lineH = 15;
+        const items = [];
+        meta.data.forEach((arc, i) => {
+            const v = ds.data[i];
+            if (!v || v / total < (opts.minShare || 0.03)) return;
+            const p = arc.getProps(['x', 'y', 'startAngle', 'endAngle', 'outerRadius'], true);
+            const a = (p.startAngle + p.endAngle) / 2, cos = Math.cos(a), sin = Math.sin(a);
+            items.push({
+                i, right: cos >= 0, color: ds.backgroundColor[i],
+                x0: p.x + cos * p.outerRadius, y0: p.y + sin * p.outerRadius,
+                x1: p.x + cos * (p.outerRadius + 12), y1: p.y + sin * (p.outerRadius + 12),
+                cx: p.x, r: p.outerRadius,
+                text: (opts.short && opts.short[i]) || chart.data.labels[i], value: `${fmt(v)} MWh`
+            });
+        });
+        // απλωμα ανά πλευρά
+        for (const side of [true, false]) {
+            const list = items.filter((t) => t.right === side).sort((a, b) => a.y1 - b.y1);
+            for (let k = 1; k < list.length; k++) {
+                if (list[k].y1 - list[k - 1].y1 < lineH * 2) list[k].y1 = list[k - 1].y1 + lineH * 2;
+            }
+            const overflow = list.length ? list[list.length - 1].y1 - (area.bottom - lineH) : 0;
+            if (overflow > 0) list.forEach((t) => { t.y1 -= overflow; });
+        }
+        ctx.save();
+        const fitText = (txt, maxW) => {
+            if (ctx.measureText(txt).width <= maxW) return txt;
+            let t2 = txt;
+            while (t2.length > 1 && ctx.measureText(t2 + '…').width > maxW) t2 = t2.slice(0, -1);
+            return t2 + '…';
+        };
+        items.forEach((t) => {
+            // σταθερές «στήλες» δεξιά/αριστερά της πίτας, μέσα στο περιθώριο του γραφήματος
+            const colX = t.right ? area.right + 6 : area.left - 6;
+            const maxW = t.right ? chart.width - colX - 6 : colX - 6;
+            ctx.strokeStyle = t.color; ctx.lineWidth = 1.2;
+            ctx.beginPath(); ctx.moveTo(t.x0, t.y0); ctx.lineTo(t.x1, t.y1); ctx.lineTo(colX, t.y1); ctx.stroke();
+            ctx.fillStyle = t.color; ctx.beginPath(); ctx.arc(t.x0, t.y0, 2, 0, Math.PI * 2); ctx.fill();
+            ctx.textAlign = t.right ? 'left' : 'right'; ctx.textBaseline = 'middle';
+            const tx = colX + (t.right ? 3 : -3);
+            ctx.fillStyle = '#e2e8f0'; ctx.font = `600 11px ${font}`; ctx.fillText(fitText(t.text, maxW), tx, t.y1 - 7);
+            ctx.fillStyle = C.muted; ctx.font = `11px ${font}`; ctx.fillText(fitText(t.value, maxW), tx, t.y1 + 7);
+        });
         ctx.restore();
     }
 };
@@ -332,6 +410,7 @@ function setTab(tab) {
     ['live', 'daily', 'clean', 'records'].forEach((v) => $(`view-${v}`).classList.toggle('hidden', v !== tab));
     fillPicker();
     updatePill();
+    if (tab === 'live' && S.manifest) renderLive();   // οι πίτες μετρούν ξανά το πλάτος τους
     // Τα γραφήματα σε κρυφό tab έχουν μηδενικό μέγεθος· τα ξαναμετράμε.
     requestAnimationFrame(() => Object.values(S.charts).forEach((c) => c.resize()));
 }
@@ -357,7 +436,7 @@ function applyStaticText() {
         flowsTitle: x.flowsTitle, flowsSub: x.flowsSub, supplyRankTitle: x.supplyTitle, usesRankTitle: x.usesTitle,
         dispatchTitle: x.dispatchTitle, dispatchSub: x.dispatchSub, cleanIntro: x.cleanIntro,
         boxVarTitle: x.boxVar, boxUceTitle: x.boxUce, boxBaseTitle: x.boxBase,
-        xrayTitle: x.xrayTitle, xraySub: x.xraySub, reconTitle: x.reconTitle, gapTitle: x.gapTitle, gapSub: x.gapSub, loadChartTitle: x.loadTitle, loadChartSub: x.loadSub,
+        xrayTitle: x.xrayTitle, xraySub: x.xraySub, reconTitle: x.reconTitle, gapTitle: x.gapTitle, gapSub: x.gapSub, mcpTitle: x.mcpTitle, cleanMore: x.methodLink, gapMore: x.methodLink, recProgTitle: x.recProgTitle, recTopTitle: x.recTopTitle, recModalClose: x.close, loadChartTitle: x.loadTitle, loadChartSub: x.loadSub,
         recHourlyTitle: x.recHourly, recDailyTitle: x.recDaily, modalTitle: x.modalTitle, modalCloseBtn: x.close,
         loadTitle: x.load.title, loadGroup1: x.load.g1, loadGroup2: x.load.g2, loadReady: x.load.ready
     };
@@ -374,6 +453,11 @@ async function setLang(lang) {
     updateHeader();
     fillPicker();
     await renderAll();
+}
+
+function openMethodology(anchor) {
+    toggleModal(true);
+    if (anchor) setTimeout(() => { const el = document.getElementById(anchor); if (el) el.scrollIntoView({ block: 'start', behavior: 'smooth' }); }, 320);
 }
 
 function toggleModal(open) {
@@ -450,12 +534,21 @@ function renderLive() {
     const day = S.cache[`live/${S.liveDate}`];
     const h = day && day.hours.find((x) => x.hr === S.hourSel && x.has_data);
     if (!h) return;
-    const n = t().names, g = h.gen;
+    const n = t().names, x = t(), g = h.gen;
 
+    // Παραγωγή + υποενότητα καθαρή / ορυκτά (ίδιος υπολογισμός με τον ΑΔΜΗΕ)
+    const clean = g.res + g.hydro, fossil = g.lignite + g.gas;
+    const shareRow = (label, hint, v, color) => `<div class="grid grid-cols-[1fr_auto_auto] items-baseline gap-3 py-1 text-sm" title="${esc(hint)}">
+        <span class="flex items-center gap-2 text-slate-300"><span class="w-2.5 h-2.5 rounded-full shrink-0" style="background:${color}"></span>${esc(label)}</span>
+        <span class="text-right text-slate-100">${fmt(v)} <span class="text-[11px] text-slate-500">MWh</span></span>
+        <span class="text-right font-semibold text-white min-w-[3.5rem]">${g.total ? fmt(100 * v / g.total, 1) : '–'}%</span></div>`;
     $('genLedger').innerHTML =
         ledgerRow(n.lignite, '', g.lignite, C.lignite) + ledgerRow(n.gas, '+', g.gas, C.gas) +
         ledgerRow(n.hydro, '+', g.hydro, C.hydro) + ledgerRow(n.res, '+', g.res, C.res) +
-        ledgerRule + ledgerRow(t().ledgerTotal, '=', g.total, null, true);
+        ledgerRule + ledgerRow(t().ledgerTotal, '=', g.total, null, true) +
+        '<div class="border-t border-dashed border-slate-600 my-2"></div>' +
+        shareRow(x.cleanEnergy, x.cleanHint, clean, C.res) + shareRow(x.fossilFuels, x.fossilHint, fossil, C.gas) +
+        `<p class="text-[11px] text-slate-500 mt-1">${esc(x.cleanHint)} · ${esc(x.fossilHint)}</p>`;
 
     const check = h.balance_ok === true ? `<p class="mt-3 text-xs text-emerald-400">✓ ${esc(t().balanceOk)}</p>`
         : h.balance_ok === false ? `<p class="mt-3 text-xs text-orange-300">${esc(t().balanceOff)}</p>` : '';
@@ -465,40 +558,48 @@ function renderLive() {
         ledgerRow(n.chg, '−', h.storage.chg, C.chg) + ledgerRow(n.pumping, '−', h.pumping, C.pumping) +
         ledgerRule + ledgerRow(t().ledgerDemand, '=', h.demand, null, true) + check;
 
+    // Πίτες με ετικέτες-βελάκια (μεγάλες οθόνες) ή υπόμνημα (στενές)
     const totalIn = g.total + h.imports + h.storage.dis;
     const donut = (id, items) => {
         const data = items.filter((i) => i.v > 0);
+        const wide = $(id).parentElement.clientWidth >= CALLOUT_MIN_WIDTH;
+        const sum = data.reduce((a, i) => a + i.v, 0);
+        const minor = data.filter((i) => i.v / sum < 0.03);
+        $(`${id}Minor`).textContent = wide && minor.length ? `${x.minorOther}: ` + minor.map((i) => `${i.l} ${fmt(i.v)} MWh`).join(' · ') : '';
         upsertChart(id, {
             type: 'doughnut',
             data: { labels: data.map((i) => i.l), datasets: [{ data: data.map((i) => i.v), backgroundColor: data.map((i) => i.c), borderColor: '#1e293b', borderWidth: 2 }] },
             options: {
                 cutout: '62%',
+                layout: { padding: wide ? { left: 104, right: 104, top: 22, bottom: 22 } : 0 },
                 plugins: {
-                    legend: { position: 'bottom', labels: { font: { size: 11 } } },
+                    legend: { display: !wide, position: 'bottom', labels: { font: { size: 11 } } },
                     tooltip: { callbacks: { label: (c) => ` ${c.label}: ${fmt(c.raw)} MWh (${fmt(100 * c.raw / totalIn, 1)}%)` } },
-                    centerText: { text: fmt(totalIn), sub: 'MWh' }
+                    centerText: { text: fmt(totalIn), sub: 'MWh' },
+                    calloutLabels: { enabled: wide, minShare: 0.03, short: data.map((i) => i.s || i.l) }
                 }
             },
-            plugins: [centerText]
+            plugins: [centerText, calloutLabels]
         });
     };
     donut('supplyDonut', [
-        { l: n.lignite, v: g.lignite, c: C.lignite }, { l: n.gas, v: g.gas, c: C.gas }, { l: n.hydro, v: g.hydro, c: C.hydro },
-        { l: n.res, v: g.res, c: C.res }, { l: n.dis, v: h.storage.dis, c: C.dis }, { l: n.imports, v: h.imports, c: C.imports }
+        { l: n.lignite, s: x.short.lignite, v: g.lignite, c: C.lignite }, { l: n.gas, s: x.short.gas, v: g.gas, c: C.gas }, { l: n.hydro, s: x.short.hydro, v: g.hydro, c: C.hydro },
+        { l: n.res, s: x.short.res, v: g.res, c: C.res }, { l: n.dis, s: x.short.dis, v: h.storage.dis, c: C.dis }, { l: n.imports, s: x.short.imports, v: h.imports, c: C.imports }
     ]);
     donut('usesDonut', [
-        { l: n.demand, v: h.demand, c: '#64748b' }, { l: n.exports, v: h.exports, c: C.exports },
-        { l: n.chg, v: h.storage.chg, c: C.chg }, { l: n.pumping, v: h.pumping, c: C.pumping }
+        { l: n.demand, s: x.short.demand, v: h.demand, c: '#64748b' }, { l: n.exports, s: x.short.exports, v: h.exports, c: C.exports },
+        { l: n.chg, s: x.short.chg, v: h.storage.chg, c: C.chg }, { l: n.pumping, s: x.short.pumping, v: h.pumping, c: C.pumping }
     ]);
 
+    // Ροές
     const codes = ['AL', 'BG', 'IT', 'TR', 'MK'];
     upsertChart('flowsChart', {
         type: 'bar',
         data: {
             labels: codes.map((c) => t().countries[c]),
             datasets: [
-                { label: n.imports, data: codes.map((c) => h.flows[c].imp), backgroundColor: C.imports, stack: 'f', borderRadius: 3 },
-                { label: n.exports, data: codes.map((c) => -(h.flows[c].exp || 0)), backgroundColor: C.exports, stack: 'f', borderRadius: 3 }
+                { label: n.imports, data: codes.map((c) => h.flows[c].imp), backgroundColor: C.imports, stack: 'f', borderRadius: 3, maxBarThickness: 46 },
+                { label: n.exports, data: codes.map((c) => -(h.flows[c].exp || 0)), backgroundColor: C.exports, stack: 'f', borderRadius: 3, maxBarThickness: 46 }
             ]
         },
         options: {
@@ -516,6 +617,17 @@ function renderLive() {
     });
     $('flowsMismatch').textContent = t().flowsMismatch;
     $('flowsMismatch').classList.toggle('hidden', h.flows_match !== false);
+
+    // MCP της ώρας, με θέση στην ημέρα και μέση τιμή
+    const prices = day.hours.map((q) => q.dam_price).filter((v) => v !== null && v !== undefined);
+    const rank = h.dam_price === null ? null : 1 + prices.filter((v) => v > h.dam_price).length;
+    $('mcpBox').innerHTML = `
+        <div class="flex items-baseline gap-2"><span class="text-4xl font-bold" style="color:${C.price}">${fmt(h.dam_price, h.dam_price % 1 ? 2 : 0)}</span><span class="text-sm text-slate-400">${esc(x.mcpUnit)}</span></div>
+        <p class="text-xs text-slate-400 mt-1">${esc(hourRange(h.hr))}</p>
+        <div class="border-t border-slate-700 mt-3 pt-3 space-y-1 text-sm">
+            <div class="flex justify-between"><span class="text-slate-400">${esc(x.mcpDayAvg)}</span><span class="text-slate-100">${fmt(day.totals.dam_price_avg, 2)} ${esc(x.mcpUnit)}</span></div>
+            <div class="flex justify-between"><span class="text-slate-400">${esc(x.mcpRank)}</span><span class="text-slate-100">${rank ? `${ordinal(rank)} ${esc(x.mcpRankOf)} ${prices.length} (${esc(x.mcpRankHigh)})` : '–'}</span></div>
+        </div>`;
 }
 
 // ---------------------------------------------------------------------
@@ -541,9 +653,18 @@ async function renderDaily() {
     const n = t().names, tot = day.totals, x = t();
     const nHours = day.hours.length;
 
-    const stats = [`${x.avgPrice}: <strong class="text-slate-100">${fmt(tot.dam_price_avg, 2)} €/MWh</strong>`,
-        `${x.hoursData}: <strong class="text-slate-100">${tot.hours_with_data}/${nHours}</strong>${tot.hours_with_data < nHours && S.dailyDate === S.liveDate ? ` <span class="text-slate-500">(${x.dayInProgress})</span>` : ''}`];
-    $('dailyStats').innerHTML = stats.map((s) => `<span>${s}</span>`).join('');
+    // Ribbon (D40): τέσσερα κουτάκια, κεντραρισμένα
+    const prices = day.hours.map((h) => h.dam_price).filter((v) => v !== null && v !== undefined);
+    const tile = (label, value, sub) => `<div class="bg-slate-800/40 border border-slate-700 rounded-xl px-4 py-3 text-center">
+        <div class="text-[11px] uppercase tracking-wide text-slate-400">${esc(label)}</div>
+        <div class="text-lg font-bold text-white mt-0.5">${value}</div>${sub ? `<div class="text-[11px] text-slate-500">${sub}</div>` : ''}</div>`;
+    const g = tot.gen;
+    const cleanShare = g && g.total ? 100 * (g.res + g.hydro) / g.total : null;
+    $('dailyStats').innerHTML =
+        tile(x.avgPrice, `${fmt(tot.dam_price_avg, 2)} <span class="text-xs font-normal text-slate-400">€/MWh</span>`) +
+        tile(x.priceRange, prices.length ? `${fmt(Math.min(...prices))} – ${fmt(Math.max(...prices))} <span class="text-xs font-normal text-slate-400">€/MWh</span>` : '–') +
+        tile(x.hoursData, `${tot.hours_with_data}/${nHours}`, tot.hours_with_data < nHours && S.dailyDate === S.liveDate ? esc(x.dayInProgress) : '') +
+        tile(x.dayClean, cleanShare === null ? '–' : `${fmt(cleanShare, 1)}%`, esc(x.cleanHintShort));
 
     if (tot.hours_with_data > 0) {
         const supply = [
@@ -789,28 +910,33 @@ function recordWhen(id) {
 }
 
 function renderRecords() {
-    const R = S.records, x = t(), m = S.manifest;
-    $('recordsIntro').textContent = x.recordsIntro
-        .replace('{l}', m.live_days && m.live_days.length ? fmtDate(m.live_days[0]) : '–')
-        .replace('{x}', m.xray_days && m.xray_days.length ? fmtDate(m.xray_days[0]) : '–');
+    const R = S.records, x = t(), start = R && R.tracking_start ? R.tracking_start.live : (S.manifest.live_days || [])[0];
+    $('recordsIntro').textContent = x.recordsIntro.replace('{l}', start ? fmtDate(start) : '–');
     let newCount = 0;
     const card = (scope, key, color) => {
         const items = (R && R[scope] && R[scope][key]) || [];
-        const rows = items.slice(0, 3).map((it, i) => {
-            const isNew = S.liveDate && it.id.startsWith(S.liveDate);
-            if (isNew) newCount++;
-            return `<div class="flex items-baseline gap-3 py-1.5 text-sm">
-                <span class="font-bold w-6 ${MEDAL[i]}">#${i + 1}</span>
-                <span class="text-slate-400 flex-1">${recordWhen(it.id)}${isNew ? ` <span class="ml-1 px-1.5 py-0.5 rounded bg-acc-400 text-slate-900 text-[10px] font-bold">${esc(x.newBadge)}</span>` : ''}</span>
-                <span class="font-semibold" style="color:${color}">${fmt(it.value)} <span class="text-[11px] font-normal text-slate-500">MWh</span></span>
-            </div>`;
-        }).join('') || `<p class="text-sm text-slate-500">${esc(x.noData)}</p>`;
-        return `<div class="bg-slate-800/40 p-4 rounded-xl border border-slate-700"><h3 class="text-sm font-semibold text-slate-200 mb-2">${esc(x.rec[key])}</h3>${rows}</div>`;
+        const top = items[0];
+        if (!top) return `<div class="bg-slate-800/40 p-4 rounded-xl border border-slate-700"><h3 class="text-sm font-semibold text-slate-200">${esc(x.rec[key])}</h3><p class="text-sm text-slate-500 mt-2">${esc(x.noData)}</p></div>`;
+        const isNew = S.liveDate && top.id.startsWith(S.liveDate);
+        const newInTop = !isNew && items.some((it) => S.liveDate && it.id.startsWith(S.liveDate));
+        if (isNew || newInTop) newCount++;
+        return `<button type="button" data-rec="${scope}:${key}" class="group text-left bg-slate-800/40 p-4 rounded-xl border border-slate-700 hover:border-acc-400 hover:bg-slate-800/70 transition w-full">
+            <div class="flex items-start justify-between gap-2">
+                <h3 class="text-sm font-semibold text-slate-200">${esc(x.rec[key])}</h3>
+                ${isNew ? `<span class="px-1.5 py-0.5 rounded bg-acc-400 text-slate-900 text-[10px] font-bold">${esc(x.newBadge)}</span>` : ''}
+            </div>
+            <div class="mt-2 text-2xl font-bold" style="color:${color}">${fmt(top.value)} <span class="text-xs font-normal text-slate-500">MWh</span></div>
+            <div class="text-xs text-slate-400 mt-0.5">${recordWhen(top.id)}</div>
+            <div class="flex justify-between items-center mt-2 text-[11px]">
+                <span class="text-slate-500">${newInTop ? esc(x.newTop5) : ''}</span>
+                <span class="text-acc-300 group-hover:text-white">${esc(x.viewHistory)}</span>
+            </div>
+        </button>`;
     };
     $('recHourly').innerHTML = REC_ORDER.hourly.map(([k, c]) => card('hourly', k, c)).join('');
     $('recDaily').innerHTML = REC_ORDER.daily.map(([k, c]) => card('daily', k, c)).join('');
+    document.querySelectorAll('[data-rec]').forEach((b) => b.addEventListener('click', () => openRecord(...b.dataset.rec.split(':'))));
 
-    // Σήμα στο tab όταν υπάρχουν νέα ρεκόρ σήμερα
     const btn = document.querySelector('.tab-btn[data-tab="records"]');
     let badge = btn.querySelector('[data-badge]');
     if (newCount > 0) {
@@ -818,6 +944,82 @@ function renderRecords() {
         badge.className = 'ml-2 px-1.5 py-0.5 rounded-full bg-acc-400 text-slate-900 text-[10px] font-bold';
         badge.textContent = `${newCount} ${x.newBadge}`;
     } else if (badge) badge.remove();
+}
+
+// --- Modal ρεκόρ (D39): εξέλιξη του #1 + πέντε κορυφαίες ---
+const dayIndex = (iso) => { const [y, m, d] = iso.slice(0, 10).split('-').map(Number); return Date.UTC(y, m - 1, d) / 86400000; };
+const isoFromIndex = (i) => new Date(i * 86400000).toISOString().slice(0, 10);
+const TRACKING_SHADE_DAYS = 21;
+
+// Σκιά «έναρξη καταγραφής»: τις πρώτες εβδομάδες σχεδόν κάθε μέρα είναι «ρεκόρ».
+const startShade = {
+    id: 'startShade',
+    beforeDatasetsDraw(chart, _a, opts) {
+        if (!opts || opts.from === undefined) return;
+        const { ctx, chartArea: area, scales: { x } } = chart;
+        const x0 = Math.max(area.left, x.getPixelForValue(opts.from)), x1 = Math.min(area.right, x.getPixelForValue(opts.to));
+        if (x1 <= x0) return;
+        ctx.save();
+        ctx.fillStyle = 'rgba(148, 163, 184, 0.10)'; ctx.fillRect(x0, area.top, x1 - x0, area.bottom - area.top);
+        ctx.fillStyle = C.muted; ctx.font = `11px ${Chart.defaults.font.family}`; ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+        ctx.fillText(opts.label, x0 + 6, area.top + 6);
+        ctx.restore();
+    }
+};
+
+function openRecord(scope, key) {
+    const R = S.records, x = t();
+    const top = (R[scope] && R[scope][key]) || [], prog = (R.progression && R.progression[scope] && R.progression[scope][key]) || [];
+    const color = (REC_ORDER[scope].find(([k]) => k === key) || [])[1] || C.accent;
+    $('recModalTitle').textContent = `${x.rec[key]} · ${scope === 'hourly' ? x.recHourly : x.recDaily}`;
+    $('recModalSub').textContent = top[0] ? `#1: ${fmt(top[0].value)} MWh · ${recordWhen(top[0].id).replace(/<[^>]+>/g, '')}` : '';
+
+    // κλιμακωτό γράφημα: κάθε σημείο = νέο ρεκόρ· η τελευταία τιμή εκτείνεται έως σήμερα
+    const start = (R.tracking_start && (['solar', 'wind'].includes(key) ? R.tracking_start.xray : R.tracking_start.live)) || (prog[0] && prog[0].id);
+    const pts = prog.map((p) => ({ x: dayIndex(p.id) + (p.id.length > 10 ? (parseInt(p.id.slice(12, 14), 10) - 0.5) / 24 : 0.5), y: p.value, id: p.id }));
+    const today = S.liveDate ? dayIndex(S.liveDate) + 1 : (pts.length ? pts[pts.length - 1].x + 1 : 0);
+    if (pts.length) pts.push({ x: today, y: pts[pts.length - 1].y, id: null });
+    const s0 = start ? dayIndex(start) : (pts[0] ? Math.floor(pts[0].x) : 0);
+    upsertChart('recProgChart', {
+        type: 'line',
+        data: { datasets: [{ label: x.rec[key], data: pts, borderColor: color, backgroundColor: color, stepped: 'before', borderWidth: 2.5,
+                             pointRadius: pts.map((p) => (p.id ? 3.5 : 0)), pointHoverRadius: 5 }] },
+        options: {
+            parsing: false,
+            scales: {
+                x: { type: 'linear', min: s0, max: today, grid: { display: false },
+                     ticks: { maxTicksLimit: 7, callback: (v) => fmtDate(isoFromIndex(Math.floor(v)), false) } },
+                y: { title: { display: true, text: 'MWh' }, ticks: { callback: (v) => fmt(v) } }
+            },
+            plugins: {
+                legend: { display: false },
+                startShade: { from: s0, to: s0 + TRACKING_SHADE_DAYS, label: x.trackingStart },
+                tooltip: { filter: (c) => !!c.raw.id, callbacks: { title: (items) => recordWhen(items[0].raw.id).replace(/<[^>]+>/g, ''), label: (c) => ` ${fmt(c.raw.y)} MWh` } }
+            }
+        },
+        plugins: [startShade]
+    });
+
+    $('recTopTable').innerHTML = `<table class="w-full text-sm">
+        <thead><tr class="text-left text-xs text-slate-400 border-b border-slate-700">
+            <th class="py-2 pr-3 font-medium">${esc(x.recRank)}</th><th class="py-2 pr-3 font-medium">${esc(x.recWhen)}</th><th class="py-2 text-right font-medium">${esc(x.recValue)}</th></tr></thead>
+        <tbody>${top.map((it, i) => `<tr class="border-b border-slate-800">
+            <td class="py-2 pr-3 font-bold ${i === 0 ? 'text-acc-300' : 'text-slate-400'}">#${i + 1}</td>
+            <td class="py-2 pr-3 text-slate-300">${recordWhen(it.id)}${S.liveDate && it.id.startsWith(S.liveDate) ? ` <span class="ml-1 px-1.5 py-0.5 rounded bg-acc-400 text-slate-900 text-[10px] font-bold">${esc(x.newBadge)}</span>` : ''}</td>
+            <td class="py-2 text-right font-semibold" style="color:${color}">${fmt(it.value)} <span class="text-[11px] font-normal text-slate-500">MWh</span></td></tr>`).join('')}</tbody></table>`;
+    toggleRecModal(true);
+}
+
+function toggleRecModal(open) {
+    const modal = $('recordModal'), content = $('recModalContent');
+    if (open) {
+        modal.classList.remove('hidden'); modal.classList.add('flex'); document.body.style.overflow = 'hidden';
+        requestAnimationFrame(() => { modal.classList.remove('opacity-0'); content.classList.remove('scale-95'); if (S.charts.recProgChart) S.charts.recProgChart.resize(); });
+        modal.querySelector('[data-close-rec]').focus();
+    } else {
+        modal.classList.add('opacity-0'); content.classList.add('scale-95'); document.body.style.overflow = '';
+        setTimeout(() => { modal.classList.add('hidden'); modal.classList.remove('flex'); }, 300);
+    }
 }
 
 async function renderAll() {
@@ -923,9 +1125,15 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.lang-btn').forEach((b) => b.addEventListener('click', () => setLang(b.dataset.lang)));
     $('contextSelect').addEventListener('change', onPickerChange);
     $('btnMethodologyWrap').addEventListener('click', () => toggleModal(true));
+    document.querySelectorAll('[data-method]').forEach((b) => b.addEventListener('click', () => openMethodology(b.dataset.method)));
+    document.querySelectorAll('[data-close-rec]').forEach((b) => b.addEventListener('click', () => toggleRecModal(false)));
+    $('recordModal').addEventListener('click', (e) => { if (e.target.id === 'recordModal') toggleRecModal(false); });
+    // Οι πίτες αλλάζουν μορφή (βελάκια ή υπόμνημα) με το πλάτος: ξανασχεδιάζονται όταν αλλάζει το παράθυρο.
+    let resizeT; let lastW = window.innerWidth;
+    window.addEventListener('resize', () => { clearTimeout(resizeT); resizeT = setTimeout(() => { if (Math.abs(window.innerWidth - lastW) > 40) { lastW = window.innerWidth; if (S.tab === 'live') renderLive(); } }, 250); });
     document.querySelectorAll('[data-close-modal]').forEach((b) => b.addEventListener('click', () => toggleModal(false)));
     $('methodologyModal').addEventListener('click', (e) => { if (e.target.id === 'methodologyModal') toggleModal(false); });
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('methodologyModal').classList.contains('hidden')) toggleModal(false); });
+    document.addEventListener('keydown', (e) => { if (e.key !== 'Escape') return; if (!$('recordModal').classList.contains('hidden')) toggleRecModal(false); else if (!$('methodologyModal').classList.contains('hidden')) toggleModal(false); });
     boot();
     setInterval(refresh, 5 * 60 * 1000);
     setInterval(updatePill, 60 * 1000);

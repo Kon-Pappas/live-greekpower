@@ -353,17 +353,30 @@ LIVE_CATS = {'hourly': ['bess_chg', 'bess_dis', 'exports', 'bess_chg_pump', 'net
 XRAY_CATS = {'hourly': ['solar', 'wind'], 'daily': ['solar', 'wind']}
 
 
-def _top3(entries):
-    return sorted(entries, key=lambda e: e['value'], reverse=True)[:3]
+RECORD_TOP_N = 5
+
+
+def _top(entries, n=RECORD_TOP_N):
+    return sorted(entries, key=lambda e: e['value'], reverse=True)[:n]
+
+
+def _progression(entries):
+    """Χρονολογική σειρά των στιγμών που σπάει το #1 (D39): κάθε στοιχείο είναι νέο ρεκόρ."""
+    out, best = [], None
+    for e in sorted(entries, key=lambda e: e['id']):
+        if best is None or e['value'] > best:
+            best = e['value']
+            out.append({'id': e['id'], 'value': e['value']})
+    return out
 
 
 def build_records():
-    """Ίδια μορφή records.json με πριν (η σημερινή σελίδα τη διαβάζει ως έχει).
+    """records.json (D39): για κάθε κατηγορία τα 5 κορυφαία και η εξέλιξη του #1.
 
     Κάθε run ξαναϋπολογίζει από όλα τα αρχεία ημέρας, οπότε μια διόρθωση του
     ΑΔΜΗΕ προς τα κάτω διορθώνει και το ρεκόρ. Εγγραφές με ημερομηνία ΠΡΙΝ
-    από την πρώτη διαθέσιμη ημέρα κάθε πηγής δεν μπορούν να ξαναϋπολογιστούν,
-    οπότε κρατιούνται από το υπάρχον records.json («legacy»)."""
+    από την πρώτη διαθέσιμη ημέρα κάθε πηγής κρατιούνται από το υπάρχον
+    records.json («legacy»)."""
     old = load_json_strict(RECORDS_PATH, {})
     cand = {'hourly': defaultdict(list), 'daily': defaultdict(list)}
 
@@ -403,7 +416,9 @@ def build_records():
             for cat in ['solar', 'wind']:
                 cand['daily'][cat].append({'id': d, 'value': round(tot[cat], 1)})
 
-    records = {'daily': {}, 'hourly': {}}
+    records = {'daily': {}, 'hourly': {}, 'progression': {'daily': {}, 'hourly': {}},
+               'tracking_start': {'live': live_days[0] if live_days else None,
+                                  'xray': xray_days[0] if xray_days else None}}
     order = {'daily': ['solar', 'wind', 'exports', 'bess_chg', 'bess_dis', 'bess_chg_pump', 'res'],
              'hourly': ['solar', 'wind', 'exports', 'bess_chg', 'bess_dis', 'bess_chg_pump', 'network_load']}
     for scope in ['daily', 'hourly']:
@@ -411,10 +426,12 @@ def build_records():
             first = (xray_days if cat in XRAY_CATS[scope] else live_days)
             first = first[0] if first else '9999-99-99'
             legacy = [e for e in old.get(scope, {}).get(cat, []) if e['id'][:10] < first]
-            records[scope][cat] = _top3(cand[scope][cat] + legacy)
+            allc = cand[scope][cat] + legacy
+            records[scope][cat] = _top(allc)
+            records['progression'][scope][cat] = _progression(allc)
 
     write_json_atomic(RECORDS_PATH, records)
-    print("✓ records.json ξαναϋπολογίστηκε από όλο το ιστορικό.")
+    print("✓ records.json ξαναϋπολογίστηκε από όλο το ιστορικό (top 5 + εξέλιξη).")
     return records
 
 
