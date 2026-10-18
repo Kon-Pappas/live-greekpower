@@ -1,0 +1,1109 @@
+{
+  "schema": 1,
+  "date": "2026-09-05",
+  "source": "ADMIE/IPTO market portal: prodmixandload, dayaheadmarket, scadainterflows",
+  "updated": "2026-10-18T18:42:56+03:00",
+  "totals": {
+    "hours_with_data": 24,
+    "gen": {
+      "lignite": 9572.0,
+      "gas": 52880.0,
+      "hydro": 11242.0,
+      "res": 110445.0,
+      "total": 184139.0
+    },
+    "imports": 9654.0,
+    "exports": 27954.0,
+    "storage": {
+      "dis": 1337.0,
+      "chg": 1538.0
+    },
+    "pumping": 2127.0,
+    "demand": 163511.0,
+    "dam_price_avg": 122.88,
+    "hours_flows_mismatch": 0,
+    "hours_balance_off": 0
+  },
+  "hours": [
+    {
+      "hr": 1,
+      "has_data": true,
+      "dam_price": 226.0,
+      "fetched": "2026-10-18T18:41:47.649748+03:00",
+      "gen": {
+        "lignite": 389.0,
+        "gas": 3154.0,
+        "hydro": 351.0,
+        "res": 1943.0,
+        "total": 5837.0
+      },
+      "imports": 554.0,
+      "exports": 104.0,
+      "flows": {
+        "AL": {
+          "imp": 0.0,
+          "exp": 79.0
+        },
+        "BG": {
+          "imp": 83.0,
+          "exp": 1.0
+        },
+        "IT": {
+          "imp": 174.0,
+          "exp": 2.0
+        },
+        "TR": {
+          "imp": 24.0,
+          "exp": 22.0
+        },
+        "MK": {
+          "imp": 273.0,
+          "exp": 0.0
+        }
+      },
+      "flows_match": true,
+      "storage": {
+        "dis": 25.0,
+        "chg": 1.0
+      },
+      "pumping": 0.0,
+      "demand": 6311.0,
+      "balance_ok": true
+    },
+    {
+      "hr": 2,
+      "has_data": true,
+      "dam_price": 217.0,
+      "fetched": "2026-10-18T18:41:47.649748+03:00",
+      "gen": {
+        "lignite": 527.0,
+        "gas": 2977.0,
+        "hydro": 555.0,
+        "res": 1964.0,
+        "total": 6023.0
+      },
+      "imports": 534.0,
+      "exports": 537.0,
+      "flows": {
+        "AL": {
+          "imp": 0.0,
+          "exp": 150.0
+        },
+        "BG": {
+          "imp": 202.0,
+          "exp": 0.0
+        },
+        "IT": {
+          "imp": 2.0,
+          "exp": 385.0
+        },
+        "TR": {
+          "imp": 117.0,
+          "exp": 2.0
+        },
+        "MK": {
+          "imp": 213.0,
+          "exp": 0.0
+        }
+      },
+      "flows_match": true,
+      "storage": {
+        "dis": 3.0,
+        "chg": 1.0
+      },
+      "pumping": 0.0,
+      "demand": 6022.0,
+      "balance_ok": true
+    },
+    {
+      "hr": 3,
+      "has_data": true,
+      "dam_price": 190.0,
+      "fetched": "2026-10-18T18:41:47.649748+03:00",
+      "gen": {
+        "lignite": 563.0,
+        "gas": 3026.0,
+        "hydro": 311.0,
+        "res": 2070.0,
+        "total": 5970.0
+      },
+      "imports": 474.0,
+      "exports": 646.0,
+      "flows": {
+        "AL": {
+          "imp": 0.0,
+          "exp": 129.0
+        },
+        "BG": {
+          "imp": 167.0,
+          "exp": 0.0
+        },
+        "IT": {
+          "imp": 0.0,
+          "exp": 516.0
+        },
+        "TR": {
+          "imp": 111.0,
+          "exp": 1.0
+        },
+        "MK": {
+          "imp": 196.0,
+          "exp": 0.0
+        }
+      },
+      "flows_match": true,
+      "storage": {
+        "dis": 0.0,
+        "chg": 0.0
+      },
+      "pumping": 0.0,
+      "demand": 5798.0,
+      "balance_ok": true
+    },
+    {
+      "hr": 4,
+      "has_data": true,
+      "dam_price": 171.0,
+      "fetched": "2026-10-18T18:41:47.649748+03:00",
+      "gen": {
+        "lignite": 522.0,
+        "gas": 3013.0,
+        "hydro": 220.0,
+        "res": 2125.0,
+        "total": 5880.0
+      },
+      "imports": 397.0,
+      "exports": 668.0,
+      "flows": {
+        "AL": {
+          "imp": 0.0,
+          "exp": 152.0
+        },
+        "BG": {
+          "imp": 130.0,
+          "exp": 0.0
+        },
+        "IT": {
+          "imp": 0.0,
+          "exp": 516.0
+        },
+        "TR": {
+          "imp": 127.0,
+          "exp": 0.0
+        },
+        "MK": {
+          "imp": 140.0,
+          "exp": 0.0
+        }
+      },
+      "flows_match": true,
+      "storage": {
+        "dis": 0.0,
+        "chg": 0.0
+      },
+      "pumping": 0.0,
+      "demand": 5609.0,
+      "balance_ok": true
+    },
+    {
+      "hr": 5,
+      "has_data": true,
+      "dam_price": 160.0,
+      "fetched": "2026-10-18T18:41:47.649748+03:00",
+      "gen": {
+        "lignite": 526.0,
+        "gas": 2869.0,
+        "hydro": 55.0,
+        "res": 2211.0,
+        "total": 5661.0
+      },
+      "imports": 452.0,
+      "exports": 639.0,
+      "flows": {
+        "AL": {
+          "imp": 0.0,
+          "exp": 122.0
+        },
+        "BG": {
+          "imp": 147.0,
+          "exp": 0.0
+        },
+        "IT": {
+          "imp": 0.0,
+          "exp": 517.0
+        },
+        "TR": {
+          "imp": 134.0,
+          "exp": 0.0
+        },
+        "MK": {
+          "imp": 171.0,
+          "exp": 0.0
+        }
+      },
+      "flows_match": true,
+      "storage": {
+        "dis": 0.0,
+        "chg": 0.0
+      },
+      "pumping": 0.0,
+      "demand": 5474.0,
+      "balance_ok": true
+    },
+    {
+      "hr": 6,
+      "has_data": true,
+      "dam_price": 160.0,
+      "fetched": "2026-10-18T18:41:47.649748+03:00",
+      "gen": {
+        "lignite": 413.0,
+        "gas": 2762.0,
+        "hydro": 173.0,
+        "res": 2348.0,
+        "total": 5696.0
+      },
+      "imports": 370.0,
+      "exports": 649.0,
+      "flows": {
+        "AL": {
+          "imp": 0.0,
+          "exp": 133.0
+        },
+        "BG": {
+          "imp": 106.0,
+          "exp": 0.0
+        },
+        "IT": {
+          "imp": 0.0,
+          "exp": 516.0
+        },
+        "TR": {
+          "imp": 115.0,
+          "exp": 0.0
+        },
+        "MK": {
+          "imp": 149.0,
+          "exp": 0.0
+        }
+      },
+      "flows_match": true,
+      "storage": {
+        "dis": 0.0,
+        "chg": 0.0
+      },
+      "pumping": 0.0,
+      "demand": 5417.0,
+      "balance_ok": true
+    },
+    {
+      "hr": 7,
+      "has_data": true,
+      "dam_price": 160.0,
+      "fetched": "2026-10-18T18:41:47.649748+03:00",
+      "gen": {
+        "lignite": 384.0,
+        "gas": 2789.0,
+        "hydro": 410.0,
+        "res": 2351.0,
+        "total": 5934.0
+      },
+      "imports": 288.0,
+      "exports": 679.0,
+      "flows": {
+        "AL": {
+          "imp": 0.0,
+          "exp": 162.0
+        },
+        "BG": {
+          "imp": 71.0,
+          "exp": 0.0
+        },
+        "IT": {
+          "imp": 0.0,
+          "exp": 517.0
+        },
+        "TR": {
+          "imp": 98.0,
+          "exp": 0.0
+        },
+        "MK": {
+          "imp": 119.0,
+          "exp": 0.0
+        }
+      },
+      "flows_match": true,
+      "storage": {
+        "dis": 0.0,
+        "chg": 0.0
+      },
+      "pumping": 0.0,
+      "demand": 5543.0,
+      "balance_ok": true
+    },
+    {
+      "hr": 8,
+      "has_data": true,
+      "dam_price": 161.0,
+      "fetched": "2026-10-18T18:41:47.649748+03:00",
+      "gen": {
+        "lignite": 402.0,
+        "gas": 2921.0,
+        "hydro": 526.0,
+        "res": 2554.0,
+        "total": 6403.0
+      },
+      "imports": 128.0,
+      "exports": 852.0,
+      "flows": {
+        "AL": {
+          "imp": 0.0,
+          "exp": 291.0
+        },
+        "BG": {
+          "imp": 26.0,
+          "exp": 5.0
+        },
+        "IT": {
+          "imp": 0.0,
+          "exp": 516.0
+        },
+        "TR": {
+          "imp": 89.0,
+          "exp": 4.0
+        },
+        "MK": {
+          "imp": 13.0,
+          "exp": 36.0
+        }
+      },
+      "flows_match": true,
+      "storage": {
+        "dis": 0.0,
+        "chg": 17.0
+      },
+      "pumping": 0.0,
+      "demand": 5662.0,
+      "balance_ok": true
+    },
+    {
+      "hr": 9,
+      "has_data": true,
+      "dam_price": 116.0,
+      "fetched": "2026-10-18T18:41:47.649748+03:00",
+      "gen": {
+        "lignite": 378.0,
+        "gas": 1985.0,
+        "hydro": 278.0,
+        "res": 4491.0,
+        "total": 7132.0
+      },
+      "imports": 180.0,
+      "exports": 1113.0,
+      "flows": {
+        "AL": {
+          "imp": 0.0,
+          "exp": 409.0
+        },
+        "BG": {
+          "imp": 61.0,
+          "exp": 3.0
+        },
+        "IT": {
+          "imp": 0.0,
+          "exp": 516.0
+        },
+        "TR": {
+          "imp": 119.0,
+          "exp": 0.0
+        },
+        "MK": {
+          "imp": 0.0,
+          "exp": 185.0
+        }
+      },
+      "flows_match": true,
+      "storage": {
+        "dis": 3.0,
+        "chg": 7.0
+      },
+      "pumping": 0.0,
+      "demand": 6195.0,
+      "balance_ok": true
+    },
+    {
+      "hr": 10,
+      "has_data": true,
+      "dam_price": 52.0,
+      "fetched": "2026-10-18T18:41:47.649748+03:00",
+      "gen": {
+        "lignite": 313.0,
+        "gas": 933.0,
+        "hydro": 145.0,
+        "res": 7085.0,
+        "total": 8476.0
+      },
+      "imports": 208.0,
+      "exports": 1882.0,
+      "flows": {
+        "AL": {
+          "imp": 0.0,
+          "exp": 696.0
+        },
+        "BG": {
+          "imp": 41.0,
+          "exp": 56.0
+        },
+        "IT": {
+          "imp": 0.0,
+          "exp": 516.0
+        },
+        "TR": {
+          "imp": 167.0,
+          "exp": 2.0
+        },
+        "MK": {
+          "imp": 0.0,
+          "exp": 612.0
+        }
+      },
+      "flows_match": true,
+      "storage": {
+        "dis": 15.0,
+        "chg": 1.0
+      },
+      "pumping": 90.0,
+      "demand": 6726.0,
+      "balance_ok": true
+    },
+    {
+      "hr": 11,
+      "has_data": true,
+      "dam_price": 3.0,
+      "fetched": "2026-10-18T18:41:47.649748+03:00",
+      "gen": {
+        "lignite": 314.0,
+        "gas": 723.0,
+        "hydro": 69.0,
+        "res": 8754.0,
+        "total": 9860.0
+      },
+      "imports": 4.0,
+      "exports": 2278.0,
+      "flows": {
+        "AL": {
+          "imp": 0.0,
+          "exp": 821.0
+        },
+        "BG": {
+          "imp": 1.0,
+          "exp": 44.0
+        },
+        "IT": {
+          "imp": 0.0,
+          "exp": 516.0
+        },
+        "TR": {
+          "imp": 3.0,
+          "exp": 111.0
+        },
+        "MK": {
+          "imp": 0.0,
+          "exp": 786.0
+        }
+      },
+      "flows_match": true,
+      "storage": {
+        "dis": 0.0,
+        "chg": 115.0
+      },
+      "pumping": 306.0,
+      "demand": 7165.0,
+      "balance_ok": true
+    },
+    {
+      "hr": 12,
+      "has_data": true,
+      "dam_price": 0.0,
+      "fetched": "2026-10-18T18:41:47.649748+03:00",
+      "gen": {
+        "lignite": 317.0,
+        "gas": 647.0,
+        "hydro": 105.0,
+        "res": 9434.0,
+        "total": 10503.0
+      },
+      "imports": 0.0,
+      "exports": 2308.0,
+      "flows": {
+        "AL": {
+          "imp": 0.0,
+          "exp": 804.0
+        },
+        "BG": {
+          "imp": 0.0,
+          "exp": 66.0
+        },
+        "IT": {
+          "imp": 0.0,
+          "exp": 515.0
+        },
+        "TR": {
+          "imp": 0.0,
+          "exp": 147.0
+        },
+        "MK": {
+          "imp": 0.0,
+          "exp": 776.0
+        }
+      },
+      "flows_match": true,
+      "storage": {
+        "dis": 0.0,
+        "chg": 373.0
+      },
+      "pumping": 360.0,
+      "demand": 7462.0,
+      "balance_ok": true
+    },
+    {
+      "hr": 13,
+      "has_data": true,
+      "dam_price": 0.0,
+      "fetched": "2026-10-18T18:41:47.649748+03:00",
+      "gen": {
+        "lignite": 314.0,
+        "gas": 645.0,
+        "hydro": 68.0,
+        "res": 9975.0,
+        "total": 11002.0
+      },
+      "imports": 0.0,
+      "exports": 2426.0,
+      "flows": {
+        "AL": {
+          "imp": 0.0,
+          "exp": 764.0
+        },
+        "BG": {
+          "imp": 0.0,
+          "exp": 158.0
+        },
+        "IT": {
+          "imp": 0.0,
+          "exp": 515.0
+        },
+        "TR": {
+          "imp": 0.0,
+          "exp": 215.0
+        },
+        "MK": {
+          "imp": 0.0,
+          "exp": 774.0
+        }
+      },
+      "flows_match": true,
+      "storage": {
+        "dis": 0.0,
+        "chg": 414.0
+      },
+      "pumping": 361.0,
+      "demand": 7801.0,
+      "balance_ok": true
+    },
+    {
+      "hr": 14,
+      "has_data": true,
+      "dam_price": 0.0,
+      "fetched": "2026-10-18T18:41:47.649748+03:00",
+      "gen": {
+        "lignite": 314.0,
+        "gas": 646.0,
+        "hydro": 59.0,
+        "res": 10144.0,
+        "total": 11163.0
+      },
+      "imports": 0.0,
+      "exports": 2427.0,
+      "flows": {
+        "AL": {
+          "imp": 0.0,
+          "exp": 747.0
+        },
+        "BG": {
+          "imp": 0.0,
+          "exp": 179.0
+        },
+        "IT": {
+          "imp": 0.0,
+          "exp": 515.0
+        },
+        "TR": {
+          "imp": 0.0,
+          "exp": 210.0
+        },
+        "MK": {
+          "imp": 0.0,
+          "exp": 776.0
+        }
+      },
+      "flows_match": true,
+      "storage": {
+        "dis": 0.0,
+        "chg": 310.0
+      },
+      "pumping": 359.0,
+      "demand": 8067.0,
+      "balance_ok": true
+    },
+    {
+      "hr": 15,
+      "has_data": true,
+      "dam_price": 0.0,
+      "fetched": "2026-10-18T18:41:47.649748+03:00",
+      "gen": {
+        "lignite": 312.0,
+        "gas": 646.0,
+        "hydro": 66.0,
+        "res": 10035.0,
+        "total": 11059.0
+      },
+      "imports": 0.0,
+      "exports": 2446.0,
+      "flows": {
+        "AL": {
+          "imp": 0.0,
+          "exp": 652.0
+        },
+        "BG": {
+          "imp": 0.0,
+          "exp": 299.0
+        },
+        "IT": {
+          "imp": 0.0,
+          "exp": 516.0
+        },
+        "TR": {
+          "imp": 0.0,
+          "exp": 258.0
+        },
+        "MK": {
+          "imp": 0.0,
+          "exp": 721.0
+        }
+      },
+      "flows_match": true,
+      "storage": {
+        "dis": 0.0,
+        "chg": 192.0
+      },
+      "pumping": 359.0,
+      "demand": 8062.0,
+      "balance_ok": true
+    },
+    {
+      "hr": 16,
+      "has_data": true,
+      "dam_price": 0.0,
+      "fetched": "2026-10-18T18:41:47.649748+03:00",
+      "gen": {
+        "lignite": 352.0,
+        "gas": 744.0,
+        "hydro": 52.0,
+        "res": 9672.0,
+        "total": 10820.0
+      },
+      "imports": 0.0,
+      "exports": 2557.0,
+      "flows": {
+        "AL": {
+          "imp": 0.0,
+          "exp": 679.0
+        },
+        "BG": {
+          "imp": 0.0,
+          "exp": 350.0
+        },
+        "IT": {
+          "imp": 0.0,
+          "exp": 516.0
+        },
+        "TR": {
+          "imp": 0.0,
+          "exp": 242.0
+        },
+        "MK": {
+          "imp": 0.0,
+          "exp": 770.0
+        }
+      },
+      "flows_match": true,
+      "storage": {
+        "dis": 0.0,
+        "chg": 88.0
+      },
+      "pumping": 292.0,
+      "demand": 7883.0,
+      "balance_ok": true
+    },
+    {
+      "hr": 17,
+      "has_data": true,
+      "dam_price": 22.0,
+      "fetched": "2026-10-18T18:41:47.649748+03:00",
+      "gen": {
+        "lignite": 308.0,
+        "gas": 1122.0,
+        "hydro": 53.0,
+        "res": 8449.0,
+        "total": 9932.0
+      },
+      "imports": 27.0,
+      "exports": 2222.0,
+      "flows": {
+        "AL": {
+          "imp": 0.0,
+          "exp": 670.0
+        },
+        "BG": {
+          "imp": 25.0,
+          "exp": 160.0
+        },
+        "IT": {
+          "imp": 0.0,
+          "exp": 517.0
+        },
+        "TR": {
+          "imp": 2.0,
+          "exp": 172.0
+        },
+        "MK": {
+          "imp": 0.0,
+          "exp": 703.0
+        }
+      },
+      "flows_match": true,
+      "storage": {
+        "dis": 12.0,
+        "chg": 12.0
+      },
+      "pumping": 0.0,
+      "demand": 7737.0,
+      "balance_ok": true
+    },
+    {
+      "hr": 18,
+      "has_data": true,
+      "dam_price": 102.0,
+      "fetched": "2026-10-18T18:41:47.649748+03:00",
+      "gen": {
+        "lignite": 324.0,
+        "gas": 1785.0,
+        "hydro": 146.0,
+        "res": 6303.0,
+        "total": 8558.0
+      },
+      "imports": 304.0,
+      "exports": 1183.0,
+      "flows": {
+        "AL": {
+          "imp": 0.0,
+          "exp": 399.0
+        },
+        "BG": {
+          "imp": 176.0,
+          "exp": 0.0
+        },
+        "IT": {
+          "imp": 0.0,
+          "exp": 513.0
+        },
+        "TR": {
+          "imp": 128.0,
+          "exp": 1.0
+        },
+        "MK": {
+          "imp": 0.0,
+          "exp": 270.0
+        }
+      },
+      "flows_match": true,
+      "storage": {
+        "dis": 0.0,
+        "chg": 1.0
+      },
+      "pumping": 0.0,
+      "demand": 7678.0,
+      "balance_ok": true
+    },
+    {
+      "hr": 19,
+      "has_data": true,
+      "dam_price": 174.0,
+      "fetched": "2026-10-18T18:41:47.649748+03:00",
+      "gen": {
+        "lignite": 434.0,
+        "gas": 2793.0,
+        "hydro": 468.0,
+        "res": 3568.0,
+        "total": 7263.0
+      },
+      "imports": 436.0,
+      "exports": 283.0,
+      "flows": {
+        "AL": {
+          "imp": 0.0,
+          "exp": 228.0
+        },
+        "BG": {
+          "imp": 224.0,
+          "exp": 0.0
+        },
+        "IT": {
+          "imp": 0.0,
+          "exp": 31.0
+        },
+        "TR": {
+          "imp": 157.0,
+          "exp": 1.0
+        },
+        "MK": {
+          "imp": 55.0,
+          "exp": 23.0
+        }
+      },
+      "flows_match": true,
+      "storage": {
+        "dis": 143.0,
+        "chg": 1.0
+      },
+      "pumping": 0.0,
+      "demand": 7558.0,
+      "balance_ok": true
+    },
+    {
+      "hr": 20,
+      "has_data": true,
+      "dam_price": 237.0,
+      "fetched": "2026-10-18T18:41:47.649748+03:00",
+      "gen": {
+        "lignite": 458.0,
+        "gas": 3197.0,
+        "hydro": 1375.0,
+        "res": 1450.0,
+        "total": 6480.0
+      },
+      "imports": 854.0,
+      "exports": 353.0,
+      "flows": {
+        "AL": {
+          "imp": 0.0,
+          "exp": 275.0
+        },
+        "BG": {
+          "imp": 455.0,
+          "exp": 0.0
+        },
+        "IT": {
+          "imp": 0.0,
+          "exp": 78.0
+        },
+        "TR": {
+          "imp": 231.0,
+          "exp": 0.0
+        },
+        "MK": {
+          "imp": 168.0,
+          "exp": 0.0
+        }
+      },
+      "flows_match": true,
+      "storage": {
+        "dis": 463.0,
+        "chg": 0.0
+      },
+      "pumping": 0.0,
+      "demand": 7444.0,
+      "balance_ok": true
+    },
+    {
+      "hr": 21,
+      "has_data": true,
+      "dam_price": 230.0,
+      "fetched": "2026-10-18T18:41:47.649748+03:00",
+      "gen": {
+        "lignite": 377.0,
+        "gas": 3253.0,
+        "hydro": 1531.0,
+        "res": 1018.0,
+        "total": 6179.0
+      },
+      "imports": 1393.0,
+      "exports": 580.0,
+      "flows": {
+        "AL": {
+          "imp": 0.0,
+          "exp": 197.0
+        },
+        "BG": {
+          "imp": 709.0,
+          "exp": 0.0
+        },
+        "IT": {
+          "imp": 0.0,
+          "exp": 383.0
+        },
+        "TR": {
+          "imp": 307.0,
+          "exp": 0.0
+        },
+        "MK": {
+          "imp": 377.0,
+          "exp": 0.0
+        }
+      },
+      "flows_match": true,
+      "storage": {
+        "dis": 527.0,
+        "chg": 0.0
+      },
+      "pumping": 0.0,
+      "demand": 7519.0,
+      "balance_ok": true
+    },
+    {
+      "hr": 22,
+      "has_data": true,
+      "dam_price": 182.0,
+      "fetched": "2026-10-18T18:41:47.649748+03:00",
+      "gen": {
+        "lignite": 414.0,
+        "gas": 3494.0,
+        "hydro": 1726.0,
+        "res": 914.0,
+        "total": 6548.0
+      },
+      "imports": 1001.0,
+      "exports": 443.0,
+      "flows": {
+        "AL": {
+          "imp": 0.0,
+          "exp": 256.0
+        },
+        "BG": {
+          "imp": 526.0,
+          "exp": 0.0
+        },
+        "IT": {
+          "imp": 0.0,
+          "exp": 187.0
+        },
+        "TR": {
+          "imp": 213.0,
+          "exp": 0.0
+        },
+        "MK": {
+          "imp": 262.0,
+          "exp": 0.0
+        }
+      },
+      "flows_match": true,
+      "storage": {
+        "dis": 108.0,
+        "chg": 3.0
+      },
+      "pumping": 0.0,
+      "demand": 7211.0,
+      "balance_ok": true
+    },
+    {
+      "hr": 23,
+      "has_data": true,
+      "dam_price": 178.0,
+      "fetched": "2026-10-18T18:41:47.649748+03:00",
+      "gen": {
+        "lignite": 538.0,
+        "gas": 3475.0,
+        "hydro": 1583.0,
+        "res": 804.0,
+        "total": 6400.0
+      },
+      "imports": 786.0,
+      "exports": 424.0,
+      "flows": {
+        "AL": {
+          "imp": 0.0,
+          "exp": 274.0
+        },
+        "BG": {
+          "imp": 415.0,
+          "exp": 0.0
+        },
+        "IT": {
+          "imp": 0.0,
+          "exp": 150.0
+        },
+        "TR": {
+          "imp": 166.0,
+          "exp": 0.0
+        },
+        "MK": {
+          "imp": 205.0,
+          "exp": 0.0
+        }
+      },
+      "flows_match": true,
+      "storage": {
+        "dis": 10.0,
+        "chg": 1.0
+      },
+      "pumping": 0.0,
+      "demand": 6771.0,
+      "balance_ok": true
+    },
+    {
+      "hr": 24,
+      "has_data": true,
+      "dam_price": 208.0,
+      "fetched": "2026-10-18T18:41:47.649748+03:00",
+      "gen": {
+        "lignite": 379.0,
+        "gas": 3281.0,
+        "hydro": 917.0,
+        "res": 783.0,
+        "total": 5360.0
+      },
+      "imports": 1264.0,
+      "exports": 255.0,
+      "flows": {
+        "AL": {
+          "imp": 0.0,
+          "exp": 117.0
+        },
+        "BG": {
+          "imp": 573.0,
+          "exp": 0.0
+        },
+        "IT": {
+          "imp": 0.0,
+          "exp": 138.0
+        },
+        "TR": {
+          "imp": 241.0,
+          "exp": 0.0
+        },
+        "MK": {
+          "imp": 450.0,
+          "exp": 0.0
+        }
+      },
+      "flows_match": true,
+      "storage": {
+        "dis": 28.0,
+        "chg": 1.0
+      },
+      "pumping": 0.0,
+      "demand": 6396.0,
+      "balance_ok": true
+    }
+  ]
+}
