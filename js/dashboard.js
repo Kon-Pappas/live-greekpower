@@ -380,11 +380,13 @@ const tipHead = (left, right) => `<div class="flex justify-between items-baselin
     <b class="text-[15px] text-acc-300">${left}</b>${right ? `<b class="text-[15px]" style="color:${C.price}">${right}</b>` : ''}</div>`;
 const tipRule = '<div class="border-t border-dashed border-white/20 my-2"></div>';
 function tipRow(label, value, color, opts = {}) {
+    if (value === null || value === undefined || Math.round(value) === 0) return '';
     const v = value === null || value === undefined ? '–' : (opts.sign && value > 0 ? '+' : '') + fmt(value, opts.digits || 0);
     return `<div class="flex justify-between items-baseline gap-6 py-[2px] text-[13.5px]">
         <span class="${opts.strong ? 'font-bold text-white' : 'text-slate-200'}">${color ? `<span class="inline-block w-2 h-2 rounded-full mr-2 align-middle" style="background:${color}"></span>` : ''}${esc(label)}:</span>
         <span class="text-white whitespace-nowrap" ${opts.valueColor ? `style="color:${opts.valueColor}"` : ''}><b>${v}</b> ${opts.unit || 'MWh'}</span></div>`;
 }
+const tipSections = (...parts) => parts.filter((x) => x).join(tipRule);
 const priceStr = (p) => p === null || p === undefined ? '' : `MCP: ${fmt(p, p % 1 ? 2 : 0)} €/MWh`;
 
 // Επιστρέφει handler για tooltip.external· το build(dataIndex) δίνει το HTML.
@@ -487,9 +489,9 @@ function renderLive() {
                 legend: { position: 'bottom' },
                 tooltip: tipOff((i) => {
                     const f = h.flows[codes[i]], imp = f.imp || 0, exp = f.exp || 0;
-                    return tipHead(esc(t().countries[codes[i]]), '') +
-                        tipRow(n.imports, imp, C.imports) + tipRow(n.exports, exp, C.exports) + tipRule +
-                        tipRow(S.lang === 'el' ? 'Καθαρό (εισ. − εξ.)' : 'Net (imp − exp)', imp - exp, null, { strong: true, sign: true });
+                    return tipHead(esc(t().countries[codes[i]]), '') + tipSections(
+                        tipRow(n.imports, imp, C.imports) + tipRow(n.exports, exp, C.exports),
+                        imp && exp ? tipRow(S.lang === 'el' ? 'Καθαρό (εισ. − εξ.)' : 'Net (imp − exp)', imp - exp, null, { strong: true, sign: true }) : '');
                 })
             }
         }
@@ -548,11 +550,14 @@ async function renderDaily() {
         data: {
             labels: H.map((h) => hourTick(h.hr)),
             datasets: [
+                // Σειρά στοίβαξης από το μηδέν προς τα έξω (D28): κάτω από το μηδέν
+                // άντληση → φόρτιση → εξαγωγές (οι εξαγωγές στον πάτο)· πάνω από το μηδέν
+                // λιγνίτης → αέριο → εισαγωγές → εκφόρτιση → ΑΠΕ → υδροηλεκτρικά (στην κορυφή).
+                bar(n.pumping, val((h) => -h.pumping), C.pumping), bar(n.chg, val((h) => -h.storage.chg), C.chg),
+                bar(n.exports, val((h) => -h.exports), C.exports),
                 bar(n.lignite, val((h) => h.gen.lignite), C.lignite), bar(n.gas, val((h) => h.gen.gas), C.gas),
-                bar(n.hydro, val((h) => h.gen.hydro), C.hydro), bar(n.res, val((h) => h.gen.res), C.res),
-                bar(n.dis, val((h) => h.storage.dis), C.dis), bar(n.imports, val((h) => h.imports), C.imports),
-                bar(n.exports, val((h) => -h.exports), C.exports), bar(n.chg, val((h) => -h.storage.chg), C.chg),
-                bar(n.pumping, val((h) => -h.pumping), C.pumping),
+                bar(n.imports, val((h) => h.imports), C.imports), bar(n.dis, val((h) => h.storage.dis), C.dis),
+                bar(n.res, val((h) => h.gen.res), C.res), bar(n.hydro, val((h) => h.gen.hydro), C.hydro),
                 { type: 'line', label: n.demand, data: val((h) => h.demand), borderColor: C.demand, borderDash: [6, 4], borderWidth: 2, pointRadius: 0, yAxisID: 'y', order: 1, spanGaps: false },
                 { type: 'line', label: n.price, data: H.map((h) => h.dam_price), borderColor: C.price, backgroundColor: C.price, borderWidth: 2, pointRadius: 2.5, yAxisID: 'y1', order: 0 }
             ]
@@ -570,12 +575,11 @@ async function renderDaily() {
                     const h = H[i];
                     let html = tipHead(tipHourLabel(h.hr), priceStr(h.dam_price));
                     if (!h.has_data) return html + `<p class="text-xs text-slate-400">${S.lang === 'el' ? 'Η ώρα δεν έχει γίνει ακόμα.' : 'This hour has not happened yet.'}</p>`;
-                    return html +
+                    return html + tipSections(
                         tipRow(n.hydro, h.gen.hydro, C.hydro) + tipRow(n.res, h.gen.res, C.res) + tipRow(n.dis, h.storage.dis, C.dis) +
-                        tipRow(n.imports, h.imports, C.imports) + tipRow(n.gas, h.gen.gas, C.gas) + tipRow(n.lignite, h.gen.lignite, C.lignite) +
-                        tipRule +
-                        tipRow(n.demand, h.demand, '#94a3b8', { strong: true }) + tipRow(n.exports, h.exports, C.exports) +
-                        tipRow(n.chg, h.storage.chg, C.chg) + tipRow(n.pumping, h.pumping, C.pumping);
+                        tipRow(n.imports, h.imports, C.imports) + tipRow(n.gas, h.gen.gas, C.gas) + tipRow(n.lignite, h.gen.lignite, C.lignite),
+                        tipRow(n.demand, h.demand, '#94a3b8', { strong: true }) + tipRow(n.pumping, h.pumping, C.pumping) +
+                        tipRow(n.chg, h.storage.chg, C.chg) + tipRow(n.exports, h.exports, C.exports));
                 })
             }
         }
@@ -615,9 +619,10 @@ async function renderClean() {
         data: {
             labels: H.map((h) => hourTick(h.hr)),
             datasets: [
+                // Σειρά στοίβαξης από κάτω προς τα πάνω (D28).
                 bar(n.biomass, 'biomass', C.biomass), bar(n.smallHydro, 'small_hydro', C.smallHydro), bar(n.cogen, 'cogen', C.cogen),
-                bar(n.solar, 'solar', C.solar), bar(n.bigHydro, 'big_hydro', C.bigHydro), bar(n.wind, 'wind', C.wind),
                 bar(n.uce, 'uce', C.uce),
+                bar(n.solar, 'solar', C.solar), bar(n.bigHydro, 'big_hydro', C.bigHydro), bar(n.wind, 'wind', C.wind),
                 { type: 'line', label: n.price, data: H.map((h) => h.mcp), borderColor: C.price, backgroundColor: C.price, borderWidth: 2, pointRadius: 2.5, yAxisID: 'y1', order: 0 }
             ]
         },
@@ -633,14 +638,11 @@ async function renderClean() {
                 tooltip: tipOff((i) => {
                     const h = H[i];
                     const total = h.uce !== null ? h.phys_clean + h.uce : h.phys_clean;
-                    return tipHead(tipHourLabel(h.hr), priceStr(h.mcp)) +
-                        tipRow(n.wind, h.wind, C.wind) + tipRow(n.bigHydro, h.big_hydro, C.bigHydro) + tipRow(n.solar, h.solar, C.solar) +
-                        tipRule +
-                        tipRow(S.lang === 'el' ? 'Μη κατανεμημένη καθαρή ενέργεια' : 'Unallocated clean energy', h.uce, C.uce, { strong: true, sign: true }) +
-                        tipRule +
-                        tipRow(n.cogen, h.cogen, C.cogen) + tipRow(n.smallHydro, h.small_hydro, C.smallHydro) + tipRow(n.biomass, h.biomass, C.biomass) +
-                        tipRule +
-                        tipRow(S.lang === 'el' ? 'Συνολική καθαρή ενέργεια' : 'Total clean energy', total, null, { valueColor: C.res });
+                    return tipHead(tipHourLabel(h.hr), priceStr(h.mcp)) + tipSections(
+                        tipRow(n.wind, h.wind, C.wind) + tipRow(n.bigHydro, h.big_hydro, C.bigHydro) + tipRow(n.solar, h.solar, C.solar),
+                        tipRow(S.lang === 'el' ? 'Μη κατανεμημένη καθαρή ενέργεια' : 'Unallocated clean energy', h.uce, C.uce, { strong: true, sign: true }),
+                        tipRow(n.cogen, h.cogen, C.cogen) + tipRow(n.smallHydro, h.small_hydro, C.smallHydro) + tipRow(n.biomass, h.biomass, C.biomass),
+                        tipRow(S.lang === 'el' ? 'Συνολική καθαρή ενέργεια' : 'Total clean energy', total, null, { valueColor: C.res }));
                 })
             }
         }
@@ -661,9 +663,9 @@ async function renderClean() {
                 legend: { position: 'bottom' },
                 tooltip: tipOff((i) => {
                     const h = H[i], e = enByHr[h.hr] || {};
-                    return tipHead(tipHourLabel(h.hr), '') +
-                        tipRow(n.admieSolar, h.solar, C.solar) + tipRow(n.entsoeSolar, en ? e.solar : null, C.entsoeSolar) + tipRule +
-                        tipRow(n.admieWind, h.wind, C.wind) + tipRow(n.entsoeWind, en ? e.wind : null, C.entsoeWind);
+                    return tipHead(tipHourLabel(h.hr), '') + tipSections(
+                        tipRow(n.admieSolar, h.solar, C.solar) + tipRow(n.entsoeSolar, en ? e.solar : null, C.entsoeSolar),
+                        tipRow(n.admieWind, h.wind, C.wind) + tipRow(n.entsoeWind, en ? e.wind : null, C.entsoeWind));
                 })
             }
         }
