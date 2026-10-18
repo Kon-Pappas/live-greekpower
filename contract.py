@@ -292,25 +292,49 @@ def rebuild_xray_derived(start_iso=None, end_iso=None):
 # ENTSO-E (A75, D-1/D-2)
 # ---------------------------------------------------------------------
 
-ENTSOE_FIELDS = ['solar', 'wind', 'hydro_ror', 'hydro_res', 'hydro', 'biomass', 'gas', 'lignite']
+ENTSOE_FIELDS = ['solar', 'wind', 'hydro_ror', 'hydro_res', 'hydro', 'biomass', 'gas', 'lignite', 'load']
+# Η ENTSO-E αναθεωρεί περίπου 10 ημέρες μετά· από 14 ημέρες και πάνω θεωρούμε την έκδοση τελική (D33).
+ENTSOE_FINAL_LAG_DAYS = 14
+
+
+def _entsoe_status(date8, fetched_iso):
+    d = datetime.strptime(date8, "%Y%m%d").date()
+    f = datetime.fromisoformat(fetched_iso).date()
+    return 'final' if (f - d).days >= ENTSOE_FINAL_LAG_DAYS else 'provisional'
 
 
 def write_entsoe_days(raw_records):
+    """Γράφει data/entsoe/<ημέρα>.json. Η ΠΡΩΤΗ έκδοση κάθε ημέρας (block 'first') φυλάσσεται
+    για πάντα· τα 'hours'/'totals' είναι η πιο πρόσφατη. Η διαφορά τους δείχνει την αναθεώρηση
+    της ENTSO-E (π.χ. αφαίρεση της εκτίμησης των φ/β χαμηλής τάσης)."""
     by_date = defaultdict(dict)
     for rec in raw_records:
         hr = _valid_hr(rec.get('target_hour'))
         if rec.get('date') and hr:
             by_date[rec['date']][hr] = rec
+    now = now_athens_iso()
     for date8, hrs in sorted(by_date.items()):
         hours = [{'hr': hr, **{k: r1(hrs[hr].get('entsoe_' + k)) for k in ENTSOE_FIELDS}}
                  for hr in sorted(hrs)]
+        totals = {k: _sum(h[k] for h in hours) for k in ENTSOE_FIELDS}
+        old = load_json_lenient(day_path(ENTSOE_DIR, date8), None)
+        if old and old.get('first'):
+            first = old['first']                                   # ήδη φυλαγμένη
+        elif old and old.get('hours'):
+            # Αρχείο παλιάς μορφής: η τιμή του είναι η πρώτη που είχαμε κατεβάσει.
+            first = {'fetched': old.get('updated'), 'totals': old.get('totals'), 'hours': old.get('hours'),
+                     'status': 'unknown'}   # ο πραγματικός χρόνος του τότε κατεβάσματος δεν είναι γνωστός
+        else:
+            first = {'fetched': now, 'totals': totals, 'hours': hours, 'status': _entsoe_status(date8, now)}
         write_json_atomic(day_path(ENTSOE_DIR, date8), {
             'schema': SCHEMA,
             'date': iso_date(date8),
-            'source': 'ENTSO-E Transparency Platform, A75 actual generation per type (GR)',
-            'updated': now_athens_iso(),
-            'totals': {k: _sum(h[k] for h in hours) for k in ENTSOE_FIELDS},
+            'source': 'ENTSO-E Transparency Platform: A75 actual generation per type, A65 actual total load (GR)',
+            'updated': now,
+            'status': _entsoe_status(date8, now),
+            'totals': totals,
             'hours': hours,
+            'first': first,
         })
     print(f"✓ ENTSO-E day files: {len(by_date)} ημέρες.")
 

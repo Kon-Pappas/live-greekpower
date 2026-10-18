@@ -50,6 +50,13 @@ const T = {
         xrayTitle: 'Physical clean generation and UCE', xraySub: 'Metered clean generation by technology (CHP excluded), UCE in the stack (below zero when negative), day-ahead price on the right axis.',
         reconTitle: 'ADMIE vs ENTSO-E: solar and wind', reconSub: 'Solid lines: ADMIE ex-post files. Dashed lines: ENTSO-E Transparency Platform (actual generation per type).',
         reconNA: 'No ENTSO-E data for this day.',
+        gapTitle: 'ADMIE and ENTSO-E: the day at a glance',
+        gapSub: 'ADMIE publishes renewables including an estimate of low-voltage generation that is not metered. ENTSO-E first shows a similar figure and, about ten days later, revises it to metered generation only. The cards set the two sources side by side; the clean share is computed the way ADMIE computes it (RES incl. CHP + hydro, over RES + hydro + gas + lignite).',
+        gapShare: 'Clean share', gapClean: 'RES + hydro', gapRevision: 'ENTSO-E solar: revision', gapLoad: 'Total load',
+        gapMissing: 'not in ENTSO-E', gapPoints: 'points', gapFirst: 'first version', gapNow: 'current version',
+        gapProvisional: 'provisional', gapFinal: 'final', gapUnknown: 'earliest kept', gapNotYet: 'not revised yet', gapNoLoad: 'ENTSO-E load not loaded yet for this day', gapNoHistory: 'No version history kept yet for this day',
+        loadTitle: 'Total load: ADMIE and ENTSO-E', loadSub: 'ADMIE live total load against ENTSO-E actual total load (A65). Dotted: ENTSO-E first version, when it differs from the current one.',
+        admieLoad: 'ADMIE total load', entsoeLoad: 'ENTSO-E load', entsoeLoadFirst: 'ENTSO-E load (first version)', entsoeSolarFirst: 'Solar (ENTSO-E, first version)',
         recordsIntro: 'Top three since tracking began. Recomputed every hour from the stored history (live data from {l}, clean-energy data from {x}); earlier entries are kept as first recorded. Hourly values are MWh in one hour, equal to the average MW.',
         recHourly: 'Hourly records', recDaily: 'Daily records', newBadge: 'NEW', noData: 'No data yet',
         rec: { solar: 'Solar', wind: 'Wind', exports: 'Exports', bess_chg: 'BESS charge', bess_dis: 'BESS discharge', bess_chg_pump: 'BESS charge + pumping', network_load: 'Network load', res: 'RES (incl. CHP)' },
@@ -81,6 +88,13 @@ const T = {
         xrayTitle: 'Φυσική καθαρή παραγωγή και UCE', xraySub: 'Μετρημένη καθαρή παραγωγή ανά τεχνολογία (χωρίς ΣΗΘΥΑ), το UCE στη στοίβα (κάτω από το μηδέν όταν είναι αρνητικό) και η τιμή DAM στον δεξιό άξονα.',
         reconTitle: 'ΑΔΜΗΕ και ENTSO-E: φωτοβολταϊκά και αιολικά', reconSub: 'Συνεχείς γραμμές: εκ των υστέρων αρχεία ΑΔΜΗΕ. Διακεκομμένες: ENTSO-E Transparency Platform (πραγματική παραγωγή ανά τύπο).',
         reconNA: 'Δεν υπάρχουν δεδομένα ENTSO-E για αυτή την ημέρα.',
+        gapTitle: 'ΑΔΜΗΕ και ENTSO-E: η εικόνα της ημέρας',
+        gapSub: 'Ο ΑΔΜΗΕ δημοσιεύει τις ΑΠΕ μαζί με εκτίμηση της παραγωγής χαμηλής τάσης που δεν μετριέται. Η ENTSO-E δείχνει αρχικά παρόμοιο στοιχείο και, περίπου δέκα ημέρες μετά, το αναθεωρεί σε μόνο μετρημένη παραγωγή. Οι κάρτες βάζουν τις δύο πηγές δίπλα-δίπλα· το μερίδιο καθαρής υπολογίζεται όπως το υπολογίζει ο ΑΔΜΗΕ (ΑΠΕ με ΣΗΘΥΑ + υδροηλεκτρικά, προς ΑΠΕ + υδρο + αέριο + λιγνίτη).',
+        gapShare: 'Μερίδιο καθαρής', gapClean: 'ΑΠΕ + υδροηλεκτρικά', gapRevision: 'Φ/β ENTSO-E: αναθεώρηση', gapLoad: 'Συνολικό φορτίο',
+        gapMissing: 'λείπουν από την ENTSO-E', gapPoints: 'μονάδες', gapFirst: 'πρώτη έκδοση', gapNow: 'τρέχουσα έκδοση',
+        gapProvisional: 'προσωρινά', gapFinal: 'τελικά', gapUnknown: 'παλαιότερη που κρατήθηκε', gapNotYet: 'δεν έχει αναθεωρηθεί ακόμα', gapNoLoad: 'Το φορτίο της ENTSO-E δεν έχει φορτωθεί ακόμα για αυτή την ημέρα', gapNoHistory: 'Δεν υπάρχει ακόμα ιστορικό εκδόσεων για αυτή την ημέρα',
+        loadTitle: 'Συνολικό φορτίο: ΑΔΜΗΕ και ENTSO-E', loadSub: 'Live συνολικό φορτίο του ΑΔΜΗΕ έναντι του πραγματικού συνολικού φορτίου της ENTSO-E (A65). Με τελείες: η πρώτη έκδοση της ENTSO-E, όταν διαφέρει από την τρέχουσα.',
+        admieLoad: 'Φορτίο ΑΔΜΗΕ', entsoeLoad: 'Φορτίο ENTSO-E', entsoeLoadFirst: 'Φορτίο ENTSO-E (πρώτη έκδοση)', entsoeSolarFirst: 'Φ/Β (ENTSO-E, πρώτη έκδοση)',
         recordsIntro: 'Οι τρεις κορυφαίες τιμές από την έναρξη της καταγραφής. Υπολογίζονται κάθε ώρα από το αποθηκευμένο ιστορικό (live δεδομένα από {l}, δεδομένα καθαρής ενέργειας από {x})· οι παλαιότερες εγγραφές κρατιούνται όπως καταγράφηκαν. Οι ωριαίες τιμές είναι MWh σε μία ώρα, ίσες με τα μέσα MW.',
         recHourly: 'Ωριαία ρεκόρ', recDaily: 'Ημερήσια ρεκόρ', newBadge: 'ΝΕΟ', noData: 'Δεν υπάρχουν ακόμα δεδομένα',
         rec: { solar: 'Φωτοβολταϊκά', wind: 'Αιολικά', exports: 'Εξαγωγές', bess_chg: 'Φόρτιση BESS', bess_dis: 'Εκφόρτιση BESS', bess_chg_pump: 'Φόρτιση BESS + άντληση', network_load: 'Φορτίο δικτύου', res: 'ΑΠΕ (με ΣΗΘΥΑ)' },
@@ -100,6 +114,8 @@ const METHODOLOGY = {
 <p class="mb-4">ADMIE's live “RES” figure includes cogeneration (CHP) and an estimate of distribution-level generation that is not metered. Physical clean energy is the metered part: large hydro + small hydro + solar + wind + biomass, from the transmission SCADA file and the medium-voltage RESMV file. Live clean energy is live RES + hydro minus cogeneration; cogeneration is removed from both sides because it is mostly gas-fired. UCE is live minus physical and keeps its sign. It is mainly rooftop and other low-voltage solar (its daily shape follows medium-voltage solar closely), distribution-connected wind (RESMV has no wind) and small low-voltage hydro and biomass. Crete is in neither source: both see it only through its two interconnection cables. A negative hour means ADMIE's estimate came out below the metered value, for example through losses; it is not consumption. On the Live and Daily tabs, “RES” is ADMIE's figure, cogeneration included.</p>
 <h4 class="text-acc-300 font-semibold mb-1">Prices</h4>
 <p class="mb-4">The day-ahead price is the hourly value for Greece as published on ADMIE's portal.</p>
+<h4 class="text-acc-300 font-semibold mb-1">ADMIE and ENTSO-E</h4>
+<p class="mb-4">ADMIE's own statistics split renewables into system RES (transmission) and network RES (distribution); network RES include medium-voltage generation metered in the RESMV file and an estimate of low-voltage generation that is not metered hourly. On the ENTSO-E Transparency Platform the first published solar figure is close to that total; about ten days later it is revised to metered generation only, and biomass is not reported. The page keeps both ENTSO-E versions (the first one and the latest, marked provisional or final after 14 days) and the ENTSO-E actual total load, so the two sources can be compared day by day.</p>
 <h4 class="text-acc-300 font-semibold mb-1">Records</h4>
 <p class="mb-4">The three highest values since tracking began, recomputed every hour from the full history, so a correction by ADMIE also corrects a record.</p>
 <h4 class="text-acc-300 font-semibold mb-1">Status</h4>
@@ -115,6 +131,8 @@ const METHODOLOGY = {
 <p class="mb-4">Το live «ΑΠΕ» του ΑΔΜΗΕ περιέχει τη συμπαραγωγή (ΣΗΘΥΑ) και μια εκτίμηση της παραγωγής της διανομής που δεν μετριέται. Η φυσική καθαρή ενέργεια είναι το μετρημένο κομμάτι: μεγάλα + μικρά υδροηλεκτρικά + φωτοβολταϊκά + αιολικά + βιομάζα, από το SCADA μεταφοράς και το αρχείο μέσης τάσης RESMV. Η live καθαρή ενέργεια είναι live ΑΠΕ + υδροηλεκτρικά μείον τη συμπαραγωγή· η συμπαραγωγή αφαιρείται και από τις δύο πλευρές, γιατί είναι κυρίως με φυσικό αέριο. Το UCE είναι live μείον φυσική, με το πρόσημό του. Είναι κυρίως φ/β στέγης και λοιπά φ/β χαμηλής τάσης (το ημερήσιο σχήμα του ακολουθεί στενά τα φ/β μέσης τάσης), αιολικά της διανομής (το RESMV δεν έχει αιολικά) και μικρά υδροηλεκτρικά και βιομάζα χαμηλής τάσης. Η Κρήτη δεν υπάρχει σε καμία από τις δύο πηγές: και οι δύο τη βλέπουν μόνο μέσα από τα δύο καλώδια διασύνδεσης. Μια αρνητική ώρα σημαίνει ότι η εκτίμηση του ΑΔΜΗΕ βγήκε κάτω από τη μέτρηση, για παράδειγμα λόγω απωλειών· δεν είναι κατανάλωση. Στα tabs Live και Ημέρα, το «ΑΠΕ» είναι το στοιχείο του ΑΔΜΗΕ, μαζί με τη συμπαραγωγή.</p>
 <h4 class="text-acc-300 font-semibold mb-1">Τιμές</h4>
 <p class="mb-4">Η τιμή επόμενης ημέρας είναι η ωριαία τιμή για την Ελλάδα όπως δημοσιεύεται στην πύλη του ΑΔΜΗΕ.</p>
+<h4 class="text-acc-300 font-semibold mb-1">ΑΔΜΗΕ και ENTSO-E</h4>
+<p class="mb-4">Τα στατιστικά του ίδιου του ΑΔΜΗΕ χωρίζουν τις ΑΠΕ σε ΑΠΕ συστήματος (μεταφορά) και ΑΠΕ δικτύου (διανομή)· οι ΑΠΕ δικτύου περιέχουν την παραγωγή μέσης τάσης που μετριέται στο αρχείο RESMV και μια εκτίμηση της παραγωγής χαμηλής τάσης που δεν μετριέται ωριαία. Στην ENTSO-E Transparency Platform η πρώτη δημοσιευμένη τιμή των φ/β είναι κοντά σε αυτό το σύνολο· περίπου δέκα ημέρες μετά αναθεωρείται σε μόνο μετρημένη παραγωγή, και η βιομάζα δεν δηλώνεται. Η σελίδα κρατά και τις δύο εκδόσεις της ENTSO-E (την πρώτη και την πιο πρόσφατη, με ένδειξη προσωρινή ή τελική μετά από 14 ημέρες) και το πραγματικό συνολικό φορτίο της ENTSO-E, ώστε οι δύο πηγές να συγκρίνονται ημέρα προς ημέρα.</p>
 <h4 class="text-acc-300 font-semibold mb-1">Ρεκόρ</h4>
 <p class="mb-4">Οι τρεις υψηλότερες τιμές από την έναρξη της καταγραφής, που υπολογίζονται κάθε ώρα από όλο το ιστορικό· έτσι μια διόρθωση του ΑΔΜΗΕ διορθώνει και το ρεκόρ.</p>
 <h4 class="text-acc-300 font-semibold mb-1">Κατάσταση</h4>
@@ -339,7 +357,7 @@ function applyStaticText() {
         flowsTitle: x.flowsTitle, flowsSub: x.flowsSub, supplyRankTitle: x.supplyTitle, usesRankTitle: x.usesTitle,
         dispatchTitle: x.dispatchTitle, dispatchSub: x.dispatchSub, cleanIntro: x.cleanIntro,
         boxVarTitle: x.boxVar, boxUceTitle: x.boxUce, boxBaseTitle: x.boxBase,
-        xrayTitle: x.xrayTitle, xraySub: x.xraySub, reconTitle: x.reconTitle,
+        xrayTitle: x.xrayTitle, xraySub: x.xraySub, reconTitle: x.reconTitle, gapTitle: x.gapTitle, gapSub: x.gapSub, loadChartTitle: x.loadTitle, loadChartSub: x.loadSub,
         recHourlyTitle: x.recHourly, recDailyTitle: x.recDaily, modalTitle: x.modalTitle, modalCloseBtn: x.close,
         loadTitle: x.load.title, loadGroup1: x.load.g1, loadGroup2: x.load.g2, loadReady: x.load.ready
     };
@@ -650,10 +668,16 @@ async function renderClean() {
     });
 
     const enByHr = en ? Object.fromEntries(en.hours.map((h) => [h.hr, h])) : {};
-    const line = (label, data, color, dashed) => ({ type: 'line', label, data, borderColor: color, backgroundColor: color, borderWidth: 2.5, pointRadius: 0, tension: 0.3, borderDash: dashed ? [7, 5] : [] });
-    const ds = [line(n.admieSolar, H.map((h) => h.solar), C.solar, false), line(n.admieWind, H.map((h) => h.wind), C.wind, false)];
-    if (en) ds.push(line(n.entsoeSolar, H.map((h) => (enByHr[h.hr] || {}).solar ?? null), C.entsoeSolar, true),
-                    line(n.entsoeWind, H.map((h) => (enByHr[h.hr] || {}).wind ?? null), C.entsoeWind, true));
+    const enFirstByHr = en && en.first && en.first.hours ? Object.fromEntries(en.first.hours.map((h) => [h.hr, h])) : {};
+    const enStatus = en && en.status ? (en.status === 'final' ? x.gapFinal : x.gapProvisional) : '';
+    // Η πρώτη έκδοση εμφανίζεται μόνο όταν διαφέρει ουσιαστικά από την τρέχουσα (>1% στα ημερήσια φ/β).
+    const solarRevised = en && en.first && en.first.totals && en.totals.solar && Math.abs(en.first.totals.solar - en.totals.solar) > 0.01 * en.totals.solar;
+    const line = (label, data, color, dash) => ({ type: 'line', label, data, borderColor: color, backgroundColor: color, borderWidth: dash === 'dot' ? 2 : 2.5, pointRadius: 0, tension: 0.3, borderDash: dash === 'dash' ? [7, 5] : dash === 'dot' ? [2, 4] : [] });
+    const ds = [line(n.admieSolar, H.map((h) => h.solar), C.solar), line(n.admieWind, H.map((h) => h.wind), C.wind)];
+    const withStatus = (label) => enStatus ? label.replace(')', `, ${enStatus})`) : label;
+    if (en) ds.push(line(withStatus(n.entsoeSolar), H.map((h) => (enByHr[h.hr] || {}).solar ?? null), C.entsoeSolar, 'dash'),
+                    line(withStatus(n.entsoeWind), H.map((h) => (enByHr[h.hr] || {}).wind ?? null), C.entsoeWind, 'dash'));
+    if (solarRevised) ds.push(line(x.entsoeSolarFirst, H.map((h) => (enFirstByHr[h.hr] || {}).solar ?? null), C.entsoeSolar, 'dot'));
     upsertChart('reconChart', {
         type: 'line',
         data: { labels: H.map((h) => hourTick(h.hr)), datasets: ds },
@@ -665,13 +689,87 @@ async function renderClean() {
                 tooltip: tipOff((i) => {
                     const h = H[i], e = enByHr[h.hr] || {};
                     return tipHead(tipHourLabel(h.hr), '') + tipSections(
-                        tipRow(n.admieSolar, h.solar, C.solar) + tipRow(n.entsoeSolar, en ? e.solar : null, C.entsoeSolar),
+                        tipRow(n.admieSolar, h.solar, C.solar) + tipRow(n.entsoeSolar, en ? e.solar : null, C.entsoeSolar) +
+                        (solarRevised ? tipRow(x.entsoeSolarFirst, (enFirstByHr[h.hr] || {}).solar, C.entsoeSolar) : ''),
                         tipRow(n.admieWind, h.wind, C.wind) + tipRow(n.entsoeWind, en ? e.wind : null, C.entsoeWind));
                 })
             }
         }
     });
     $('reconSub').textContent = en ? x.reconSub : x.reconNA;
+    await renderGap(xr, en);
+}
+
+// ---------------------------------------------------------------------
+// 9b. ΑΔΜΗΕ και ENTSO-E: σύγκριση της ημέρας και φορτίο (D33)
+// ---------------------------------------------------------------------
+function gapCard(title, body) {
+    return `<div class="bg-slate-900/40 border border-slate-700 rounded-lg p-4"><h3 class="text-xs font-semibold text-slate-400 mb-2">${esc(title)}</h3>${body}</div>`;
+}
+const gwh = (v) => v === null || v === undefined ? '–' : fmt(v / 1000, 1);
+function gapLine(label, value, unit, strong) {
+    return `<div class="flex justify-between items-baseline gap-3 text-sm"><span class="text-slate-300">${esc(label)}</span><span class="${strong ? 'font-bold text-white' : 'text-slate-100'}">${value} <span class="text-[11px] font-normal text-slate-500">${unit}</span></span></div>`;
+}
+
+async function renderGap(xr, en) {
+    const x = t(), live = await getLive(S.cleanDate);
+    if (!live || !live.totals || !live.totals.gen) { $('gapBox').innerHTML = ''; return; }
+    const g = live.totals.gen;
+    const aClean = g.res + g.hydro, aShare = aClean / (g.res + g.hydro + g.gas + g.lignite);
+    let cards = '';
+    if (en) {
+        const e = en.totals, eClean = (e.solar || 0) + (e.wind || 0) + (e.hydro || 0) + (e.biomass || 0);
+        const eShare = eClean / (eClean + (e.gas || 0) + (e.lignite || 0));
+        const status = en.status === 'final' ? x.gapFinal : en.status === 'provisional' ? x.gapProvisional : '';
+        const src = status ? `ENTSO-E (${status})` : 'ENTSO-E';
+        cards += gapCard(x.gapShare,
+            gapLine('ΑΔΜΗΕ', fmt(aShare * 100, 1), '%') + gapLine(src, fmt(eShare * 100, 1), '%') +
+            gapLine('Δ', fmt((aShare - eShare) * 100, 1), x.gapPoints, true));
+        cards += gapCard(x.gapClean,
+            gapLine('ΑΔΜΗΕ', gwh(aClean), 'GWh') + gapLine(src, gwh(eClean), 'GWh') +
+            gapLine(x.gapMissing, gwh(aClean - eClean), 'GWh', true));
+        const f = en.first && en.first.totals;
+        const fLabel = en.first && en.first.status === 'unknown' ? x.gapUnknown : x.gapFirst;
+        const revised = f && e.solar && Math.abs(f.solar - e.solar) > 0.01 * e.solar;
+        cards += gapCard(x.gapRevision, !f
+            ? gapLine(x.gapNow, gwh(e.solar), 'GWh') + `<p class="text-xs text-slate-500 mt-1">${esc(x.gapNoHistory)}</p>`
+            : gapLine(fLabel, gwh(f.solar), 'GWh') + gapLine(status ? `${x.gapNow} (${status})` : x.gapNow, gwh(e.solar), 'GWh') +
+              (revised ? gapLine('Δ', gwh(e.solar - f.solar), 'GWh', true) : `<p class="text-xs text-slate-500 mt-1">${esc(en.status === 'final' ? '' : x.gapNotYet)}</p>`));
+        cards += gapCard(x.gapLoad, e.load === null || e.load === undefined
+            ? gapLine('ΑΔΜΗΕ', gwh(live.totals.demand), 'GWh') + `<p class="text-xs text-slate-500 mt-1">${esc(x.gapNoLoad)}</p>`
+            : gapLine('ΑΔΜΗΕ', gwh(live.totals.demand), 'GWh') + gapLine(src, gwh(e.load), 'GWh') +
+              gapLine('Δ', gwh(live.totals.demand - e.load), 'GWh', true));
+    }
+    $('gapBox').innerHTML = cards;
+
+    // Γράφημα φορτίου
+    const H = live.hours.filter((h) => h.has_data);
+    const enByHr = en ? Object.fromEntries(en.hours.map((h) => [h.hr, h])) : {};
+    const fByHr = en && en.first && en.first.hours ? Object.fromEntries(en.first.hours.map((h) => [h.hr, h])) : {};
+    const hasLoad = en && en.totals.load !== null && en.totals.load !== undefined;
+    const loadRevised = hasLoad && en.first && en.first.totals && en.first.totals.load && Math.abs(en.first.totals.load - en.totals.load) > 0.005 * en.totals.load;
+    const ln = (label, data, color, dash) => ({ type: 'line', label, data, borderColor: color, backgroundColor: color, borderWidth: 2.5, pointRadius: 0, tension: 0.3, borderDash: dash === 'dash' ? [7, 5] : dash === 'dot' ? [2, 4] : [] });
+    const ds = [ln(x.admieLoad, H.map((h) => h.demand), C.demand)];
+    if (hasLoad) ds.push(ln(x.entsoeLoad, H.map((h) => (enByHr[h.hr] || {}).load ?? null), C.price, 'dash'));
+    if (loadRevised) ds.push(ln(x.entsoeLoadFirst, H.map((h) => (fByHr[h.hr] || {}).load ?? null), C.price, 'dot'));
+    upsertChart('loadChart', {
+        type: 'line',
+        data: { labels: H.map((h) => hourTick(h.hr)), datasets: ds },
+        options: {
+            interaction: { mode: 'index', intersect: false },
+            scales: { x: { grid: { display: false }, title: { display: true, text: x.hourAxis } }, y: { title: { display: true, text: 'MWh' }, ticks: { callback: (v) => fmt(v) } } },
+            plugins: {
+                legend: { position: 'bottom' },
+                tooltip: tipOff((i) => {
+                    const h = H[i], e = enByHr[h.hr] || {}, f = fByHr[h.hr] || {};
+                    return tipHead(tipHourLabel(h.hr), '') + tipSections(
+                        tipRow(x.admieLoad, h.demand, C.demand) + (hasLoad ? tipRow(x.entsoeLoad, e.load, C.price) : '') +
+                        (loadRevised ? tipRow(x.entsoeLoadFirst, f.load, C.price) : ''),
+                        hasLoad && e.load ? tipRow('Δ', h.demand - e.load, null, { strong: true, sign: true }) : '');
+                })
+            }
+        }
+    });
 }
 
 // ---------------------------------------------------------------------

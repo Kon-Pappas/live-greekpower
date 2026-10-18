@@ -1,172 +1,142 @@
-import requests
-import xml.etree.ElementTree as ET
+"""ENTSO-E Transparency Platform → data/entsoe/YYYY-MM-DD.json (γράφει ΜΟΝΟ αυτό το script).
+
+Κατεβάζει για κάθε ημέρα:
+  A75 – Actual Generation per Production Type (φ/β, αιολικά, υδροηλεκτρικά, βιομάζα, αέριο, λιγνίτης)
+  A65 – Actual Total Load (συνολικό φορτίο)
+
+Η ENTSO-E αναθεωρεί τα στοιχεία περίπου 10 ημέρες μετά (D33): η πρώτη έκδοση των φ/β
+περιέχει εκτίμηση της χαμηλής τάσης, η τελική μόνο τα μετρημένα. Γι' αυτό:
+  - χωρίς ημερομηνίες (cron 10:15): προχθές, χθες ΚΑΙ η ημέρα πριν από FINAL_LAG_DAYS (τελική έκδοση),
+  - η ΠΡΩΤΗ έκδοση κάθε ημέρας φυλάσσεται για πάντα μέσα στο αρχείο (contract.write_entsoe_days).
+Κενές τιμές μένουν κενές (null): «η ENTSO-E δεν δίνει στοιχείο» ≠ «παραγωγή μηδέν».
+"""
 import os
-import json
+import time
+import xml.etree.ElementTree as ET
 from datetime import datetime, timedelta
+
 import pytz
-from jsonio import write_json_atomic
+import requests
+
 import contract
+
+API = "https://web-api.tp.entsoe.eu/api"
+GR = '10YGR-HTSO-----Y'
+NS = {'ns': 'urn:iec62325.351:tc57wg16:451-6:generationloaddocument:3:0'}
+ATHENS = pytz.timezone('Europe/Athens')
+
+PSR_MAP = {
+    'B16': 'entsoe_solar',
+    'B19': 'entsoe_wind',
+    'B11': 'entsoe_hydro_ror',   # Run-of-river
+    'B12': 'entsoe_hydro_res',   # Reservoir
+    'B01': 'entsoe_biomass',
+    'B04': 'entsoe_gas',
+    'B02': 'entsoe_lignite',
+}
+
 
 def get_target_dates():
     start_env = os.environ.get('START_DATE', '').strip().replace('-', '')
     end_env = os.environ.get('END_DATE', '').strip().replace('-', '')
+    now = datetime.now(ATHENS)
+    if start_env and end_env:
+        try:
+            s = datetime.strptime(start_env, "%Y%m%d"); e = datetime.strptime(end_env, "%Y%m%d")
+            out = []
+            while s <= e:
+                out.append(s.strftime("%Y%m%d")); s += timedelta(days=1)
+            return out
+        except ValueError:
+            print("Μη έγκυρη μορφή ημερομηνίας. Γίνεται fallback στις αυτόματες ημέρες.")
+    lag = int(os.environ.get('FINAL_LAG_DAYS', str(contract.ENTSOE_FINAL_LAG_DAYS)))
+    return [(now - timedelta(days=lag)).strftime("%Y%m%d"),     # τελική έκδοση
+            (now - timedelta(days=2)).strftime("%Y%m%d"),       # πρώτη έκδοση
+            (now - timedelta(days=1)).strftime("%Y%m%d")]
 
-    tz = pytz.timezone('Europe/Athens')
-    now = datetime.now(tz)
-    
-    # Αν δεν δοθούν ημερομηνίες (π.χ. cron-job), βάλε Προχθές και Χθες
-    if not start_env or not end_env:
-        yesterday_dt = now - timedelta(days=1)
-        day_before_dt = now - timedelta(days=2)
-        start_str = day_before_dt.strftime("%Y%m%d")
-        end_str = yesterday_dt.strftime("%Y%m%d")
-    else:
-        start_str = start_env
-        end_str = end_env
 
+def _day_window_utc(date_str):
+    start = ATHENS.localize(datetime.strptime(date_str, "%Y%m%d"))
+    end = ATHENS.localize(datetime.strptime(date_str, "%Y%m%d") + timedelta(days=1))
+    return start.astimezone(pytz.utc).strftime("%Y%m%d%H%M"), end.astimezone(pytz.utc).strftime("%Y%m%d%H%M")
+
+
+def _fetch(date_str, token, params, label):
+    """Ένα αίτημα στο API· επιστρέφει {(key, hr): [τιμές]} ή None αν απέτυχε."""
+    p0, p1 = _day_window_utc(date_str)
+    params = {**params, 'securityToken': token, 'periodStart': p0, 'periodEnd': p1}
     try:
-        start_dt = datetime.strptime(start_str, "%Y%m%d")
-        end_dt = datetime.strptime(end_str, "%Y%m%d")
-    except ValueError:
-        print("Μη έγκυρη μορφή ημερομηνίας. Γίνεται fallback (Προχθές - Χθες).")
-        yesterday_dt = now - timedelta(days=1)
-        day_before_dt = now - timedelta(days=2)
-        start_dt = day_before_dt
-        end_dt = yesterday_dt
+        r = requests.get(API, params=params, timeout=30)
+    except Exception as e:
+        print(f"[{date_str}] {label}: αποτυχία σύνδεσης ({e})")
+        return None
+    if r.status_code != 200:
+        print(f"[{date_str}] {label}: σφάλμα API {r.status_code}")
+        return None
+    try:
+        root = ET.fromstring(r.content)
+    except ET.ParseError:
+        print(f"[{date_str}] {label}: σφάλμα ανάλυσης XML")
+        return None
+    out = {}
+    for ts in root.findall('ns:TimeSeries', NS):
+        psr = ts.find('ns:MktPSRType/ns:psrType', NS)
+        key = PSR_MAP.get(psr.text) if psr is not None else 'entsoe_load'
+        if key is None:
+            continue
+        period = ts.find('ns:Period', NS)
+        if period is None:
+            continue
+        res = period.find('ns:resolution', NS).text
+        step = {'PT15M': 15, 'PT30M': 30, 'PT60M': 60}.get(res)
+        if not step:
+            continue
+        t0 = datetime.strptime(period.find('ns:timeInterval/ns:start', NS).text, "%Y-%m-%dT%H:%MZ").replace(tzinfo=pytz.utc)
+        for pt in period.findall('ns:Point', NS):
+            pos = int(pt.find('ns:position', NS).text)
+            qty = float(pt.find('ns:quantity', NS).text)
+            t = (t0 + timedelta(minutes=step * (pos - 1))).astimezone(ATHENS)
+            if t.strftime("%Y%m%d") == date_str:
+                out.setdefault((key, t.hour + 1), []).append(qty)   # 00:00–01:00 = ώρα 1
+    return out
 
-    dates = []
-    current = start_dt
-    while current <= end_dt:
-        dates.append(current.strftime("%Y%m%d"))
-        current += timedelta(days=1)
-    return dates
 
 def build_entsoe_for_date(date_str, token):
     if not token:
-        print("ΣΦΑΛΜΑ: Δεν βρέθηκε το ENTSOE_TOKEN στα περιβάλλοντα (env).")
+        print("ΣΦΑΛΜΑ: Δεν βρέθηκε το ENTSOE_TOKEN.")
         return []
+    print(f"[{date_str}] ENTSO-E: παραγωγή ανά τύπο (A75) και φορτίο (A65)...")
+    gen = _fetch(date_str, token, {'documentType': 'A75', 'processType': 'A16', 'in_Domain': GR}, 'A75')
+    if gen is None:
+        return []          # χωρίς παραγωγή δεν γράφουμε τίποτα (το παλιό αρχείο μένει)
+    time.sleep(1)
+    load = _fetch(date_str, token, {'documentType': 'A65', 'processType': 'A16', 'outBiddingZone_Domain': GR}, 'A65') or {}
 
-    athens = pytz.timezone('Europe/Athens')
-    # Χρονικά όρια: Από 00:00 της ζητούμενης ημέρας έως 00:00 της επόμενης
-    start_dt_athens = athens.localize(datetime.strptime(date_str, "%Y%m%d"))
-    end_dt_athens = start_dt_athens + timedelta(days=1)
-    
-    # Μετατροπή σε UTC για το ENTSO-E (μορφή YYYYMMDDHHMM)
-    start_utc = start_dt_athens.astimezone(pytz.utc).strftime("%Y%m%d%H%M")
-    end_utc = end_dt_athens.astimezone(pytz.utc).strftime("%Y%m%d%H%M")
-
-    url = "https://web-api.tp.entsoe.eu/api"
-    params = {
-        'securityToken': token,
-        'documentType': 'A75', # Actual Generation per Type
-        'processType': 'A16',  # Realised
-        'in_Domain': '10YGR-HTSO-----Y', # Ελλάδα
-        'periodStart': start_utc,
-        'periodEnd': end_utc
-    }
-    
-    # Οι κωδικοί που μας ενδιαφέρουν για τη διασταύρωση
-    psr_map = {
-        'B16': 'entsoe_solar',
-        'B19': 'entsoe_wind',
-        'B11': 'entsoe_hydro_ror', # Run-of-river
-        'B12': 'entsoe_hydro_res', # Reservoir
-        'B01': 'entsoe_biomass',
-        'B04': 'entsoe_gas',
-        'B02': 'entsoe_lignite'
-    }
-    
-    # Προετοιμασία: Φτιάχνουμε λίστες για κάθε ώρα (ώστε να βγάλουμε τον μέσο όρο των 15λεπτων)
-    hourly_raw = {hr: {k: [] for k in psr_map.values()} for hr in range(1, 25)}
-    
-    print(f"[{date_str}] Ζήτηση δεδομένων ENTSO-E (Actual Generation)...")
-    try:
-        response = requests.get(url, params=params, timeout=20)
-    except Exception as e:
-        print(f"[{date_str}] Αποτυχία σύνδεσης στο ENTSO-E API: {e}")
-        return []
-
-    if response.status_code != 200:
-        print(f"[{date_str}] ENTSO-E API Error {response.status_code}: {response.text}")
-        return []
-        
-    # Αυστηρό Parsing του XML βάσει του ENTSO-E Namespace
-    ns = {'ns': 'urn:iec62325.351:tc57wg16:451-6:generationloaddocument:3:0'}
-    try:
-        root = ET.fromstring(response.content)
-    except ET.ParseError:
-        print(f"[{date_str}] Σφάλμα ανάλυσης XML από το ENTSO-E.")
-        return []
-    
-    for ts in root.findall('ns:TimeSeries', ns):
-        psr_type_elem = ts.find('ns:MktPSRType/ns:psrType', ns)
-        if psr_type_elem is None or psr_type_elem.text not in psr_map:
-            continue
-            
-        out_key = psr_map[psr_type_elem.text]
-        period = ts.find('ns:Period', ns)
-        if period is None: continue
-        
-        res_text = period.find('ns:resolution', ns).text
-        start_str = period.find('ns:timeInterval/ns:start', ns).text
-        
-        # Ώρα έναρξης του block σε UTC
-        ts_start_utc = datetime.strptime(start_str, "%Y-%m-%dT%H:%MZ").replace(tzinfo=pytz.utc)
-        
-        for pt in period.findall('ns:Point', ns):
-            pos = int(pt.find('ns:position', ns).text)
-            qty = float(pt.find('ns:quantity', ns).text)
-            
-            # Υπολογισμός πραγματικού Timestamp του Point
-            if res_text == 'PT15M':
-                point_time_utc = ts_start_utc + timedelta(minutes=15 * (pos - 1))
-            elif res_text == 'PT60M':
-                point_time_utc = ts_start_utc + timedelta(minutes=60 * (pos - 1))
-            else:
-                continue
-                
-            # Μετατροπή σε Ώρα Ελλάδος
-            point_time_athens = point_time_utc.astimezone(athens)
-            
-            # Διασφάλιση ότι αφορά ακριβώς τη ζητούμενη μέρα
-            if point_time_athens.strftime("%Y%m%d") == date_str:
-                # Το 00:00 (12 το βράδυ) ανήκει στην Ώρα 1
-                target_hour = point_time_athens.hour + 1
-                hourly_raw[target_hour][out_key].append(qty)
-                
-    # 2. Συγχώνευση (Averaging) και Δημιουργία των Records
-    entsoe_records = []
+    avg = lambda v: round(sum(v) / len(v), 1) if v else None   # μέσο MW της ώρας = MWh
+    recs = []
     for hr in range(1, 25):
-        rec = {
-            "date": date_str,
-            "target_hour": int(hr)
-        }
-        for k in psr_map.values():
-            vals = hourly_raw[hr][k]
-            # Ο μέσος όρος ισχύος MW (Average) μας δίνει την ενέργεια σε MWh
-            rec[k] = round(sum(vals) / len(vals), 1) if vals else 0.0
-        
-        # Ευκολία για το frontend: Συνολικά Υδροηλεκτρικά (ROR + RES)
-        rec['entsoe_hydro'] = round(rec['entsoe_hydro_ror'] + rec['entsoe_hydro_res'], 1)
-        
-        entsoe_records.append(rec)
-        
-    return entsoe_records
+        rec = {'date': date_str, 'target_hour': hr}
+        for k in PSR_MAP.values():
+            rec[k] = avg(gen.get((k, hr)))
+        ror, resv = rec['entsoe_hydro_ror'], rec['entsoe_hydro_res']
+        rec['entsoe_hydro'] = None if ror is None and resv is None else round((ror or 0) + (resv or 0), 1)
+        rec['entsoe_load'] = avg(load.get(('entsoe_load', hr)))
+        recs.append(rec)
+    return recs
+
 
 if __name__ == "__main__":
     target_dates = get_target_dates()
     token = os.environ.get('ENTSOE_TOKEN')
+    pause = float(os.environ.get('PAUSE_SECONDS', '1') or 0)
     print(f"Θα ελεγχθούν δεδομένα ENTSO-E για τις ημέρες: {target_dates}")
-    
     all_entsoe_data = []
-    for d_str in target_dates:
-        daily_data = build_entsoe_for_date(d_str, token)
-        all_entsoe_data.extend(daily_data)
-        
+    for i, d_str in enumerate(target_dates):
+        if i and pause:
+            time.sleep(pause)
+        all_entsoe_data.extend(build_entsoe_for_date(d_str, token))
     if all_entsoe_data:
-        # --- Νέα δομή (schema v1): ένα αρχείο ανά ημέρα ---
         contract.write_entsoe_days(all_entsoe_data)
-        # Φάση 3b: το παλιό συγκεντρωτικό αρχείο δεν χρησιμοποιείται πια.
-        if os.path.exists('data/entsoe_ref.json'):
-            os.remove('data/entsoe_ref.json')
-            print("✓ Το παλιό data/entsoe_ref.json αφαιρέθηκε (φάση 3b).")
+    if os.path.exists('data/entsoe_ref.json'):
+        os.remove('data/entsoe_ref.json')
+        print("✓ Το παλιό data/entsoe_ref.json αφαιρέθηκε (φάση 3b).")

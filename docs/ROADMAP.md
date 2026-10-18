@@ -33,6 +33,10 @@ Check what ADMIE returned for 25 Oct, handle a 25-hour (and 23-hour) day in the 
 - Run *Backfill live history* once (1 Apr–17 Sep), then let the hourly scrape rebuild records and manifest.
 - Re-check the UCE findings of K18 on 6.5 months.
 
+## Phase 3d: ADMIE and ENTSO-E (code done 18 Oct 2026, D33–D35)
+- Run *ENTSO-E history refresh* once (1 Apr – 15 days ago): load and final values for the whole history.
+- Then check K19: is ENTSO-E load lower than ADMIE load by about the low-voltage estimate?
+
 ## Phase 4: Content
 - Leaderboard split done early (D24).
 - Decomposition of UCE on the page (unmetered solar ≈ k × MV solar, distribution wind, rest), once K18 is confirmed on the full history.
