@@ -4,44 +4,7 @@ import os
 import sys
 from datetime import datetime, timedelta
 import pytz
-
-# =====================================================================
-# 0. ΑΣΦΑΛΗΣ ΑΝΑΓΝΩΣΗ / ΕΓΓΡΑΦΗ JSON
-# =====================================================================
-
-def load_json_strict(path, default):
-    """Αν το αρχείο δεν υπάρχει -> default.
-    Αν υπάρχει αλλά δεν διαβάζεται -> ΣΤΑΜΑΤΑΜΕ (exit 1), ώστε να μη γραφτεί
-    από πάνω του κάτι φτωχότερο. Το Action αποτυγχάνει, δεν γίνεται commit,
-    και το προηγούμενο καλό αρχείο μένει άθικτο στο repo."""
-    if not os.path.exists(path):
-        return default
-    try:
-        with open(path, 'r', encoding='utf-8') as f:
-            return json.load(f)
-    except Exception as e:
-        print(f"✗ ΚΡΙΣΙΜΟ: Το {path} υπάρχει αλλά δεν διαβάζεται ({e}). Διακοπή χωρίς εγγραφή.")
-        sys.exit(1)
-
-def load_json_lenient(path, default):
-    """Για αρχεία που απλώς ΔΙΑΒΑΖΟΥΜΕ (δεν τα ξαναγράφουμε): αν χαλάσουν,
-    συνεχίζουμε χωρίς αυτά, με προειδοποίηση."""
-    if not os.path.exists(path):
-        return default
-    try:
-        with open(path, 'r', encoding='utf-8') as f:
-            return json.load(f)
-    except Exception as e:
-        print(f"⚠ Προειδοποίηση: Το {path} δεν διαβάστηκε ({e}). Συνέχεια χωρίς αυτό.")
-        return default
-
-def write_json_atomic(path, data):
-    """Γράφει πρώτα σε προσωρινό αρχείο και μετά το μετονομάζει,
-    ώστε να μην μείνει ποτέ μισογραμμένο JSON."""
-    tmp = path + '.tmp'
-    with open(tmp, 'w', encoding='utf-8') as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
-    os.replace(tmp, path)
+from jsonio import load_json_strict, load_json_lenient, write_json_atomic
 
 # =====================================================================
 # 1. ΚΑΝΟΝΕΣ ΕΠΙΚΥΡΩΣΗΣ (SANITY CHECKS) & ΣΥΓΧΩΝΕΥΣΗΣ

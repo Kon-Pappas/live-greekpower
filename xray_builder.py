@@ -4,6 +4,7 @@ import os
 import sys
 from datetime import datetime, timedelta
 import pytz
+from jsonio import load_json_strict, write_json_atomic
 import pandas as pd
 import io
 import urllib3
@@ -207,12 +208,9 @@ def save_xray_data(new_records):
     filepath = 'data/xray_data.json'
     os.makedirs('data', exist_ok=True)
     
-    history = []
-    if os.path.exists(filepath):
-        try:
-            with open(filepath, 'r', encoding='utf-8') as f:
-                history = json.load(f)
-        except: pass 
+    # Το αρχείο κρατά όλο το ιστορικό από 1/4/2026 και δεν υπάρχει αλλού:
+    # αν δεν διαβάζεται, ΣΤΑΜΑΤΑΜΕ αντί να το αντικαταστήσουμε με 2 μέρες.
+    history = load_json_strict(filepath, [])
         
     history_map = { (rec.get("date"), rec.get("target_hour")): i for i, rec in enumerate(history) }
     
@@ -227,8 +225,7 @@ def save_xray_data(new_records):
     # Ταξινόμηση - ΧΩΡΙΣ ΟΡΙΟ (Κρατάει το ιστορικό για πάντα)
     history.sort(key=lambda x: (x.get("date", ""), x.get("target_hour", 0)))
 
-    with open(filepath, 'w', encoding='utf-8') as f:
-        json.dump(history, f, ensure_ascii=False, indent=2)
+    write_json_atomic(filepath, history)
     print(f"✓ Δεδομένα X-Ray αποθηκεύτηκαν στο {filepath} ({len(history)} ώρες συνολικά).")
 
 if __name__ == "__main__":

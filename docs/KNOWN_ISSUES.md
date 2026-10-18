@@ -19,3 +19,4 @@ Status: **open** (needs action or a decision), **accepted** (understood, no acti
 | K13 | until 2026-10-18 | The status pill said "Live" whatever the age of the data | A stalled pipeline looked live | **closed** (D07) |
 | K14 | until 2026-10-18 | A corrupt `records.json` was silently replaced by records from the last 30 days | History loss | **closed** (D05) |
 | K15 | until 2026-10-18 | GitHub cron and cron-job.org both triggered the scrape; the scrape pushed without rebasing | Duplicate runs; occasional failed pushes | **closed** (D02–D04) |
+| K16 | until 2026-10-18 | A corrupt `xray_data.json` or `entsoe_ref.json` was silently replaced by the last two days of data | Loss of the whole history since 1 Apr 2026 | **closed** (D14) |

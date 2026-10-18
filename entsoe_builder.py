@@ -4,6 +4,7 @@ import os
 import json
 from datetime import datetime, timedelta
 import pytz
+from jsonio import load_json_strict, write_json_atomic
 
 def get_target_dates():
     start_env = os.environ.get('START_DATE', '').strip().replace('-', '')
@@ -156,12 +157,9 @@ def save_entsoe_data(new_records):
     filepath = 'data/entsoe_ref.json'
     os.makedirs('data', exist_ok=True)
     
-    history = []
-    if os.path.exists(filepath):
-        try:
-            with open(filepath, 'r', encoding='utf-8') as f:
-                history = json.load(f)
-        except: pass 
+    # Το αρχείο κρατά όλο το ιστορικό από 1/4/2026 και δεν υπάρχει αλλού:
+    # αν δεν διαβάζεται, ΣΤΑΜΑΤΑΜΕ αντί να το αντικαταστήσουμε με 2 μέρες.
+    history = load_json_strict(filepath, [])
         
     history_map = { (rec.get("date"), rec.get("target_hour")): i for i, rec in enumerate(history) }
     
@@ -176,8 +174,7 @@ def save_entsoe_data(new_records):
     # Ταξινόμηση
     history.sort(key=lambda x: (x.get("date", ""), x.get("target_hour", 0)))
 
-    with open(filepath, 'w', encoding='utf-8') as f:
-        json.dump(history, f, ensure_ascii=False, indent=2)
+    write_json_atomic(filepath, history)
     print(f"✓ Δεδομένα ENTSO-E (Διασταύρωση) αποθηκεύτηκαν στο {filepath} ({len(history)} ώρες).")
 
 if __name__ == "__main__":
