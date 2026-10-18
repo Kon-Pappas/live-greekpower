@@ -43,11 +43,11 @@ contract.py                   data contract (schema v1): file layout, derived va
 jsonio.py                     safe JSON reading (stop on a corrupt file) and atomic writing
 data/manifest.json            latest hour, next update, available days
 data/live/YYYY-MM-DD.json     hourly live balance and day totals (written by scraper only)
-data/xray/YYYY-MM-DD.json     hourly ex-post clean generation and UCE (written by xray_builder only)
+data/xray/YYYY-MM-DD.json     hourly ex-post clean generation, UCE, Crete flows, SCADA net load (written by xray_builder only)
 data/entsoe/YYYY-MM-DD.json   hourly ENTSO-E generation and load, first and latest version (written by entsoe_builder only)
 data/records.json             top-three records
 data/live_raw.json            scraper's merge memory for yesterday and today (not read by the page)
-.github/workflows/            scrape.yml (hourly), xray.yml (daily), backfill.yml (manual: history + UCE recompute), entsoe_refresh.yml (manual: ENTSO-E history)
+.github/workflows/            scrape.yml (hourly), xray.yml (daily), backfill.yml (manual: history + UCE recompute), entsoe_refresh.yml (manual: ENTSO-E history), xray_refresh.yml (manual: SCADA/RESMV history)
 docs/                         DECISIONS, KNOWN_ISSUES, ROADMAP
 ```
 

@@ -1,6 +1,7 @@
 import requests
 import json
 import os
+import time
 import sys
 from datetime import datetime, timedelta
 import pytz
@@ -143,6 +144,13 @@ def build_xray_for_date(date_str):
     is_cg = res_df['1'].astype(str).str.contains("CG", na=False)
     is_wind = ~is_myis & ~is_pv & ~is_bm & ~is_cg & pd.notna(res_df['1'])
 
+    # Γραμμές συστήματος του SCADA (D36): οι δύο διασυνδέσεις της Κρήτης και το καθαρό φορτίο.
+    # Πρόσημο όπως στο αρχείο: αρνητικό = ροή από την ηπειρωτική χώρα προς την Κρήτη.
+    def scada_row(name):
+        idx = scada_df.index[scada_df['1'].astype(str).str.strip() == name]
+        return idx[0] if len(idx) else None
+    row_ac, row_dc, row_netload = scada_row('AC KRHTH'), scada_row('DC KRHTH'), scada_row('NET LOAD')
+
     # Ανάκτηση MCP & Storage από το API
     api_supp = fetch_api_supplement(date_str)
     xray_records = []
@@ -171,6 +179,14 @@ def build_xray_for_date(date_str):
         sum_of_scada_parts = scada_myis + scada_solar + scada_biomass + scada_cogen + scada_wind
         scada_other_res = scada_total_res_row - sum_of_scada_parts
         
+        def row_val(idx):
+            if idx is None:
+                return None
+            v = pd.to_numeric(scada_df.loc[idx, scada_col], errors='coerce')
+            return None if pd.isna(v) else float(v)
+        crete_ac, crete_dc, scada_net_load = row_val(row_ac), row_val(row_dc), row_val(row_netload)
+        crete_flow = None if crete_ac is None and crete_dc is None else (crete_ac or 0.0) + (crete_dc or 0.0)
+
         # 2. Υπολογισμοί RESMV (Ρητό cast σε float!)
         resmv_row = resmv_df[resmv_df['ΩΡΑ'] == float(hr)]
         if not resmv_row.empty:
@@ -199,7 +215,11 @@ def build_xray_for_date(date_str):
             "other_res": float(round(scada_other_res, 1)),
             "bess_disch": float(round(supp['bess_disch'], 1)),
             "bess_chg": float(round(supp['bess_chg'], 1)),
-            "pump": float(round(supp['pump'], 1))
+            "pump": float(round(supp['pump'], 1)),
+            "crete_ac": crete_ac,
+            "crete_dc": crete_dc,
+            "crete_flow": crete_flow,
+            "scada_net_load": scada_net_load
         })
         
     return xray_records
@@ -208,8 +228,11 @@ if __name__ == "__main__":
     target_dates = get_target_dates()
     print(f"Θα ελεγχθούν δεδομένα X-Ray για τις ημέρες: {target_dates}")
     
+    pause = float(os.environ.get('PAUSE_SECONDS', '0') or 0)
     all_xray_data = []
-    for d_str in target_dates:
+    for i, d_str in enumerate(target_dates):
+        if i and pause:
+            time.sleep(pause)
         daily_xray = build_xray_for_date(d_str)
         all_xray_data.extend(daily_xray)
         

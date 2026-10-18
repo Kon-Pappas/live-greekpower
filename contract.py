@@ -206,6 +206,7 @@ XRAY_FIELDS = ['big_hydro', 'small_hydro', 'solar', 'wind', 'biomass', 'cogen', 
 # (το SCADA 'TOTAL RES' περιέχει τις μονάδες CG). Γι' αυτό αφαιρείται ΚΑΙ από τις δύο
 # πλευρές, ώστε να αλληλοαναιρείται και να μη φουσκώνει το UCE.
 PHYS_CLEAN_FIELDS = ['big_hydro', 'small_hydro', 'solar', 'wind', 'biomass']
+XRAY_SYSTEM_FIELDS = ['crete_ac', 'crete_dc', 'crete_flow', 'scada_net_load']
 
 
 def _derive_xray(h, live_hour):
@@ -229,6 +230,9 @@ def normalize_xray_hour(rec, live_hour):
     out['bess_chg'] = r1(rec.get('bess_chg'))
     out['pumping'] = r1(rec.get('pump'))
     out['mcp'] = r1(rec.get('mcp'))
+    # Γραμμές συστήματος του SCADA (D36). Πρόσημο του αρχείου: αρνητικό = προς την Κρήτη.
+    for k in XRAY_SYSTEM_FIELDS:
+        out[k] = r1(rec.get(k))
     return _derive_xray(out, live_hour)
 
 
@@ -241,6 +245,7 @@ def _xray_day_doc(date8, hours, source):
         'updated': now_athens_iso(),
         'totals': {
             **{k: _sum(h[k] for h in hours) for k in XRAY_FIELDS + ['bess_dis', 'bess_chg', 'pumping', 'phys_clean', 'live_clean']},
+            **{k: _sum(h.get(k) for h in hours) for k in XRAY_SYSTEM_FIELDS},
             'uce': _sum(uce_vals),
             'uce_positive': _sum(v for v in uce_vals if v > 0),
             'uce_negative': _sum(v for v in uce_vals if v < 0),
