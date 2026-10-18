@@ -83,7 +83,7 @@ def list_days(folder):
 # ---------------------------------------------------------------------
 
 def normalize_live_hour(rec):
-    """Μια ωριαία εγγραφή του live_data.json → μορφή v1."""
+    """Μια ωριαία εγγραφή του ΑΔΜΗΕ (όπως τη φέρνει το scraper) → μορφή v1."""
     m = rec.get('production_mix') or {}
     inter = rec.get('interconnections_mwh') or {}
 
@@ -169,12 +169,12 @@ def live_day_totals(hours):
 
 def write_live_days(raw_records, dates8):
     """Γράφει data/live/<ημέρα>.json για κάθε ημέρα του dates8,
-    από τις (ήδη συγχωνευμένες) εγγραφές του live_data.json."""
+    από τις (ήδη συγχωνευμένες) ωριαίες εγγραφές του scraper."""
     by_date = defaultdict(dict)
     for rec in raw_records:
         hr = _valid_hr(rec.get('target_hour'))
         if rec.get('date') in dates8 and hr:
-            # Το παλιό live_data.json έχει διπλές εγγραφές για λίγες ώρες (K17):
+            # Αν υπάρχουν διπλές εγγραφές για μια ώρα (K17):
             # κρατάμε την πιο πρόσφατη λήψη, όπως και η σημερινή σελίδα.
             prev = by_date[rec['date']].get(hr)
             if prev is None or (rec.get('fetch_timestamp') or '') >= (prev.get('fetch_timestamp') or ''):
@@ -201,6 +201,26 @@ def write_live_days(raw_records, dates8):
 XRAY_FIELDS = ['big_hydro', 'small_hydro', 'solar', 'wind', 'biomass', 'cogen', 'other_res']
 
 
+# «Φυσική καθαρή» = μεγάλα + μικρά υδροηλεκτρικά + φ/β + αιολικά + βιομάζα (D30).
+# Η συμπαραγωγή (ΣΗΘΥΑ) ΔΕΝ είναι καθαρή· ο ΑΔΜΗΕ όμως τη μετρά μέσα στο live «ΑΠΕ»
+# (το SCADA 'TOTAL RES' περιέχει τις μονάδες CG). Γι' αυτό αφαιρείται ΚΑΙ από τις δύο
+# πλευρές, ώστε να αλληλοαναιρείται και να μη φουσκώνει το UCE.
+PHYS_CLEAN_FIELDS = ['big_hydro', 'small_hydro', 'solar', 'wind', 'biomass']
+
+
+def _derive_xray(h, live_hour):
+    """Συμπληρώνει phys_clean, live_clean, uce σε μια ώρα X-Ray (μορφή v1)."""
+    h['phys_clean'] = r1(sum((h.get(k) or 0) for k in PHYS_CLEAN_FIELDS))
+    if live_hour and live_hour.get('has_data'):
+        h['live_clean'] = r1(live_hour['gen']['res'] + live_hour['gen']['hydro'] - (h.get('cogen') or 0))
+        # UCE ΜΕ ΠΡΟΣΗΜΟ (K03): αρνητικό = τα εκ των υστέρων δείχνουν περισσότερη καθαρή από το live.
+        h['uce'] = r1(h['live_clean'] - h['phys_clean'])
+    else:
+        h['live_clean'] = None
+        h['uce'] = None
+    return h
+
+
 def normalize_xray_hour(rec, live_hour):
     out = {'hr': _valid_hr(rec.get('target_hour'))}
     for k in XRAY_FIELDS:
@@ -209,18 +229,30 @@ def normalize_xray_hour(rec, live_hour):
     out['bess_chg'] = r1(rec.get('bess_chg'))
     out['pumping'] = r1(rec.get('pump'))
     out['mcp'] = r1(rec.get('mcp'))
+    return _derive_xray(out, live_hour)
 
-    # Ίδιος ορισμός με τη σημερινή σελίδα: το other_res ΔΕΝ μπαίνει στο άθροισμα.
-    out['phys_clean'] = r1(sum((rec.get(k) or 0) for k in
-                               ['big_hydro', 'small_hydro', 'solar', 'wind', 'biomass', 'cogen']))
-    if live_hour and live_hour.get('has_data'):
-        out['live_clean'] = r1(live_hour['gen']['res'] + live_hour['gen']['hydro'])
-        # UCE ΜΕ ΠΡΟΣΗΜΟ (K03): αρνητικό = η φυσική καθαρή ενέργεια ξεπερνά τη live.
-        out['uce'] = r1(out['live_clean'] - out['phys_clean'])
-    else:
-        out['live_clean'] = None
-        out['uce'] = None
-    return out
+
+def _xray_day_doc(date8, hours, source):
+    uce_vals = [h['uce'] for h in hours if h['uce'] is not None]
+    return {
+        'schema': SCHEMA,
+        'date': iso_date(date8),
+        'source': source,
+        'updated': now_athens_iso(),
+        'totals': {
+            **{k: _sum(h[k] for h in hours) for k in XRAY_FIELDS + ['bess_dis', 'bess_chg', 'pumping', 'phys_clean', 'live_clean']},
+            'uce': _sum(uce_vals),
+            'uce_positive': _sum(v for v in uce_vals if v > 0),
+            'uce_negative': _sum(v for v in uce_vals if v < 0),
+        },
+        'hours': hours,
+    }
+
+
+def _live_by_hr(date8):
+    # Τα live δεδομένα της ίδιας μέρας τα ΔΙΑΒΑΖΟΥΜΕ μόνο (τα γράφει το scraper).
+    live = load_json_lenient(day_path(LIVE_DIR, date8), {})
+    return {h['hr']: h for h in live.get('hours', [])}
 
 
 def write_xray_days(raw_records):
@@ -230,25 +262,30 @@ def write_xray_days(raw_records):
         if rec.get('date') and hr:
             by_date[rec['date']][hr] = rec
     for date8, hrs in sorted(by_date.items()):
-        # Τα live δεδομένα της ίδιας μέρας τα ΔΙΑΒΑΖΟΥΜΕ μόνο (τα γράφει το scraper).
-        live = load_json_lenient(day_path(LIVE_DIR, date8), {})
-        live_by_hr = {h['hr']: h for h in live.get('hours', [])}
-        hours = [normalize_xray_hour(hrs[hr], live_by_hr.get(hr)) for hr in sorted(hrs)]
-        uce_vals = [h['uce'] for h in hours if h['uce'] is not None]
-        write_json_atomic(day_path(XRAY_DIR, date8), {
-            'schema': SCHEMA,
-            'date': iso_date(date8),
-            'source': 'ADMIE/IPTO operation-market files (ex-post) + RESMV',
-            'updated': now_athens_iso(),
-            'totals': {
-                **{k: _sum(h[k] for h in hours) for k in XRAY_FIELDS + ['bess_dis', 'bess_chg', 'pumping', 'phys_clean', 'live_clean']},
-                'uce': _sum(uce_vals),
-                'uce_positive': _sum(v for v in uce_vals if v > 0),
-                'uce_negative': _sum(v for v in uce_vals if v < 0),
-            },
-            'hours': hours,
-        })
+        lb = _live_by_hr(date8)
+        hours = [normalize_xray_hour(hrs[hr], lb.get(hr)) for hr in sorted(hrs)]
+        write_json_atomic(day_path(XRAY_DIR, date8),
+                          _xray_day_doc(date8, hours, 'ADMIE/IPTO operation-market files (ex-post) + RESMV'))
     print(f"✓ X-Ray day files: {len(by_date)} ημέρες.")
+
+
+def rebuild_xray_derived(start_iso=None, end_iso=None):
+    """Ξαναϋπολογίζει phys_clean / live_clean / UCE στα ΗΔΗ αποθηκευμένα αρχεία X-Ray,
+    χωρίς νέα λήψη από τον ΑΔΜΗΕ (π.χ. μετά από backfill των live ή αλλαγή ορισμού).
+    Αλλάζει μόνο τα παράγωγα πεδία· οι μετρήσεις μένουν ως έχουν."""
+    n = 0
+    for d in list_days(XRAY_DIR):
+        if (start_iso and d < start_iso) or (end_iso and d > end_iso):
+            continue
+        doc = load_json_strict(os.path.join(XRAY_DIR, d + '.json'), None)
+        if not doc:
+            continue
+        date8 = d.replace('-', '')
+        lb = _live_by_hr(date8)
+        hours = [_derive_xray(dict(h), lb.get(h['hr'])) for h in doc.get('hours', [])]
+        write_json_atomic(day_path(XRAY_DIR, date8), _xray_day_doc(date8, hours, doc.get('source', '')))
+        n += 1
+    print(f"✓ X-Ray: ξαναϋπολογίστηκαν τα παράγωγα σε {n} ημέρες.")
 
 
 # ---------------------------------------------------------------------

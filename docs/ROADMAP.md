@@ -26,11 +26,16 @@ Check what ADMIE returned for 25 Oct, handle a 25-hour (and 23-hour) day in the 
 - One place for colour tokens instead of values repeated in JS and CSS.
 - Hour labels made unambiguous (K09).
 
-## Phase 3b: Clean-up (after the new page has run for a day)
+## Phase 3b: Clean-up (done 18 Oct 2026, D29)
 - Stop writing the old files (`live_data.json`, `xray_data.json`, `entsoe_ref.json`) and delete them, together with `css/styles.css` and `migrate_v2.py` / its workflow (D20).
+
+## Phase 3c: Full history (code done 18 Oct 2026, D30–D32)
+- Run *Backfill live history* once (1 Apr–17 Sep), then let the hourly scrape rebuild records and manifest.
+- Re-check the UCE findings of K18 on 6.5 months.
 
 ## Phase 4: Content
 - Leaderboard split done early (D24).
+- Decomposition of UCE on the page (unmetered solar ≈ k × MV solar, distribution wind, rest), once K18 is confirmed on the full history.
 - Further ideas for the page, to be discussed.
 
 ## Phase 5: Documentation

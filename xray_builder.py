@@ -4,7 +4,7 @@ import os
 import sys
 from datetime import datetime, timedelta
 import pytz
-from jsonio import load_json_strict, write_json_atomic
+from jsonio import write_json_atomic
 import contract
 import pandas as pd
 import io
@@ -204,31 +204,6 @@ def build_xray_for_date(date_str):
         
     return xray_records
 
-def save_xray_data(new_records):
-    if not new_records: return
-    filepath = 'data/xray_data.json'
-    os.makedirs('data', exist_ok=True)
-    
-    # Το αρχείο κρατά όλο το ιστορικό από 1/4/2026 και δεν υπάρχει αλλού:
-    # αν δεν διαβάζεται, ΣΤΑΜΑΤΑΜΕ αντί να το αντικαταστήσουμε με 2 μέρες.
-    history = load_json_strict(filepath, [])
-        
-    history_map = { (rec.get("date"), rec.get("target_hour")): i for i, rec in enumerate(history) }
-    
-    for new_rec in new_records:
-        key = (new_rec["date"], new_rec["target_hour"])
-        if key in history_map: 
-            history[history_map[key]] = new_rec
-        else:
-            history.append(new_rec)
-            history_map[key] = len(history) - 1
-            
-    # Ταξινόμηση - ΧΩΡΙΣ ΟΡΙΟ (Κρατάει το ιστορικό για πάντα)
-    history.sort(key=lambda x: (x.get("date", ""), x.get("target_hour", 0)))
-
-    write_json_atomic(filepath, history)
-    print(f"✓ Δεδομένα X-Ray αποθηκεύτηκαν στο {filepath} ({len(history)} ώρες συνολικά).")
-
 if __name__ == "__main__":
     target_dates = get_target_dates()
     print(f"Θα ελεγχθούν δεδομένα X-Ray για τις ημέρες: {target_dates}")
@@ -239,6 +214,9 @@ if __name__ == "__main__":
         all_xray_data.extend(daily_xray)
         
     if all_xray_data:
-        save_xray_data(all_xray_data)
         # --- Νέα δομή (schema v1): ένα αρχείο ανά ημέρα ---
         contract.write_xray_days(all_xray_data)
+        # Φάση 3b: το παλιό συγκεντρωτικό αρχείο δεν χρησιμοποιείται πια.
+        if os.path.exists('data/xray_data.json'):
+            os.remove('data/xray_data.json')
+            print("✓ Το παλιό data/xray_data.json αφαιρέθηκε (φάση 3b).")

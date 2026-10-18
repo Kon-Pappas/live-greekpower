@@ -31,7 +31,7 @@ const T = {
         pickerHour: 'Hour:', pickerDate: 'Date:', today: 'today',
         pill: { live: 'Live', delayed: 'Delayed', stale: 'Stale data', histHour: 'Past hour', today: 'Today', histDay: 'Past day', expost: 'Ex-post data' },
         load: { title: 'System Initialization', g1: 'Data fetching', g2: 'Analytics', s1: 'Reading the data index', s2: 'Live balance', s3: 'Daily dispatch', s4: 'Clean energy cross-check', s5: 'Records', ready: 'Dashboard is ready!', error: 'The data could not be loaded. Reload the page in a few minutes.' },
-        names: { lignite: 'Lignite', gas: 'Natural gas', hydro: 'Hydro', res: 'Renewables (RES)', dis: 'BESS discharge', chg: 'BESS charge', imports: 'Imports', exports: 'Exports', pumping: 'Pumping', demand: 'Domestic demand', price: 'Day-ahead price', total: 'Total generation',
+        names: { lignite: 'Lignite', gas: 'Natural gas', hydro: 'Hydro', res: 'RES (incl. CHP)', dis: 'BESS discharge', chg: 'BESS charge', imports: 'Imports', exports: 'Exports', pumping: 'Pumping', demand: 'Domestic demand', price: 'Day-ahead price', total: 'Total generation',
                  wind: 'Wind', bigHydro: 'Large hydro', solar: 'Solar', cogen: 'Cogeneration', smallHydro: 'Small hydro', biomass: 'Biomass', uce: 'UCE', entsoeSolar: 'Solar (ENTSO-E)', entsoeWind: 'Wind (ENTSO-E)', admieSolar: 'Solar (ADMIE)', admieWind: 'Wind (ADMIE)' },
         countries: { AL: 'Albania', BG: 'Bulgaria', IT: 'Italy', TR: 'Türkiye', MK: 'North Macedonia' },
         genLedger: 'Generation', balLedger: 'System balance', ledgerTotal: 'Total', ledgerDemand: 'Demand',
@@ -43,16 +43,16 @@ const T = {
         dispatchTitle: '24-hour dispatch and day-ahead price',
         dispatchSub: 'Sources above zero, exports, charging and pumping below. Hours that have not happened yet show the price only.',
         hourAxis: 'Hour (start, Greek time)', mwh: 'MWh', eur: '€/MWh',
-        cleanIntro: 'Clean generation from ADMIE\'s ex-post files, published one to two days later, compared with the live renewables and hydro figure of the same hours. The difference is the unallocated clean energy (UCE): positive when the live figure is higher, negative when the ex-post files show more.',
+        cleanIntro: 'Metered clean generation from ADMIE\'s ex-post files (transmission SCADA plus the medium-voltage RESMV file), published one to two days later, against ADMIE\'s live renewables and hydro of the same hours. Cogeneration (CHP) is not clean and is removed from both sides. The difference is the unallocated clean energy (UCE): distribution-level generation that ADMIE estimates but does not meter, mainly rooftop and other low-voltage solar, distribution-connected wind and small low-voltage units. A negative hour is an estimation error, not consumption.',
         boxVar: 'Variable & dispatchable', boxUce: 'Unallocated clean energy (UCE)', boxBase: 'Baseload',
         uceNet: 'Net for the day', ucePos: 'Hours with live higher', uceNeg: 'Hours with ex-post higher',
         uceNA: 'Not available: live data start on {d}.',
-        xrayTitle: 'Physical clean generation and UCE', xraySub: 'Ex-post generation by technology, UCE stacked on top (below zero when negative), day-ahead price on the right axis.',
+        xrayTitle: 'Physical clean generation and UCE', xraySub: 'Metered clean generation by technology (CHP excluded), UCE in the stack (below zero when negative), day-ahead price on the right axis.',
         reconTitle: 'ADMIE vs ENTSO-E: solar and wind', reconSub: 'Solid lines: ADMIE ex-post files. Dashed lines: ENTSO-E Transparency Platform (actual generation per type).',
         reconNA: 'No ENTSO-E data for this day.',
         recordsIntro: 'Top three since tracking began. Recomputed every hour from the stored history (live data from {l}, clean-energy data from {x}); earlier entries are kept as first recorded. Hourly values are MWh in one hour, equal to the average MW.',
         recHourly: 'Hourly records', recDaily: 'Daily records', newBadge: 'NEW', noData: 'No data yet',
-        rec: { solar: 'Solar', wind: 'Wind', exports: 'Exports', bess_chg: 'BESS charge', bess_dis: 'BESS discharge', bess_chg_pump: 'BESS charge + pumping', network_load: 'Network load', res: 'Renewables (RES)' },
+        rec: { solar: 'Solar', wind: 'Wind', exports: 'Exports', bess_chg: 'BESS charge', bess_dis: 'BESS discharge', bess_chg_pump: 'BESS charge + pumping', network_load: 'Network load', res: 'RES (incl. CHP)' },
         close: 'Close', modalTitle: 'Methodology & Data Sources'
     },
     el: {
@@ -62,7 +62,7 @@ const T = {
         pickerHour: 'Ώρα:', pickerDate: 'Ημέρα:', today: 'σήμερα',
         pill: { live: 'Live', delayed: 'Καθυστέρηση', stale: 'Παλιά δεδομένα', histHour: 'Προηγούμενη ώρα', today: 'Σήμερα', histDay: 'Προηγούμενη ημέρα', expost: 'Εκ των υστέρων' },
         load: { title: 'Εκκίνηση', g1: 'Λήψη δεδομένων', g2: 'Ανάλυση', s1: 'Ανάγνωση ευρετηρίου', s2: 'Ισοζύγιο ώρας', s3: 'Κατανομή ημέρας', s4: 'Διασταύρωση καθαρής ενέργειας', s5: 'Ρεκόρ', ready: 'Το dashboard είναι έτοιμο!', error: 'Τα δεδομένα δεν φορτώθηκαν. Ανανεώστε τη σελίδα σε λίγα λεπτά.' },
-        names: { lignite: 'Λιγνίτης', gas: 'Φυσικό αέριο', hydro: 'Υδροηλεκτρικά', res: 'ΑΠΕ', dis: 'Εκφόρτιση BESS', chg: 'Φόρτιση BESS', imports: 'Εισαγωγές', exports: 'Εξαγωγές', pumping: 'Άντληση', demand: 'Εγχώρια ζήτηση', price: 'Τιμή DAM', total: 'Συνολική παραγωγή',
+        names: { lignite: 'Λιγνίτης', gas: 'Φυσικό αέριο', hydro: 'Υδροηλεκτρικά', res: 'ΑΠΕ (με ΣΗΘΥΑ)', dis: 'Εκφόρτιση BESS', chg: 'Φόρτιση BESS', imports: 'Εισαγωγές', exports: 'Εξαγωγές', pumping: 'Άντληση', demand: 'Εγχώρια ζήτηση', price: 'Τιμή DAM', total: 'Συνολική παραγωγή',
                  wind: 'Αιολικά', bigHydro: 'Μεγάλα υδροηλεκτρικά', solar: 'Φωτοβολταϊκά', cogen: 'Συμπαραγωγή', smallHydro: 'Μικρά υδροηλεκτρικά', biomass: 'Βιομάζα', uce: 'UCE', entsoeSolar: 'Φ/Β (ENTSO-E)', entsoeWind: 'Αιολικά (ENTSO-E)', admieSolar: 'Φ/Β (ΑΔΜΗΕ)', admieWind: 'Αιολικά (ΑΔΜΗΕ)' },
         countries: { AL: 'Αλβανία', BG: 'Βουλγαρία', IT: 'Ιταλία', TR: 'Τουρκία', MK: 'Βόρεια Μακεδονία' },
         genLedger: 'Παραγωγή', balLedger: 'Ισοζύγιο συστήματος', ledgerTotal: 'Σύνολο', ledgerDemand: 'Ζήτηση',
@@ -74,16 +74,16 @@ const T = {
         dispatchTitle: 'Κατανομή 24ώρου και τιμή επόμενης ημέρας',
         dispatchSub: 'Πηγές πάνω από το μηδέν· εξαγωγές, φόρτιση και άντληση κάτω. Για τις ώρες που δεν έχουν γίνει ακόμα φαίνεται μόνο η τιμή.',
         hourAxis: 'Ώρα (έναρξη, ώρα Ελλάδας)', mwh: 'MWh', eur: '€/MWh',
-        cleanIntro: 'Καθαρή παραγωγή από τα εκ των υστέρων αρχεία του ΑΔΜΗΕ, που δημοσιεύονται μία με δύο ημέρες αργότερα, σε σύγκριση με τα live στοιχεία ΑΠΕ και υδροηλεκτρικών των ίδιων ωρών. Η διαφορά είναι η μη κατανεμημένη καθαρή ενέργεια (UCE): θετική όταν το live στοιχείο είναι μεγαλύτερο, αρνητική όταν τα εκ των υστέρων αρχεία δείχνουν περισσότερη.',
+        cleanIntro: 'Μετρημένη καθαρή παραγωγή από τα εκ των υστέρων αρχεία του ΑΔΜΗΕ (SCADA μεταφοράς και αρχείο μέσης τάσης RESMV), που δημοσιεύονται μία με δύο ημέρες αργότερα, σε σύγκριση με τα live ΑΠΕ και υδροηλεκτρικά του ΑΔΜΗΕ των ίδιων ωρών. Η συμπαραγωγή (ΣΗΘΥΑ) δεν είναι καθαρή και αφαιρείται και από τις δύο πλευρές. Η διαφορά είναι η μη κατανεμημένη καθαρή ενέργεια (UCE): παραγωγή της διανομής που ο ΑΔΜΗΕ εκτιμά αλλά δεν μετρά, κυρίως φ/β στέγης και λοιπά φ/β χαμηλής τάσης, αιολικά της διανομής και μικρές μονάδες χαμηλής τάσης. Μια αρνητική ώρα είναι σφάλμα εκτίμησης, όχι κατανάλωση.',
         boxVar: 'Μεταβλητές & κατανεμόμενες', boxUce: 'Μη κατανεμημένη καθαρή ενέργεια (UCE)', boxBase: 'Βάσης',
         uceNet: 'Καθαρό για την ημέρα', ucePos: 'Ώρες με μεγαλύτερο το live', uceNeg: 'Ώρες με μεγαλύτερα τα εκ των υστέρων',
         uceNA: 'Μη διαθέσιμο: τα live δεδομένα ξεκινούν στις {d}.',
-        xrayTitle: 'Φυσική καθαρή παραγωγή και UCE', xraySub: 'Εκ των υστέρων παραγωγή ανά τεχνολογία, με το UCE από πάνω (κάτω από το μηδέν όταν είναι αρνητικό) και την τιμή DAM στον δεξιό άξονα.',
+        xrayTitle: 'Φυσική καθαρή παραγωγή και UCE', xraySub: 'Μετρημένη καθαρή παραγωγή ανά τεχνολογία (χωρίς ΣΗΘΥΑ), το UCE στη στοίβα (κάτω από το μηδέν όταν είναι αρνητικό) και η τιμή DAM στον δεξιό άξονα.',
         reconTitle: 'ΑΔΜΗΕ και ENTSO-E: φωτοβολταϊκά και αιολικά', reconSub: 'Συνεχείς γραμμές: εκ των υστέρων αρχεία ΑΔΜΗΕ. Διακεκομμένες: ENTSO-E Transparency Platform (πραγματική παραγωγή ανά τύπο).',
         reconNA: 'Δεν υπάρχουν δεδομένα ENTSO-E για αυτή την ημέρα.',
         recordsIntro: 'Οι τρεις κορυφαίες τιμές από την έναρξη της καταγραφής. Υπολογίζονται κάθε ώρα από το αποθηκευμένο ιστορικό (live δεδομένα από {l}, δεδομένα καθαρής ενέργειας από {x})· οι παλαιότερες εγγραφές κρατιούνται όπως καταγράφηκαν. Οι ωριαίες τιμές είναι MWh σε μία ώρα, ίσες με τα μέσα MW.',
         recHourly: 'Ωριαία ρεκόρ', recDaily: 'Ημερήσια ρεκόρ', newBadge: 'ΝΕΟ', noData: 'Δεν υπάρχουν ακόμα δεδομένα',
-        rec: { solar: 'Φωτοβολταϊκά', wind: 'Αιολικά', exports: 'Εξαγωγές', bess_chg: 'Φόρτιση BESS', bess_dis: 'Εκφόρτιση BESS', bess_chg_pump: 'Φόρτιση BESS + άντληση', network_load: 'Φορτίο δικτύου', res: 'ΑΠΕ' },
+        rec: { solar: 'Φωτοβολταϊκά', wind: 'Αιολικά', exports: 'Εξαγωγές', bess_chg: 'Φόρτιση BESS', bess_dis: 'Εκφόρτιση BESS', bess_chg_pump: 'Φόρτιση BESS + άντληση', network_load: 'Φορτίο δικτύου', res: 'ΑΠΕ (με ΣΗΘΥΑ)' },
         close: 'Κλείσιμο', modalTitle: 'Μεθοδολογία & Πηγές Δεδομένων'
     }
 };
@@ -97,7 +97,7 @@ const METHODOLOGY = {
 <h4 class="text-acc-300 font-semibold mb-1">System balance and demand</h4>
 <p class="mb-4">Demand is ADMIE's total load. It equals generation + imports − exports + BESS discharge − BESS charge − pumping; the page checks this for every hour and says when it does not hold. Imports and exports are ADMIE's official totals; the per-country flows are shown as a breakdown.</p>
 <h4 class="text-acc-300 font-semibold mb-1">Unallocated clean energy (UCE)</h4>
-<p class="mb-4">Live clean energy is renewables plus hydro from the live data. Physical clean energy is large hydro + small hydro + solar + wind + biomass + cogeneration from the ex-post files. UCE is the difference, live minus physical, and keeps its sign: a negative hour means the ex-post files show more clean generation than the live figure.</p>
+<p class="mb-4">ADMIE's live “RES” figure includes cogeneration (CHP) and an estimate of distribution-level generation that is not metered. Physical clean energy is the metered part: large hydro + small hydro + solar + wind + biomass, from the transmission SCADA file and the medium-voltage RESMV file. Live clean energy is live RES + hydro minus cogeneration; cogeneration is removed from both sides because it is mostly gas-fired. UCE is live minus physical and keeps its sign. It is mainly rooftop and other low-voltage solar (its daily shape follows medium-voltage solar closely), distribution-connected wind (RESMV has no wind) and small low-voltage hydro and biomass. Crete is in neither source: both see it only through its two interconnection cables. A negative hour means ADMIE's estimate came out below the metered value, for example through losses; it is not consumption. On the Live and Daily tabs, “RES” is ADMIE's figure, cogeneration included.</p>
 <h4 class="text-acc-300 font-semibold mb-1">Prices</h4>
 <p class="mb-4">The day-ahead price is the hourly value for Greece as published on ADMIE's portal.</p>
 <h4 class="text-acc-300 font-semibold mb-1">Records</h4>
@@ -112,7 +112,7 @@ const METHODOLOGY = {
 <h4 class="text-acc-300 font-semibold mb-1">Ισοζύγιο και ζήτηση</h4>
 <p class="mb-4">Η ζήτηση είναι το συνολικό φορτίο του ΑΔΜΗΕ. Ισούται με παραγωγή + εισαγωγές − εξαγωγές + εκφόρτιση BESS − φόρτιση BESS − άντληση· η σελίδα το ελέγχει για κάθε ώρα και το επισημαίνει όταν δεν ισχύει. Οι εισαγωγές και οι εξαγωγές είναι τα επίσημα σύνολα του ΑΔΜΗΕ· οι ροές ανά χώρα εμφανίζονται ως ανάλυση.</p>
 <h4 class="text-acc-300 font-semibold mb-1">Μη κατανεμημένη καθαρή ενέργεια (UCE)</h4>
-<p class="mb-4">Η live καθαρή ενέργεια είναι ΑΠΕ συν υδροηλεκτρικά από τα live δεδομένα. Η φυσική καθαρή ενέργεια είναι μεγάλα + μικρά υδροηλεκτρικά + φωτοβολταϊκά + αιολικά + βιομάζα + συμπαραγωγή από τα εκ των υστέρων αρχεία. Το UCE είναι η διαφορά, live μείον φυσική, με το πρόσημό της: μια αρνητική ώρα σημαίνει ότι τα εκ των υστέρων αρχεία δείχνουν περισσότερη καθαρή παραγωγή από το live στοιχείο.</p>
+<p class="mb-4">Το live «ΑΠΕ» του ΑΔΜΗΕ περιέχει τη συμπαραγωγή (ΣΗΘΥΑ) και μια εκτίμηση της παραγωγής της διανομής που δεν μετριέται. Η φυσική καθαρή ενέργεια είναι το μετρημένο κομμάτι: μεγάλα + μικρά υδροηλεκτρικά + φωτοβολταϊκά + αιολικά + βιομάζα, από το SCADA μεταφοράς και το αρχείο μέσης τάσης RESMV. Η live καθαρή ενέργεια είναι live ΑΠΕ + υδροηλεκτρικά μείον τη συμπαραγωγή· η συμπαραγωγή αφαιρείται και από τις δύο πλευρές, γιατί είναι κυρίως με φυσικό αέριο. Το UCE είναι live μείον φυσική, με το πρόσημό του. Είναι κυρίως φ/β στέγης και λοιπά φ/β χαμηλής τάσης (το ημερήσιο σχήμα του ακολουθεί στενά τα φ/β μέσης τάσης), αιολικά της διανομής (το RESMV δεν έχει αιολικά) και μικρά υδροηλεκτρικά και βιομάζα χαμηλής τάσης. Η Κρήτη δεν υπάρχει σε καμία από τις δύο πηγές: και οι δύο τη βλέπουν μόνο μέσα από τα δύο καλώδια διασύνδεσης. Μια αρνητική ώρα σημαίνει ότι η εκτίμηση του ΑΔΜΗΕ βγήκε κάτω από τη μέτρηση, για παράδειγμα λόγω απωλειών· δεν είναι κατανάλωση. Στα tabs Live και Ημέρα, το «ΑΠΕ» είναι το στοιχείο του ΑΔΜΗΕ, μαζί με τη συμπαραγωγή.</p>
 <h4 class="text-acc-300 font-semibold mb-1">Τιμές</h4>
 <p class="mb-4">Η τιμή επόμενης ημέρας είναι η ωριαία τιμή για την Ελλάδα όπως δημοσιεύεται στην πύλη του ΑΔΜΗΕ.</p>
 <h4 class="text-acc-300 font-semibold mb-1">Ρεκόρ</h4>
@@ -603,7 +603,8 @@ async function renderClean() {
     const n = t().names, x = t(), tot = xr.totals, H = xr.hours;
 
     $('boxVar').innerHTML = boxRow(n.wind, tot.wind, C.wind) + boxRow(n.bigHydro, tot.big_hydro, C.bigHydro) + boxRow(n.solar, tot.solar, C.solar);
-    $('boxBase').innerHTML = boxRow(n.cogen, tot.cogen, C.cogen) + boxRow(n.smallHydro, tot.small_hydro, C.smallHydro) + boxRow(n.biomass, tot.biomass, C.biomass);
+    $('boxBase').innerHTML = boxRow(n.smallHydro, tot.small_hydro, C.smallHydro) + boxRow(n.biomass, tot.biomass, C.biomass) +
+        `<p class="pt-2 mt-1 border-t border-slate-700 text-xs text-slate-400">${esc(S.lang === 'el' ? 'Συμπαραγωγή (ΣΗΘΥΑ), εκτός καθαρής' : 'Cogeneration (CHP), excluded from clean')}: <span class="text-slate-300 font-semibold">${fmt(tot.cogen)} MWh</span></p>`;
     if (tot.uce === null) {
         const first = (S.manifest.live_days || [])[0];
         $('boxUce').innerHTML = `<p class="text-sm text-slate-400">${esc(x.uceNA.replace('{d}', first ? fmtDate(first) : '–'))}</p>`;
@@ -620,7 +621,7 @@ async function renderClean() {
             labels: H.map((h) => hourTick(h.hr)),
             datasets: [
                 // Σειρά στοίβαξης από κάτω προς τα πάνω (D28).
-                bar(n.biomass, 'biomass', C.biomass), bar(n.smallHydro, 'small_hydro', C.smallHydro), bar(n.cogen, 'cogen', C.cogen),
+                bar(n.biomass, 'biomass', C.biomass), bar(n.smallHydro, 'small_hydro', C.smallHydro),
                 bar(n.uce, 'uce', C.uce),
                 bar(n.solar, 'solar', C.solar), bar(n.bigHydro, 'big_hydro', C.bigHydro), bar(n.wind, 'wind', C.wind),
                 { type: 'line', label: n.price, data: H.map((h) => h.mcp), borderColor: C.price, backgroundColor: C.price, borderWidth: 2, pointRadius: 2.5, yAxisID: 'y1', order: 0 }
@@ -641,7 +642,7 @@ async function renderClean() {
                     return tipHead(tipHourLabel(h.hr), priceStr(h.mcp)) + tipSections(
                         tipRow(n.wind, h.wind, C.wind) + tipRow(n.bigHydro, h.big_hydro, C.bigHydro) + tipRow(n.solar, h.solar, C.solar),
                         tipRow(S.lang === 'el' ? 'Μη κατανεμημένη καθαρή ενέργεια' : 'Unallocated clean energy', h.uce, C.uce, { strong: true, sign: true }),
-                        tipRow(n.cogen, h.cogen, C.cogen) + tipRow(n.smallHydro, h.small_hydro, C.smallHydro) + tipRow(n.biomass, h.biomass, C.biomass),
+                        tipRow(n.smallHydro, h.small_hydro, C.smallHydro) + tipRow(n.biomass, h.biomass, C.biomass),
                         tipRow(S.lang === 'el' ? 'Συνολική καθαρή ενέργεια' : 'Total clean energy', total, null, { valueColor: C.res }));
                 })
             }

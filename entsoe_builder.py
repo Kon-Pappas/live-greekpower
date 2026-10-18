@@ -4,7 +4,7 @@ import os
 import json
 from datetime import datetime, timedelta
 import pytz
-from jsonio import load_json_strict, write_json_atomic
+from jsonio import write_json_atomic
 import contract
 
 def get_target_dates():
@@ -153,31 +153,6 @@ def build_entsoe_for_date(date_str, token):
         
     return entsoe_records
 
-def save_entsoe_data(new_records):
-    if not new_records: return
-    filepath = 'data/entsoe_ref.json'
-    os.makedirs('data', exist_ok=True)
-    
-    # Το αρχείο κρατά όλο το ιστορικό από 1/4/2026 και δεν υπάρχει αλλού:
-    # αν δεν διαβάζεται, ΣΤΑΜΑΤΑΜΕ αντί να το αντικαταστήσουμε με 2 μέρες.
-    history = load_json_strict(filepath, [])
-        
-    history_map = { (rec.get("date"), rec.get("target_hour")): i for i, rec in enumerate(history) }
-    
-    for new_rec in new_records:
-        key = (new_rec["date"], new_rec["target_hour"])
-        if key in history_map: 
-            history[history_map[key]] = new_rec
-        else:
-            history.append(new_rec)
-            history_map[key] = len(history) - 1
-            
-    # Ταξινόμηση
-    history.sort(key=lambda x: (x.get("date", ""), x.get("target_hour", 0)))
-
-    write_json_atomic(filepath, history)
-    print(f"✓ Δεδομένα ENTSO-E (Διασταύρωση) αποθηκεύτηκαν στο {filepath} ({len(history)} ώρες).")
-
 if __name__ == "__main__":
     target_dates = get_target_dates()
     token = os.environ.get('ENTSOE_TOKEN')
@@ -189,6 +164,9 @@ if __name__ == "__main__":
         all_entsoe_data.extend(daily_data)
         
     if all_entsoe_data:
-        save_entsoe_data(all_entsoe_data)
         # --- Νέα δομή (schema v1): ένα αρχείο ανά ημέρα ---
         contract.write_entsoe_days(all_entsoe_data)
+        # Φάση 3b: το παλιό συγκεντρωτικό αρχείο δεν χρησιμοποιείται πια.
+        if os.path.exists('data/entsoe_ref.json'):
+            os.remove('data/entsoe_ref.json')
+            print("✓ Το παλιό data/entsoe_ref.json αφαιρέθηκε (φάση 3b).")

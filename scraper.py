@@ -1,6 +1,7 @@
 import requests
 import json
 import os
+import time
 import sys
 from datetime import datetime, timedelta
 import pytz
@@ -165,57 +166,71 @@ def fetch_all_data(date_str):
         print(f"Σφάλμα κατά την άντληση {date_str}: {e}")
         return []
 
+RAW_PATH = 'data/live_raw.json'          # μνήμη συγχώνευσης: μόνο χθες + σήμερα
+LEGACY_PATH = 'data/live_data.json'      # παλιό αρχείο 30 ημερών (φάση 3b: σβήνεται)
+
 def save_to_json(new_records, is_live_mode, start_str, end_str):
-    """Γράφει το παλιό live_data.json (30 ημέρες, για τη σημερινή σελίδα)
-    και επιστρέφει το συγχωνευμένο ιστορικό πριν το κόψιμο των 30 ημερών,
-    ώστε να γραφτούν από αυτό τα νέα αρχεία ημέρας."""
+    """Συγχωνεύει τις νέες λήψεις με τη μνήμη (live mode) ή τις αντικαθιστά
+    (ιστορικό mode) και επιστρέφει όλες τις εγγραφές, ώστε να γραφτούν από
+    αυτές τα αρχεία ημέρας. Η μνήμη κρατά ΜΟΝΟ χθες και σήμερα: είναι το μόνο
+    που χρειάζεται η συγχώνευση (κρατά την παλιά τιμή όταν ο ΑΔΜΗΕ δίνει κενό)."""
     if not new_records: return []
-    filepath = 'data/live_data.json'
-    os.makedirs('data', exist_ok=True)
-    history = load_json_strict(filepath, [])
 
-    if is_live_mode:
-        print("Λειτουργία: LIVE (Εφαρμογή Sanity Checks & Ασφαλές Merging)")
-        history_map = { (rec.get("date"), rec.get("target_hour")): i for i, rec in enumerate(history) }
-        
-        for new_rec in new_records:
-            clean_rec = apply_live_sanity_checks(new_rec)
-            key = (clean_rec["date"], clean_rec["target_hour"])
-            
-            if key in history_map: 
-                idx = history_map[key]
-                history[idx] = merge_hourly_record(history[idx], clean_rec)
-            else:
-                history.append(clean_rec)
-                history_map[key] = len(history) - 1
-    else:
-        print(f"Λειτουργία: HISTORICAL (Clean Slate από {start_str} έως {end_str})")
-        history = [rec for rec in history if not (start_str <= rec.get("date", "") <= end_str)]
-        history.extend(new_records)
-            
+    if not is_live_mode:
+        # Ιστορικό mode (π.χ. backfill): οι ημέρες αντικαθίστανται ολόκληρες, δεν χρειάζεται
+        # συγχώνευση. Η μνήμη (live_raw.json) ΔΕΝ αγγίζεται: τη γράφει μόνο το ωριαίο scrape.
+        print(f"Λειτουργία: HISTORICAL (Αντικατάσταση δεδομένων από {start_str} έως {end_str})")
+        return sorted(new_records, key=lambda x: (x.get("date", ""), x.get("target_hour", 0)))
+
+    history = load_json_strict(RAW_PATH, None)
+    if history is None:
+        # Πρώτο run μετά τη φάση 3b: αφετηρία το παλιό αρχείο, αν υπάρχει.
+        history = load_json_strict(LEGACY_PATH, [])
+
+    print("Λειτουργία: LIVE (Εφαρμογή Sanity Checks & Ασφαλές Merging)")
+    history_map = { (rec.get("date"), rec.get("target_hour")): i for i, rec in enumerate(history) }
+    for new_rec in new_records:
+        clean_rec = apply_live_sanity_checks(new_rec)
+        key = (clean_rec.get("date"), clean_rec.get("target_hour"))
+        if key in history_map:
+            idx = history_map[key]
+            history[idx] = merge_hourly_record(history[idx], clean_rec)
+        else:
+            history.append(clean_rec)
+            history_map[key] = len(history) - 1
+
     history.sort(key=lambda x: (x.get("date", ""), x.get("target_hour", 0)))
-    
-    tz = pytz.timezone('Europe/Athens')
-    thirty_days_ago = datetime.now(tz) - timedelta(days=30)
-    cutoff = thirty_days_ago.strftime("%Y%m%d")
-    filtered_history = [rec for rec in history if rec.get("date", "") >= cutoff]
 
-    write_json_atomic(filepath, filtered_history)
-    print(f"✓ Δεδομένα αποθηκεύτηκαν στο {filepath}.")
+    tz = pytz.timezone('Europe/Athens')
+    keep_from = (datetime.now(tz) - timedelta(days=1)).strftime("%Y%m%d")
+    write_json_atomic(RAW_PATH, [rec for rec in history if rec.get("date", "") >= keep_from])
+
+    if os.path.exists(LEGACY_PATH):
+        os.remove(LEGACY_PATH)
+        print(f"✓ Το παλιό {LEGACY_PATH} αφαιρέθηκε (φάση 3b).")
+    print(f"✓ Μνήμη συγχώνευσης: {RAW_PATH}.")
     return history
 
 if __name__ == "__main__":
     target_dates, is_live_mode, start_str, end_str = get_target_dates()
     print(f"Θα αντληθούν δεδομένα για τις εξής {len(target_dates)} ημέρες: {target_dates}")
     
+    # Backfill: παύση ανάμεσα στις ημέρες, για να μην επιβαρύνουμε τον server του ΑΔΜΗΕ.
+    pause = float(os.environ.get('PAUSE_SECONDS', '0') or 0)
+    # Backfill: τα records και το manifest τα γράφει ΜΟΝΟ το ωριαίο scrape (ένας συγγραφέας ανά αρχείο).
+    skip_derived = os.environ.get('SKIP_DERIVED', '') == '1'
+
     all_new_data = []
-    for d_str in target_dates:
+    for i, d_str in enumerate(target_dates):
+        if i and pause:
+            time.sleep(pause)
         daily_data = fetch_all_data(d_str)
         all_new_data.extend(daily_data)
-        
+
     if all_new_data:
         merged_history = save_to_json(all_new_data, is_live_mode, start_str, end_str)
         # --- Νέα δομή (schema v1): αρχεία ημέρας, records, manifest ---
         contract.write_live_days(merged_history, set(target_dates))
-        contract.build_records()
-        contract.write_manifest()
+        if not skip_derived:
+            contract.build_records()
+            contract.write_manifest()
