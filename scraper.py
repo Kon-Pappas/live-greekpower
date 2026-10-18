@@ -6,6 +6,44 @@ from datetime import datetime, timedelta
 import pytz
 
 # =====================================================================
+# 0. ΑΣΦΑΛΗΣ ΑΝΑΓΝΩΣΗ / ΕΓΓΡΑΦΗ JSON
+# =====================================================================
+
+def load_json_strict(path, default):
+    """Αν το αρχείο δεν υπάρχει -> default.
+    Αν υπάρχει αλλά δεν διαβάζεται -> ΣΤΑΜΑΤΑΜΕ (exit 1), ώστε να μη γραφτεί
+    από πάνω του κάτι φτωχότερο. Το Action αποτυγχάνει, δεν γίνεται commit,
+    και το προηγούμενο καλό αρχείο μένει άθικτο στο repo."""
+    if not os.path.exists(path):
+        return default
+    try:
+        with open(path, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except Exception as e:
+        print(f"✗ ΚΡΙΣΙΜΟ: Το {path} υπάρχει αλλά δεν διαβάζεται ({e}). Διακοπή χωρίς εγγραφή.")
+        sys.exit(1)
+
+def load_json_lenient(path, default):
+    """Για αρχεία που απλώς ΔΙΑΒΑΖΟΥΜΕ (δεν τα ξαναγράφουμε): αν χαλάσουν,
+    συνεχίζουμε χωρίς αυτά, με προειδοποίηση."""
+    if not os.path.exists(path):
+        return default
+    try:
+        with open(path, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except Exception as e:
+        print(f"⚠ Προειδοποίηση: Το {path} δεν διαβάστηκε ({e}). Συνέχεια χωρίς αυτό.")
+        return default
+
+def write_json_atomic(path, data):
+    """Γράφει πρώτα σε προσωρινό αρχείο και μετά το μετονομάζει,
+    ώστε να μην μείνει ποτέ μισογραμμένο JSON."""
+    tmp = path + '.tmp'
+    with open(tmp, 'w', encoding='utf-8') as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+    os.replace(tmp, path)
+
+# =====================================================================
 # 1. ΚΑΝΟΝΕΣ ΕΠΙΚΥΡΩΣΗΣ (SANITY CHECKS) & ΣΥΓΧΩΝΕΥΣΗΣ
 # =====================================================================
 
@@ -168,14 +206,8 @@ def save_to_json(new_records, is_live_mode, start_str, end_str):
     if not new_records: return
     filepath = 'data/live_data.json'
     os.makedirs('data', exist_ok=True)
-    history = []
-    
-    if os.path.exists(filepath):
-        try:
-            with open(filepath, 'r', encoding='utf-8') as f:
-                history = json.load(f)
-        except: pass 
-        
+    history = load_json_strict(filepath, [])
+
     if is_live_mode:
         print("Λειτουργία: LIVE (Εφαρμογή Sanity Checks & Ασφαλές Merging)")
         history_map = { (rec.get("date"), rec.get("target_hour")): i for i, rec in enumerate(history) }
@@ -202,8 +234,7 @@ def save_to_json(new_records, is_live_mode, start_str, end_str):
     cutoff = thirty_days_ago.strftime("%Y%m%d")
     filtered_history = [rec for rec in history if rec.get("date", "") >= cutoff]
 
-    with open(filepath, 'w', encoding='utf-8') as f:
-        json.dump(filtered_history, f, ensure_ascii=False, indent=2)
+    write_json_atomic(filepath, filtered_history)
     print(f"✓ Δεδομένα αποθηκεύτηκαν στο {filepath}.")
 
 def update_records():
@@ -216,33 +247,21 @@ def update_records():
     }
     
     # Διατήρηση των παλιών ρεκόρ για να μην χαθούν δεδομένα!
-    if os.path.exists(records_path):
-        try:
-            with open(records_path, 'r', encoding='utf-8') as f:
-                old_records = json.load(f)
-                for category in ['daily', 'hourly']:
-                    for key in records[category]:
-                        if key in old_records.get(category, {}):
-                            records[category][key] = old_records[category][key]
-        except: pass
+    # Αν το records.json υπάρχει αλλά είναι χαλασμένο, ΣΤΑΜΑΤΑΜΕ:
+    # αλλιώς τα ρεκόρ θα ξαναϋπολογίζονταν μόνο από τις τελευταίες 30 ημέρες
+    # και θα έσβηναν το ιστορικό.
+    old_records = load_json_strict(records_path, {})
+    for category in ['daily', 'hourly']:
+        for key in records[category]:
+            if key in old_records.get(category, {}):
+                records[category][key] = old_records[category][key]
 
-    # --- 1. Διάβασμα Live Δεδομένων ---
-    all_live = []
-    live_filepath = 'data/live_data.json'
-    if os.path.exists(live_filepath):
-        try:
-            with open(live_filepath, 'r', encoding='utf-8') as f:
-                all_live = json.load(f)
-        except: pass
+    # --- 1. Διάβασμα Live Δεδομένων (μόλις γράφτηκε από το save_to_json) ---
+    all_live = load_json_strict('data/live_data.json', [])
 
-    # --- 2. Διάβασμα X-Ray Δεδομένων ---
-    all_xray = []
-    xray_filepath = 'data/xray_data.json'
-    if os.path.exists(xray_filepath):
-        try:
-            with open(xray_filepath, 'r', encoding='utf-8') as f:
-                all_xray = json.load(f)
-        except: pass
+    # --- 2. Διάβασμα X-Ray Δεδομένων (μόνο ανάγνωση: αν λείπει, απλώς δεν
+    #        ενημερώνονται τα solar/wind ρεκόρ· τα παλιά μένουν) ---
+    all_xray = load_json_lenient('data/xray_data.json', [])
 
     def add_top3(lst, entry):
         existing = next((i for i in lst if i['id'] == entry['id']), None)
@@ -345,8 +364,7 @@ def update_records():
             records['daily']['solar'] = add_top3(records['daily']['solar'], {'id': date_formatted, 'value': round(x_vals['solar'], 1)})
             records['daily']['wind'] = add_top3(records['daily']['wind'], {'id': date_formatted, 'value': round(x_vals['wind'], 1)})
 
-    with open(records_path, 'w', encoding='utf-8') as f:
-        json.dump(records, f, ensure_ascii=False, indent=2)
+    write_json_atomic(records_path, records)
     print(f"✓ Το records.json (14 Metrics) ενημερώθηκε επιτυχώς.")
 
 if __name__ == "__main__":
