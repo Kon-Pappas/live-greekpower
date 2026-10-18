@@ -1,0 +1,118 @@
+name: Backfill live history
+
+# Γεμίζει τα live αρχεία ημέρας (data/live/) για παλιές ημερομηνίες και μετά ξαναϋπολογίζει
+# το UCE σε όλα τα αρχεία X-Ray (data/xray/), με τον ορισμό D30. Τρέχει μόνο χειροκίνητα:
+# Actions → «Backfill live history» → Run workflow. Ασφαλές να ξανατρέξει (αντικαθιστά τις ίδιες ημέρες).
+#
+# Σεβασμός στον server του ΑΔΜΗΕ: παύση ανάμεσα στις ημέρες και ανάμεσα στα κομμάτια.
+# Ένας συγγραφέας ανά αρχείο: το backfill ΔΕΝ γράφει records.json, manifest.json, live_raw.json·
+# αυτά τα ενημερώνει το επόμενο ωριαίο scrape (ξαναϋπολογίζει τα ρεκόρ από όλο το ιστορικό).
+on:
+  workflow_dispatch:
+    inputs:
+      start_date:
+        description: 'Από (YYYYMMDD)'
+        required: true
+        default: '20260401'
+      end_date:
+        description: 'Έως (YYYYMMDD)'
+        required: true
+        default: '20260917'
+      chunk_days:
+        description: 'Ημέρες ανά κομμάτι (commit μετά από κάθε κομμάτι)'
+        required: true
+        default: '15'
+      pause_seconds:
+        description: 'Παύση ανάμεσα στις ημέρες (δευτερόλεπτα)'
+        required: true
+        default: '5'
+      chunk_pause_seconds:
+        description: 'Παύση ανάμεσα στα κομμάτια (δευτερόλεπτα)'
+        required: true
+        default: '60'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: backfill
+  cancel-in-progress: false
+
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests pytz
+
+      - name: Backfill in chunks
+        env:
+          BF_START: ${{ github.event.inputs.start_date }}
+          BF_END: ${{ github.event.inputs.end_date }}
+          BF_CHUNK: ${{ github.event.inputs.chunk_days }}
+          BF_PAUSE: ${{ github.event.inputs.pause_seconds }}
+          BF_CHUNK_PAUSE: ${{ github.event.inputs.chunk_pause_seconds }}
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action Bot"
+
+          commit_push () {
+            git add -A data
+            if git diff --staged --quiet; then
+              echo "Καμία αλλαγή."
+              return 0
+            fi
+            git commit -m "$1"
+            for i in 1 2 3; do
+              git pull --rebase origin main && git push && return 0
+              echo "Push απέτυχε (προσπάθεια $i), νέα δοκιμή σε 10s..."
+              sleep 10
+            done
+            echo "Το push απέτυχε μετά από 3 προσπάθειες."
+            return 1
+          }
+
+          # Κομμάτια διαστήματος, π.χ. "20260401 20260415"
+          python - > chunks.txt <<'PY'
+          import os
+          from datetime import datetime, timedelta
+          s = datetime.strptime(os.environ['BF_START'], '%Y%m%d')
+          e = datetime.strptime(os.environ['BF_END'], '%Y%m%d')
+          n = max(1, int(os.environ['BF_CHUNK']))
+          while s <= e:
+              c = min(e, s + timedelta(days=n - 1))
+              print(s.strftime('%Y%m%d'), c.strftime('%Y%m%d'))
+              s = c + timedelta(days=1)
+          PY
+          echo "Κομμάτια:"; cat chunks.txt
+
+          first=1
+          while read -r CS CE; do
+            if [ "$first" -eq 0 ]; then
+              echo "Παύση ${BF_CHUNK_PAUSE}s πριν το επόμενο κομμάτι..."
+              sleep "$BF_CHUNK_PAUSE"
+            fi
+            first=0
+            echo "=== Live backfill $CS → $CE ==="
+            START_DATE="$CS" END_DATE="$CE" SKIP_DERIVED=1 PAUSE_SECONDS="$BF_PAUSE" python scraper.py
+            commit_push "Backfill live: $CS–$CE"
+          done < chunks.txt
+
+          # Σε ΟΛΑ τα αρχεία X-Ray: έτσι εφαρμόζεται και ο ορισμός D30 (συμπαραγωγή εκτός καθαρής)
+          # στις ημέρες που γράφτηκαν πριν από αυτόν. Μόνο τοπικά αρχεία, καμία λήψη.
+          echo "=== Επαναϋπολογισμός UCE σε όλα τα αρχεία X-Ray ==="
+          python recompute_uce.py
+          commit_push "Backfill: UCE ξαναϋπολογίστηκε σε όλο το ιστορικό X-Ray"
+          rm -f chunks.txt

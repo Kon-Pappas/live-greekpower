@@ -52,7 +52,8 @@ jobs:
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action Bot"
-          git add data/live_data.json data/records.json data/manifest.json data/live
+          # -A: καταγράφει και τις διαγραφές (το παλιό live_data.json, φάση 3b)
+          git add -A data
           if git diff --staged --quiet; then
             echo "Καμία αλλαγή στα δεδομένα."
             exit 0

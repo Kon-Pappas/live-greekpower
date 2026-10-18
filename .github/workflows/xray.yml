@@ -61,7 +61,8 @@ jobs:
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action Bot"
-          git add data/xray_data.json data/entsoe_ref.json data/xray data/entsoe
+          # -A: καταγράφει και τις διαγραφές (τα παλιά xray_data.json / entsoe_ref.json, φάση 3b)
+          git add -A data
           if git diff --staged --quiet; then
             echo "Καμία αλλαγή στα δεδομένα."
             exit 0
