@@ -12,6 +12,47 @@ let validLiveRecord = null;
 let selectedHourLive = null;
 let selectedDateDaily = null;
 
+// Μια ώρα έχει «πραγματικά» δεδομένα όταν υπάρχει παραγωγή ή ζήτηση.
+// (Ο ΑΔΜΗΕ δίνει τιμή DAM για όλο το 24ωρο από την προηγούμενη μέρα,
+//  οπότε υπάρχουν εγγραφές και για ώρες που δεν έχουν γίνει ακόμα.)
+const hasRealData = (rec) => {
+    const gen = (rec.production_mix && rec.production_mix['TOTAL_PROD']) || 0;
+    const dem = rec.demand_mwh || 0;
+    return gen > 0 || dem > 0;
+};
+
+// Πόσα λεπτά έχουν περάσει από το ΤΕΛΟΣ της ώρας της εγγραφής, σε ώρα Αθήνας,
+// ανεξάρτητα από τη ζώνη ώρας του επισκέπτη. Ο ΑΔΜΗΕ μετρά hr = 1..24
+// (hr 1 = 00:00–01:00), άρα το τέλος της ώρας hr είναι η ώρα hr της ημέρας.
+function minutesSinceHourEnd(rec) {
+    const parts = Object.fromEntries(
+        new Intl.DateTimeFormat('en-GB', {
+            timeZone: 'Europe/Athens', hourCycle: 'h23',
+            year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit'
+        }).formatToParts(new Date()).map(p => [p.type, p.value])
+    );
+    const nowAthens = Date.UTC(+parts.year, +parts.month - 1, +parts.day, +parts.hour, +parts.minute);
+    const y = +rec.date.substring(0, 4), m = +rec.date.substring(4, 6) - 1, d = +rec.date.substring(6, 8);
+    const hourEnd = Date.UTC(y, m, d, rec.target_hour); // hr 24 → 00:00 της επόμενης μέρας
+    return Math.round((nowAthens - hourEnd) / 60000);
+}
+
+// Όρια: το cron τρέχει στο :05, άρα κανονικά η τελευταία ώρα είναι 5–65' «παλιά».
+const STALE_DELAYED_MIN = 75;   // χάθηκε ένα run
+const STALE_STALE_MIN = 180;    // κάτι δεν πάει καλά στη ροή
+
+const PILL_STYLES = {
+    green: { color: 'var(--accent-green)', border: 'rgba(46, 204, 113, 0.3)', bg: 'rgba(46, 204, 113, 0.15)' },
+    amber: { color: '#ffc000',             border: 'rgba(255, 192, 0, 0.3)',  bg: 'rgba(255, 192, 0, 0.15)' },
+    red:   { color: '#e74c3c',             border: 'rgba(231, 76, 60, 0.35)', bg: 'rgba(231, 76, 60, 0.15)' }
+};
+function setPill(pill, text, tone) {
+    const st = PILL_STYLES[tone];
+    pill.innerHTML = '● ' + text;
+    pill.style.color = st.color; pill.style.borderColor = st.border; pill.style.backgroundColor = st.bg;
+}
+const fmtLag = (min) => min < 120 ? `${min}'` : `${Math.floor(min / 60)}h ${String(min % 60).padStart(2, '0')}'`;
+
 // --- 2. Initialize App ---
 document.addEventListener('DOMContentLoaded', () => {
     initCharts();
@@ -110,11 +151,8 @@ async function loadData() {
         });
 
         for (let i = globalData.length - 1; i >= 0; i--) {
-            let d = globalData[i];
-            let totalGen = d.production_mix['TOTAL_PROD'] || 0;
-            let demand = d.demand_mwh || 0;
-            if (totalGen > 0 || demand > 0) {
-                validLiveRecord = d;
+            if (hasRealData(globalData[i])) {
+                validLiveRecord = globalData[i];
                 break;
             }
         }
@@ -139,7 +177,7 @@ function updateDropdownState() {
     dropdown.innerHTML = '';
     
     if (currentActiveTab === 'tab-live') {
-        const todayRecords = globalData.filter(d => d.date === latestDateGlobal);
+        const todayRecords = globalData.filter(d => d.date === latestDateGlobal && hasRealData(d));
         todayRecords.forEach(rec => {
             let hrStr = rec.target_hour.toString().padStart(2, '0') + ':00';
             let option = document.createElement('option');
@@ -183,11 +221,12 @@ function handleDropdownChange() {
         document.getElementById('last-updated').innerText = `Last Update: ${fetchTime} | Target Hour: ${displayHour}`;
         
         if (record.target_hour === validLiveRecord.target_hour) {
-            pill.innerHTML = '● Live Data Active';
-            pill.style.color = 'var(--accent-green)'; pill.style.borderColor = 'rgba(46, 204, 113, 0.3)'; pill.style.backgroundColor = 'rgba(46, 204, 113, 0.15)';
+            const lag = minutesSinceHourEnd(record);
+            if (lag <= STALE_DELAYED_MIN)      setPill(pill, 'Live Data Active', 'green');
+            else if (lag <= STALE_STALE_MIN)   setPill(pill, `Delayed · ${fmtLag(lag)}`, 'amber');
+            else                               setPill(pill, `Stale Data · ${fmtLag(lag)}`, 'red');
         } else {
-            pill.innerHTML = '● Historical Hour';
-            pill.style.color = '#ffc000'; pill.style.borderColor = 'rgba(255, 192, 0, 0.3)'; pill.style.backgroundColor = 'rgba(255, 192, 0, 0.15)';
+            setPill(pill, 'Historical Hour', 'amber');
         }
         
         renderLiveTab(record);
@@ -202,11 +241,9 @@ function handleDropdownChange() {
         document.getElementById('last-updated').innerText = `Last Update: ${fetchTime} | Selected Date: ${formattedDate}`;
         
         if (selectedDateDaily === latestDateGlobal) {
-            pill.innerHTML = '● Today';
-            pill.style.color = 'var(--accent-green)'; pill.style.borderColor = 'rgba(46, 204, 113, 0.3)'; pill.style.backgroundColor = 'rgba(46, 204, 113, 0.15)';
+            setPill(pill, 'Today', 'green');
         } else {
-            pill.innerHTML = '● Historical Day';
-            pill.style.color = '#ffc000'; pill.style.borderColor = 'rgba(255, 192, 0, 0.3)'; pill.style.backgroundColor = 'rgba(255, 192, 0, 0.15)';
+            setPill(pill, 'Historical Day', 'amber');
         }
         
         if (currentActiveTab === 'tab-daily') {
