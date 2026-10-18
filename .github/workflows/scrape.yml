@@ -52,7 +52,7 @@ jobs:
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action Bot"
-          git add data/live_data.json data/records.json
+          git add data/live_data.json data/records.json data/manifest.json data/live
           if git diff --staged --quiet; then
             echo "Καμία αλλαγή στα δεδομένα."
             exit 0

@@ -61,7 +61,7 @@ jobs:
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action Bot"
-          git add data/xray_data.json data/entsoe_ref.json
+          git add data/xray_data.json data/entsoe_ref.json data/xray data/entsoe
           if git diff --staged --quiet; then
             echo "Καμία αλλαγή στα δεδομένα."
             exit 0

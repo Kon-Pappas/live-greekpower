@@ -1,0 +1,55 @@
+name: Migrate to v2 (one-off)
+
+# ΜΙΑΣ ΧΡΗΣΗΣ: μετατρέπει το υπάρχον ιστορικό στη νέα δομή (data/live, data/xray,
+# data/entsoe, manifest.json, records.json). Τρέχει μόνο χειροκίνητα από το
+# Actions → «Run workflow». Μπορεί να σβηστεί μετά την επιτυχή εκτέλεση.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+# Ίδιο group με το ωριαίο scrape: τα δύο δεν τρέχουν ποτέ ταυτόχρονα.
+concurrency:
+  group: scrape-live
+  cancel-in-progress: false
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests pytz
+
+      - name: Run migration
+        run: python migrate_v2.py
+
+      - name: Commit and push changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action Bot"
+          git add data/live data/xray data/entsoe data/manifest.json data/records.json
+          if git diff --staged --quiet; then
+            echo "Καμία αλλαγή."
+            exit 0
+          fi
+          git commit -m "Μετατροπή ιστορικού στη νέα δομή v1: $(TZ=Europe/Athens date +'%Y-%m-%d %H:%M')"
+          for i in 1 2 3; do
+            git pull --rebase origin main && git push && exit 0
+            echo "Push απέτυχε (προσπάθεια $i), νέα δοκιμή σε 10s..."
+            sleep 10
+          done
+          echo "Το push απέτυχε μετά από 3 προσπάθειες."
+          exit 1
