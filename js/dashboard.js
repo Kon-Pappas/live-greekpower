@@ -300,8 +300,11 @@ async function onPickerChange() {
 const TAB_ON = ['bg-acc-400', 'text-slate-900', 'border-acc-400', 'md:bg-transparent', 'md:text-acc-400', 'md:border-b-acc-400'];
 const TAB_OFF = ['bg-slate-800', 'text-slate-400', 'border-slate-700', 'hover:text-white', 'md:bg-transparent', 'md:border-transparent', 'md:hover:text-acc-200'];
 
+function hideTip() { const el = document.getElementById('chart-tip'); if (el) el.style.opacity = 0; }
+
 function setTab(tab) {
     S.tab = tab;
+    hideTip();
     document.querySelectorAll('.tab-btn').forEach((b) => {
         const on = b.dataset.tab === tab;
         b.classList.remove(...TAB_ON, ...TAB_OFF);
@@ -368,6 +371,48 @@ function toggleModal(open) {
         setTimeout(() => { modal.classList.add('hidden'); modal.classList.remove('flex'); $('btnMethodologyWrap').focus(); }, 300);
     }
 }
+
+// ---------------------------------------------------------------------
+// 6b. Δικά μας HTML tooltips (επικεφαλίδα ώρα | τιμή, ενότητες, σύνολα)
+// ---------------------------------------------------------------------
+const tipHourLabel = (hr) => `${S.lang === 'el' ? 'Ώρα' : 'Hour'}: ${pad(hr - 1)}–${pad(hr)}`;
+const tipHead = (left, right) => `<div class="flex justify-between items-baseline gap-6 mb-2.5">
+    <b class="text-[15px] text-acc-300">${left}</b>${right ? `<b class="text-[15px]" style="color:${C.price}">${right}</b>` : ''}</div>`;
+const tipRule = '<div class="border-t border-dashed border-white/20 my-2"></div>';
+function tipRow(label, value, color, opts = {}) {
+    const v = value === null || value === undefined ? '–' : (opts.sign && value > 0 ? '+' : '') + fmt(value, opts.digits || 0);
+    return `<div class="flex justify-between items-baseline gap-6 py-[2px] text-[13.5px]">
+        <span class="${opts.strong ? 'font-bold text-white' : 'text-slate-200'}">${color ? `<span class="inline-block w-2 h-2 rounded-full mr-2 align-middle" style="background:${color}"></span>` : ''}${esc(label)}:</span>
+        <span class="text-white whitespace-nowrap" ${opts.valueColor ? `style="color:${opts.valueColor}"` : ''}><b>${v}</b> ${opts.unit || 'MWh'}</span></div>`;
+}
+const priceStr = (p) => p === null || p === undefined ? '' : `MCP: ${fmt(p, p % 1 ? 2 : 0)} €/MWh`;
+
+// Επιστρέφει handler για tooltip.external· το build(dataIndex) δίνει το HTML.
+function htmlTip(build) {
+    return (ctx) => {
+        let el = document.getElementById('chart-tip');
+        if (!el) {
+            el = document.createElement('div');
+            el.id = 'chart-tip';
+            el.className = 'fixed z-[9000] pointer-events-none rounded-lg border border-slate-600 bg-slate-900/95 shadow-2xl px-4 py-3 min-w-[240px] max-w-[92vw] transition-opacity duration-100';
+            document.body.appendChild(el);
+        }
+        const tt = ctx.tooltip;
+        if (!tt || tt.opacity === 0 || !tt.dataPoints || !tt.dataPoints.length) { el.style.opacity = 0; return; }
+        el.innerHTML = build(tt.dataPoints[0].dataIndex);
+        el.style.opacity = 1;
+        // Θέση: δεξιά του σημείου, ή αριστερά αν δεν χωράει· πάντα μέσα στην οθόνη.
+        const r = ctx.chart.canvas.getBoundingClientRect();
+        const w = el.offsetWidth, h = el.offsetHeight, gap = 14;
+        let x = r.left + tt.caretX + gap;
+        if (x + w > window.innerWidth - 8) x = r.left + tt.caretX - w - gap;
+        x = Math.max(8, Math.min(x, window.innerWidth - w - 8));
+        let y = r.top + ctx.chart.chartArea.top;
+        y = Math.max(8, Math.min(y, window.innerHeight - h - 8));
+        el.style.left = `${x}px`; el.style.top = `${y}px`;
+    };
+}
+const tipOff = (build) => ({ enabled: false, external: htmlTip(build) });
 
 // ---------------------------------------------------------------------
 // 7. LIVE
@@ -438,7 +483,15 @@ function renderLive() {
         },
         options: {
             scales: { x: { stacked: true, grid: { display: false } }, y: { stacked: true, ticks: { callback: (v) => fmt(Math.abs(v)) }, title: { display: true, text: 'MWh' } } },
-            plugins: { legend: { position: 'bottom' }, tooltip: { callbacks: { label: (c) => ` ${c.dataset.label}: ${fmt(Math.abs(c.raw))} MWh` } } }
+            plugins: {
+                legend: { position: 'bottom' },
+                tooltip: tipOff((i) => {
+                    const f = h.flows[codes[i]], imp = f.imp || 0, exp = f.exp || 0;
+                    return tipHead(esc(t().countries[codes[i]]), '') +
+                        tipRow(n.imports, imp, C.imports) + tipRow(n.exports, exp, C.exports) + tipRule +
+                        tipRow(S.lang === 'el' ? 'Καθαρό (εισ. − εξ.)' : 'Net (imp − exp)', imp - exp, null, { strong: true, sign: true });
+                })
+            }
         }
     });
     $('flowsMismatch').textContent = t().flowsMismatch;
@@ -513,13 +566,17 @@ async function renderDaily() {
             },
             plugins: {
                 legend: { position: 'bottom' },
-                tooltip: {
-                    filter: (c) => c.raw !== null && c.raw !== 0,
-                    callbacks: {
-                        title: (items) => hourRange(H[items[0].dataIndex].hr),
-                        label: (c) => c.dataset.yAxisID === 'y1' ? ` ${c.dataset.label}: ${fmt(c.raw, 2)} €/MWh` : ` ${c.dataset.label}: ${fmt(Math.abs(c.raw))} MWh`
-                    }
-                }
+                tooltip: tipOff((i) => {
+                    const h = H[i];
+                    let html = tipHead(tipHourLabel(h.hr), priceStr(h.dam_price));
+                    if (!h.has_data) return html + `<p class="text-xs text-slate-400">${S.lang === 'el' ? 'Η ώρα δεν έχει γίνει ακόμα.' : 'This hour has not happened yet.'}</p>`;
+                    return html +
+                        tipRow(n.hydro, h.gen.hydro, C.hydro) + tipRow(n.res, h.gen.res, C.res) + tipRow(n.dis, h.storage.dis, C.dis) +
+                        tipRow(n.imports, h.imports, C.imports) + tipRow(n.gas, h.gen.gas, C.gas) + tipRow(n.lignite, h.gen.lignite, C.lignite) +
+                        tipRule +
+                        tipRow(n.demand, h.demand, '#94a3b8', { strong: true }) + tipRow(n.exports, h.exports, C.exports) +
+                        tipRow(n.chg, h.storage.chg, C.chg) + tipRow(n.pumping, h.pumping, C.pumping);
+                })
             }
         }
     });
@@ -573,19 +630,18 @@ async function renderClean() {
             },
             plugins: {
                 legend: { position: 'bottom' },
-                tooltip: {
-                    filter: (c) => c.raw !== null,
-                    callbacks: {
-                        title: (items) => hourRange(H[items[0].dataIndex].hr),
-                        label: (c) => c.dataset.yAxisID === 'y1' ? ` ${c.dataset.label}: ${fmt(c.raw, 2)} €/MWh`
-                            : ` ${c.dataset.label}: ${c.dataset.label === n.uce && c.raw > 0 ? '+' : ''}${fmt(c.raw)} MWh`,
-                        footer: (items) => {
-                            const h = H[items[0].dataIndex];
-                            return `${S.lang === 'el' ? 'Φυσική καθαρή' : 'Physical clean'}: ${fmt(h.phys_clean)} MWh` +
-                                (h.live_clean !== null ? `\n${S.lang === 'el' ? 'Live καθαρή' : 'Live clean'}: ${fmt(h.live_clean)} MWh` : '');
-                        }
-                    }
-                }
+                tooltip: tipOff((i) => {
+                    const h = H[i];
+                    const total = h.uce !== null ? h.phys_clean + h.uce : h.phys_clean;
+                    return tipHead(tipHourLabel(h.hr), priceStr(h.mcp)) +
+                        tipRow(n.wind, h.wind, C.wind) + tipRow(n.bigHydro, h.big_hydro, C.bigHydro) + tipRow(n.solar, h.solar, C.solar) +
+                        tipRule +
+                        tipRow(S.lang === 'el' ? 'Μη κατανεμημένη καθαρή ενέργεια' : 'Unallocated clean energy', h.uce, C.uce, { strong: true, sign: true }) +
+                        tipRule +
+                        tipRow(n.cogen, h.cogen, C.cogen) + tipRow(n.smallHydro, h.small_hydro, C.smallHydro) + tipRow(n.biomass, h.biomass, C.biomass) +
+                        tipRule +
+                        tipRow(S.lang === 'el' ? 'Συνολική καθαρή ενέργεια' : 'Total clean energy', total, null, { valueColor: C.res });
+                })
             }
         }
     });
@@ -603,7 +659,12 @@ async function renderClean() {
             scales: { x: { grid: { display: false }, title: { display: true, text: x.hourAxis } }, y: { title: { display: true, text: 'MWh' }, ticks: { callback: (v) => fmt(v) } } },
             plugins: {
                 legend: { position: 'bottom' },
-                tooltip: { callbacks: { title: (items) => hourRange(H[items[0].dataIndex].hr), label: (c) => ` ${c.dataset.label}: ${fmt(c.raw)} MWh` } }
+                tooltip: tipOff((i) => {
+                    const h = H[i], e = enByHr[h.hr] || {};
+                    return tipHead(tipHourLabel(h.hr), '') +
+                        tipRow(n.admieSolar, h.solar, C.solar) + tipRow(n.entsoeSolar, en ? e.solar : null, C.entsoeSolar) + tipRule +
+                        tipRow(n.admieWind, h.wind, C.wind) + tipRow(n.entsoeWind, en ? e.wind : null, C.entsoeWind);
+                })
             }
         }
     });
@@ -767,4 +828,5 @@ document.addEventListener('DOMContentLoaded', () => {
     boot();
     setInterval(refresh, 5 * 60 * 1000);
     setInterval(updatePill, 60 * 1000);
+    window.addEventListener('scroll', hideTip, { passive: true });
 });
