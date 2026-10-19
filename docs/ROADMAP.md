@@ -43,9 +43,8 @@ Check what ADMIE returned for 25 Oct, handle a 25-hour (and 23-hour) day in the 
 ## Phase 3f: UI/UX round (done 18 Oct 2026, D38–D40)
 Live layout, donut callouts, clean/fossil shares, MCP card, daily ribbon, short intros with methodology links, record cards with progression modal, footer rule.
 
-## Phase 3g: Crete and the layers of load (code done 19 Oct 2026, D41–D42)
-- Run *Backfill live history* for 1 Apr – 17 Oct (live `CRETE LOAD` for the whole history) and *X-Ray history refresh* for 1 Apr – 17 Jun (AC line in Greek spelling).
-- Re-test K19 on the full period.
+## Phase 3g: Crete and the layers of load (done 19 Oct 2026, D41–D42; K19 confirmed on 1 Apr–3 Oct)
+- Live backfill (1 Apr–17 Oct) and X-Ray refresh (1 Apr–17 Jun) run on 19 Oct 2026; K19 re-tested and closed.
 
 ## Phase 4: Content
 - Leaderboard split done early (D24).
