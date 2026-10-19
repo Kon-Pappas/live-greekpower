@@ -49,7 +49,7 @@ const T = {
         tabs: { live: 'Live (hour)', daily: 'Daily', clean: 'Clean energy', analysis: 'Analysis', records: 'Records' },
         pickerHour: 'Hour:', pickerDate: 'Date:', today: 'today',
         pill: { live: 'Live', delayed: 'Delayed', stale: 'Stale data', histHour: 'Past hour', today: 'Today', histDay: 'Past day', expost: 'Ex-post data' },
-        load: { title: 'System Initialization', g1: 'Data fetching', g2: 'Analytics', s1: 'Reading the data index', s2: 'Live balance', s3: 'Daily dispatch', s4: 'Clean energy cross-check', s5: 'Records', ready: 'Dashboard is ready!', error: 'The data could not be loaded. Reload the page in a few minutes.' },
+        load: { title: 'System Initialization', g1: 'Data fetching', g2: 'Building views', s1: 'Reading the data', s2: 'Live balance', s3: 'Daily dispatch', s4: 'Clean energy cross-check', s5: 'Analysis of the day', s6: 'Records', ready: 'Dashboard is ready!', error: 'The data could not be loaded. Reload the page in a few minutes.' },
         names: { lignite: 'Lignite', gas: 'Natural gas', hydro: 'Hydro', res: 'RES (incl. CHP)', dis: 'BESS discharge', chg: 'BESS charge', imports: 'Imports', exports: 'Exports', pumping: 'Pumping', demand: 'Domestic demand', price: 'Day-ahead price', total: 'Total generation',
                  wind: 'Wind', bigHydro: 'Large hydro', solar: 'Solar', cogen: 'Cogeneration', smallHydro: 'Small hydro', biomass: 'Biomass', uce: 'UCE', entsoeSolar: 'Solar (ENTSO-E)', entsoeWind: 'Wind (ENTSO-E)', admieSolar: 'Solar (ADMIE)', admieWind: 'Wind (ADMIE)' },
         countries: { AL: 'Albania', BG: 'Bulgaria', IT: 'Italy', TR: 'Türkiye', MK: 'North Macedonia' },
@@ -106,7 +106,7 @@ const T = {
         tabs: { live: 'Live (ώρα)', daily: 'Ημέρα', clean: 'Καθαρή ενέργεια', analysis: 'Ανάλυση', records: 'Ρεκόρ' },
         pickerHour: 'Ώρα:', pickerDate: 'Ημέρα:', today: 'σήμερα',
         pill: { live: 'Live', delayed: 'Καθυστέρηση', stale: 'Παλιά δεδομένα', histHour: 'Προηγούμενη ώρα', today: 'Σήμερα', histDay: 'Προηγούμενη ημέρα', expost: 'Εκ των υστέρων' },
-        load: { title: 'Εκκίνηση', g1: 'Λήψη δεδομένων', g2: 'Ανάλυση', s1: 'Ανάγνωση ευρετηρίου', s2: 'Ισοζύγιο ώρας', s3: 'Κατανομή ημέρας', s4: 'Διασταύρωση καθαρής ενέργειας', s5: 'Ρεκόρ', ready: 'Το dashboard είναι έτοιμο!', error: 'Τα δεδομένα δεν φορτώθηκαν. Ανανεώστε τη σελίδα σε λίγα λεπτά.' },
+        load: { title: 'Εκκίνηση', g1: 'Λήψη δεδομένων', g2: 'Προετοιμασία προβολών', s1: 'Ανάγνωση δεδομένων', s2: 'Ισοζύγιο ώρας', s3: 'Κατανομή ημέρας', s4: 'Διασταύρωση καθαρής ενέργειας', s5: 'Ανάλυση ημέρας', s6: 'Ρεκόρ', ready: 'Το dashboard είναι έτοιμο!', error: 'Τα δεδομένα δεν φορτώθηκαν. Ανανεώστε τη σελίδα σε λίγα λεπτά.' },
         names: { lignite: 'Λιγνίτης', gas: 'Φυσικό αέριο', hydro: 'Υδροηλεκτρικά', res: 'ΑΠΕ (με ΣΗΘΥΑ)', dis: 'Εκφόρτιση BESS', chg: 'Φόρτιση BESS', imports: 'Εισαγωγές', exports: 'Εξαγωγές', pumping: 'Άντληση', demand: 'Εγχώρια ζήτηση', price: 'Τιμή DAM', total: 'Συνολική παραγωγή',
                  wind: 'Αιολικά', bigHydro: 'Μεγάλα υδροηλεκτρικά', solar: 'Φωτοβολταϊκά', cogen: 'Συμπαραγωγή', smallHydro: 'Μικρά υδροηλεκτρικά', biomass: 'Βιομάζα', uce: 'UCE', entsoeSolar: 'Φ/Β (ENTSO-E)', entsoeWind: 'Αιολικά (ENTSO-E)', admieSolar: 'Φ/Β (ΑΔΜΗΕ)', admieWind: 'Αιολικά (ΑΔΜΗΕ)' },
         countries: { AL: 'Αλβανία', BG: 'Βουλγαρία', IT: 'Ιταλία', TR: 'Τουρκία', MK: 'Βόρεια Μακεδονία' },
@@ -1284,26 +1284,29 @@ async function renderAll() {
 // ---------------------------------------------------------------------
 // 11. Εκκίνηση (house style: βήματα με ρυθμό)
 // ---------------------------------------------------------------------
-function animateStep(step) {
-    return new Promise((resolve) => {
-        const row = document.querySelector(`.load-row[data-step="${step}"]`);
-        const bar = row.querySelector('[data-load-bar]'), pct = row.querySelector('[data-load-pct]');
-        row.classList.remove('opacity-0');
-        setTimeout(() => {
-            bar.style.width = '100%';
-            let p = 0;
-            const iv = setInterval(() => {
-                p = Math.min(100, p + 12);
-                pct.textContent = `${p}%`;
-                if (p >= 100) {
-                    clearInterval(iv);
-                    pct.innerHTML = '<svg class="w-3.5 h-3.5 text-emerald-400 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" /></svg>';
-                    bar.classList.remove('bg-blue-500', 'bg-acc-500'); bar.classList.add('bg-emerald-500');
-                }
-            }, 30);
-            setTimeout(resolve, 500);
-        }, 50);
-    });
+// Οθόνη φόρτωσης (D47, ρυθμός όπως στο BigHydro): κάθε βήμα «ανάβει», κάνει τη δουλειά του και μετά
+// η μπάρα του γεμίζει ομαλά σε STEP ms· το ✓ μπαίνει όταν τελειώσει. Λιγότερη κίνηση → συντομότεροι χρόνοι.
+const REDUCE_MOTION = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+const LOAD_STEP = REDUCE_MOTION ? 120 : 350, LOAD_MIN_READ = REDUCE_MOTION ? 200 : 650, LOAD_READY = REDUCE_MOTION ? 200 : 650;
+const pause = (ms) => (ms > 0 ? new Promise((r) => setTimeout(r, ms)) : Promise.resolve());
+const loadRow = (i) => document.querySelector(`.load-row[data-step="${i}"]`);
+function loadActivate(i) { const r = loadRow(i); if (r) r.classList.remove('opacity-50'); }
+function loadSet(i, pct) { const b = loadRow(i) && loadRow(i).querySelector('[data-load-bar]'); if (b) b.style.width = `${pct}%`; }
+function loadDone(i) {
+    const r = loadRow(i); if (!r) return;
+    const b = r.querySelector('[data-load-bar]');
+    b.style.width = '100%'; b.classList.remove('bg-blue-500', 'bg-acc-500'); b.classList.add('bg-emerald-500');
+    r.querySelector('[data-load-ck]').classList.remove('opacity-0');
+}
+// Βήμα 2…6: πρώτα η δουλειά, μετά το γέμισμα της μπάρας, μετά ✓.
+async function loadStep(i, work) {
+    loadActivate(i);
+    await pause(20);                        // ο browser προλαβαίνει να δείξει ότι το βήμα «άναψε»
+    await work();
+    const b = loadRow(i).querySelector('[data-load-bar]');
+    b.style.transitionDuration = `${LOAD_STEP}ms`; b.style.transitionTimingFunction = 'linear'; b.style.width = '100%';
+    await pause(LOAD_STEP);
+    loadDone(i);
 }
 
 function loadFailed(err) {
@@ -1318,39 +1321,41 @@ async function boot() {
     applyStaticText();
     setTab('live');
     try {
-        await animateStep(1);
+        // Βήμα 1: πραγματική πρόοδος (manifest → ημέρα live + ρεκόρ), με ελάχιστο χρόνο ανάγνωσης
+        loadActivate(1);
+        const t0 = Date.now();
         S.manifest = await getJSON('manifest', true);
         if (!S.manifest || !S.manifest.last_live) throw new Error('manifest.json missing or empty');
+        loadSet(1, 34);
         S.liveDate = S.manifest.last_live.date;
         S.hourSel = S.manifest.last_live.hr;
         S.dailyDate = S.liveDate;
         S.cleanDate = (S.manifest.xray_days || []).slice(-1)[0] || null;
-        updateHeader();
-
-        await animateStep(2);
-        if (!(await getLive(S.liveDate))) throw new Error(`live/${S.liveDate}.json missing`);
-        renderLive();
-        fillPicker();
-
-        await animateStep(3);
-        await renderDaily();
-
-        await animateStep(4);
-        if (S.cleanDate) await renderClean();
         S.anDate = (S.manifest.analysis_days || []).slice(-1)[0] || null;
-        try { await renderAnalysis(); } catch (e) { console.warn('analysis', e); }
+        updateHeader();
+        const [live, recs] = await Promise.all([
+            getLive(S.liveDate).then((v) => { loadSet(1, 67); return v; }),
+            getJSON('records', true).then((v) => { loadSet(1, 100); return v; })
+        ]);
+        if (!live) throw new Error(`live/${S.liveDate}.json missing`);
+        S.records = recs;
+        await pause(Math.max(0, LOAD_MIN_READ - (Date.now() - t0)));
+        loadDone(1);
+        await pause(LOAD_STEP);
 
-        await animateStep(5);
-        S.records = await getJSON('records', true);
-        renderRecords();
+        // Βήματα 2–6: κάθε προβολή με τη σειρά των tabs
+        await loadStep(2, async () => { renderLive(); fillPicker(); });
+        await loadStep(3, () => renderDaily());
+        await loadStep(4, async () => { if (S.cleanDate) await renderClean(); });
+        await loadStep(5, async () => { try { await renderAnalysis(); } catch (e) { console.warn('analysis', e); } });
+        await loadStep(6, async () => { renderRecords(); });
 
         $('mainSpinner').classList.add('hidden');
         $('loadRowFinal').classList.remove('opacity-0', 'translate-y-2');
-        setTimeout(() => {
-            const ov = $('loading-overlay');
-            ov.classList.add('opacity-0');
-            setTimeout(() => { ov.style.display = 'none'; }, 500);
-        }, 800);
+        await pause(LOAD_READY);
+        const ov = $('loading-overlay');
+        ov.classList.add('opacity-0');
+        setTimeout(() => { ov.style.display = 'none'; }, 500);
     } catch (err) { loadFailed(err); }
 }
 
