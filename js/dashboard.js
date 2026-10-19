@@ -28,7 +28,7 @@ const T = {
         locale: 'en-GB', title: 'Greek Power Live',
         mcpTitle: 'Day-ahead price (MCP)', mcpUnit: '€/MWh', mcpDayAvg: 'Day average', mcpRank: 'Rank in the day', mcpRankOf: 'of', mcpRankHigh: 'most expensive',
         cleanEnergy: 'Clean energy', fossilFuels: 'Fossil fuels', cleanHint: 'RES (incl. CHP, as ADMIE reports) + hydro', cleanHintShort: 'RES incl. CHP + hydro', fossilHint: 'lignite + natural gas', shareOfGen: 'of generation',
-        minorOther: 'Other', methodLink: 'Methodology →',
+        minorOther: 'Other', methodLink: 'Methodology →', networkLoad: 'Network load',
         short: { lignite: 'Lignite', gas: 'Gas', hydro: 'Hydro', res: 'RES', dis: 'BESS out', imports: 'Imports', demand: 'Demand', exports: 'Exports', chg: 'BESS in', pumping: 'Pumping' },
         priceRange: 'Price range', dayClean: 'Clean share of generation',
         recProgTitle: 'Progression of the #1', recTopTitle: 'Top five', viewHistory: 'history →', trackingStart: 'tracking starts',
@@ -73,7 +73,7 @@ const T = {
         locale: 'el-GR', title: 'Greek Power Live',
         mcpTitle: 'Τιμή επόμενης ημέρας (MCP)', mcpUnit: '€/MWh', mcpDayAvg: 'Μέση ημέρας', mcpRank: 'Θέση στην ημέρα', mcpRankOf: 'από', mcpRankHigh: 'ακριβότερη',
         cleanEnergy: 'Καθαρή ενέργεια', fossilFuels: 'Ορυκτά καύσιμα', cleanHint: 'ΑΠΕ (με ΣΗΘΥΑ, όπως τις δημοσιεύει ο ΑΔΜΗΕ) + υδροηλεκτρικά', cleanHintShort: 'ΑΠΕ με ΣΗΘΥΑ + υδρο', fossilHint: 'λιγνίτης + φυσικό αέριο', shareOfGen: 'της παραγωγής',
-        minorOther: 'Λοιπά', methodLink: 'Μεθοδολογία →',
+        minorOther: 'Λοιπά', methodLink: 'Μεθοδολογία →', networkLoad: 'Φορτίο δικτύου',
         short: { lignite: 'Λιγνίτης', gas: 'Αέριο', hydro: 'Υδρο', res: 'ΑΠΕ', dis: 'Εκφόρτιση', imports: 'Εισαγωγές', demand: 'Ζήτηση', exports: 'Εξαγωγές', chg: 'Φόρτιση', pumping: 'Άντληση' },
         priceRange: 'Εύρος τιμής', dayClean: 'Μερίδιο καθαρής στην παραγωγή',
         recProgTitle: 'Εξέλιξη του #1', recTopTitle: 'Οι πέντε κορυφαίες', viewHistory: 'ιστορικό →', trackingStart: 'έναρξη καταγραφής',
@@ -271,18 +271,33 @@ function upsertChart(id, config) {
 }
 
 // Plugin: σύνολο στο κέντρο του donut
+// Plugin: το κέντρο του donut (D43). Χωρίς επιλογή: ετικέτα + σύνολο.
+// Με δείκτη/δάχτυλο πάνω σε φέτα: όνομα, τιμή και ποσοστό της φέτας (αντί για αιωρούμενο tooltip).
 const centerText = {
     id: 'centerText',
     afterDraw(chart, _args, opts) {
         if (!opts || !opts.text) return;
         const { ctx, chartArea: a } = chart;
         const x = (a.left + a.right) / 2, y = (a.top + a.bottom) / 2;
+        const meta = chart.getDatasetMeta(0), inner = meta.data[0] ? meta.data[0].innerRadius : 60;
+        const maxW = inner * 1.7, fam = Chart.defaults.font.family;
+        const fit = (txt, weight, size) => {          // σμίκρυνση γραμματοσειράς ώστε να χωρά στην «τρύπα»
+            let s2 = size; ctx.font = `${weight} ${s2}px ${fam}`;
+            while (s2 > 9 && ctx.measureText(txt).width > maxW) { s2 -= 1; ctx.font = `${weight} ${s2}px ${fam}`; }
+        };
+        const act = chart.getActiveElements();
+        let label = opts.label || '', value = opts.text, sub = opts.sub || '', color = '#f1f5f9';
+        if (act.length) {
+            const i = act[0].index, ds = chart.data.datasets[0], v = ds.data[i];
+            const total = ds.data.reduce((p, q) => p + (q || 0), 0);
+            label = chart.data.labels[i]; value = fmt(v); color = ds.backgroundColor[i];
+            sub = `MWh · ${fmt(100 * v / total, 1)}%`;
+        }
         ctx.save();
         ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-        ctx.fillStyle = '#f1f5f9'; ctx.font = `700 18px ${Chart.defaults.font.family}`;
-        ctx.fillText(opts.text, x, y - 8);
-        ctx.fillStyle = C.muted; ctx.font = `12px ${Chart.defaults.font.family}`;
-        ctx.fillText(opts.sub || '', x, y + 12);
+        ctx.fillStyle = act.length ? color : C.muted; fit(label, act.length ? 600 : 500, 12); ctx.fillText(label, x, y - 20);
+        ctx.fillStyle = '#f1f5f9'; fit(value, 700, 20); ctx.fillText(value, x, y + 1);
+        ctx.fillStyle = C.muted; fit(sub, 400, 11); ctx.fillText(sub, x, y + 20);
         ctx.restore();
     }
 };
@@ -563,8 +578,7 @@ function renderLive() {
         ledgerRow(n.hydro, '+', g.hydro, C.hydro) + ledgerRow(n.res, '+', g.res, C.res) +
         ledgerRule + ledgerRow(t().ledgerTotal, '=', g.total, null, true) +
         '<div class="border-t border-dashed border-slate-600 my-2"></div>' +
-        shareRow(x.cleanEnergy, x.cleanHint, clean, C.res) + shareRow(x.fossilFuels, x.fossilHint, fossil, C.gas) +
-        `<p class="text-[11px] text-slate-500 mt-1">${esc(x.cleanHint)} · ${esc(x.fossilHint)}</p>`;
+        shareRow(x.cleanEnergy, x.cleanHint, clean, C.res) + shareRow(x.fossilFuels, x.fossilHint, fossil, C.gas);
 
     const check = h.balance_ok === true ? `<p class="mt-3 text-xs text-emerald-400">✓ ${esc(t().balanceOk)}</p>`
         : h.balance_ok === false ? `<p class="mt-3 text-xs text-orange-300">${esc(t().balanceOff)}</p>` : '';
@@ -587,11 +601,13 @@ function renderLive() {
             data: { labels: data.map((i) => i.l), datasets: [{ data: data.map((i) => i.v), backgroundColor: data.map((i) => i.c), borderColor: '#1e293b', borderWidth: 2 }] },
             options: {
                 cutout: '62%',
+                hoverOffset: 8,
+                interaction: { mode: 'nearest', intersect: true },
                 layout: { padding: wide ? { left: 104, right: 104, top: 22, bottom: 22 } : 0 },
                 plugins: {
                     legend: { display: !wide, position: 'bottom', labels: { font: { size: 11 } } },
-                    tooltip: { callbacks: { label: (c) => ` ${c.label}: ${fmt(c.raw)} MWh (${fmt(100 * c.raw / totalIn, 1)}%)` } },
-                    centerText: { text: fmt(totalIn), sub: 'MWh' },
+                    tooltip: { enabled: false },
+                    centerText: { text: fmt(totalIn), sub: 'MWh', label: x.networkLoad },
                     calloutLabels: { enabled: wide, minShare: 0.03, short: data.map((i) => i.s || i.l) }
                 }
             },
