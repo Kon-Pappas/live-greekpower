@@ -16,6 +16,7 @@ ENTSO-E: από πού ήρθε η ενέργεια κάθε ώρας και π�
 | Live (hour) | Generation ledger (lignite + gas + hydro + RES = total, with clean and fossil shares), two donuts with labelled slices (sources, uses), cross-border flows per country, system-balance ledger (generation + imports − exports + BESS discharge − BESS charge − pumping = demand, checked against ADMIE's total load) and the hour's day-ahead price |
 | Daily | Where the day's energy came from and where it went, with shares; 24-hour stacked dispatch with demand and the day-ahead price |
 | Clean energy | Metered clean generation (ADMIE ex-post SCADA + medium-voltage RESMV, cogeneration excluded) against ADMIE's live RES + hydro (cogeneration removed as well); the difference is the unallocated clean energy (UCE, signed): distribution-level generation ADMIE estimates but does not meter. ADMIE vs ENTSO-E for solar and wind, the day's ADMIE–ENTSO-E comparison (clean share, RES, solar revision, load) and total load |
+| Analysis | The conclusion of the day (fixed sentences with the day's numbers), UCE split by the model into low-voltage solar, distribution wind and small units, the day's layers of load and three renewables totals against ENTSO-E, and the model's coefficients over time |
 | Records | The #1 hourly and daily value per category since tracking began; each opens its progression and the top five; new records are flagged |
 
 On the Live and Daily tabs, "RES" is ADMIE's figure, which includes cogeneration (CHP).
@@ -38,6 +39,7 @@ js/dashboard.js               all page logic; reads only the data files below
 scraper.py                    hourly: ADMIE market portal → data/live/, records, manifest
 xray_builder.py               daily: ADMIE ex-post files → data/xray/ (with UCE)
 entsoe_builder.py             daily: ENTSO-E A75 generation + A65 load → data/entsoe/ (first and latest version kept)
+analysis_builder.py           daily: 90-day calibration, UCE decomposition, layers, conclusion → data/analysis/
 recompute_uce.py              recomputes UCE in stored X-Ray files (local only, no download)
 contract.py                   data contract (schema v1): file layout, derived values, records, manifest
 jsonio.py                     safe JSON reading (stop on a corrupt file) and atomic writing
@@ -47,7 +49,7 @@ data/xray/YYYY-MM-DD.json     hourly ex-post clean generation, UCE, Crete flows,
 data/entsoe/YYYY-MM-DD.json   hourly ENTSO-E generation and load, first and latest version (written by entsoe_builder only)
 data/records.json             top-three records
 data/live_raw.json            scraper's merge memory for yesterday and today (not read by the page)
-.github/workflows/            scrape.yml (hourly), xray.yml (daily), backfill.yml (manual: history + UCE recompute), entsoe_refresh.yml (manual: ENTSO-E history), xray_refresh.yml (manual: SCADA/RESMV history)
+.github/workflows/            scrape.yml (hourly), xray.yml (daily), backfill.yml (manual: history + UCE recompute), entsoe_refresh.yml (manual: ENTSO-E history), xray_refresh.yml (manual: SCADA/RESMV history), analysis_refresh.yml (manual: Analysis history)
 docs/                         DECISIONS, KNOWN_ISSUES, ROADMAP
 ```
 

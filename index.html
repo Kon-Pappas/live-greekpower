@@ -161,11 +161,12 @@
 
         <!-- Tabs -->
         <nav class="pt-5 mt-2 border-t border-slate-700/50 md:border-none md:pt-0 md:mt-0" role="tablist">
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-0 md:border-b md:border-slate-800">
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-0 md:border-b md:border-slate-800">
                 <button type="button" role="tab" data-tab="live" class="tab-btn relative flex items-center justify-center text-xs md:text-base font-bold rounded-lg md:rounded-none h-12 w-full transition whitespace-nowrap px-2 border md:border-0 md:border-b-2"></button>
                 <button type="button" role="tab" data-tab="daily" class="tab-btn relative flex items-center justify-center text-xs md:text-base font-bold rounded-lg md:rounded-none h-12 w-full transition whitespace-nowrap px-2 border md:border-0 md:border-b-2"></button>
                 <button type="button" role="tab" data-tab="clean" class="tab-btn relative flex items-center justify-center text-xs md:text-base font-bold rounded-lg md:rounded-none h-12 w-full transition whitespace-nowrap px-2 border md:border-0 md:border-b-2"></button>
-                <button type="button" role="tab" data-tab="records" class="tab-btn relative flex items-center justify-center text-xs md:text-base font-bold rounded-lg md:rounded-none h-12 w-full transition whitespace-nowrap px-2 border md:border-0 md:border-b-2"></button>
+                <button type="button" role="tab" data-tab="analysis" class="tab-btn relative flex items-center justify-center text-xs md:text-base font-bold rounded-lg md:rounded-none h-12 w-full transition whitespace-nowrap px-2 border md:border-0 md:border-b-2"></button>
+                <button type="button" role="tab" data-tab="records" class="tab-btn col-span-2 md:col-span-1 relative flex items-center justify-center text-xs md:text-base font-bold rounded-lg md:rounded-none h-12 w-full transition whitespace-nowrap px-2 border md:border-0 md:border-b-2"></button>
             </div>
         </nav>
 
@@ -269,6 +270,44 @@
                 <h2 class="text-lg font-semibold text-slate-200" id="loadChartTitle">Total load: ADMIE and ENTSO-E</h2>
                 <p class="text-xs text-slate-400" id="loadChartSub"></p>
                 <div class="relative h-[320px] md:h-[380px] mt-4"><canvas id="loadChart"></canvas></div>
+            </div>
+        </section>
+
+        <!-- VIEW: ANALYSIS (D46) -->
+        <section id="view-analysis" class="space-y-6 hidden">
+            <article class="bg-slate-800/40 p-6 rounded-xl border border-slate-700">
+                <div class="flex items-center gap-3 mb-3">
+                    <span class="w-9 h-9 shrink-0 rounded-lg bg-slate-700/60 flex items-center justify-center text-acc-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/></svg>
+                    </span>
+                    <div><h2 class="text-lg font-semibold text-slate-100" id="anConclTitle">Conclusion of the day</h2>
+                    <p class="text-xs text-slate-400" id="anConclSub"></p></div>
+                </div>
+                <div id="anConclusion" class="space-y-3 text-[15px] leading-relaxed text-slate-200 max-w-4xl"></div>
+            </article>
+            <div class="bg-slate-800/40 p-6 rounded-xl border border-slate-700">
+                <h2 class="text-lg font-semibold text-slate-200" id="anDecTitle">What the unmetered generation is made of</h2>
+                <p class="text-xs text-slate-400 max-w-4xl"><span id="anDecSub"></span> <button type="button" class="text-acc-300 hover:text-white underline underline-offset-2 whitespace-nowrap" data-method="m-analysis" id="anMore">Methodology →</button></p>
+                <div class="relative h-[380px] md:h-[440px] mt-4"><canvas id="anDecChart"></canvas></div>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <div class="bg-slate-800/40 p-6 rounded-xl border border-slate-700">
+                    <h2 class="text-lg font-semibold text-slate-200" id="anLoadTitle">Layers of the day's load</h2>
+                    <p class="text-xs text-slate-400" id="anLoadSub"></p>
+                    <div class="relative h-[220px] mt-4"><canvas id="anLoadChart"></canvas></div>
+                </div>
+                <div class="bg-slate-800/40 p-6 rounded-xl border border-slate-700">
+                    <h2 class="text-lg font-semibold text-slate-200" id="anResTitle">Three renewables totals of the same day</h2>
+                    <p class="text-xs text-slate-400" id="anResSub"></p>
+                    <div class="relative h-[220px] mt-4"><canvas id="anResChart"></canvas></div>
+                    <p class="text-xs text-slate-400 mt-3" id="anResNote"></p>
+                </div>
+            </div>
+            <div class="bg-slate-800/40 p-6 rounded-xl border border-slate-700">
+                <h2 class="text-lg font-semibold text-slate-200" id="anCalTitle">The model, recalibrated every day</h2>
+                <p class="text-xs text-slate-400 max-w-4xl" id="anCalSub"></p>
+                <div id="anCalTiles" class="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4"></div>
+                <div class="relative h-[260px] mt-5"><canvas id="anCalChart"></canvas></div>
             </div>
         </section>
 

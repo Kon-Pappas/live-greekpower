@@ -468,5 +468,6 @@ def write_manifest():
         'live_days': live_days,
         'xray_days': list_days(XRAY_DIR),
         'entsoe_days': list_days(ENTSOE_DIR),
+        'analysis_days': list_days(os.path.join(DATA_DIR, 'analysis')),
     })
     print("✓ manifest.json ενημερώθηκε.")

@@ -46,7 +46,11 @@ Live layout, donut callouts, clean/fossil shares, MCP card, daily ribbon, short 
 ## Phase 3g: Crete and the layers of load (done 19 Oct 2026, D41–D42; K19 confirmed on 1 Apr–3 Oct)
 - Live backfill (1 Apr–17 Oct) and X-Ray refresh (1 Apr–17 Jun) run on 19 Oct 2026; K19 re-tested and closed.
 
-## Phase 4: Content
+## Phase 4: Analysis tab (code done 19 Oct 2026, D46)
+- Run *Analysis history refresh* once (1 Apr – 3 days ago), not near 10:15 / 13:30.
+- From then on the X-Ray workflow adds the day before yesterday and yesterday every morning.
+
+## Phase 4b: Further content
 - Leaderboard split done early (D24).
 - Decomposition of UCE on the page (unmetered solar ≈ k × MV solar, distribution wind, rest), once K18 is confirmed on the full history.
 - Further ideas for the page, to be discussed.
