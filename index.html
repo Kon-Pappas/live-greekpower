@@ -15,6 +15,10 @@
     <style>
         body { font-variant-numeric: tabular-nums; }
         :focus-visible { outline: 2px solid var(--acc); outline-offset: 2px; }
+        /* Badge νέου ρεκόρ (D45): φούξια, εκτός παλέτας δεδομένων, με απαλό παλμό ~2 s */
+        @keyframes recGlow { 0%, 100% { box-shadow: 0 0 4px 0 rgba(217, 70, 239, 0.45); } 50% { box-shadow: 0 0 16px 4px rgba(217, 70, 239, 0.9); } }
+        .rec-badge { background: #d946ef; color: #fff; font-weight: 800; letter-spacing: .02em; border-radius: 6px; animation: recGlow 2s ease-in-out infinite; white-space: nowrap; }
+        .rec-sticker { position: absolute; top: -10px; right: -8px; transform: rotate(20deg); padding: 3px 8px; font-size: 11px; z-index: 2; }
         .scroll-thin::-webkit-scrollbar { width: 6px; }
         .scroll-thin::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
         @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; } }
@@ -268,18 +272,34 @@
             </div>
         </section>
 
-        <!-- VIEW: RECORDS -->
-        <section id="view-records" class="space-y-6 hidden">
+        <!-- VIEW: RECORDS (D45): δύο πάνελ (ωριαία / ημερήσια)· στο κινητό διακόπτης και συμπαγείς γραμμές -->
+        <section id="view-records" class="space-y-5 hidden">
             <p class="text-sm text-slate-400 max-w-3xl" id="recordsIntro"></p>
-            <div class="grid grid-cols-1 xl:grid-cols-2 gap-8">
-                <div>
-                    <h2 class="text-base font-semibold text-acc-300 mb-4" id="recHourlyTitle">Hourly records</h2>
-                    <div id="recHourly" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
-                </div>
-                <div>
-                    <h2 class="text-base font-semibold text-acc-300 mb-4" id="recDailyTitle">Daily records</h2>
-                    <div id="recDaily" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
-                </div>
+            <div class="sm:hidden flex gap-1 bg-slate-800 border border-slate-700 rounded-lg p-1 text-xs font-bold" role="tablist" id="recScopeSwitch">
+                <button type="button" data-recscope="hourly" class="rec-scope-btn flex-1 h-10 rounded flex items-center justify-center gap-2 transition"></button>
+                <button type="button" data-recscope="daily" class="rec-scope-btn flex-1 h-10 rounded flex items-center justify-center gap-2 transition"></button>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-10">
+                <section id="recPanelHourly" class="rec-panel bg-slate-800/20 border border-slate-700/70 rounded-2xl p-4 sm:p-5">
+                    <header class="flex items-start gap-3 mb-4">
+                        <span class="w-9 h-9 shrink-0 rounded-lg bg-slate-700/60 flex items-center justify-center text-acc-300">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2m6-2a10 10 0 11-20 0 10 10 0 0120 0z"/></svg>
+                        </span>
+                        <div><h2 class="text-base font-semibold text-slate-100" id="recHourlyTitle">Hourly records</h2>
+                        <p class="text-xs text-slate-400" id="recHourlySub"></p></div>
+                    </header>
+                    <div id="recHourly"></div>
+                </section>
+                <section id="recPanelDaily" class="rec-panel bg-slate-800/20 border border-slate-700/70 rounded-2xl p-4 sm:p-5">
+                    <header class="flex items-start gap-3 mb-4">
+                        <span class="w-9 h-9 shrink-0 rounded-lg bg-slate-700/60 flex items-center justify-center text-acc-300">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/></svg>
+                        </span>
+                        <div><h2 class="text-base font-semibold text-slate-100" id="recDailyTitle">Daily records</h2>
+                        <p class="text-xs text-slate-400" id="recDailySub"></p></div>
+                    </header>
+                    <div id="recDaily"></div>
+                </section>
             </div>
         </section>
 

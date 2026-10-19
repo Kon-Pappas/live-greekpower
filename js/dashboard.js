@@ -32,7 +32,7 @@ const T = {
         short: { lignite: 'Lignite', gas: 'Gas', hydro: 'Hydro', res: 'RES', dis: 'BESS out', imports: 'Imports', demand: 'Demand', exports: 'Exports', chg: 'BESS in', pumping: 'Pumping' },
         priceRange: 'Price range', dayClean: 'Clean share of generation',
         recProgTitle: 'Progression of the #1', recTopTitle: 'Top five', viewHistory: 'history →', trackingStart: 'tracking starts',
-        newTop5: 'new in the top five', recRank: 'Rank', recWhen: 'When', recValue: 'Value',
+        newTop5: 'new in the top five', recHourlySub: 'The highest value of a single hour (MWh in one hour)', recShort: { bess_chg_pump: 'BESS + pumping' }, recDailySub: 'The highest total of a whole day', newPlural: 'NEW', newAt: 'NEW #', recRank: 'Rank', recWhen: 'When', recValue: 'Value',
         lastUpdate: 'Last update:', nextUpdate: 'Next update:', methodology: 'Methodology & Sources',
         tabs: { live: 'Live (hour)', daily: 'Daily', clean: 'Clean energy', records: 'Records' },
         pickerHour: 'Hour:', pickerDate: 'Date:', today: 'today',
@@ -77,7 +77,7 @@ const T = {
         short: { lignite: 'Λιγνίτης', gas: 'Αέριο', hydro: 'Υδρο', res: 'ΑΠΕ', dis: 'Εκφόρτιση', imports: 'Εισαγωγές', demand: 'Ζήτηση', exports: 'Εξαγωγές', chg: 'Φόρτιση', pumping: 'Άντληση' },
         priceRange: 'Εύρος τιμής', dayClean: 'Μερίδιο καθαρής στην παραγωγή',
         recProgTitle: 'Εξέλιξη του #1', recTopTitle: 'Οι πέντε κορυφαίες', viewHistory: 'ιστορικό →', trackingStart: 'έναρξη καταγραφής',
-        newTop5: 'νέα είσοδος στις πέντε κορυφαίες', recRank: 'Θέση', recWhen: 'Πότε', recValue: 'Τιμή',
+        newTop5: 'νέα είσοδος στις πέντε κορυφαίες', recHourlySub: 'Η υψηλότερη τιμή μίας ώρας (MWh σε μία ώρα)', recShort: { bess_chg_pump: 'BESS + άντληση' }, recDailySub: 'Το υψηλότερο σύνολο μίας ημέρας', newPlural: 'ΝΕΑ', newAt: 'ΝΕΟ #', recRank: 'Θέση', recWhen: 'Πότε', recValue: 'Τιμή',
         lastUpdate: 'Τελευταία ενημέρωση:', nextUpdate: 'Επόμενη:', methodology: 'Μεθοδολογία & Πηγές',
         tabs: { live: 'Live (ώρα)', daily: 'Ημέρα', clean: 'Καθαρή ενέργεια', records: 'Ρεκόρ' },
         pickerHour: 'Ώρα:', pickerDate: 'Ημέρα:', today: 'σήμερα',
@@ -178,7 +178,8 @@ const S = {
     cache: {},                 // 'live/2026-10-18' → json | null
     liveDate: null, hourSel: null,
     dailyDate: null, cleanDate: null,
-    charts: {}
+    charts: {},
+    recScope: 'hourly'   // κινητό: ποια ομάδα ρεκόρ φαίνεται (D45)
 };
 try { const l = localStorage.getItem('kp_lang'); if (l === 'el' || l === 'en') S.lang = l; } catch (e) { /* ιδιωτική περιήγηση */ }
 
@@ -474,7 +475,7 @@ function applyStaticText() {
         flowsTitle: x.flowsTitle, flowsSub: x.flowsSub, supplyRankTitle: x.supplyTitle, usesRankTitle: x.usesTitle,
         dispatchTitle: x.dispatchTitle, dispatchSub: x.dispatchSub, cleanIntro: x.cleanIntro,
         boxVarTitle: x.boxVar, boxUceTitle: x.boxUce, boxBaseTitle: x.boxBase,
-        xrayTitle: x.xrayTitle, xraySub: x.xraySub, reconTitle: x.reconTitle, gapTitle: x.gapTitle, gapSub: x.gapSub, mcpTitle: x.mcpTitle, cleanMore: x.methodLink, gapMore: x.methodLink, recProgTitle: x.recProgTitle, recTopTitle: x.recTopTitle, recModalClose: x.close, loadChartTitle: x.loadTitle, loadChartSub: x.loadSub,
+        xrayTitle: x.xrayTitle, xraySub: x.xraySub, reconTitle: x.reconTitle, gapTitle: x.gapTitle, gapSub: x.gapSub, mcpTitle: x.mcpTitle, cleanMore: x.methodLink, gapMore: x.methodLink, recProgTitle: x.recProgTitle, recHourlySub: x.recHourlySub, recDailySub: x.recDailySub, recTopTitle: x.recTopTitle, recModalClose: x.close, loadChartTitle: x.loadTitle, loadChartSub: x.loadSub,
         recHourlyTitle: x.recHourly, recDailyTitle: x.recDaily, modalTitle: x.modalTitle, modalCloseBtn: x.close,
         loadTitle: x.load.title, loadGroup1: x.load.g1, loadGroup2: x.load.g2, loadReady: x.load.ready
     };
@@ -958,40 +959,90 @@ function recordWhen(id) {
     return hh ? `${date}, <span class="whitespace-nowrap">${esc(hourRange(parseInt(hh, 10)).replace(/:00/g, ''))}</span>` : date;
 }
 
+// «Πρόσφατο» ρεκόρ (D45): στις 5 πρώτες και μέσα στις τελευταίες 24 ώρες δεδομένων
+// (ωριαία: έως 24 ώρες πριν από την τελευταία ώρα· ημερήσια: σήμερα ή χθες).
+function recentRank(items) {
+    const last = S.manifest && S.manifest.last_live;
+    if (!last || !items) return null;
+    const ref = dayIndex(last.date) * 24 + last.hr;
+    for (let i = 0; i < items.length; i++) {
+        const [d, hh] = items[i].id.split(', ');
+        const recent = hh ? (ref - (dayIndex(d) * 24 + parseInt(hh, 10))) < 24 : dayIndex(d) >= dayIndex(last.date) - 1;
+        if (recent) return i + 1;
+    }
+    return null;
+}
+const isRecentId = (id) => recentRank([{ id }]) !== null;
+
+function shortWhen(id) {
+    const [d, hh] = id.split(', ');
+    const [y, m, dd] = d.split('-').map(Number);
+    const yr = S.manifest && S.manifest.last_live && +S.manifest.last_live.date.slice(0, 4) !== y ? `/${String(y).slice(2)}` : '';
+    const date = `${dd}/${m}${yr}`;
+    return hh ? `${date} · ${hourRange(parseInt(hh, 10)).replace(/:00/g, '')}` : date;
+}
+const badgeHtml = (rank, extra = '') => `<span class="rec-badge ${extra}">${esc(t().newAt)}${rank}</span>`;
+
 function renderRecords() {
     const R = S.records, x = t(), start = R && R.tracking_start ? R.tracking_start.live : (S.manifest.live_days || [])[0];
     $('recordsIntro').textContent = x.recordsIntro.replace('{l}', start ? fmtDate(start) : '–');
-    let newCount = 0;
-    const card = (scope, key, color) => {
-        const items = (R && R[scope] && R[scope][key]) || [];
-        const top = items[0];
-        if (!top) return `<div class="bg-slate-800/40 p-4 rounded-xl border border-slate-700"><h3 class="text-sm font-semibold text-slate-200">${esc(x.rec[key])}</h3><p class="text-sm text-slate-500 mt-2">${esc(x.noData)}</p></div>`;
-        const isNew = S.liveDate && top.id.startsWith(S.liveDate);
-        const newInTop = !isNew && items.some((it) => S.liveDate && it.id.startsWith(S.liveDate));
-        if (isNew || newInTop) newCount++;
-        return `<button type="button" data-rec="${scope}:${key}" class="group text-left bg-slate-800/40 p-4 rounded-xl border border-slate-700 hover:border-acc-400 hover:bg-slate-800/70 transition w-full">
-            <div class="flex items-start justify-between gap-2">
-                <h3 class="text-sm font-semibold text-slate-200">${esc(x.rec[key])}</h3>
-                ${isNew ? `<span class="px-1.5 py-0.5 rounded bg-acc-400 text-slate-900 text-[10px] font-bold">${esc(x.newBadge)}</span>` : ''}
-            </div>
-            <div class="mt-2 text-2xl font-bold" style="color:${color}">${fmt(top.value)} <span class="text-xs font-normal text-slate-500">MWh</span></div>
-            <div class="text-xs text-slate-400 mt-0.5">${recordWhen(top.id)}</div>
-            <div class="flex justify-between items-center mt-2 text-[11px]">
-                <span class="text-slate-500">${newInTop ? esc(x.newTop5) : ''}</span>
-                <span class="text-acc-300 group-hover:text-white">${esc(x.viewHistory)}</span>
-            </div>
-        </button>`;
+    const counts = { hourly: 0, daily: 0 };
+    const block = (scope) => {
+        let cards = '', rows = '';
+        REC_ORDER[scope].forEach(([key, color]) => {
+            const items = (R && R[scope] && R[scope][key]) || [];
+            const top = items[0];
+            const rank = recentRank(items);
+            if (rank) counts[scope]++;
+            if (!top) {
+                cards += `<div class="bg-slate-800/40 p-4 rounded-xl border border-slate-700"><h3 class="text-sm font-semibold text-slate-200">${esc(x.rec[key])}</h3><p class="text-sm text-slate-500 mt-2">${esc(x.noData)}</p></div>`;
+                return;
+            }
+            const ring = rank ? 'border-fuchsia-500/60' : 'border-slate-700';
+            // desktop / tablet: κάρτα
+            cards += `<button type="button" data-rec="${scope}:${key}" class="relative group text-left bg-slate-800/40 p-4 rounded-xl border ${ring} hover:border-acc-400 hover:bg-slate-800/70 transition w-full">
+                ${rank ? badgeHtml(rank, 'rec-sticker') : ''}
+                <h3 class="text-sm font-semibold text-slate-200 pr-10">${esc(x.rec[key])}</h3>
+                <div class="mt-2 text-2xl font-bold" style="color:${color}">${fmt(top.value)} <span class="text-xs font-normal text-slate-500">MWh</span></div>
+                <div class="flex justify-between items-center mt-1 text-xs">
+                    <span class="text-slate-400">${recordWhen(top.id)}</span>
+                    <span class="text-acc-300 group-hover:text-white">${esc(x.viewHistory)}</span>
+                </div>
+            </button>`;
+            // κινητό: συμπαγής γραμμή
+            rows += `<button type="button" data-rec="${scope}:${key}" class="w-full flex items-center gap-3 py-2.5 px-3 text-left ${rank ? 'bg-fuchsia-500/10' : ''}">
+                <span class="flex-1 min-w-0">
+                    <span class="block text-sm font-semibold text-slate-200 truncate">${esc((x.recShort && x.recShort[key]) || x.rec[key])}</span>
+                    <span class="flex items-center gap-2 text-[11px] text-slate-400">${esc(shortWhen(top.id))}${rank ? badgeHtml(rank, 'text-[10px] px-1.5 py-px') : ''}</span>
+                </span>
+                <span class="text-base font-bold whitespace-nowrap" style="color:${color}">${fmt(top.value)} <span class="text-[10px] font-normal text-slate-500">MWh</span></span>
+                <span class="text-slate-500 text-lg leading-none">›</span>
+            </button>`;
+        });
+        return `<div class="hidden sm:grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">${cards}</div>
+                <div class="sm:hidden divide-y divide-slate-700/60 border border-slate-700/60 rounded-xl overflow-hidden">${rows}</div>`;
     };
-    $('recHourly').innerHTML = REC_ORDER.hourly.map(([k, c]) => card('hourly', k, c)).join('');
-    $('recDaily').innerHTML = REC_ORDER.daily.map(([k, c]) => card('daily', k, c)).join('');
+    $('recHourly').innerHTML = block('hourly');
+    $('recDaily').innerHTML = block('daily');
     document.querySelectorAll('[data-rec]').forEach((b) => b.addEventListener('click', () => openRecord(...b.dataset.rec.split(':'))));
 
+    // διακόπτης κινητού
+    document.querySelectorAll('.rec-scope-btn').forEach((b) => {
+        const sc = b.dataset.recscope, on = sc === S.recScope;
+        b.className = `rec-scope-btn flex-1 h-10 rounded flex items-center justify-center gap-2 transition ${on ? 'bg-acc-400 text-slate-900' : 'text-slate-400'}`;
+        b.innerHTML = `${esc(sc === 'hourly' ? x.recHourly : x.recDaily)}${counts[sc] ? ` <span class="rec-badge text-[10px] px-1.5 py-0.5">${counts[sc]} ${esc(x.newPlural)}</span>` : ''}`;
+    });
+    $('recPanelHourly').classList.toggle('max-sm:hidden', S.recScope !== 'hourly');
+    $('recPanelDaily').classList.toggle('max-sm:hidden', S.recScope !== 'daily');
+
+    // σήμα στο tab
+    const total = counts.hourly + counts.daily;
     const btn = document.querySelector('.tab-btn[data-tab="records"]');
     let badge = btn.querySelector('[data-badge]');
-    if (newCount > 0) {
+    if (total > 0) {
         if (!badge) { badge = document.createElement('span'); badge.dataset.badge = '1'; btn.appendChild(badge); }
-        badge.className = 'ml-2 px-1.5 py-0.5 rounded-full bg-acc-400 text-slate-900 text-[10px] font-bold';
-        badge.textContent = `${newCount} ${x.newBadge}`;
+        badge.className = 'rec-badge ml-2 px-1.5 py-0.5 text-[10px]';
+        badge.textContent = `${total} ${x.newPlural}`;
     } else if (badge) badge.remove();
 }
 
@@ -1021,7 +1072,9 @@ function openRecord(scope, key) {
     const top = (R[scope] && R[scope][key]) || [], prog = (R.progression && R.progression[scope] && R.progression[scope][key]) || [];
     const color = (REC_ORDER[scope].find(([k]) => k === key) || [])[1] || C.accent;
     $('recModalTitle').textContent = `${x.rec[key]} · ${scope === 'hourly' ? x.recHourly : x.recDaily}`;
-    $('recModalSub').textContent = top[0] ? `#1: ${fmt(top[0].value)} MWh · ${recordWhen(top[0].id).replace(/<[^>]+>/g, '')}` : '';
+    const rRank = recentRank(top);
+    $('recModalSub').innerHTML = (top[0] ? esc(`#1: ${fmt(top[0].value)} MWh · ${recordWhen(top[0].id).replace(/<[^>]+>/g, '')}`) : '') +
+        (rRank ? ` <span class="ml-2 align-middle inline-block" style="transform:rotate(-4deg)">${badgeHtml(rRank, 'text-[11px] px-2 py-0.5')}</span>` : '');
 
     // κλιμακωτό γράφημα: κάθε σημείο = νέο ρεκόρ· η τελευταία τιμή εκτείνεται έως σήμερα
     const start = (R.tracking_start && (['solar', 'wind'].includes(key) ? R.tracking_start.xray : R.tracking_start.live)) || (prog[0] && prog[0].id);
@@ -1031,8 +1084,9 @@ function openRecord(scope, key) {
     const s0 = start ? dayIndex(start) : (pts[0] ? Math.floor(pts[0].x) : 0);
     upsertChart('recProgChart', {
         type: 'line',
-        data: { datasets: [{ label: x.rec[key], data: pts, borderColor: color, backgroundColor: color, stepped: 'before', borderWidth: 2.5,
-                             pointRadius: pts.map((p) => (p.id ? 3.5 : 0)), pointHoverRadius: 5 }] },
+        data: { datasets: [{ label: x.rec[key], data: pts, borderColor: color, backgroundColor: pts.map((p) => (p.id && isRecentId(p.id) ? '#d946ef' : color)),
+                             stepped: 'before', borderWidth: 2.5,
+                             pointRadius: pts.map((p) => (!p.id ? 0 : isRecentId(p.id) ? 7 : 3.5)), pointHoverRadius: 7 }] },
         options: {
             parsing: false,
             scales: {
@@ -1052,9 +1106,9 @@ function openRecord(scope, key) {
     $('recTopTable').innerHTML = `<table class="w-full text-sm">
         <thead><tr class="text-left text-xs text-slate-400 border-b border-slate-700">
             <th class="py-2 pr-3 font-medium">${esc(x.recRank)}</th><th class="py-2 pr-3 font-medium">${esc(x.recWhen)}</th><th class="py-2 text-right font-medium">${esc(x.recValue)}</th></tr></thead>
-        <tbody>${top.map((it, i) => `<tr class="border-b border-slate-800">
+        <tbody>${top.map((it, i) => `<tr class="border-b border-slate-800 ${isRecentId(it.id) ? 'bg-fuchsia-500/10' : ''}">
             <td class="py-2 pr-3 font-bold ${i === 0 ? 'text-acc-300' : 'text-slate-400'}">#${i + 1}</td>
-            <td class="py-2 pr-3 text-slate-300">${recordWhen(it.id)}${S.liveDate && it.id.startsWith(S.liveDate) ? ` <span class="ml-1 px-1.5 py-0.5 rounded bg-acc-400 text-slate-900 text-[10px] font-bold">${esc(x.newBadge)}</span>` : ''}</td>
+            <td class="py-2 pr-3 text-slate-300">${recordWhen(it.id)}${isRecentId(it.id) ? ` <span class="ml-1 inline-block">${badgeHtml(i + 1, 'text-[10px] px-1.5 py-0.5')}</span>` : ''}</td>
             <td class="py-2 text-right font-semibold" style="color:${color}">${fmt(it.value)} <span class="text-[11px] font-normal text-slate-500">MWh</span></td></tr>`).join('')}</tbody></table>`;
     toggleRecModal(true);
 }
@@ -1176,6 +1230,7 @@ document.addEventListener('DOMContentLoaded', () => {
     $('btnMethodologyWrap').addEventListener('click', () => toggleModal(true));
     document.querySelectorAll('[data-method]').forEach((b) => b.addEventListener('click', () => openMethodology(b.dataset.method)));
     document.querySelectorAll('[data-close-rec]').forEach((b) => b.addEventListener('click', () => toggleRecModal(false)));
+    document.querySelectorAll('.rec-scope-btn').forEach((b) => b.addEventListener('click', () => { S.recScope = b.dataset.recscope; renderRecords(); }));
     $('recordModal').addEventListener('click', (e) => { if (e.target.id === 'recordModal') toggleRecModal(false); });
     // Οι πίτες αλλάζουν μορφή (βελάκια ή υπόμνημα) με το πλάτος: ξανασχεδιάζονται όταν αλλάζει το παράθυρο.
     let resizeT; let lastW = window.innerWidth;
