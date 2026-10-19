@@ -189,22 +189,22 @@
                     </div>
                 </div>
             </div>
-            <div class="grid grid-cols-1 lg:grid-cols-[7fr_3fr] gap-4">
-                <div class="bg-slate-800/40 p-6 rounded-xl border border-slate-700 flex flex-col">
+            <!-- Σειρά 2 (D44): στο desktop Ροές αριστερά (2 σειρές) | Ισοζύγιο + MCP δεξιά·
+                 στο κινητό Ισοζύγιο → Ροές → MCP. -->
+            <div class="grid grid-cols-1 lg:grid-cols-[7fr_3fr] lg:grid-rows-[auto_auto] gap-4">
+                <div class="order-2 lg:order-none lg:col-start-1 lg:row-start-1 lg:row-span-2 bg-slate-800/40 p-6 rounded-xl border border-slate-700 flex flex-col">
                     <h2 class="text-lg font-semibold text-slate-200" id="flowsTitle">Cross-border flows</h2>
                     <p class="text-xs text-slate-400" id="flowsSub">Imports above zero, exports below.</p>
                     <p class="hidden text-xs text-orange-300 mt-1" id="flowsMismatch"></p>
                     <div class="relative h-[320px] lg:h-auto lg:flex-1 lg:min-h-[320px] mt-4"><canvas id="flowsChart"></canvas></div>
                 </div>
-                <div class="flex flex-col gap-4">
-                    <div class="bg-slate-800/40 p-5 rounded-xl border border-slate-700">
-                        <h2 class="text-sm font-semibold text-slate-300 mb-3" id="balLedgerTitle">System balance</h2>
-                        <div id="balLedger"></div>
-                    </div>
-                    <div class="bg-slate-800/40 p-5 rounded-xl border border-slate-700">
-                        <h2 class="text-sm font-semibold text-slate-300 mb-2" id="mcpTitle">Day-ahead price (MCP)</h2>
-                        <div id="mcpBox"></div>
-                    </div>
+                <div class="order-1 lg:order-none lg:col-start-2 lg:row-start-1 bg-slate-800/40 p-5 rounded-xl border border-slate-700">
+                    <h2 class="text-sm font-semibold text-slate-300 mb-3" id="balLedgerTitle">System balance</h2>
+                    <div id="balLedger"></div>
+                </div>
+                <div class="order-3 lg:order-none lg:col-start-2 lg:row-start-2 bg-slate-800/40 p-5 rounded-xl border border-slate-700">
+                    <h2 class="text-sm font-semibold text-slate-300 mb-2" id="mcpTitle">Day-ahead price (MCP)</h2>
+                    <div id="mcpBox"></div>
                 </div>
             </div>
         </section>

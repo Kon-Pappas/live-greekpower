@@ -197,6 +197,13 @@ const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&
 
 // hr 1 = 00:00–01:00 (ΑΔΜΗΕ) → ετικέτα από την έναρξη
 const hourTick = (hr) => pad(hr - 1);
+// Κινητό (D44): οι άξονες MWh γράφουν χιλιάδες ως «5k» για να κερδίζεται πλάτος.
+const isNarrow = () => window.innerWidth < 640;
+const axisMWh = (v) => {                       // με πρόσημο (π.χ. αρνητικό UCE)
+    if (isNarrow() && Math.abs(v) >= 1000) return `${fmt(v / 1000, v % 1000 ? 1 : 0)}k`;
+    return fmt(v);
+};
+const axisMWhAbs = (v) => axisMWh(Math.abs(v));   // χωρίς πρόσημο (εξαγωγές/φόρτιση κάτω από το μηδέν)
 // 1η, 2η… / 1st, 2nd…
 function ordinal(n) {
     if (S.lang === 'el') return `${n}η`;
@@ -630,8 +637,8 @@ function renderLive() {
         data: {
             labels: codes.map((c) => t().countries[c]),
             datasets: [
-                { label: n.imports, data: codes.map((c) => h.flows[c].imp), backgroundColor: C.imports, stack: 'f', borderRadius: 3, maxBarThickness: 46 },
-                { label: n.exports, data: codes.map((c) => -(h.flows[c].exp || 0)), backgroundColor: C.exports, stack: 'f', borderRadius: 3, maxBarThickness: 46 }
+                { label: n.imports, data: codes.map((c) => h.flows[c].imp), backgroundColor: C.imports, stack: 'f', borderRadius: 3, maxBarThickness: window.innerWidth >= 1024 ? 69 : 46 },
+                { label: n.exports, data: codes.map((c) => -(h.flows[c].exp || 0)), backgroundColor: C.exports, stack: 'f', borderRadius: 3, maxBarThickness: window.innerWidth >= 1024 ? 69 : 46 }
             ]
         },
         options: {
@@ -737,7 +744,7 @@ async function renderDaily() {
             interaction: { mode: 'index', intersect: false },
             scales: {
                 x: { stacked: true, grid: { display: false }, title: { display: true, text: x.hourAxis } },
-                y: { stacked: true, title: { display: true, text: 'MWh' }, ticks: { callback: (v) => fmt(Math.abs(v)) } },
+                y: { stacked: true, title: { display: true, text: 'MWh' }, ticks: { callback: axisMWhAbs } },
                 y1: { position: 'right', grid: { display: false }, title: { display: true, text: '€/MWh', color: C.price }, ticks: { color: C.price } }
             },
             plugins: {
@@ -802,7 +809,7 @@ async function renderClean() {
             interaction: { mode: 'index', intersect: false },
             scales: {
                 x: { stacked: true, grid: { display: false }, title: { display: true, text: x.hourAxis } },
-                y: { stacked: true, title: { display: true, text: 'MWh' }, ticks: { callback: (v) => fmt(v) } },
+                y: { stacked: true, title: { display: true, text: 'MWh' }, ticks: { callback: axisMWh } },
                 y1: { position: 'right', grid: { display: false }, title: { display: true, text: '€/MWh', color: C.price }, ticks: { color: C.price } }
             },
             plugins: {
@@ -836,7 +843,7 @@ async function renderClean() {
         data: { labels: H.map((h) => hourTick(h.hr)), datasets: ds },
         options: {
             interaction: { mode: 'index', intersect: false },
-            scales: { x: { grid: { display: false }, title: { display: true, text: x.hourAxis } }, y: { title: { display: true, text: 'MWh' }, ticks: { callback: (v) => fmt(v) } } },
+            scales: { x: { grid: { display: false }, title: { display: true, text: x.hourAxis } }, y: { title: { display: true, text: 'MWh' }, ticks: { callback: axisMWh } } },
             plugins: {
                 legend: { position: 'bottom' },
                 tooltip: tipOff((i) => {
@@ -919,7 +926,7 @@ async function renderGap(xr, en) {
         data: { labels: H.map((h) => hourTick(h.hr)), datasets: ds },
         options: {
             interaction: { mode: 'index', intersect: false },
-            scales: { x: { grid: { display: false }, title: { display: true, text: x.hourAxis } }, y: { title: { display: true, text: 'MWh' }, ticks: { callback: (v) => fmt(v) } } },
+            scales: { x: { grid: { display: false }, title: { display: true, text: x.hourAxis } }, y: { title: { display: true, text: 'MWh' }, ticks: { callback: axisMWh } } },
             plugins: {
                 legend: { position: 'bottom' },
                 tooltip: tipOff((i) => {
