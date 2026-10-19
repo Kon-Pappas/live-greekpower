@@ -1,0 +1,265 @@
+{
+  "schema": 1,
+  "date": "2026-08-06",
+  "updated": "2026-10-19T17:08:54+03:00",
+  "calibration": {
+    "window_days": 90,
+    "from": "2026-05-09",
+    "to": "2026-08-06",
+    "hours": 2160,
+    "base": 84.2,
+    "k_wind": 0.0685,
+    "k_solar": 0.1852,
+    "ci90": {
+      "base": [
+        56.6344,
+        123.3362
+      ],
+      "k_wind": [
+        0.0392,
+        0.0889
+      ],
+      "k_solar": [
+        0.1804,
+        0.1911
+      ]
+    }
+  },
+  "uce_decomposition": {
+    "hours": [
+      {
+        "hr": 1,
+        "uce": 107.4,
+        "pv": 0.8,
+        "wind": 131.9,
+        "base": 84.2,
+        "residual": -109.5
+      },
+      {
+        "hr": 2,
+        "uce": 83.1,
+        "pv": 0.8,
+        "wind": 136.3,
+        "base": 84.2,
+        "residual": -138.2
+      },
+      {
+        "hr": 3,
+        "uce": 118.7,
+        "pv": 0.8,
+        "wind": 139.5,
+        "base": 84.2,
+        "residual": -105.8
+      },
+      {
+        "hr": 4,
+        "uce": 43.4,
+        "pv": 0.8,
+        "wind": 141.7,
+        "base": 84.2,
+        "residual": -183.3
+      },
+      {
+        "hr": 5,
+        "uce": 19.3,
+        "pv": 0.8,
+        "wind": 144.0,
+        "base": 84.2,
+        "residual": -209.7
+      },
+      {
+        "hr": 6,
+        "uce": 22.8,
+        "pv": 0.8,
+        "wind": 142.7,
+        "base": 84.2,
+        "residual": -204.8
+      },
+      {
+        "hr": 7,
+        "uce": 19.7,
+        "pv": 4.0,
+        "wind": 154.6,
+        "base": 84.2,
+        "residual": -223.1
+      },
+      {
+        "hr": 8,
+        "uce": 121.9,
+        "pv": 99.3,
+        "wind": 160.2,
+        "base": 84.2,
+        "residual": -221.8
+      },
+      {
+        "hr": 9,
+        "uce": 475.8,
+        "pv": 369.6,
+        "wind": 157.4,
+        "base": 84.2,
+        "residual": -135.4
+      },
+      {
+        "hr": 10,
+        "uce": 806.5,
+        "pv": 670.6,
+        "wind": 154.2,
+        "base": 84.2,
+        "residual": -102.5
+      },
+      {
+        "hr": 11,
+        "uce": 1090.0,
+        "pv": 913.2,
+        "wind": 152.3,
+        "base": 84.2,
+        "residual": -59.6
+      },
+      {
+        "hr": 12,
+        "uce": 1270.2,
+        "pv": 1111.0,
+        "wind": 159.4,
+        "base": 84.2,
+        "residual": -84.4
+      },
+      {
+        "hr": 13,
+        "uce": 1328.4,
+        "pv": 1212.8,
+        "wind": 160.7,
+        "base": 84.2,
+        "residual": -129.3
+      },
+      {
+        "hr": 14,
+        "uce": 1333.2,
+        "pv": 1221.2,
+        "wind": 162.6,
+        "base": 84.2,
+        "residual": -134.8
+      },
+      {
+        "hr": 15,
+        "uce": 1314.3,
+        "pv": 1180.2,
+        "wind": 153.4,
+        "base": 84.2,
+        "residual": -103.5
+      },
+      {
+        "hr": 16,
+        "uce": 1172.2,
+        "pv": 1035.2,
+        "wind": 154.0,
+        "base": 84.2,
+        "residual": -101.2
+      },
+      {
+        "hr": 17,
+        "uce": 961.2,
+        "pv": 893.7,
+        "wind": 154.5,
+        "base": 84.2,
+        "residual": -171.2
+      },
+      {
+        "hr": 18,
+        "uce": 820.5,
+        "pv": 712.2,
+        "wind": 141.4,
+        "base": 84.2,
+        "residual": -117.3
+      },
+      {
+        "hr": 19,
+        "uce": 532.9,
+        "pv": 417.5,
+        "wind": 129.7,
+        "base": 84.2,
+        "residual": -98.4
+      },
+      {
+        "hr": 20,
+        "uce": 310.6,
+        "pv": 118.4,
+        "wind": 115.6,
+        "base": 84.2,
+        "residual": -7.6
+      },
+      {
+        "hr": 21,
+        "uce": 271.2,
+        "pv": 6.4,
+        "wind": 99.6,
+        "base": 84.2,
+        "residual": 81.0
+      },
+      {
+        "hr": 22,
+        "uce": 177.3,
+        "pv": 0.7,
+        "wind": 94.1,
+        "base": 84.2,
+        "residual": -1.8
+      },
+      {
+        "hr": 23,
+        "uce": 142.5,
+        "pv": 0.7,
+        "wind": 86.1,
+        "base": 84.2,
+        "residual": -28.5
+      },
+      {
+        "hr": 24,
+        "uce": 76.5,
+        "pv": 0.7,
+        "wind": 86.9,
+        "base": 84.2,
+        "residual": -95.3
+      }
+    ],
+    "totals": {
+      "uce": 12619.6,
+      "pv": 9972.2,
+      "wind": 3312.8,
+      "base": 2020.8,
+      "residual": -2686.0
+    }
+  },
+  "layers": {
+    "load": {
+      "demand": 190277.0,
+      "net_load": 147999.0,
+      "crete": 10031.0,
+      "transmission_no_crete": 137968.0,
+      "mv": 29658.4,
+      "lv": 12619.6,
+      "entsoe": 175934.5
+    },
+    "res": {
+      "transmission": 76727.0,
+      "metered": 106385.4,
+      "live": 119005.0,
+      "live_sw": 116803.80000000002,
+      "entsoe": 102943.4,
+      "entsoe_status": "final"
+    }
+  },
+  "records": [],
+  "conclusion": {
+    "el": [
+      "Στις 6 Αυγούστου 2026 η ζήτηση ήταν 190,3 GWh και οι ΑΠΕ με τα υδροηλεκτρικά κάλυψαν το 60,4% της εγχώριας παραγωγής (live ΑΔΜΗΕ, ΑΠΕ με ΣΗΘΥΑ). Οι καθαρές εξαγωγές ήταν 35,3 GWh και η μέση τιμή επόμενης ημέρας 141,54 €/MWh.",
+      "Από την παραγωγή της διανομής, 12,6 GWh δεν μετρήθηκαν ωριαία. Εκτιμώνται 10,0 GWh φ/β στέγης και χαμηλής τάσης, 3,3 GWh αιολικά της διανομής και 2,0 GWh μικρές μονάδες· το υπόλοιπο (−2,7 GWh) είναι απόκλιση της εκτίμησης του ΑΔΜΗΕ από το μοντέλο.",
+      "Προς την Κρήτη στάλθηκαν 10,0 GWh μέσα από τα δύο καλώδια.",
+      "Στην ENTSO-E (τελική έκδοση) φ/β, αιολικά και βιομάζα της ημέρας είναι 102,9 GWh, έναντι 116,8 GWh στα live στοιχεία του ΑΔΜΗΕ."
+    ],
+    "en": [
+      "On 6 August 2026 demand was 190.3 GWh and renewables with hydro covered 60.4% of domestic generation (ADMIE live, RES incl. CHP). Net exports were 35.3 GWh and the average day-ahead price 141.54 €/MWh.",
+      "Of distribution-level generation, 12.6 GWh was not metered hourly. An estimated 10.0 GWh came from rooftop and other low-voltage solar, 3.3 GWh from distribution-connected wind and 2.0 GWh from small units; the remainder (−2.7 GWh) is the difference between ADMIE's estimate and the model.",
+      "10.0 GWh was sent to Crete through the two cables.",
+      "In ENTSO-E's final data, the day's solar, wind and biomass add up to 102.9 GWh, against 116.8 GWh in ADMIE's live figures."
+    ]
+  }
+}

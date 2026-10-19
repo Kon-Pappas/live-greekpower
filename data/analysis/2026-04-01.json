@@ -1,0 +1,49 @@
+{
+  "schema": 1,
+  "date": "2026-04-01",
+  "updated": "2026-10-19T17:07:00+03:00",
+  "calibration": null,
+  "uce_decomposition": null,
+  "layers": {
+    "load": {
+      "demand": 150890.0,
+      "net_load": 136663.0,
+      "crete": 5873.0,
+      "transmission_no_crete": 130790.0,
+      "mv": 10600.8,
+      "lv": 3626.2,
+      "entsoe": 144364.7
+    },
+    "res": {
+      "transmission": 62710.0,
+      "metered": 73310.8,
+      "live": 76937.0,
+      "live_sw": 72847.7,
+      "entsoe": 67211.0,
+      "entsoe_status": "final"
+    }
+  },
+  "records": [
+    {
+      "scope": "hourly",
+      "cat": "wind",
+      "rank": 1,
+      "value": 3907.0,
+      "id": "2026-04-01, 19:00"
+    }
+  ],
+  "conclusion": {
+    "el": [
+      "Στις 1 Απριλίου 2026 η ζήτηση ήταν 150,9 GWh και οι ΑΠΕ με τα υδροηλεκτρικά κάλυψαν το 50,5% της εγχώριας παραγωγής (live ΑΔΜΗΕ, ΑΠΕ με ΣΗΘΥΑ). Οι καθαρές εξαγωγές ήταν 19,9 GWh και η μέση τιμή επόμενης ημέρας 155,67 €/MWh.",
+      "Προς την Κρήτη στάλθηκαν 5,9 GWh μέσα από τα δύο καλώδια.",
+      "Στην ENTSO-E (τελική έκδοση) φ/β, αιολικά και βιομάζα της ημέρας είναι 67,2 GWh, έναντι 72,8 GWh στα live στοιχεία του ΑΔΜΗΕ.",
+      "Ρεκόρ της ημέρας στις πέντε κορυφαίες θέσεις: αιολικά (ωριαίο, #1)."
+    ],
+    "en": [
+      "On 1 April 2026 demand was 150.9 GWh and renewables with hydro covered 50.5% of domestic generation (ADMIE live, RES incl. CHP). Net exports were 19.9 GWh and the average day-ahead price 155.67 €/MWh.",
+      "5.9 GWh was sent to Crete through the two cables.",
+      "In ENTSO-E's final data, the day's solar, wind and biomass add up to 67.2 GWh, against 72.8 GWh in ADMIE's live figures.",
+      "Records of the day in the top five: wind (hourly, #1)."
+    ]
+  }
+}
