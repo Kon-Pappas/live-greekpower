@@ -61,9 +61,9 @@ const T = {
         gapSub: 'The same day in ADMIE’s figures and in ENTSO-E’s. ENTSO-E revises solar about ten days later to metered generation only.',
         gapShare: 'Clean share', gapClean: 'RES + hydro', gapRevision: 'ENTSO-E solar: revision', gapLoad: 'Total load',
         gapMissing: 'not in ENTSO-E', gapPoints: 'points', gapFirst: 'first version', gapNow: 'current version',
-        gapProvisional: 'provisional', gapFinal: 'final', gapUnknown: 'earliest kept', gapNotYet: 'not revised yet', gapNoLoad: 'ENTSO-E load not loaded yet for this day', gapNoHistory: 'No version history kept yet for this day',
-        loadTitle: 'Total load: ADMIE and ENTSO-E', loadSub: 'ADMIE live total load against ENTSO-E actual total load (A65). Dotted: ENTSO-E first version, when it differs from the current one.',
-        admieLoad: 'ADMIE total load', entsoeLoad: 'ENTSO-E load', entsoeLoadFirst: 'ENTSO-E load (first version)', entsoeSolarFirst: 'Solar (ENTSO-E, first version)',
+        gapProvisional: 'provisional', gapFinal: 'final', gapUnknown: 'earliest kept', gapNotYet: 'not revised yet', gapNoLoad: 'ENTSO-E load not loaded yet for this day', gapNoHistory: 'No version history kept yet for this day', gapNoCrete: 'ADMIE without Crete',
+        loadTitle: 'Total load: ADMIE and ENTSO-E', loadSub: 'ADMIE live total load against ENTSO-E actual total load (A65). Thin line: ADMIE load without the flow to Crete, which ADMIE counts as load and ENTSO-E does not. Dotted: ENTSO-E first version, when it differs.',
+        admieLoad: 'ADMIE total load', admieLoadNoCrete: 'ADMIE load without the flow to Crete', entsoeLoad: 'ENTSO-E load', entsoeLoadFirst: 'ENTSO-E load (first version)', entsoeSolarFirst: 'Solar (ENTSO-E, first version)',
         recordsIntro: 'The highest values since tracking began on {l}. Select a record for its progression and the top five.',
         recHourly: 'Hourly records', recDaily: 'Daily records', newBadge: 'NEW', noData: 'No data yet',
         rec: { solar: 'Solar', wind: 'Wind', exports: 'Exports', bess_chg: 'BESS charge', bess_dis: 'BESS discharge', bess_chg_pump: 'BESS charge + pumping', network_load: 'Network load', res: 'RES (incl. CHP)' },
@@ -106,9 +106,9 @@ const T = {
         gapSub: 'Η ίδια ημέρα στα στοιχεία του ΑΔΜΗΕ και της ENTSO-E. Η ENTSO-E αναθεωρεί τα φ/β περίπου δέκα ημέρες μετά σε μόνο μετρημένη παραγωγή.',
         gapShare: 'Μερίδιο καθαρής', gapClean: 'ΑΠΕ + υδροηλεκτρικά', gapRevision: 'Φ/β ENTSO-E: αναθεώρηση', gapLoad: 'Συνολικό φορτίο',
         gapMissing: 'λείπουν από την ENTSO-E', gapPoints: 'μονάδες', gapFirst: 'πρώτη έκδοση', gapNow: 'τρέχουσα έκδοση',
-        gapProvisional: 'προσωρινά', gapFinal: 'τελικά', gapUnknown: 'παλαιότερη που κρατήθηκε', gapNotYet: 'δεν έχει αναθεωρηθεί ακόμα', gapNoLoad: 'Το φορτίο της ENTSO-E δεν έχει φορτωθεί ακόμα για αυτή την ημέρα', gapNoHistory: 'Δεν υπάρχει ακόμα ιστορικό εκδόσεων για αυτή την ημέρα',
-        loadTitle: 'Συνολικό φορτίο: ΑΔΜΗΕ και ENTSO-E', loadSub: 'Live συνολικό φορτίο του ΑΔΜΗΕ έναντι του πραγματικού συνολικού φορτίου της ENTSO-E (A65). Με τελείες: η πρώτη έκδοση της ENTSO-E, όταν διαφέρει από την τρέχουσα.',
-        admieLoad: 'Φορτίο ΑΔΜΗΕ', entsoeLoad: 'Φορτίο ENTSO-E', entsoeLoadFirst: 'Φορτίο ENTSO-E (πρώτη έκδοση)', entsoeSolarFirst: 'Φ/Β (ENTSO-E, πρώτη έκδοση)',
+        gapProvisional: 'προσωρινά', gapFinal: 'τελικά', gapUnknown: 'παλαιότερη που κρατήθηκε', gapNotYet: 'δεν έχει αναθεωρηθεί ακόμα', gapNoLoad: 'Το φορτίο της ENTSO-E δεν έχει φορτωθεί ακόμα για αυτή την ημέρα', gapNoHistory: 'Δεν υπάρχει ακόμα ιστορικό εκδόσεων για αυτή την ημέρα', gapNoCrete: 'ΑΔΜΗΕ χωρίς Κρήτη',
+        loadTitle: 'Συνολικό φορτίο: ΑΔΜΗΕ και ENTSO-E', loadSub: 'Live συνολικό φορτίο του ΑΔΜΗΕ έναντι του πραγματικού συνολικού φορτίου της ENTSO-E (A65). Λεπτή γραμμή: το φορτίο του ΑΔΜΗΕ χωρίς τη ροή προς την Κρήτη, που ο ΑΔΜΗΕ μετρά ως φορτίο και η ENTSO-E όχι. Με τελείες: η πρώτη έκδοση της ENTSO-E, όταν διαφέρει.',
+        admieLoad: 'Φορτίο ΑΔΜΗΕ', admieLoadNoCrete: 'Φορτίο ΑΔΜΗΕ χωρίς τη ροή προς Κρήτη', entsoeLoad: 'Φορτίο ENTSO-E', entsoeLoadFirst: 'Φορτίο ENTSO-E (πρώτη έκδοση)', entsoeSolarFirst: 'Φ/Β (ENTSO-E, πρώτη έκδοση)',
         recordsIntro: 'Οι υψηλότερες τιμές από την έναρξη της καταγραφής, {l}. Πατήστε σε ένα ρεκόρ για την εξέλιξή του και τις πέντε κορυφαίες.',
         recHourly: 'Ωριαία ρεκόρ', recDaily: 'Ημερήσια ρεκόρ', newBadge: 'ΝΕΟ', noData: 'Δεν υπάρχουν ακόμα δεδομένα',
         rec: { solar: 'Φωτοβολταϊκά', wind: 'Αιολικά', exports: 'Εξαγωγές', bess_chg: 'Φόρτιση BESS', bess_dis: 'Εκφόρτιση BESS', bess_chg_pump: 'Φόρτιση BESS + άντληση', network_load: 'Φορτίο δικτύου', res: 'ΑΠΕ (με ΣΗΘΥΑ)' },
@@ -130,6 +130,14 @@ const METHODOLOGY = {
 <p class="mb-4">The day-ahead price is the hourly value for Greece as published on ADMIE's portal.</p>
 <h4 id="m-entsoe" class="text-acc-300 font-semibold mb-1 scroll-mt-4">ADMIE and ENTSO-E</h4>
 <p class="mb-4">ADMIE's own statistics split renewables into system RES (transmission) and network RES (distribution); network RES include medium-voltage generation metered in the RESMV file and an estimate of low-voltage generation that is not metered hourly. On the ENTSO-E Transparency Platform the first published solar figure is close to that total; about ten days later it is revised to metered generation only, and biomass is not reported. The page keeps both ENTSO-E versions (the first one and the latest, marked provisional or final after 14 days) and the ENTSO-E actual total load, so the two sources can be compared day by day.</p>
+<h4 id="m-layers" class="text-acc-300 font-semibold mb-1 scroll-mt-4">Layers of load and of renewables</h4>
+<p class="mb-2">ADMIE's figures add up exactly, layer by layer (example: 17 Oct 2026, MWh):</p>
+<ul class="mb-2 list-disc pl-5 space-y-1">
+<li>transmission load without Crete 89,667 + flow to Crete through the two cables 5,937 = SCADA net load 95,604;</li>
+<li>+ pumping and BESS charging − BESS discharging = 97,647, the total of ADMIE's daily energy bulletin;</li>
+<li>SCADA net load + medium-voltage generation (RESMV) 22,790 + the low-voltage estimate (UCE) 11,976 = 130,370, ADMIE's live total load.</li>
+</ul>
+<p class="mb-4">ADMIE therefore publishes three renewables totals for the same day: transmission only (daily bulletin, 66,187), metered transmission + medium voltage (88,977) and live, with the low-voltage estimate (100,953). None is wrong; they measure different things. Crete is outside the mainland figures: its own renewables appear in none of them, only the flow through the cables. ENTSO-E's load leaves out the flow to Crete and about 40% of the low-voltage estimate; its generation leaves out the whole low-voltage estimate.</p>
 <h4 class="text-acc-300 font-semibold mb-1">Records</h4>
 <p class="mb-4">The five highest values since tracking began (1 April 2026), recomputed every hour from the full history, so a correction by ADMIE also corrects a record. Each record shows how the #1 progressed; in the first weeks of tracking almost every day is a “record”, which is why that period is shaded. Hourly values are MWh in one hour, equal to the average MW.</p>
 <h4 class="text-acc-300 font-semibold mb-1">Status</h4>
@@ -147,6 +155,14 @@ const METHODOLOGY = {
 <p class="mb-4">Η τιμή επόμενης ημέρας είναι η ωριαία τιμή για την Ελλάδα όπως δημοσιεύεται στην πύλη του ΑΔΜΗΕ.</p>
 <h4 id="m-entsoe" class="text-acc-300 font-semibold mb-1 scroll-mt-4">ΑΔΜΗΕ και ENTSO-E</h4>
 <p class="mb-4">Τα στατιστικά του ίδιου του ΑΔΜΗΕ χωρίζουν τις ΑΠΕ σε ΑΠΕ συστήματος (μεταφορά) και ΑΠΕ δικτύου (διανομή)· οι ΑΠΕ δικτύου περιέχουν την παραγωγή μέσης τάσης που μετριέται στο αρχείο RESMV και μια εκτίμηση της παραγωγής χαμηλής τάσης που δεν μετριέται ωριαία. Στην ENTSO-E Transparency Platform η πρώτη δημοσιευμένη τιμή των φ/β είναι κοντά σε αυτό το σύνολο· περίπου δέκα ημέρες μετά αναθεωρείται σε μόνο μετρημένη παραγωγή, και η βιομάζα δεν δηλώνεται. Η σελίδα κρατά και τις δύο εκδόσεις της ENTSO-E (την πρώτη και την πιο πρόσφατη, με ένδειξη προσωρινή ή τελική μετά από 14 ημέρες) και το πραγματικό συνολικό φορτίο της ENTSO-E, ώστε οι δύο πηγές να συγκρίνονται ημέρα προς ημέρα.</p>
+<h4 id="m-layers" class="text-acc-300 font-semibold mb-1 scroll-mt-4">Επίπεδα φορτίου και ΑΠΕ</h4>
+<p class="mb-2">Τα στοιχεία του ΑΔΜΗΕ αθροίζουν ακριβώς, επίπεδο προς επίπεδο (παράδειγμα: 17 Οκτ 2026, MWh):</p>
+<ul class="mb-2 list-disc pl-5 space-y-1">
+<li>φορτίο μεταφοράς χωρίς Κρήτη 89.667 + ροή προς Κρήτη από τα δύο καλώδια 5.937 = καθαρό φορτίο SCADA 95.604·</li>
+<li>+ άντληση και φόρτιση BESS − εκφόρτιση BESS = 97.647, το σύνολο του ημερήσιου δελτίου ενέργειας του ΑΔΜΗΕ·</li>
+<li>καθαρό φορτίο SCADA + παραγωγή μέσης τάσης (RESMV) 22.790 + εκτίμηση χαμηλής τάσης (UCE) 11.976 = 130.370, το live συνολικό φορτίο του ΑΔΜΗΕ.</li>
+</ul>
+<p class="mb-4">Ο ΑΔΜΗΕ δημοσιεύει έτσι τρία σύνολα ΑΠΕ για την ίδια ημέρα: μόνο μεταφορά (ημερήσιο δελτίο, 66.187), μετρημένη μεταφορά + μέση τάση (88.977) και live, με την εκτίμηση χαμηλής τάσης (100.953). Κανένα δεν είναι λάθος· μετρούν διαφορετικά πράγματα. Η Κρήτη είναι εκτός των στοιχείων της ηπειρωτικής χώρας: οι ΑΠΕ της δεν εμφανίζονται σε κανένα, μόνο η ροή από τα καλώδια. Το φορτίο της ENTSO-E αφήνει έξω τη ροή προς την Κρήτη και περίπου το 40% της εκτίμησης χαμηλής τάσης· η παραγωγή της αφήνει έξω ολόκληρη την εκτίμηση χαμηλής τάσης.</p>
 <h4 class="text-acc-300 font-semibold mb-1">Ρεκόρ</h4>
 <p class="mb-4">Οι πέντε υψηλότερες τιμές από την έναρξη της καταγραφής (1 Απριλίου 2026), που υπολογίζονται κάθε ώρα από όλο το ιστορικό· έτσι μια διόρθωση του ΑΔΜΗΕ διορθώνει και το ρεκόρ. Κάθε ρεκόρ δείχνει πώς εξελίχθηκε το #1· τις πρώτες εβδομάδες σχεδόν κάθε μέρα είναι «ρεκόρ», γι’ αυτό η περίοδος αυτή είναι σκιασμένη. Οι ωριαίες τιμές είναι MWh σε μία ώρα, ίσες με τα μέσα MW.</p>
 <h4 class="text-acc-300 font-semibold mb-1">Κατάσταση</h4>
@@ -856,10 +872,14 @@ async function renderGap(xr, en) {
             ? gapLine(x.gapNow, gwh(e.solar), 'GWh') + `<p class="text-xs text-slate-500 mt-1">${esc(x.gapNoHistory)}</p>`
             : gapLine(fLabel, gwh(f.solar), 'GWh') + gapLine(status ? `${x.gapNow} (${status})` : x.gapNow, gwh(e.solar), 'GWh') +
               (revised ? gapLine('Δ', gwh(e.solar - f.solar), 'GWh', true) : `<p class="text-xs text-slate-500 mt-1">${esc(en.status === 'final' ? '' : x.gapNotYet)}</p>`));
+        const crete = live.totals.crete_flow ?? (xr && xr.totals ? xr.totals.crete_flow : null);   // αρνητικό = προς Κρήτη
+        const noCrete = crete === null || crete === undefined ? null : live.totals.demand + crete;
         cards += gapCard(x.gapLoad, e.load === null || e.load === undefined
             ? gapLine('ΑΔΜΗΕ', gwh(live.totals.demand), 'GWh') + `<p class="text-xs text-slate-500 mt-1">${esc(x.gapNoLoad)}</p>`
-            : gapLine('ΑΔΜΗΕ', gwh(live.totals.demand), 'GWh') + gapLine(src, gwh(e.load), 'GWh') +
-              gapLine('Δ', gwh(live.totals.demand - e.load), 'GWh', true));
+            : gapLine('ΑΔΜΗΕ', gwh(live.totals.demand), 'GWh') +
+              (noCrete !== null ? gapLine(x.gapNoCrete, gwh(noCrete), 'GWh') : '') +
+              gapLine(src, gwh(e.load), 'GWh') +
+              gapLine('Δ', gwh((noCrete !== null ? noCrete : live.totals.demand) - e.load), 'GWh', true));
     }
     $('gapBox').innerHTML = cards;
 
@@ -870,7 +890,12 @@ async function renderGap(xr, en) {
     const hasLoad = en && en.totals.load !== null && en.totals.load !== undefined;
     const loadRevised = hasLoad && en.first && en.first.totals && en.first.totals.load && Math.abs(en.first.totals.load - en.totals.load) > 0.005 * en.totals.load;
     const ln = (label, data, color, dash) => ({ type: 'line', label, data, borderColor: color, backgroundColor: color, borderWidth: 2.5, pointRadius: 0, tension: 0.3, borderDash: dash === 'dash' ? [7, 5] : dash === 'dot' ? [2, 4] : [] });
+    const xrByHr = xr ? Object.fromEntries(xr.hours.map((q) => [q.hr, q])) : {};
+    const creteOf = (h) => h.crete_flow ?? (xrByHr[h.hr] || {}).crete_flow ?? null;   // αρνητικό = προς Κρήτη
+    const noCreteData = H.map((h) => (creteOf(h) === null ? null : h.demand + creteOf(h)));
+    const hasCrete = noCreteData.some((v) => v !== null);
     const ds = [ln(x.admieLoad, H.map((h) => h.demand), C.demand)];
+    if (hasCrete) ds.push({ ...ln(x.admieLoadNoCrete, noCreteData, '#94a3b8'), borderWidth: 1.5 });
     if (hasLoad) ds.push(ln(x.entsoeLoad, H.map((h) => (enByHr[h.hr] || {}).load ?? null), C.price, 'dash'));
     if (loadRevised) ds.push(ln(x.entsoeLoadFirst, H.map((h) => (fByHr[h.hr] || {}).load ?? null), C.price, 'dot'));
     upsertChart('loadChart', {
@@ -884,9 +909,10 @@ async function renderGap(xr, en) {
                 tooltip: tipOff((i) => {
                     const h = H[i], e = enByHr[h.hr] || {}, f = fByHr[h.hr] || {};
                     return tipHead(tipHourLabel(h.hr), '') + tipSections(
-                        tipRow(x.admieLoad, h.demand, C.demand) + (hasLoad ? tipRow(x.entsoeLoad, e.load, C.price) : '') +
+                        tipRow(x.admieLoad, h.demand, C.demand) + (hasCrete ? tipRow(x.admieLoadNoCrete, noCreteData[i], '#94a3b8') : '') +
+                        (hasLoad ? tipRow(x.entsoeLoad, e.load, C.price) : '') +
                         (loadRevised ? tipRow(x.entsoeLoadFirst, f.load, C.price) : ''),
-                        hasLoad && e.load ? tipRow('Δ', h.demand - e.load, null, { strong: true, sign: true }) : '');
+                        hasLoad && e.load ? tipRow('Δ', (noCreteData[i] ?? h.demand) - e.load, null, { strong: true, sign: true }) : '');
                 })
             }
         }

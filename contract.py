@@ -96,6 +96,9 @@ def normalize_live_hour(rec):
         'has_data': has_data,
         'dam_price': r1(rec.get('dam_price_eur')),
         'fetched': rec.get('fetch_timestamp'),
+        # Ροή προς την Κρήτη όπως τη δίνει ο ΑΔΜΗΕ ('CRETE LOAD' = AC + DC· αρνητικό = προς την Κρήτη).
+        # Το live φορτίο την περιέχει (D41)· κενό όταν ο ΑΔΜΗΕ δεν τη δίνει.
+        'crete_flow': r1(m.get('CRETE LOAD')) if has_data else None,
     }
     if not has_data:
         # Ώρα που δεν έχει γίνει ακόμα (ή χωρίς δημοσίευση): μόνο η τιμή DAM.
@@ -162,6 +165,7 @@ def live_day_totals(hours):
         'pumping': _sum(h['pumping'] for h in data),
         'demand': _sum(h['demand'] for h in data),
         'dam_price_avg': round(sum(prices) / len(prices), 2) if prices else None,
+        'crete_flow': _sum(h.get('crete_flow') for h in data),
         'hours_flows_mismatch': sum(1 for h in data if h['flows_match'] is False),
         'hours_balance_off': sum(1 for h in data if h['balance_ok'] is False),
     }

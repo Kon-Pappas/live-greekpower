@@ -146,10 +146,18 @@ def build_xray_for_date(date_str):
 
     # Γραμμές συστήματος του SCADA (D36): οι δύο διασυνδέσεις της Κρήτης και το καθαρό φορτίο.
     # Πρόσημο όπως στο αρχείο: αρνητικό = ροή από την ηπειρωτική χώρα προς την Κρήτη.
-    def scada_row(name):
-        idx = scada_df.index[scada_df['1'].astype(str).str.strip() == name]
-        return idx[0] if len(idx) else None
-    row_ac, row_dc, row_netload = scada_row('AC KRHTH'), scada_row('DC KRHTH'), scada_row('NET LOAD')
+    # Το αρχείο γράφει την Κρήτη με ελληνικούς χαρακτήρες έως 17/6/2026 ('AC ΚΡΗΤΗ', μόνο AC)
+    # και με λατινικούς από 18/6/2026 ('AC KRHTH', 'DC KRHTH'). Δεχόμαστε και τις δύο γραφές (D41).
+    def scada_row(*names):
+        col = scada_df['1'].astype(str).str.strip().str.upper()
+        for name in names:
+            idx = scada_df.index[col == name]
+            if len(idx):
+                return idx[0]
+        return None
+    row_ac = scada_row('AC KRHTH', 'AC ΚΡΗΤΗ')
+    row_dc = scada_row('DC KRHTH', 'DC ΚΡΗΤΗ')
+    row_netload = scada_row('NET LOAD')
 
     # Ανάκτηση MCP & Storage από το API
     api_supp = fetch_api_supplement(date_str)
