@@ -57,6 +57,12 @@ jobs:
           ENTSOE_TOKEN: ${{ secrets.ENTSOE_TOKEN }}
         run: python entsoe_builder.py
 
+      - name: Run Analysis Builder (φάση 4, D46)
+        env:
+          START_DATE: ${{ github.event.inputs.start_date }}
+          END_DATE: ${{ github.event.inputs.end_date }}
+        run: python analysis_builder.py
+
       - name: Commit and Push changes
         run: |
           git config --local user.email "action@github.com"
