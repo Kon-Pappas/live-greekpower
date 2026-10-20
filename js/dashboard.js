@@ -481,6 +481,12 @@ function setTab(tab) {
     fillPicker();
     updatePill();
     if (tab === 'live' && S.manifest) renderLive();   // οι πίτες μετρούν ξανά το πλάτος τους
+    if (tab === 'records' && S.recVisible && S.recVisible.length) {
+        markSeen(S.recVisible);
+        // το σήμα του tab ησυχάζει αμέσως· οι κάρτες συνεχίζουν να πάλλονται μέχρι την επόμενη σχεδίαση
+        const tb = document.querySelector('.tab-btn[data-tab="records"] [data-badge]');
+        if (tb) tb.className = 'rec-badge-soft ml-2 px-1.5 py-0.5 text-[10px]';
+    }
     // Τα γραφήματα σε κρυφό tab έχουν μηδενικό μέγεθος· τα ξαναμετράμε.
     requestAnimationFrame(() => Object.values(S.charts).forEach((c) => c.resize()));
 }
@@ -1012,27 +1018,47 @@ function shortWhen(id) {
     const date = `${dd}/${m}${yr}`;
     return hh ? `${date} · ${hourRange(parseInt(hh, 10)).replace(/:00/g, '')}` : date;
 }
-const badgeHtml = (rank, extra = '') => `<span class="rec-badge ${extra}">${esc(t().newAt)}${rank}</span>`;
+// Μνήμη «το έχω δει» (D48): κλειδιά των πρόσφατων ρεκόρ που ο επισκέπτης έχει ήδη δει στο tab Ρεκόρ.
+const SEEN_KEY = 'lgp_rec_seen';
+function seenSet() { try { return new Set(JSON.parse(localStorage.getItem(SEEN_KEY) || '[]')); } catch (e) { return new Set(); } }
+function markSeen(keys) {
+    try {
+        const cur = seenSet(); keys.forEach((k) => cur.add(k));
+        localStorage.setItem(SEEN_KEY, JSON.stringify([...cur].slice(-200)));   // όριο ώστε να μη μεγαλώνει για πάντα
+    } catch (e) { /* χωρίς αποθήκευση: απλώς πάλλονται όλα, όπως πριν */ }
+}
+const recKey = (scope, key, id) => `${scope}:${key}:${id}`;
+// #1: γεμάτο· #2–#5: περίγραμμα· παλμός μόνο αν δεν το έχει δει
+function badgeHtml(rank, extra = '', unseen = false) {
+    const cls = rank === 1 ? 'rec-badge' : 'rec-badge-soft';
+    return `<span class="${cls} ${unseen && rank === 1 ? 'rec-pulse' : ''} ${extra}">${esc(t().newAt)}${rank}</span>`;   // παλμός μόνο σε νέο #1
+}
+// Το πρόσφατο ρεκόρ μιας κατηγορίας: θέση και κλειδί
+function recentEntry(scope, key, items) {
+    const rank = recentRank(items);
+    return rank ? { rank, key: recKey(scope, key, items[rank - 1].id) } : null;
+}
 
 function renderRecords() {
     const R = S.records, x = t(), start = R && R.tracking_start ? R.tracking_start.live : (S.manifest.live_days || [])[0];
     $('recordsIntro').textContent = x.recordsIntro.replace('{l}', start ? fmtDate(start) : '–');
-    const counts = { hourly: 0, daily: 0 };
+    const counts = { hourly: 0, daily: 0 }, unseenCounts = { hourly: 0, daily: 0 }, seen = seenSet();
+    S.recVisible = [];
     const block = (scope) => {
         let cards = '', rows = '';
         REC_ORDER[scope].forEach(([key, color]) => {
             const items = (R && R[scope] && R[scope][key]) || [];
             const top = items[0];
-            const rank = recentRank(items);
-            if (rank) counts[scope]++;
+            const re = recentEntry(scope, key, items), rank = re ? re.rank : null, unseen = !!re && !seen.has(re.key);
+            if (re) { counts[scope]++; S.recVisible.push(re.key); if (unseen) unseenCounts[scope]++; }
             if (!top) {
                 cards += `<div class="bg-slate-800/40 p-4 rounded-xl border border-slate-700"><h3 class="text-sm font-semibold text-slate-200">${esc(x.rec[key])}</h3><p class="text-sm text-slate-500 mt-2">${esc(x.noData)}</p></div>`;
                 return;
             }
-            const ring = rank ? 'border-fuchsia-500/60' : 'border-slate-700';
+            const ring = rank === 1 ? 'border-fuchsia-500/60' : rank ? 'border-fuchsia-500/30' : 'border-slate-700';
             // desktop / tablet: κάρτα
             cards += `<button type="button" data-rec="${scope}:${key}" class="relative group text-left bg-slate-800/40 p-4 rounded-xl border ${ring} hover:border-acc-400 hover:bg-slate-800/70 transition w-full">
-                ${rank ? badgeHtml(rank, 'rec-sticker') : ''}
+                ${rank ? badgeHtml(rank, `rec-sticker ${rank === 1 ? 'rec-tilt' : ''}`, unseen) : ''}
                 <h3 class="text-sm font-semibold text-slate-200 pr-10">${esc(x.rec[key])}</h3>
                 <div class="mt-2 text-2xl font-bold" style="color:${color}">${fmt(top.value)} <span class="text-xs font-normal text-slate-500">MWh</span></div>
                 <div class="flex justify-between items-center mt-1 text-xs">
@@ -1044,7 +1070,7 @@ function renderRecords() {
             rows += `<button type="button" data-rec="${scope}:${key}" class="w-full flex items-center gap-3 py-2.5 px-3 text-left ${rank ? 'bg-fuchsia-500/10' : ''}">
                 <span class="flex-1 min-w-0">
                     <span class="block text-sm font-semibold text-slate-200 truncate">${esc((x.recShort && x.recShort[key]) || x.rec[key])}</span>
-                    <span class="flex items-center gap-2 text-[11px] text-slate-400">${esc(shortWhen(top.id))}${rank ? badgeHtml(rank, 'text-[10px] px-1.5 py-px') : ''}</span>
+                    <span class="flex items-center gap-2 text-[11px] text-slate-400">${esc(shortWhen(top.id))}${rank ? badgeHtml(rank, 'text-[10px] px-1.5 py-px', unseen) : ''}</span>
                 </span>
                 <span class="text-base font-bold whitespace-nowrap" style="color:${color}">${fmt(top.value)} <span class="text-[10px] font-normal text-slate-500">MWh</span></span>
                 <span class="text-slate-500 text-lg leading-none">›</span>
@@ -1061,18 +1087,18 @@ function renderRecords() {
     document.querySelectorAll('.rec-scope-btn').forEach((b) => {
         const sc = b.dataset.recscope, on = sc === S.recScope;
         b.className = `rec-scope-btn flex-1 h-10 rounded flex items-center justify-center gap-2 transition ${on ? 'bg-acc-400 text-slate-900' : 'text-slate-400'}`;
-        b.innerHTML = `${esc(sc === 'hourly' ? x.recHourly : x.recDaily)}${counts[sc] ? ` <span class="rec-badge text-[10px] px-1.5 py-0.5">${counts[sc]} ${esc(x.newPlural)}</span>` : ''}`;
+        b.innerHTML = `${esc(sc === 'hourly' ? x.recHourly : x.recDaily)}${counts[sc] ? ` <span class="${unseenCounts[sc] ? 'rec-badge rec-pulse' : 'rec-badge-soft'} text-[10px] px-1.5 py-0.5">${counts[sc]} ${esc(x.newPlural)}</span>` : ''}`;
     });
     $('recPanelHourly').classList.toggle('max-sm:hidden', S.recScope !== 'hourly');
     $('recPanelDaily').classList.toggle('max-sm:hidden', S.recScope !== 'daily');
 
     // σήμα στο tab
-    const total = counts.hourly + counts.daily;
+    const total = counts.hourly + counts.daily, totalUnseen = unseenCounts.hourly + unseenCounts.daily;
     const btn = document.querySelector('.tab-btn[data-tab="records"]');
     let badge = btn.querySelector('[data-badge]');
     if (total > 0) {
         if (!badge) { badge = document.createElement('span'); badge.dataset.badge = '1'; btn.appendChild(badge); }
-        badge.className = 'rec-badge ml-2 px-1.5 py-0.5 text-[10px]';
+        badge.className = `${totalUnseen ? 'rec-badge rec-pulse' : 'rec-badge-soft'} ml-2 px-1.5 py-0.5 text-[10px]`;
         badge.textContent = `${total} ${x.newPlural}`;
     } else if (badge) badge.remove();
 }
@@ -1105,7 +1131,7 @@ function openRecord(scope, key) {
     $('recModalTitle').textContent = `${x.rec[key]} · ${scope === 'hourly' ? x.recHourly : x.recDaily}`;
     const rRank = recentRank(top);
     $('recModalSub').innerHTML = (top[0] ? esc(`#1: ${fmt(top[0].value)} MWh · ${recordWhen(top[0].id).replace(/<[^>]+>/g, '')}`) : '') +
-        (rRank ? ` <span class="ml-2 align-middle inline-block" style="transform:rotate(-4deg)">${badgeHtml(rRank, 'text-[11px] px-2 py-0.5')}</span>` : '');
+        (rRank ? ` <span class="ml-2 align-middle inline-block">${badgeHtml(rRank, 'text-[11px] px-2 py-0.5')}</span>` : '');
 
     // κλιμακωτό γράφημα: κάθε σημείο = νέο ρεκόρ· η τελευταία τιμή εκτείνεται έως σήμερα
     const start = (R.tracking_start && (['solar', 'wind'].includes(key) ? R.tracking_start.xray : R.tracking_start.live)) || (prog[0] && prog[0].id);
