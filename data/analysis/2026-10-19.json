@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "date": "2026-10-19",
-  "updated": "2026-10-20T10:16:32+03:00",
+  "updated": "2026-10-20T13:31:37+03:00",
   "calibration": {
     "window_days": 90,
     "from": "2026-07-22",
@@ -257,6 +257,13 @@
     },
     {
       "scope": "hourly",
+      "cat": "solar",
+      "rank": 1,
+      "value": 7450.5,
+      "id": "2026-10-19, 14:00"
+    },
+    {
+      "scope": "hourly",
       "cat": "exports",
       "rank": 1,
       "value": 2881.0,
@@ -304,14 +311,14 @@
       "Από την παραγωγή της διανομής, 10,2 GWh δεν μετρήθηκαν ωριαία. Εκτιμώνται 9,8 GWh φ/β στέγης και χαμηλής τάσης, 0,4 GWh αιολικά της διανομής και 1,7 GWh μικρές μονάδες· το υπόλοιπο (−1,7 GWh) είναι απόκλιση της εκτίμησης του ΑΔΜΗΕ από το μοντέλο.",
       "Προς την Κρήτη στάλθηκαν 7,2 GWh μέσα από τα δύο καλώδια.",
       "Στην ENTSO-E (προσωρινή έκδοση) φ/β, αιολικά και βιομάζα της ημέρας είναι 66,1 GWh, έναντι 70,0 GWh στα live στοιχεία του ΑΔΜΗΕ.",
-      "Ρεκόρ της ημέρας στις πέντε κορυφαίες θέσεις: εκφόρτιση BESS (ημερήσιο, #1), εξαγωγές (ωριαίο, #1), φόρτιση BESS (ημερήσιο, #2), εκφόρτιση BESS (ωριαίο, #2), φόρτιση BESS + άντληση (ημερήσιο, #4), φόρτιση BESS (ωριαίο, #5), φόρτιση BESS + άντληση (ωριαίο, #5)."
+      "Ρεκόρ της ημέρας στις πέντε κορυφαίες θέσεις: εκφόρτιση BESS (ημερήσιο, #1), φωτοβολταϊκά (ωριαίο, #1), εξαγωγές (ωριαίο, #1), φόρτιση BESS (ημερήσιο, #2), εκφόρτιση BESS (ωριαίο, #2), φόρτιση BESS + άντληση (ημερήσιο, #4), φόρτιση BESS (ωριαίο, #5), φόρτιση BESS + άντληση (ωριαίο, #5)."
     ],
     "en": [
       "On 19 October 2026 demand was 132.1 GWh and renewables with hydro covered 59.0% of domestic generation (ADMIE live, RES incl. CHP). Net exports were 16.6 GWh and the average day-ahead price 228.75 €/MWh.",
       "Of distribution-level generation, 10.2 GWh was not metered hourly. An estimated 9.8 GWh came from rooftop and other low-voltage solar, 0.4 GWh from distribution-connected wind and 1.7 GWh from small units; the remainder (−1.7 GWh) is the difference between ADMIE's estimate and the model.",
       "7.2 GWh was sent to Crete through the two cables.",
       "In ENTSO-E's provisional data, the day's solar, wind and biomass add up to 66.1 GWh, against 70.0 GWh in ADMIE's live figures.",
-      "Records of the day in the top five: BESS discharge (daily, #1), exports (hourly, #1), BESS charge (daily, #2), BESS discharge (hourly, #2), BESS charge + pumping (daily, #4), BESS charge (hourly, #5), BESS charge + pumping (hourly, #5)."
+      "Records of the day in the top five: BESS discharge (daily, #1), solar (hourly, #1), exports (hourly, #1), BESS charge (daily, #2), BESS discharge (hourly, #2), BESS charge + pumping (daily, #4), BESS charge (hourly, #5), BESS charge + pumping (hourly, #5)."
     ]
   }
 }
