@@ -2,26 +2,26 @@
   "schema": 1,
   "date": "2026-10-20",
   "source": "ADMIE/IPTO market portal: prodmixandload, dayaheadmarket, scadainterflows",
-  "updated": "2026-10-20T04:05:34+03:00",
+  "updated": "2026-10-20T05:05:32+03:00",
   "totals": {
-    "hours_with_data": 4,
+    "hours_with_data": 5,
     "gen": {
-      "lignite": 1185.0,
-      "gas": 9543.0,
-      "hydro": 3758.0,
-      "res": 5624.0,
-      "total": 20110.0
+      "lignite": 2031.0,
+      "gas": 15897.0,
+      "hydro": 4908.0,
+      "res": 2406.0,
+      "total": 25242.0
     },
-    "imports": 1511.0,
-    "exports": 2925.0,
+    "imports": 2552.0,
+    "exports": 4253.0,
     "storage": {
-      "dis": 30.0,
-      "chg": 973.0
+      "dis": 48.0,
+      "chg": 1291.0
     },
     "pumping": 0.0,
-    "demand": 17753.0,
+    "demand": 22298.0,
     "dam_price_avg": 251.79,
-    "crete_flow": -718.0,
+    "crete_flow": -1178.0,
     "hours_flows_mismatch": 0,
     "hours_balance_off": 0
   },
@@ -30,7 +30,7 @@
       "hr": 1,
       "has_data": true,
       "dam_price": 339.0,
-      "fetched": "2026-10-20T04:05:31.234054+03:00",
+      "fetched": "2026-10-20T05:05:29.144489+03:00",
       "crete_flow": -262.0,
       "gen": {
         "lignite": 362.0,
@@ -76,7 +76,7 @@
       "hr": 2,
       "has_data": true,
       "dam_price": 282.0,
-      "fetched": "2026-10-20T04:05:31.234054+03:00",
+      "fetched": "2026-10-20T05:05:29.144489+03:00",
       "crete_flow": -232.0,
       "gen": {
         "lignite": 404.0,
@@ -122,7 +122,7 @@
       "hr": 3,
       "has_data": true,
       "dam_price": 292.0,
-      "fetched": "2026-10-20T04:05:31.234054+03:00",
+      "fetched": "2026-10-20T05:05:29.144489+03:00",
       "crete_flow": -224.0,
       "gen": {
         "lignite": 419.0,
@@ -168,69 +168,99 @@
       "hr": 4,
       "has_data": true,
       "dam_price": 300.0,
-      "fetched": "2026-10-20T04:05:31.234054+03:00",
-      "crete_flow": 0.0,
+      "fetched": "2026-10-20T05:05:29.144489+03:00",
+      "crete_flow": -230.0,
       "gen": {
-        "lignite": 0.0,
-        "gas": 0.0,
-        "hydro": 0.0,
-        "res": 4085.0,
-        "total": 4085.0
+        "lignite": 421.0,
+        "gas": 3181.0,
+        "hydro": 667.0,
+        "res": 453.0,
+        "total": 4722.0
       },
-      "imports": 0.0,
-      "exports": 0.0,
+      "imports": 519.0,
+      "exports": 677.0,
       "flows": {
         "AL": {
-          "imp": null,
-          "exp": null
+          "imp": 0.0,
+          "exp": 146.0
         },
         "BG": {
-          "imp": null,
-          "exp": null
+          "imp": 0.0,
+          "exp": 296.0
         },
         "IT": {
-          "imp": null,
-          "exp": null
+          "imp": 484.0,
+          "exp": 0.0
         },
         "TR": {
-          "imp": null,
-          "exp": null
+          "imp": 35.0,
+          "exp": 10.0
         },
         "MK": {
-          "imp": null,
-          "exp": null
+          "imp": 0.0,
+          "exp": 225.0
         }
       },
       "flows_match": true,
       "storage": {
-        "dis": 0.0,
-        "chg": 0.0
+        "dis": 9.0,
+        "chg": 258.0
       },
       "pumping": 0.0,
-      "demand": 4085.0,
+      "demand": 4315.0,
       "balance_ok": true
     },
     {
       "hr": 5,
-      "has_data": false,
+      "has_data": true,
       "dam_price": 300.0,
-      "fetched": "2026-10-20T04:05:31.234054+03:00",
-      "crete_flow": null,
-      "gen": null,
-      "imports": null,
-      "exports": null,
-      "flows": null,
-      "flows_match": null,
-      "storage": null,
-      "pumping": null,
-      "demand": null,
-      "balance_ok": null
+      "fetched": "2026-10-20T05:05:29.144489+03:00",
+      "crete_flow": -230.0,
+      "gen": {
+        "lignite": 425.0,
+        "gas": 3173.0,
+        "hydro": 483.0,
+        "res": 414.0,
+        "total": 4495.0
+      },
+      "imports": 522.0,
+      "exports": 651.0,
+      "flows": {
+        "AL": {
+          "imp": 0.0,
+          "exp": 136.0
+        },
+        "BG": {
+          "imp": 0.0,
+          "exp": 290.0
+        },
+        "IT": {
+          "imp": 485.0,
+          "exp": 0.0
+        },
+        "TR": {
+          "imp": 37.0,
+          "exp": 5.0
+        },
+        "MK": {
+          "imp": 0.0,
+          "exp": 220.0
+        }
+      },
+      "flows_match": true,
+      "storage": {
+        "dis": 9.0,
+        "chg": 60.0
+      },
+      "pumping": 0.0,
+      "demand": 4315.0,
+      "balance_ok": true
     },
     {
       "hr": 6,
       "has_data": false,
       "dam_price": 305.0,
-      "fetched": "2026-10-20T04:05:31.234054+03:00",
+      "fetched": "2026-10-20T05:05:29.144489+03:00",
       "crete_flow": null,
       "gen": null,
       "imports": null,
@@ -246,7 +276,7 @@
       "hr": 7,
       "has_data": false,
       "dam_price": 348.0,
-      "fetched": "2026-10-20T04:05:31.234054+03:00",
+      "fetched": "2026-10-20T05:05:29.144489+03:00",
       "crete_flow": null,
       "gen": null,
       "imports": null,
@@ -262,7 +292,7 @@
       "hr": 8,
       "has_data": false,
       "dam_price": 396.0,
-      "fetched": "2026-10-20T04:05:31.234054+03:00",
+      "fetched": "2026-10-20T05:05:29.144489+03:00",
       "crete_flow": null,
       "gen": null,
       "imports": null,
@@ -278,7 +308,7 @@
       "hr": 9,
       "has_data": false,
       "dam_price": 390.0,
-      "fetched": "2026-10-20T04:05:31.234054+03:00",
+      "fetched": "2026-10-20T05:05:29.144489+03:00",
       "crete_flow": null,
       "gen": null,
       "imports": null,
@@ -294,7 +324,7 @@
       "hr": 10,
       "has_data": false,
       "dam_price": 290.0,
-      "fetched": "2026-10-20T04:05:31.234054+03:00",
+      "fetched": "2026-10-20T05:05:29.144489+03:00",
       "crete_flow": null,
       "gen": null,
       "imports": null,
@@ -310,7 +340,7 @@
       "hr": 11,
       "has_data": false,
       "dam_price": 42.0,
-      "fetched": "2026-10-20T04:05:31.234054+03:00",
+      "fetched": "2026-10-20T05:05:29.144489+03:00",
       "crete_flow": null,
       "gen": null,
       "imports": null,
@@ -326,7 +356,7 @@
       "hr": 12,
       "has_data": false,
       "dam_price": 89.0,
-      "fetched": "2026-10-20T04:05:31.234054+03:00",
+      "fetched": "2026-10-20T05:05:29.144489+03:00",
       "crete_flow": null,
       "gen": null,
       "imports": null,
@@ -342,7 +372,7 @@
       "hr": 13,
       "has_data": false,
       "dam_price": 55.0,
-      "fetched": "2026-10-20T04:05:31.234054+03:00",
+      "fetched": "2026-10-20T05:05:29.144489+03:00",
       "crete_flow": null,
       "gen": null,
       "imports": null,
@@ -358,7 +388,7 @@
       "hr": 14,
       "has_data": false,
       "dam_price": 33.0,
-      "fetched": "2026-10-20T04:05:31.234054+03:00",
+      "fetched": "2026-10-20T05:05:29.144489+03:00",
       "crete_flow": null,
       "gen": null,
       "imports": null,
@@ -374,7 +404,7 @@
       "hr": 15,
       "has_data": false,
       "dam_price": 60.0,
-      "fetched": "2026-10-20T04:05:31.234054+03:00",
+      "fetched": "2026-10-20T05:05:29.144489+03:00",
       "crete_flow": null,
       "gen": null,
       "imports": null,
@@ -390,7 +420,7 @@
       "hr": 16,
       "has_data": false,
       "dam_price": 39.0,
-      "fetched": "2026-10-20T04:05:31.234054+03:00",
+      "fetched": "2026-10-20T05:05:29.144489+03:00",
       "crete_flow": null,
       "gen": null,
       "imports": null,
@@ -406,7 +436,7 @@
       "hr": 17,
       "has_data": false,
       "dam_price": 163.0,
-      "fetched": "2026-10-20T04:05:31.234054+03:00",
+      "fetched": "2026-10-20T05:05:29.144489+03:00",
       "crete_flow": null,
       "gen": null,
       "imports": null,
@@ -422,7 +452,7 @@
       "hr": 18,
       "has_data": false,
       "dam_price": 275.0,
-      "fetched": "2026-10-20T04:05:31.234054+03:00",
+      "fetched": "2026-10-20T05:05:29.144489+03:00",
       "crete_flow": null,
       "gen": null,
       "imports": null,
@@ -438,7 +468,7 @@
       "hr": 19,
       "has_data": false,
       "dam_price": 373.0,
-      "fetched": "2026-10-20T04:05:31.234054+03:00",
+      "fetched": "2026-10-20T05:05:29.144489+03:00",
       "crete_flow": null,
       "gen": null,
       "imports": null,
@@ -454,7 +484,7 @@
       "hr": 20,
       "has_data": false,
       "dam_price": 366.0,
-      "fetched": "2026-10-20T04:05:31.234054+03:00",
+      "fetched": "2026-10-20T05:05:29.144489+03:00",
       "crete_flow": null,
       "gen": null,
       "imports": null,
@@ -470,7 +500,7 @@
       "hr": 21,
       "has_data": false,
       "dam_price": 341.0,
-      "fetched": "2026-10-20T04:05:31.234054+03:00",
+      "fetched": "2026-10-20T05:05:29.144489+03:00",
       "crete_flow": null,
       "gen": null,
       "imports": null,
@@ -486,7 +516,7 @@
       "hr": 22,
       "has_data": false,
       "dam_price": 325.0,
-      "fetched": "2026-10-20T04:05:31.234054+03:00",
+      "fetched": "2026-10-20T05:05:29.144489+03:00",
       "crete_flow": null,
       "gen": null,
       "imports": null,
@@ -502,7 +532,7 @@
       "hr": 23,
       "has_data": false,
       "dam_price": 349.0,
-      "fetched": "2026-10-20T04:05:31.234054+03:00",
+      "fetched": "2026-10-20T05:05:29.144489+03:00",
       "crete_flow": null,
       "gen": null,
       "imports": null,
@@ -518,7 +548,7 @@
       "hr": 24,
       "has_data": false,
       "dam_price": 291.0,
-      "fetched": "2026-10-20T04:05:31.234054+03:00",
+      "fetched": "2026-10-20T05:05:29.144489+03:00",
       "crete_flow": null,
       "gen": null,
       "imports": null,
