@@ -35,9 +35,10 @@ MIN_HOURS = 24 * 14          # τουλάχιστον δύο εβδομάδες 
 # Ανθεκτική παλινδρόμηση (σκέτη Python)
 # ---------------------------------------------------------------------
 
-def _solve3(A, b):
+def _solve(A, b):
+    """Gauss με οδήγηση για N×N (εδώ 3 ή 4 μεταβλητές)."""
+    n = len(b)
     A = [row[:] + [v] for row, v in zip(A, b)]
-    n = 3
     for i in range(n):
         p = max(range(i, n), key=lambda r: abs(A[r][i]))
         A[i], A[p] = A[p], A[i]
@@ -52,14 +53,15 @@ def _solve3(A, b):
 
 
 def _wls(X, y, w):
-    A = [[0.0] * 3 for _ in range(3)]
-    b = [0.0] * 3
+    n = len(X[0])
+    A = [[0.0] * n for _ in range(n)]
+    b = [0.0] * n
     for xi, yi, wi in zip(X, y, w):
-        for r in range(3):
+        for r in range(n):
             b[r] += wi * xi[r] * yi
-            for c in range(3):
+            for c in range(n):
                 A[r][c] += wi * xi[r] * xi[c]
-    return _solve3(A, b)
+    return _solve(A, b)
 
 
 def huber_fit(X, y, iters=15):
@@ -89,11 +91,34 @@ _ROWS = {}   # μνήμη: κάθε αρχείο X-Ray διαβάζεται μί
 
 
 def _day_rows(d):
+    """Γραμμές ([1, αιολικά, φ/β], UCE, καθαρή λειτουργία BESS ΑΔΜΗΕ) μιας ημέρας."""
     if d not in _ROWS:
         x = load_json_lenient(os.path.join(contract.XRAY_DIR, d + '.json'), None)
-        _ROWS[d] = [([1.0, h.get('wind') or 0.0, h.get('solar') or 0.0], h['uce'])
+        lv = load_json_lenient(os.path.join(contract.LIVE_DIR, d + '.json'), None) or {}
+        st = {h['hr']: h['storage']['dis'] - h['storage']['chg'] for h in lv.get('hours', []) if h.get('has_data')}
+        _ROWS[d] = [([1.0, h.get('wind') or 0.0, h.get('solar') or 0.0], h['uce'], st.get(h['hr']))
                     for h in (x or {}).get('hours', []) if h.get('uce') is not None]
     return _ROWS[d]
+
+
+# Διαγνωστικός έλεγχος (D49, K20): εμφανίζονται μπαταρίες της διανομής μέσα στο UCE;
+# Δείκτης: η ωριαία καθαρή λειτουργία του στόλου BESS του ΑΔΜΗΕ (ίδια σήματα αγοράς).
+# Ο συντελεστής ΔΕΝ μπαίνει στην ανάλυση· αποθηκεύεται για παρακολούθηση. Αν ~100 MW διανομής
+# ήταν μέσα στο UCE με το ίδιο μοτίβο, θα περιμέναμε περίπου 100 / (μέγεθος στόλου ΑΔΜΗΕ).
+DIST_BESS_MW = 100      # σύμφωνα με δημόσιες ανακοινώσεις του Ιουλίου 2026
+
+
+def bess_diagnostic(allrows):
+    rows = [r for r in allrows if r[2] is not None]
+    if len(rows) < MIN_HOURS:
+        return None
+    dis = sorted(r[2] for r in rows if r[2] > 0)
+    fleet = dis[min(len(dis) - 1, int(0.99 * (len(dis) - 1)))] if dis else 0
+    if fleet < 50:                       # στόλος πολύ μικρός για να κριθεί κάτι
+        return {'fleet_p99': round(fleet, 1), 'k_bess': None, 'expected_if_in_uce': None}
+    b = huber_fit([r[0] + [r[2]] for r in rows], [r[1] for r in rows], iters=10)
+    return {'fleet_p99': round(fleet, 1), 'k_bess': round(b[3], 4) if b else None,
+            'expected_if_in_uce': round(DIST_BESS_MW / fleet, 3)}
 
 
 def calibrate(end_iso):
@@ -111,6 +136,7 @@ def calibrate(end_iso):
     beta = huber_fit([r[0] for r in allrows], [r[1] for r in allrows])
     if beta is None:
         return None
+    diag = bess_diagnostic(allrows)
     rng = random.Random(end_iso)            # αναπαραγώγιμο: ίδια ημέρα, ίδιο αποτέλεσμα
     keys = list(by_day)
     boots = []
@@ -124,6 +150,7 @@ def calibrate(end_iso):
         'window_days': WINDOW_DAYS, 'from': keys[-1], 'to': keys[0], 'hours': len(allrows),
         'base': round(beta[0], 1), 'k_wind': round(beta[1], 4), 'k_solar': round(beta[2], 4),
         'ci90': {'base': ci(0), 'k_wind': ci(1), 'k_solar': ci(2)},
+        'diag_bess': diag,
     }
 
 
@@ -309,7 +336,7 @@ if __name__ == '__main__':
     for d in contract.list_days(ANALYSIS_DIR):
         c = (load_json_lenient(os.path.join(ANALYSIS_DIR, d + '.json'), {}) or {}).get('calibration')
         if c:
-            cal['days'][d] = {k: c[k] for k in ['base', 'k_wind', 'k_solar', 'hours']} | {'ci90': c['ci90']}
+            cal['days'][d] = {k: c[k] for k in ['base', 'k_wind', 'k_solar', 'hours']} | {'ci90': c['ci90'], 'diag_bess': c.get('diag_bess')}
     cal['updated'] = contract.now_athens_iso()
     write_json_atomic(CALIB_PATH, cal)
     print(f"✓ Ανάλυση: {written} ημέρες · βαθμονόμηση: {len(cal['days'])} ημέρες στο ιστορικό.")
