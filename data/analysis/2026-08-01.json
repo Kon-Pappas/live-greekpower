@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "date": "2026-08-01",
-  "updated": "2026-10-19T17:08:48+03:00",
+  "updated": "2026-10-21T06:31:39+03:00",
   "calibration": {
     "window_days": 90,
     "from": "2026-05-04",
@@ -23,6 +23,11 @@
         0.1828,
         0.1959
       ]
+    },
+    "diag_bess": {
+      "fleet_p99": 432.0,
+      "k_bess": 0.0182,
+      "expected_if_in_uce": 0.231
     }
   },
   "uce_decomposition": {

@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "date": "2026-10-08",
-  "updated": "2026-10-19T17:10:22+03:00",
+  "updated": "2026-10-21T06:32:50+03:00",
   "calibration": {
     "window_days": 90,
     "from": "2026-07-11",
@@ -23,6 +23,11 @@
         0.1796,
         0.191
       ]
+    },
+    "diag_bess": {
+      "fleet_p99": 548.0,
+      "k_bess": -0.0394,
+      "expected_if_in_uce": 0.182
     }
   },
   "uce_decomposition": {
@@ -254,13 +259,6 @@
       "rank": 1,
       "value": 634.0,
       "id": "2026-10-08, 21:00"
-    },
-    {
-      "scope": "daily",
-      "cat": "bess_dis",
-      "rank": 5,
-      "value": 2009.0,
-      "id": "2026-10-08"
     }
   ],
   "conclusion": {
@@ -269,14 +267,14 @@
       "Από την παραγωγή της διανομής, 9,0 GWh δεν μετρήθηκαν ωριαία. Εκτιμώνται 8,4 GWh φ/β στέγης και χαμηλής τάσης, 0,6 GWh αιολικά της διανομής και 2,1 GWh μικρές μονάδες· το υπόλοιπο (−2,1 GWh) είναι απόκλιση της εκτίμησης του ΑΔΜΗΕ από το μοντέλο.",
       "Προς την Κρήτη στάλθηκαν 7,4 GWh μέσα από τα δύο καλώδια.",
       "Στην ENTSO-E (πιο πρόσφατη έκδοση) φ/β, αιολικά και βιομάζα της ημέρας είναι 55,1 GWh, έναντι 65,6 GWh στα live στοιχεία του ΑΔΜΗΕ.",
-      "Ρεκόρ της ημέρας στις πέντε κορυφαίες θέσεις: εκφόρτιση BESS (ωριαίο, #1), εκφόρτιση BESS (ημερήσιο, #5)."
+      "Ρεκόρ της ημέρας στις πέντε κορυφαίες θέσεις: εκφόρτιση BESS (ωριαίο, #1)."
     ],
     "en": [
       "On 8 October 2026 demand was 132.7 GWh and renewables with hydro covered 55.7% of domestic generation (ADMIE live, RES incl. CHP). Net exports were 4.2 GWh and the average day-ahead price 164.88 €/MWh.",
       "Of distribution-level generation, 9.0 GWh was not metered hourly. An estimated 8.4 GWh came from rooftop and other low-voltage solar, 0.6 GWh from distribution-connected wind and 2.1 GWh from small units; the remainder (−2.1 GWh) is the difference between ADMIE's estimate and the model.",
       "7.4 GWh was sent to Crete through the two cables.",
       "In ENTSO-E's latest data, the day's solar, wind and biomass add up to 55.1 GWh, against 65.6 GWh in ADMIE's live figures.",
-      "Records of the day in the top five: BESS discharge (hourly, #1), BESS discharge (daily, #5)."
+      "Records of the day in the top five: BESS discharge (hourly, #1)."
     ]
   }
 }

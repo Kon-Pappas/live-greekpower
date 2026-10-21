@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "date": "2026-09-28",
-  "updated": "2026-10-19T17:10:08+03:00",
+  "updated": "2026-10-21T06:32:39+03:00",
   "calibration": {
     "window_days": 90,
     "from": "2026-07-01",
@@ -23,6 +23,11 @@
         0.1796,
         0.1878
       ]
+    },
+    "diag_bess": {
+      "fleet_p99": 539.0,
+      "k_bess": -0.009,
+      "expected_if_in_uce": 0.186
     }
   },
   "uce_decomposition": {
@@ -251,7 +256,7 @@
     {
       "scope": "daily",
       "cat": "bess_dis",
-      "rank": 2,
+      "rank": 4,
       "value": 2071.0,
       "id": "2026-09-28"
     }
@@ -262,14 +267,14 @@
       "Από την παραγωγή της διανομής, 12,5 GWh δεν μετρήθηκαν ωριαία. Εκτιμώνται 8,0 GWh φ/β στέγης και χαμηλής τάσης, 3,4 GWh αιολικά της διανομής και 1,7 GWh μικρές μονάδες· το υπόλοιπο (−0,7 GWh) είναι απόκλιση της εκτίμησης του ΑΔΜΗΕ από το μοντέλο.",
       "Προς την Κρήτη στάλθηκαν 2,0 GWh μέσα από τα δύο καλώδια.",
       "Στην ENTSO-E (τελική έκδοση) φ/β, αιολικά και βιομάζα της ημέρας είναι 88,2 GWh, έναντι 99,9 GWh στα live στοιχεία του ΑΔΜΗΕ.",
-      "Ρεκόρ της ημέρας στις πέντε κορυφαίες θέσεις: εκφόρτιση BESS (ημερήσιο, #2)."
+      "Ρεκόρ της ημέρας στις πέντε κορυφαίες θέσεις: εκφόρτιση BESS (ημερήσιο, #4)."
     ],
     "en": [
       "On 28 September 2026 demand was 123.8 GWh and renewables with hydro covered 71.0% of domestic generation (ADMIE live, RES incl. CHP). Net exports were 31.0 GWh and the average day-ahead price 134.50 €/MWh.",
       "Of distribution-level generation, 12.5 GWh was not metered hourly. An estimated 8.0 GWh came from rooftop and other low-voltage solar, 3.4 GWh from distribution-connected wind and 1.7 GWh from small units; the remainder (−0.7 GWh) is the difference between ADMIE's estimate and the model.",
       "2.0 GWh was sent to Crete through the two cables.",
       "In ENTSO-E's final data, the day's solar, wind and biomass add up to 88.2 GWh, against 99.9 GWh in ADMIE's live figures.",
-      "Records of the day in the top five: BESS discharge (daily, #2)."
+      "Records of the day in the top five: BESS discharge (daily, #4)."
     ]
   }
 }

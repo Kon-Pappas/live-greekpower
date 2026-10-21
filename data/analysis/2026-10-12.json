@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "date": "2026-10-12",
-  "updated": "2026-10-19T17:10:27+03:00",
+  "updated": "2026-10-21T06:32:54+03:00",
   "calibration": {
     "window_days": 90,
     "from": "2026-07-15",
@@ -23,6 +23,11 @@
         0.1805,
         0.1923
       ]
+    },
+    "diag_bess": {
+      "fleet_p99": 552.0,
+      "k_bess": -0.0413,
+      "expected_if_in_uce": 0.181
     }
   },
   "uce_decomposition": {
@@ -251,15 +256,8 @@
     {
       "scope": "daily",
       "cat": "bess_dis",
-      "rank": 3,
-      "value": 2061.0,
-      "id": "2026-10-12"
-    },
-    {
-      "scope": "daily",
-      "cat": "bess_chg",
       "rank": 5,
-      "value": 2273.0,
+      "value": 2061.0,
       "id": "2026-10-12"
     }
   ],
@@ -269,14 +267,14 @@
       "Από την παραγωγή της διανομής, 8,5 GWh δεν μετρήθηκαν ωριαία. Εκτιμώνται 6,8 GWh φ/β στέγης και χαμηλής τάσης, 1,1 GWh αιολικά της διανομής και 1,6 GWh μικρές μονάδες· το υπόλοιπο (−1,0 GWh) είναι απόκλιση της εκτίμησης του ΑΔΜΗΕ από το μοντέλο.",
       "Προς την Κρήτη στάλθηκαν 7,2 GWh μέσα από τα δύο καλώδια.",
       "Στην ENTSO-E (πιο πρόσφατη έκδοση) φ/β, αιολικά και βιομάζα της ημέρας είναι 61,6 GWh, έναντι 63,2 GWh στα live στοιχεία του ΑΔΜΗΕ.",
-      "Ρεκόρ της ημέρας στις πέντε κορυφαίες θέσεις: εκφόρτιση BESS (ημερήσιο, #3), φόρτιση BESS (ημερήσιο, #5)."
+      "Ρεκόρ της ημέρας στις πέντε κορυφαίες θέσεις: εκφόρτιση BESS (ημερήσιο, #5)."
     ],
     "en": [
       "On 12 October 2026 demand was 128.9 GWh and renewables with hydro covered 52.4% of domestic generation (ADMIE live, RES incl. CHP). Net exports were 13.6 GWh and the average day-ahead price 218.42 €/MWh.",
       "Of distribution-level generation, 8.5 GWh was not metered hourly. An estimated 6.8 GWh came from rooftop and other low-voltage solar, 1.1 GWh from distribution-connected wind and 1.6 GWh from small units; the remainder (−1.0 GWh) is the difference between ADMIE's estimate and the model.",
       "7.2 GWh was sent to Crete through the two cables.",
       "In ENTSO-E's latest data, the day's solar, wind and biomass add up to 61.6 GWh, against 63.2 GWh in ADMIE's live figures.",
-      "Records of the day in the top five: BESS discharge (daily, #3), BESS charge (daily, #5)."
+      "Records of the day in the top five: BESS discharge (daily, #5)."
     ]
   }
 }
