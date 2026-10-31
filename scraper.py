@@ -63,7 +63,7 @@ def merge_hourly_record(old_record, new_record):
     return merged
 
 # =====================================================================
-# 2. ΑΝΤΛΗΣΗ & ΔΙΑΧΕΙΡΙΣΗ ΔΕΔΟΜΕΝΩΝ
+# 2. ΑΝΤΛΗΣΗ & ΔΙΑΧΕΙΡΙΣΗ ΔΕΔΟΜΕΝΩΝ (NEW API - www.admie.gr)
 # =====================================================================
 
 def get_target_dates():
@@ -100,23 +100,16 @@ def get_target_dates():
 
     return dates, is_live_mode, start_dt.strftime("%Y%m%d"), end_dt.strftime("%Y%m%d")
 
-def fetch_all_data(date_str):
-    base_proxy = "https://iptoanalytics-api.admie.gr/iptoanalytics/api/ipto?endpoint=https:%2F%2Fmarket-public-api.admie.gr%2Frestws%2Fportal%2F"
-    
-    endpoints = {
-        "production": f"{base_proxy}prodmixandload%2F{date_str}",
-        "dam": f"{base_proxy}dayaheadmarket%2F{date_str}",
-        "interconnections": f"{base_proxy}scadainterflows%2F{date_str}",
-    }
 
+def fetch_all_data(date_str):
+    base_proxy = "https://www.admie.gr/ipto-analytics/"
     headers = {
         'User-Agent': 'live-greekpower-bot (Mozilla/5.0)',
         'Accept': 'application/json'
     }
 
     tz = pytz.timezone('Europe/Athens')
-    current_time = datetime.now(tz)
-    fetch_timestamp = current_time.isoformat()
+    fetch_timestamp = datetime.now(tz).isoformat()
     daily_data = {}
 
     def get_or_create_hour(hr):
@@ -133,38 +126,65 @@ def fetch_all_data(date_str):
             }
         return daily_data[hr]
 
-    print(f"--- Fetching Data for Date: {date_str} ---")
+    print(f"--- Fetching Data for Date: {date_str} (New www.admie.gr API) ---")
 
-    try:
-        resp_prod = requests.get(endpoints["production"], headers=headers, timeout=30)
-        if resp_prod.status_code == 200:
-            for item in resp_prod.json().get("items", []):
-                hr = item.get("hr")
-                if hr is not None:
-                    record = get_or_create_hour(hr)
-                    tech, energy = item.get("itemname"), item.get("energy")
-                    if tech == "TOTAL_LOAD": record["demand_mwh"] = energy
-                    elif tech: record["production_mix"][tech] = energy
+    for hr in range(1, 25):
+        record = get_or_create_hour(hr)
+        
+        # 1. Production Mix
+        url_prod = f"{base_proxy}production-mix?date={date_str}&type=hourly&time={hr}"
+        try:
+            resp = requests.get(url_prod, headers=headers, timeout=10)
+            if resp.status_code == 200:
+                data = resp.json().get("data")
+                if data:
+                    for tech, energy in data.items():
+                        if energy is not None:
+                            record["production_mix"][tech] = float(energy)
+        except Exception as e:
+            print(f"[{hr}:00] Σφάλμα production-mix: {e}")
 
-        resp_dam = requests.get(endpoints["dam"], headers=headers, timeout=30)
-        if resp_dam.status_code == 200:
-             for item in resp_dam.json().get("items", []):
-                 hr = item.get("hr")
-                 if hr is not None and item.get("country") == "GR":
-                     get_or_create_hour(hr)["dam_price_eur"] = item.get("value") 
+        # 2. Overview (Demand)
+        url_overview = f"{base_proxy}overview?date={date_str}&type=hourly&time={hr}"
+        try:
+            resp = requests.get(url_overview, headers=headers, timeout=10)
+            if resp.status_code == 200:
+                data = resp.json().get("data")
+                if data:
+                    load = data.get("TOTAL_LOAD", data.get("System Load", data.get("Load", data.get("Demand"))))
+                    if load is not None:
+                        record["demand_mwh"] = float(load)
+        except Exception as e:
+            pass
 
-        resp_int = requests.get(endpoints["interconnections"], headers=headers, timeout=30)
-        if resp_int.status_code == 200:
-            for item in resp_int.json().get("items", []):
-                hr = item.get("hr")
-                if hr is not None:
-                    country, flow = item.get("itemname"), item.get("energy")
-                    if country: get_or_create_hour(hr)["interconnections_mwh"][country] = flow
+        # 3. Interconnection Flows
+        url_flows = f"{base_proxy}interconnection-flows?date={date_str}&type=hourly&time={hr}"
+        try:
+            resp = requests.get(url_flows, headers=headers, timeout=10)
+            if resp.status_code == 200:
+                data = resp.json().get("data")
+                if data:
+                    for country, flow in data.items():
+                        if flow is not None:
+                            record["interconnections_mwh"][country] = float(flow)
+        except Exception as e:
+            pass
 
-        return list(daily_data.values())
-    except Exception as e:
-        print(f"Σφάλμα κατά την άντληση {date_str}: {e}")
-        return []
+        # 4. Day Ahead Prices
+        url_dam = f"{base_proxy}day-ahead-prices?date={date_str}&type=hourly&time={hr}"
+        try:
+            resp = requests.get(url_dam, headers=headers, timeout=10)
+            if resp.status_code == 200:
+                data = resp.json().get("data")
+                if data:
+                     price = data.get("GR", data.get("value", data.get("Price")))
+                     if price is not None:
+                         record["dam_price_eur"] = float(price)
+        except Exception as e:
+            pass
+
+    return list(daily_data.values())
+
 
 RAW_PATH = 'data/live_raw.json'          # μνήμη συγχώνευσης: μόνο χθες + σήμερα
 LEGACY_PATH = 'data/live_data.json'      # παλιό αρχείο 30 ημερών (φάση 3b: σβήνεται)
