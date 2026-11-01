@@ -60,6 +60,8 @@ def merge_hourly_record(old_record, new_record):
                 merged['interconnections_mwh'][key] = val
 
     merged['fetch_timestamp'] = new_record.get('fetch_timestamp', merged.get('fetch_timestamp'))
+    if new_record.get('source'):
+        merged['source'] = new_record['source']          # D50: από πού ήρθε η ώρα
     return merged
 
 # =====================================================================
@@ -100,71 +102,148 @@ def get_target_dates():
 
     return dates, is_live_mode, start_dt.strftime("%Y%m%d"), end_dt.strftime("%Y%m%d")
 
-def fetch_all_data(date_str):
+# ---------------------------------------------------------------------
+# Πηγές live δεδομένων (D50). Δύο «προσαρμογείς» που παράγουν ΑΚΡΙΒΩΣ την ίδια μορφή εγγραφής:
+#   admie : οι δημόσιες διευθύνσεις του www.admie.gr (νέο IPTO Analytics, από 31/10/2026)
+#   ipto  : ο παλιός ενδιάμεσος iptoanalytics-api.admie.gr (εκτός από 29/10/2026· κρατιέται ως εφεδρεία)
+# Σειρά από τη μεταβλητή LIVE_SOURCES (προεπιλογή «admie,ipto»). Για κάθε ημέρα χρησιμοποιείται η πρώτη
+# πηγή που δίνει ώρες ΚΑΙ περνά τον έλεγχο του ισοζυγίου· αλλιώς δεν γράφεται τίποτα.
+# ---------------------------------------------------------------------
+HEADERS = {'User-Agent': 'live-greekpower-bot (Mozilla/5.0)', 'Accept': 'application/json'}
+SOURCE_NAMES = {'admie': 'admie.gr', 'ipto': 'iptoanalytics'}
+
+
+def _now_iso():
+    return datetime.now(pytz.timezone('Europe/Athens')).isoformat()
+
+
+def _empty_record(date_str, hr, ts, source):
+    return {"fetch_timestamp": ts, "date": date_str, "target_hour": hr, "demand_mwh": None,
+            "production_mix": {}, "dam_price_eur": None, "interconnections_mwh": {},
+            "co2_emissions": None, "source": source}
+
+
+def fetch_ipto(date_str):
+    """Παλιά πηγή (εφεδρική): iptoanalytics-api → market-public-api (prodmixandload, dayaheadmarket, scadainterflows)."""
     base_proxy = "https://iptoanalytics-api.admie.gr/iptoanalytics/api/ipto?endpoint=https:%2F%2Fmarket-public-api.admie.gr%2Frestws%2Fportal%2F"
-    
     endpoints = {
         "production": f"{base_proxy}prodmixandload%2F{date_str}",
         "dam": f"{base_proxy}dayaheadmarket%2F{date_str}",
         "interconnections": f"{base_proxy}scadainterflows%2F{date_str}",
     }
+    ts, daily_data = _now_iso(), {}
 
-    headers = {
-        'User-Agent': 'live-greekpower-bot (Mozilla/5.0)',
-        'Accept': 'application/json'
-    }
-
-    tz = pytz.timezone('Europe/Athens')
-    current_time = datetime.now(tz)
-    fetch_timestamp = current_time.isoformat()
-    daily_data = {}
-
-    def get_or_create_hour(hr):
+    def hour(hr):
         if hr not in daily_data:
-            daily_data[hr] = {
-                "fetch_timestamp": fetch_timestamp,
-                "date": date_str,
-                "target_hour": hr,
-                "demand_mwh": None,
-                "production_mix": {},
-                "dam_price_eur": None,
-                "interconnections_mwh": {},
-                "co2_emissions": None
-            }
+            daily_data[hr] = _empty_record(date_str, hr, ts, SOURCE_NAMES['ipto'])
         return daily_data[hr]
 
-    print(f"--- Fetching Data for Date: {date_str} ---")
-
     try:
-        resp_prod = requests.get(endpoints["production"], headers=headers, timeout=30)
+        resp_prod = requests.get(endpoints["production"], headers=HEADERS, timeout=30)
         if resp_prod.status_code == 200:
             for item in resp_prod.json().get("items", []):
                 hr = item.get("hr")
                 if hr is not None:
-                    record = get_or_create_hour(hr)
+                    record = hour(hr)
                     tech, energy = item.get("itemname"), item.get("energy")
                     if tech == "TOTAL_LOAD": record["demand_mwh"] = energy
                     elif tech: record["production_mix"][tech] = energy
-
-        resp_dam = requests.get(endpoints["dam"], headers=headers, timeout=30)
+        else:
+            return []
+        resp_dam = requests.get(endpoints["dam"], headers=HEADERS, timeout=30)
         if resp_dam.status_code == 200:
-             for item in resp_dam.json().get("items", []):
-                 hr = item.get("hr")
-                 if hr is not None and item.get("country") == "GR":
-                     get_or_create_hour(hr)["dam_price_eur"] = item.get("value") 
-
-        resp_int = requests.get(endpoints["interconnections"], headers=headers, timeout=30)
+            for item in resp_dam.json().get("items", []):
+                hr = item.get("hr")
+                if hr is not None and item.get("country") == "GR":
+                    hour(hr)["dam_price_eur"] = item.get("value")
+        resp_int = requests.get(endpoints["interconnections"], headers=HEADERS, timeout=30)
         if resp_int.status_code == 200:
             for item in resp_int.json().get("items", []):
                 hr = item.get("hr")
                 if hr is not None:
                     country, flow = item.get("itemname"), item.get("energy")
-                    if country: get_or_create_hour(hr)["interconnections_mwh"][country] = flow
-
+                    if country: hour(hr)["interconnections_mwh"][country] = flow
         return list(daily_data.values())
     except Exception as e:
-        print(f"Σφάλμα κατά την άντληση {date_str}: {e}")
+        print(f"   [ipto] {date_str}: {type(e).__name__}: {str(e)[:120]}")
         return []
+
+
+def fetch_admie(date_str):
+    """Νέα πηγή (κύρια): www.admie.gr.
+    production_fuel_hourly → όλη η μέρα με μία αίτηση (μείγμα, ζήτηση, άντληση)·
+    overview (ανά ώρα) → συνολική παραγωγή, εισαγωγές/εξαγωγές, φόρτιση/εκφόρτιση, τιμή DAM.
+    Επαληθευμένο στις 28/10/2026 13:00: 12/12 πεδία ίδια με την παλιά πηγή. Ροές ανά χώρα και Κρήτη δεν δίνονται."""
+    ts, out = _now_iso(), []
+    pause = float(os.environ.get('ADMIE_PAUSE', '0.15') or 0)
+    try:
+        r = requests.get(f"https://www.admie.gr/production_fuel_hourly?date_from={date_str}", headers=HEADERS, timeout=30)
+        if r.status_code != 200:
+            print(f"   [admie] {date_str}: production_fuel_hourly HTTP {r.status_code}")
+            return []
+        rows = r.json() or []
+    except Exception as e:
+        print(f"   [admie] {date_str}: {type(e).__name__}: {str(e)[:120]}")
+        return []
+    for row in rows:
+        hr, d = row.get('hour'), row.get('data') or {}
+        if not hr or not (d.get('TOTAL_LOAD') or 0) > 0:
+            continue                                   # ώρα που δεν έχει γίνει ακόμα
+        try:
+            if pause:
+                time.sleep(pause)
+            o = requests.get(f"https://www.admie.gr/ipto-analytics/overview?date={date_str}&type=hourly&time={hr}",
+                             headers=HEADERS, timeout=20)
+            ov = (o.json() or {}).get('data') if o.status_code == 200 else None
+        except Exception as e:
+            print(f"   [admie] {date_str} ώρα {hr}: overview {type(e).__name__}")
+            ov = None
+        if not ov or not (ov.get('production') or 0) > 0:
+            continue
+        rec = _empty_record(date_str, hr, ts, SOURCE_NAMES['admie'])
+        m = rec['production_mix']
+        for k in ['TOTAL LIGNITE', 'TOTAL GAS', 'TOTAL HYDRO', 'RES_PROD', 'RES_SYSTEM', 'RES_NETWORK', 'STORAGE', 'INTER_BALANCE']:
+            if d.get(k) is not None:
+                m[k] = d[k]
+        # Ίδια ονόματα και πρόσημα με την παλιά πηγή: άντληση θετική, φόρτιση αρνητική, εξαγωγές θετικές.
+        m['TOTAL_PROD'] = ov.get('production')
+        m['TOTAL IMPORTS'] = ov.get('imports')
+        m['TOTAL EXPORTS'] = abs(ov.get('exports') or 0)
+        m['STORAGE_INJECTION'] = ov.get('injection')
+        m['STORAGE_ABSORPTION'] = -abs(ov.get('absorption') or 0)
+        pump = ov.get('pumping') if ov.get('pumping') is not None else d.get('ΣΥΝΟΛΙΚΗ ΑΝΤΛΗΣΗ')
+        m['ΣΥΝΟΛΙΚΗ ΑΝΤΛΗΣΗ'] = abs(pump or 0)
+        rec['demand_mwh'] = ov.get('demand') if ov.get('demand') is not None else d.get('TOTAL_LOAD')
+        rec['dam_price_eur'] = ov.get('dam_price')
+        out.append(rec)
+    return out
+
+
+FETCHERS = {'admie': fetch_admie, 'ipto': fetch_ipto}
+
+
+def validate_day(records):
+    """Δεκτή ημέρα: τουλάχιστον μία ώρα με δεδομένα και ισοζύγιο που κλείνει σε κάθε τέτοια ώρα."""
+    hours = [contract.normalize_live_hour(r) for r in records]
+    data = [h for h in hours if h['has_data']]
+    bad = [h['hr'] for h in data if h['balance_ok'] is False]
+    return len(data), bad
+
+
+def fetch_all_data(date_str):
+    order = [x.strip() for x in os.environ.get('LIVE_SOURCES', 'admie,ipto').split(',') if x.strip() in FETCHERS]
+    print(f"--- Fetching Data for Date: {date_str} (πηγές: {' → '.join(order)}) ---")
+    for i, key in enumerate(order):
+        recs = FETCHERS[key](date_str)
+        n, bad = validate_day(recs) if recs else (0, [])
+        role = 'κύρια' if i == 0 else 'εφεδρική'
+        if n and not bad:
+            print(f"✓ {date_str}: {n} ώρες από {SOURCE_NAMES[key]} ({role})")
+            return recs
+        why = 'καμία ώρα' if not n else f'ισοζύγιο εκτός στις ώρες {bad}'
+        print(f"⚠ {date_str}: {SOURCE_NAMES[key]} ({role}) απορρίφθηκε: {why}")
+    print(f"✗ {date_str}: καμία πηγή δεν έδωσε δεκτά δεδομένα· δεν γράφεται τίποτα.")
+    return []
 
 RAW_PATH = 'data/live_raw.json'          # μνήμη συγχώνευσης: μόνο χθες + σήμερα
 LEGACY_PATH = 'data/live_data.json'      # παλιό αρχείο 30 ημερών (φάση 3b: σβήνεται)

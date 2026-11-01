@@ -96,6 +96,7 @@ def normalize_live_hour(rec):
         'has_data': has_data,
         'dam_price': r1(rec.get('dam_price_eur')),
         'fetched': rec.get('fetch_timestamp'),
+        'source': rec.get('source') or 'iptoanalytics',   # D50· οι παλιές εγγραφές ήρθαν όλες από τον iptoanalytics
         # Ροή προς την Κρήτη όπως τη δίνει ο ΑΔΜΗΕ ('CRETE LOAD' = AC + DC· αρνητικό = προς την Κρήτη).
         # Το live φορτίο την περιέχει (D41)· κενό όταν ο ΑΔΜΗΕ δεν τη δίνει.
         'crete_flow': r1(m.get('CRETE LOAD')) if has_data else None,
@@ -115,19 +116,24 @@ def normalize_live_hour(rec):
         'total': r1(total or 0),
     }
 
-    flows = {}
-    for gr_name, code in COUNTRY_MAP.items():
-        imp = inter.get(f'{gr_name}_IMP')
-        exp = inter.get(f'{gr_name}_EXP')
-        flows[code] = {'imp': r1(imp), 'exp': r1(abs(exp)) if exp is not None else None}
+    # Ροές ανά χώρα: μόνο η παλιά πηγή τις δίνει (D50). Χωρίς αυτές: flows = None, όχι «ασυμφωνία».
+    flows = None
+    if inter:
+        flows = {}
+        for gr_name, code in COUNTRY_MAP.items():
+            imp = inter.get(f'{gr_name}_IMP')
+            exp = inter.get(f'{gr_name}_EXP')
+            flows[code] = {'imp': r1(imp), 'exp': r1(abs(exp)) if exp is not None else None}
 
     # Επίσημα σύνολα του ΑΔΜΗΕ. Με αυτά ο ισολογισμός κλείνει σε 735/735 ώρες
     # (έλεγχος 18/10/2026)· το άθροισμα ανά χώρα αποκλίνει σε 2.
     imports = r1(m.get('TOTAL IMPORTS') or 0)
     exports = r1(abs(m.get('TOTAL EXPORTS') or 0))
-    flows_imp = sum((f['imp'] or 0) for f in flows.values())
-    flows_exp = sum((f['exp'] or 0) for f in flows.values())
-    flows_match = abs(flows_imp - imports) <= 1 and abs(flows_exp - exports) <= 1
+    flows_match = None
+    if flows:
+        flows_imp = sum((f['imp'] or 0) for f in flows.values())
+        flows_exp = sum((f['exp'] or 0) for f in flows.values())
+        flows_match = abs(flows_imp - imports) <= 1 and abs(flows_exp - exports) <= 1
 
     storage = {'dis': r1(m.get('STORAGE_INJECTION') or 0),
                'chg': r1(abs(m.get('STORAGE_ABSORPTION') or 0))}
@@ -168,6 +174,7 @@ def live_day_totals(hours):
         'crete_flow': _sum(h.get('crete_flow') for h in data),
         'hours_flows_mismatch': sum(1 for h in data if h['flows_match'] is False),
         'hours_balance_off': sum(1 for h in data if h['balance_ok'] is False),
+        'sources': {src: sum(1 for h in data if h.get('source') == src) for src in sorted({h.get('source') for h in data if h.get('source')})},
     }
 
 
@@ -451,7 +458,7 @@ def write_manifest():
         with_data = [h for h in day.get('hours', []) if h.get('has_data')]
         if with_data:
             h = with_data[-1]
-            last = {'date': d, 'hr': h['hr'], 'fetched': h.get('fetched')}
+            last = {'date': d, 'hr': h['hr'], 'fetched': h.get('fetched'), 'source': h.get('source')}
             break
 
     # Το cron-job.org τρέχει το scrape στο :05 κάθε ώρας.

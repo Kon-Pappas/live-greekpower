@@ -49,7 +49,7 @@ data/xray/YYYY-MM-DD.json     hourly ex-post clean generation, UCE, Crete flows,
 data/entsoe/YYYY-MM-DD.json   hourly ENTSO-E generation and load, first and latest version (written by entsoe_builder only)
 data/records.json             top-three records
 data/live_raw.json            scraper's merge memory for yesterday and today (not read by the page)
-.github/workflows/            scrape.yml (hourly), xray.yml (daily), backfill.yml (manual: history + UCE recompute), entsoe_refresh.yml (manual: ENTSO-E history), xray_refresh.yml (manual: SCADA/RESMV history), analysis_refresh.yml (manual: Analysis history)
+.github/workflows/            scrape.yml (hourly), probe.yml (manual: compare a live source with stored data, writes nothing), xray.yml (daily), backfill.yml (manual: history + UCE recompute), entsoe_refresh.yml (manual: ENTSO-E history), xray_refresh.yml (manual: SCADA/RESMV history), analysis_refresh.yml (manual: Analysis history)
 docs/                         DECISIONS, KNOWN_ISSUES, ROADMAP
 ```
 

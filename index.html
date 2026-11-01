@@ -146,6 +146,7 @@
                     <div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-slate-400 mt-2">
                         <div><span id="lastUpdateLabel">Last update:</span> <strong id="lastUpdateVal" class="text-acc-300">–</strong></div>
                         <div><span id="nextUpdateLabel">Next update:</span> <strong id="nextUpdateVal" class="text-slate-200">–</strong></div>
+                        <div title="" id="sourceWrap"><span id="sourceLabel">Source:</span> <strong id="sourceVal" class="text-slate-200">–</strong></div>
                         <span id="statusPill" class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full border text-[11px] font-bold"></span>
                     </div>
                 </div>
@@ -209,7 +210,7 @@
             <div class="grid grid-cols-1 lg:grid-cols-[7fr_3fr] lg:grid-rows-[auto_auto] gap-4">
                 <div class="order-2 lg:order-none lg:col-start-1 lg:row-start-1 lg:row-span-2 bg-slate-800/40 p-6 rounded-xl border border-slate-700 flex flex-col">
                     <h2 class="text-lg font-semibold text-slate-200" id="flowsTitle">Cross-border flows</h2>
-                    <p class="text-xs text-slate-400" id="flowsSub">Imports above zero, exports below.</p>
+                    <p class="text-xs text-slate-400"><span id="flowsSub">Imports above zero, exports below.</span> <a href="https://kon-pappas.github.io/power-flows-dashboard/" class="text-acc-300 hover:text-white underline underline-offset-2 whitespace-nowrap" id="flowsLink">Per-country analysis: Power Flows →</a></p>
                     <p class="hidden text-xs text-orange-300 mt-1" id="flowsMismatch"></p>
                     <div class="relative h-[320px] lg:h-auto lg:flex-1 lg:min-h-[320px] mt-4"><canvas id="flowsChart"></canvas></div>
                 </div>

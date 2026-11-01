@@ -50,6 +50,10 @@ Live layout, donut callouts, clean/fossil shares, MCP card, daily ribbon, short 
 - Run *Analysis history refresh* once (1 Apr – 3 days ago), not near 10:15 / 13:30.
 - From then on the X-Ray workflow adds the day before yesterday and yesterday every morning.
 
+## Phase 4c: Live source change (1 Nov 2026, D50, K21)
+1. Upload batch23. 2. Run *Probe live source* (date 20261028) → all ✓. 3. Next hourly scrape resumes from admie.gr. 4. *Backfill live history* 29 Oct → yesterday. 5. *Analysis history refresh* for the same days.
+- Later: use `RES_SYSTEM` / `RES_NETWORK` (transmission / distribution RES, live, hourly) in the analysis.
+
 ## Phase 4b: Further content
 - Leaderboard split done early (D24).
 - Decomposition of UCE on the page (unmetered solar ≈ k × MV solar, distribution wind, rest), once K18 is confirmed on the full history.

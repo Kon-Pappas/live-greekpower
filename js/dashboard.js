@@ -56,7 +56,7 @@ const T = {
         genLedger: 'Generation', balLedger: 'System balance', ledgerTotal: 'Total', ledgerDemand: 'Demand',
         balanceOk: 'Matches ADMIE total load', balanceOff: 'Differs from ADMIE total load',
         supplyTitle: 'Where the energy came from', usesTitle: 'Where it went',
-        flowsTitle: 'Cross-border flows', flowsSub: 'Imports above zero, exports below. MWh in the selected hour.',
+        flowsTitle: 'Imports and exports, hour by hour', flowsSub: 'Totals of all interconnections, MWh per hour; the selected hour is highlighted.', flowsLink: 'Per-country analysis: Power Flows →', sourceLabel: 'Source:', sourceTip: 'Where the live figures of the latest hour came from',
         flowsMismatch: 'In this hour the per-country flows do not add up to ADMIE\'s official totals; the balance uses the totals.',
         avgPrice: 'Average day-ahead price', hoursData: 'Hours with data', dayInProgress: 'day in progress',
         dispatchTitle: '24-hour dispatch and day-ahead price',
@@ -113,7 +113,7 @@ const T = {
         genLedger: 'Παραγωγή', balLedger: 'Ισοζύγιο συστήματος', ledgerTotal: 'Σύνολο', ledgerDemand: 'Ζήτηση',
         balanceOk: 'Συμφωνεί με το συνολικό φορτίο του ΑΔΜΗΕ', balanceOff: 'Διαφέρει από το συνολικό φορτίο του ΑΔΜΗΕ',
         supplyTitle: 'Από πού ήρθε η ενέργεια', usesTitle: 'Πού πήγε',
-        flowsTitle: 'Διασυνοριακές ροές', flowsSub: 'Εισαγωγές πάνω από το μηδέν, εξαγωγές κάτω. MWh στην επιλεγμένη ώρα.',
+        flowsTitle: 'Εισαγωγές και εξαγωγές, ώρα προς ώρα', flowsSub: 'Σύνολα όλων των διασυνδέσεων, MWh ανά ώρα· η επιλεγμένη ώρα τονίζεται.', flowsLink: 'Ανάλυση ανά χώρα: Power Flows →', sourceLabel: 'Πηγή:', sourceTip: 'Από πού ήρθαν τα live στοιχεία της τελευταίας ώρας',
         flowsMismatch: 'Σε αυτή την ώρα οι ροές ανά χώρα δεν αθροίζουν στα επίσημα σύνολα του ΑΔΜΗΕ· το ισοζύγιο χρησιμοποιεί τα σύνολα.',
         avgPrice: 'Μέση τιμή DAM', hoursData: 'Ώρες με δεδομένα', dayInProgress: 'η ημέρα εξελίσσεται',
         dispatchTitle: 'Κατανομή 24ώρου και τιμή επόμενης ημέρας',
@@ -143,11 +143,11 @@ const T = {
 const METHODOLOGY = {
     en: `
 <h4 class="text-acc-300 font-semibold mb-1">Data sources</h4>
-<p class="mb-4">Live figures come from ADMIE/IPTO's market portal (generation mix and load, day-ahead market, SCADA interconnection flows) and are fetched every hour at minute 5. The clean-energy breakdown comes from ADMIE's ex-post operation files, published one to two days later. ENTSO-E's Transparency Platform (actual generation per type) is used as an independent cross-check.</p>
+<p class="mb-4">Live figures come from ADMIE's public IPTO Analytics data on www.admie.gr (generation mix and load, imports and exports, storage, day-ahead price) and are fetched every hour at minute 5. Until 29 Oct 2026 they came from the older IPTO Analytics service, which ADMIE withdrew; the two give identical figures (checked field by field on 28 Oct 2026), and the old service is kept as an automatic fallback. Each hour records its source, shown next to "Last update". Per-country flows are no longer published live; they are analysed in the Power Flows dashboard from the next-day SCADA files. The clean-energy breakdown comes from ADMIE's ex-post operation files, published one to two days later. ENTSO-E's Transparency Platform (actual generation per type) is used as an independent cross-check.</p>
 <h4 class="text-acc-300 font-semibold mb-1">Hours</h4>
 <p class="mb-4">All times are Greek local time. ADMIE numbers hours 1 to 24; hour 1 is 00:00–01:00. The page labels each hour by its start (00–01, 01–02, …). Values are MWh in one hour, which equals the average MW of that hour.</p>
 <h4 class="text-acc-300 font-semibold mb-1">System balance and demand</h4>
-<p class="mb-4">Demand is ADMIE's total load. It equals generation + imports − exports + BESS discharge − BESS charge − pumping; the page checks this for every hour and says when it does not hold. Imports and exports are ADMIE's official totals; the per-country flows are shown as a breakdown.</p>
+<p class="mb-4">Demand is ADMIE's total load. It equals generation + imports − exports + BESS discharge − BESS charge − pumping; the page checks this for every hour and says when it does not hold. Imports and exports are ADMIE's official totals.</p>
 <h4 id="m-uce" class="text-acc-300 font-semibold mb-1 scroll-mt-4">Unallocated clean energy (UCE)</h4>
 <p class="mb-4">ADMIE's live “RES” figure includes cogeneration (CHP) and an estimate of distribution-level generation that is not metered. Physical clean energy is the metered part: large hydro + small hydro + solar + wind + biomass, from the transmission SCADA file and the medium-voltage RESMV file. Live clean energy is live RES + hydro minus cogeneration; cogeneration is removed from both sides because it is mostly gas-fired. UCE is live minus physical and keeps its sign. It is mainly rooftop and other low-voltage solar (its daily shape follows medium-voltage solar closely), distribution-connected wind (RESMV has no wind) and small low-voltage hydro and biomass. Crete is in neither source: both see it only through its two interconnection cables. A negative hour means ADMIE's estimate came out below the metered value, for example through losses; it is not consumption. On the Live and Daily tabs, “RES” is ADMIE's figure, cogeneration included.</p>
 <h4 class="text-acc-300 font-semibold mb-1">Prices</h4>
@@ -171,11 +171,11 @@ const METHODOLOGY = {
 <p>“Live” means the latest hour ended less than 75 minutes ago. “Delayed” means up to three hours, usually one missed update. “Stale data” means longer than that.</p>`,
     el: `
 <h4 class="text-acc-300 font-semibold mb-1">Πηγές δεδομένων</h4>
-<p class="mb-4">Τα live στοιχεία προέρχονται από την πύλη αγοράς του ΑΔΜΗΕ (μείγμα παραγωγής και φορτίο, αγορά επόμενης ημέρας, ροές διασυνδέσεων SCADA) και λαμβάνονται κάθε ώρα στο 5ο λεπτό. Η ανάλυση της καθαρής ενέργειας προέρχεται από τα εκ των υστέρων αρχεία λειτουργίας του ΑΔΜΗΕ, που δημοσιεύονται μία με δύο ημέρες αργότερα. Η ENTSO-E Transparency Platform (πραγματική παραγωγή ανά τύπο) χρησιμοποιείται ως ανεξάρτητη διασταύρωση.</p>
+<p class="mb-4">Τα live στοιχεία προέρχονται από τα δημόσια δεδομένα IPTO Analytics του ΑΔΜΗΕ στο www.admie.gr (μείγμα παραγωγής και φορτίο, εισαγωγές και εξαγωγές, αποθήκευση, τιμή επόμενης ημέρας) και λαμβάνονται κάθε ώρα στο 5ο λεπτό. Έως τις 29 Οκτ 2026 έρχονταν από την παλαιότερη υπηρεσία IPTO Analytics, την οποία ο ΑΔΜΗΕ απέσυρε· οι δύο δίνουν ίδια νούμερα (έλεγχος πεδίο προς πεδίο στις 28 Οκτ 2026), και η παλιά υπηρεσία κρατιέται ως αυτόματη εφεδρεία. Κάθε ώρα καταγράφει την πηγή της, που φαίνεται δίπλα στην «Τελευταία ενημέρωση». Οι ροές ανά χώρα δεν δημοσιεύονται πια live· αναλύονται στο Power Flows dashboard από τα αρχεία SCADA της επομένης. Η ανάλυση της καθαρής ενέργειας προέρχεται από τα εκ των υστέρων αρχεία λειτουργίας του ΑΔΜΗΕ, που δημοσιεύονται μία με δύο ημέρες αργότερα. Η ENTSO-E Transparency Platform (πραγματική παραγωγή ανά τύπο) χρησιμοποιείται ως ανεξάρτητη διασταύρωση.</p>
 <h4 class="text-acc-300 font-semibold mb-1">Ώρες</h4>
 <p class="mb-4">Όλες οι ώρες είναι ώρα Ελλάδας. Ο ΑΔΜΗΕ αριθμεί τις ώρες από 1 έως 24· η ώρα 1 είναι 00:00–01:00. Η σελίδα ονομάζει κάθε ώρα από την έναρξή της (00–01, 01–02, …). Οι τιμές είναι MWh σε μία ώρα, ίσες με τα μέσα MW της ώρας.</p>
 <h4 class="text-acc-300 font-semibold mb-1">Ισοζύγιο και ζήτηση</h4>
-<p class="mb-4">Η ζήτηση είναι το συνολικό φορτίο του ΑΔΜΗΕ. Ισούται με παραγωγή + εισαγωγές − εξαγωγές + εκφόρτιση BESS − φόρτιση BESS − άντληση· η σελίδα το ελέγχει για κάθε ώρα και το επισημαίνει όταν δεν ισχύει. Οι εισαγωγές και οι εξαγωγές είναι τα επίσημα σύνολα του ΑΔΜΗΕ· οι ροές ανά χώρα εμφανίζονται ως ανάλυση.</p>
+<p class="mb-4">Η ζήτηση είναι το συνολικό φορτίο του ΑΔΜΗΕ. Ισούται με παραγωγή + εισαγωγές − εξαγωγές + εκφόρτιση BESS − φόρτιση BESS − άντληση· η σελίδα το ελέγχει για κάθε ώρα και το επισημαίνει όταν δεν ισχύει. Οι εισαγωγές και οι εξαγωγές είναι τα επίσημα σύνολα του ΑΔΜΗΕ.</p>
 <h4 id="m-uce" class="text-acc-300 font-semibold mb-1 scroll-mt-4">Μη κατανεμημένη καθαρή ενέργεια (UCE)</h4>
 <p class="mb-4">Το live «ΑΠΕ» του ΑΔΜΗΕ περιέχει τη συμπαραγωγή (ΣΗΘΥΑ) και μια εκτίμηση της παραγωγής της διανομής που δεν μετριέται. Η φυσική καθαρή ενέργεια είναι το μετρημένο κομμάτι: μεγάλα + μικρά υδροηλεκτρικά + φωτοβολταϊκά + αιολικά + βιομάζα, από το SCADA μεταφοράς και το αρχείο μέσης τάσης RESMV. Η live καθαρή ενέργεια είναι live ΑΠΕ + υδροηλεκτρικά μείον τη συμπαραγωγή· η συμπαραγωγή αφαιρείται και από τις δύο πλευρές, γιατί είναι κυρίως με φυσικό αέριο. Το UCE είναι live μείον φυσική, με το πρόσημό του. Είναι κυρίως φ/β στέγης και λοιπά φ/β χαμηλής τάσης (το ημερήσιο σχήμα του ακολουθεί στενά τα φ/β μέσης τάσης), αιολικά της διανομής (το RESMV δεν έχει αιολικά) και μικρά υδροηλεκτρικά και βιομάζα χαμηλής τάσης. Η Κρήτη δεν υπάρχει σε καμία από τις δύο πηγές: και οι δύο τη βλέπουν μόνο μέσα από τα δύο καλώδια διασύνδεσης. Μια αρνητική ώρα σημαίνει ότι η εκτίμηση του ΑΔΜΗΕ βγήκε κάτω από τη μέτρηση, για παράδειγμα λόγω απωλειών· δεν είναι κατανάλωση. Στα tabs Live και Ημέρα, το «ΑΠΕ» είναι το στοιχείο του ΑΔΜΗΕ, μαζί με τη συμπαραγωγή.</p>
 <h4 class="text-acc-300 font-semibold mb-1">Τιμές</h4>
@@ -417,6 +417,9 @@ function updateHeader() {
     const m = S.manifest;
     $('lastUpdateVal').textContent = m && m.last_live ? fmtTimeAthens(m.last_live.fetched, true) : '–';
     $('nextUpdateVal').textContent = m ? fmtTimeAthens(m.next_update) : '–';
+    // D50: η πηγή της τελευταίας ώρας (παλιές εγγραφές χωρίς πεδίο = iptoanalytics)
+    $('sourceVal').textContent = m && m.last_live ? (m.last_live.source || 'iptoanalytics') : '–';
+    $('sourceWrap').title = t().sourceTip;
     updatePill();
 }
 function updatePill() {
@@ -511,7 +514,7 @@ function applyStaticText() {
     });
     const ids = {
         genLedgerTitle: x.genLedger, balLedgerTitle: x.balLedger, supplyDonutTitle: x.supplyTitle, usesDonutTitle: x.usesTitle,
-        flowsTitle: x.flowsTitle, flowsSub: x.flowsSub, supplyRankTitle: x.supplyTitle, usesRankTitle: x.usesTitle,
+        flowsTitle: x.flowsTitle, flowsSub: x.flowsSub, flowsLink: x.flowsLink, sourceLabel: x.sourceLabel, supplyRankTitle: x.supplyTitle, usesRankTitle: x.usesTitle,
         dispatchTitle: x.dispatchTitle, dispatchSub: x.dispatchSub, cleanIntro: x.cleanIntro,
         boxVarTitle: x.boxVar, boxUceTitle: x.boxUce, boxBaseTitle: x.boxBase,
         xrayTitle: x.xrayTitle, xraySub: x.xraySub, reconTitle: x.reconTitle, gapTitle: x.gapTitle, gapSub: x.gapSub, anConclTitle: x.an.conclTitle, anConclSub: x.an.conclSub, anDecTitle: x.an.decTitle, anDecSub: x.an.decSub, anMore: x.methodLink, anLoadTitle: x.an.loadTitle, anLoadSub: x.an.loadSub, anResTitle: x.an.resTitle, anResSub: x.an.resSub, anCalTitle: x.an.calTitle, anCalSub: x.an.calSub, mcpTitle: x.mcpTitle, cleanMore: x.methodLink, gapMore: x.methodLink, recProgTitle: x.recProgTitle, recHourlySub: x.recHourlySub, recDailySub: x.recDailySub, recTopTitle: x.recTopTitle, recModalClose: x.close, loadChartTitle: x.loadTitle, loadChartSub: x.loadSub,
@@ -670,32 +673,38 @@ function renderLive() {
         { l: n.chg, s: x.short.chg, v: h.storage.chg, c: C.chg }, { l: n.pumping, s: x.short.pumping, v: h.pumping, c: C.pumping }
     ]);
 
-    // Ροές
-    const codes = ['AL', 'BG', 'IT', 'TR', 'MK'];
+    // Εισαγωγές / εξαγωγές της ημέρας, ώρα προς ώρα (D50: οι ροές ανά χώρα δεν δίνονται πια live·
+    // αναλύονται στο Power Flows dashboard από το SCADA της επομένης)
+    const DH = day.hours.filter((q) => q.has_data);
+    const selIdx = DH.findIndex((q) => q.hr === h.hr);
+    const dim = (c, i) => (i === selIdx ? c : `${c}66`);
     upsertChart('flowsChart', {
         type: 'bar',
         data: {
-            labels: codes.map((c) => t().countries[c]),
+            labels: DH.map((q) => hourTick(q.hr)),
             datasets: [
-                { label: n.imports, data: codes.map((c) => h.flows[c].imp), backgroundColor: C.imports, stack: 'f', borderRadius: 3, maxBarThickness: window.innerWidth >= 1024 ? 69 : 46 },
-                { label: n.exports, data: codes.map((c) => -(h.flows[c].exp || 0)), backgroundColor: C.exports, stack: 'f', borderRadius: 3, maxBarThickness: window.innerWidth >= 1024 ? 69 : 46 }
+                { label: n.imports, data: DH.map((q) => q.imports), backgroundColor: DH.map((_, i) => dim(C.imports, i)), stack: 'f', borderRadius: 2 },
+                { label: n.exports, data: DH.map((q) => -(q.exports || 0)), backgroundColor: DH.map((_, i) => dim(C.exports, i)), stack: 'f', borderRadius: 2 }
             ]
         },
         options: {
-            scales: { x: { stacked: true, grid: { display: false } }, y: { stacked: true, ticks: { callback: (v) => fmt(Math.abs(v)) }, title: { display: true, text: 'MWh' } } },
+            interaction: { mode: 'index', intersect: false },
+            scales: { x: { stacked: true, grid: { display: false }, title: { display: true, text: x.hourAxis } },
+                      y: { stacked: true, ticks: { callback: (v) => fmt(Math.abs(v)) }, title: { display: true, text: 'MWh' } } },
             plugins: {
-                legend: { position: 'bottom' },
+                legend: { position: 'bottom', labels: { generateLabels: (c) => [
+                    { text: n.imports, fillStyle: C.imports, strokeStyle: C.imports, lineWidth: 0, fontColor: Chart.defaults.color },
+                    { text: n.exports, fillStyle: C.exports, strokeStyle: C.exports, lineWidth: 0, fontColor: Chart.defaults.color }] } },
                 tooltip: tipOff((i) => {
-                    const f = h.flows[codes[i]], imp = f.imp || 0, exp = f.exp || 0;
-                    return tipHead(esc(t().countries[codes[i]]), '') + tipSections(
-                        tipRow(n.imports, imp, C.imports) + tipRow(n.exports, exp, C.exports),
-                        imp && exp ? tipRow(S.lang === 'el' ? 'Καθαρό (εισ. − εξ.)' : 'Net (imp − exp)', imp - exp, null, { strong: true, sign: true }) : '');
+                    const q = DH[i];
+                    return tipHead(tipHourLabel(q.hr), '') + tipSections(
+                        tipRow(n.imports, q.imports, C.imports) + tipRow(n.exports, q.exports, C.exports),
+                        tipRow(S.lang === 'el' ? 'Καθαρό (εισ. − εξ.)' : 'Net (imp − exp)', (q.imports || 0) - (q.exports || 0), null, { strong: true, sign: true }));
                 })
             }
         }
     });
-    $('flowsMismatch').textContent = t().flowsMismatch;
-    $('flowsMismatch').classList.toggle('hidden', h.flows_match !== false);
+    $('flowsMismatch').classList.add('hidden');
 
     // MCP της ώρας, με θέση στην ημέρα και μέση τιμή
     const prices = day.hours.map((q) => q.dam_price).filter((v) => v !== null && v !== undefined);
