@@ -45,7 +45,7 @@ const T = {
         priceRange: 'Price range', dayClean: 'Clean share of generation',
         recProgTitle: 'Progression of the #1', recTopTitle: 'Top five', viewHistory: 'history →', trackingStart: 'tracking starts',
         newTop5: 'new in the top five', recHourlySub: 'The highest value of a single hour (MWh in one hour)', recShort: { bess_chg_pump: 'BESS + pumping' }, recDailySub: 'The highest total of a whole day', newPlural: 'NEW', newAt: 'NEW #', recRank: 'Rank', recWhen: 'When', recValue: 'Value',
-        lastUpdate: 'Last update:', nextUpdate: 'Next update:', methodology: 'Methodology & Sources',
+        lastUpdate: 'Last update:', nextUpdate: 'Next update:', methodology: 'Methodology & Sources', lastUpdateShort: 'Updated:', methodologyShort: 'Methodology', toTop: 'Back to top', sourceLine: 'Source of the latest live hour:',
         tabs: { live: 'Live (hour)', daily: 'Daily', clean: 'Clean energy', analysis: 'Analysis', records: 'Records' },
         pickerHour: 'Hour:', pickerDate: 'Date:', today: 'today',
         pill: { live: 'Live', delayed: 'Delayed', stale: 'Stale data', histHour: 'Past hour', today: 'Today', histDay: 'Past day', expost: 'Ex-post data' },
@@ -102,7 +102,7 @@ const T = {
         priceRange: 'Εύρος τιμής', dayClean: 'Μερίδιο καθαρής στην παραγωγή',
         recProgTitle: 'Εξέλιξη του #1', recTopTitle: 'Οι πέντε κορυφαίες', viewHistory: 'ιστορικό →', trackingStart: 'έναρξη καταγραφής',
         newTop5: 'νέα είσοδος στις πέντε κορυφαίες', recHourlySub: 'Η υψηλότερη τιμή μίας ώρας (MWh σε μία ώρα)', recShort: { bess_chg_pump: 'BESS + άντληση' }, recDailySub: 'Το υψηλότερο σύνολο μίας ημέρας', newPlural: 'ΝΕΑ', newAt: 'ΝΕΟ #', recRank: 'Θέση', recWhen: 'Πότε', recValue: 'Τιμή',
-        lastUpdate: 'Τελευταία ενημέρωση:', nextUpdate: 'Επόμενη:', methodology: 'Μεθοδολογία & Πηγές',
+        lastUpdate: 'Τελευταία ενημέρωση:', nextUpdate: 'Επόμενη:', methodology: 'Μεθοδολογία & Πηγές', lastUpdateShort: 'Ενημέρωση:', methodologyShort: 'Μεθοδολογία', toTop: 'Επιστροφή στην κορυφή', sourceLine: 'Πηγή της τελευταίας live ώρας:',
         tabs: { live: 'Live (ώρα)', daily: 'Ημέρα', clean: 'Καθαρή ενέργεια', analysis: 'Ανάλυση', records: 'Ρεκόρ' },
         pickerHour: 'Ώρα:', pickerDate: 'Ημέρα:', today: 'σήμερα',
         pill: { live: 'Live', delayed: 'Καθυστέρηση', stale: 'Παλιά δεδομένα', histHour: 'Προηγούμενη ώρα', today: 'Σήμερα', histDay: 'Προηγούμενη ημέρα', expost: 'Εκ των υστέρων' },
@@ -409,9 +409,11 @@ const PILL = {
     slate: 'bg-slate-700/40 border-slate-600 text-slate-300'
 };
 function setPill(text, tone) {
-    const el = $('statusPill');
-    el.className = `inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full border text-[11px] font-bold ${PILL[tone]}`;
-    el.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-current"></span>${esc(text)}`;
+    // H06: στον υπολογιστή στην κεφαλίδα, στο κινητό μέσα στο κουτί επιλογής
+    const base = `items-center gap-1.5 px-2 py-0.5 rounded-full border text-[11px] font-bold whitespace-nowrap ${PILL[tone]}`;
+    const html = `<span class="w-1.5 h-1.5 rounded-full bg-current"></span>${esc(text)}`;
+    $('statusPill').className = `hidden md:inline-flex ${base}`; $('statusPill').innerHTML = html;
+    $('statusPillM').className = `md:hidden inline-flex shrink-0 ${base}`; $('statusPillM').innerHTML = html;
 }
 function updateHeader() {
     const m = S.manifest;
@@ -420,6 +422,8 @@ function updateHeader() {
     // D50: η πηγή της τελευταίας ώρας (παλιές εγγραφές χωρίς πεδίο = iptoanalytics)
     $('sourceVal').textContent = m && m.last_live ? (m.last_live.source || 'iptoanalytics') : '–';
     $('sourceWrap').title = t().sourceTip;
+    // Στο κινητό η πηγή δεν μπαίνει στην κεφαλίδα (H06, D52): φαίνεται στη Μεθοδολογία και ως tooltip του pill
+    $('statusPillM').title = `${t().sourceLine} ${$('sourceVal').textContent}`;
     updatePill();
 }
 function updatePill() {
@@ -501,7 +505,9 @@ function applyStaticText() {
     document.documentElement.lang = S.lang === 'el' ? 'el' : 'en';
     $('pageTitle').textContent = x.title; $('mainTitle').textContent = x.title;
     $('lastUpdateLabel').textContent = x.lastUpdate; $('nextUpdateLabel').textContent = x.nextUpdate;
-    $('btnMethodology').textContent = x.methodology;
+    $('lastUpdateShort').textContent = x.lastUpdateShort;
+    $('btnMethodology').textContent = x.methodology; $('btnMethodologyShort').textContent = x.methodologyShort;
+    $('toTop').setAttribute('aria-label', x.toTop); $('toTop').title = x.toTop;
     document.querySelectorAll('.tab-btn').forEach((b) => {
         const badge = b.querySelector('[data-badge]');
         b.textContent = x.tabs[b.dataset.tab];
@@ -544,6 +550,11 @@ function openMethodology(anchor) {
 function toggleModal(open) {
     const modal = $('methodologyModal'), content = $('modalContent');
     if (open) {
+        // D52: η πηγή της τελευταίας live ώρας, στην κορυφή της Μεθοδολογίας (στο κινητό δεν είναι στην κεφαλίδα)
+        const src = S.manifest && S.manifest.last_live ? (S.manifest.last_live.source || 'iptoanalytics') : null;
+        let line = $('modalSource');
+        if (!line) { line = document.createElement('p'); line.id = 'modalSource'; line.className = 'text-xs text-slate-400 mb-4'; $('modalBody').prepend(line); }
+        line.innerHTML = src ? `${esc(t().sourceLine)} <strong class="text-slate-200">${esc(src)}</strong>` : '';
         modal.classList.remove('hidden'); modal.classList.add('flex');
         document.body.style.overflow = 'hidden';
         requestAnimationFrame(() => { modal.classList.remove('opacity-0'); content.classList.remove('scale-95'); });
@@ -1097,7 +1108,7 @@ function renderRecords() {
     // διακόπτης κινητού
     document.querySelectorAll('.rec-scope-btn').forEach((b) => {
         const sc = b.dataset.recscope, on = sc === S.recScope;
-        b.className = `rec-scope-btn flex-1 h-10 rounded flex items-center justify-center gap-2 transition ${on ? 'bg-acc-400 text-slate-900' : 'text-slate-400'}`;
+        b.className = `rec-scope-btn flex-1 rounded flex items-center justify-center gap-2 transition ${on ? 'bg-acc-400 text-slate-900' : 'text-slate-400 hover:text-white'}`;   // D52: σκούρο πηγάδι όπως το GR | EN
         b.innerHTML = `${esc(sc === 'hourly' ? x.recHourly : x.recDaily)}${counts[sc] ? ` <span class="${unseenCounts[sc] ? 'rec-badge rec-pulse' : 'rec-badge-soft'} text-[10px] px-1.5 py-0.5">${counts[sc]} ${esc(x.newPlural)}</span>` : ''}`;
     });
     $('recPanelHourly').classList.toggle('max-sm:hidden', S.recScope !== 'hourly');
@@ -1184,6 +1195,11 @@ function openRecord(scope, key) {
 function toggleRecModal(open) {
     const modal = $('recordModal'), content = $('recModalContent');
     if (open) {
+        // D52: η πηγή της τελευταίας live ώρας, στην κορυφή της Μεθοδολογίας (στο κινητό δεν είναι στην κεφαλίδα)
+        const src = S.manifest && S.manifest.last_live ? (S.manifest.last_live.source || 'iptoanalytics') : null;
+        let line = $('modalSource');
+        if (!line) { line = document.createElement('p'); line.id = 'modalSource'; line.className = 'text-xs text-slate-400 mb-4'; $('modalBody').prepend(line); }
+        line.innerHTML = src ? `${esc(t().sourceLine)} <strong class="text-slate-200">${esc(src)}</strong>` : '';
         modal.classList.remove('hidden'); modal.classList.add('flex'); document.body.style.overflow = 'hidden';
         requestAnimationFrame(() => { modal.classList.remove('opacity-0'); content.classList.remove('scale-95'); if (S.charts.recProgChart) S.charts.recProgChart.resize(); });
         modal.querySelector('[data-close-rec]').focus();
@@ -1427,6 +1443,15 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.lang-btn').forEach((b) => b.addEventListener('click', () => setLang(b.dataset.lang)));
     $('contextSelect').addEventListener('change', onPickerChange);
     $('btnMethodologyWrap').addEventListener('click', () => toggleModal(true));
+    // Βελάκι ↑ (H06): φαίνεται στο κινητό όταν τα tabs βγουν από την οθόνη
+    const toTop = $('toTop');
+    if ('IntersectionObserver' in window) {
+        new IntersectionObserver(([e]) => {
+            const show = !e.isIntersecting && e.boundingClientRect.top < 0;
+            toTop.classList.toggle('opacity-0', !show); toTop.classList.toggle('pointer-events-none', !show);
+        }).observe($('tabNav'));
+    }
+    toTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: REDUCE_MOTION ? 'auto' : 'smooth' }));
     document.querySelectorAll('[data-method]').forEach((b) => b.addEventListener('click', () => openMethodology(b.dataset.method)));
     document.querySelectorAll('[data-close-rec]').forEach((b) => b.addEventListener('click', () => toggleRecModal(false)));
     document.querySelectorAll('.rec-scope-btn').forEach((b) => b.addEventListener('click', () => { S.recScope = b.dataset.recscope; renderRecords(); }));

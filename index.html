@@ -132,36 +132,39 @@
         </div>
     </div>
 
-    <div class="max-w-7xl mx-auto space-y-6 w-full">
+    <div class="max-w-7xl mx-auto space-y-3 md:space-y-6 w-full pb-20 md:pb-0">
 
         <!-- Header -->
-        <header class="border-b border-slate-700 pb-4">
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <!-- Κεφαλίδα (H06 · D52): στο κινητό τίτλος και Ενημέρωση / Επόμενη, μετά ΕΝΑ κουτί δευτερευόντων
+             (γραμμή Α: επιλογή + pill· γραμμή Β: Μεθοδολογία + GR | EN), μετά τα tabs. Ο υπολογιστής δεν αλλάζει. -->
+        <header class="md:border-b md:border-slate-700 md:pb-4">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 md:gap-4">
                 <div class="flex flex-col items-start w-full md:w-auto">
                     <a href="https://kon-pappas.github.io/" class="inline-flex items-center gap-1.5 text-sm text-slate-400 hover:text-acc-300 transition-colors mb-2.5 group w-fit">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 group-hover:-translate-x-0.5 transition-transform"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" /></svg>
                         <span class="font-medium tracking-wide">Konstantinos Pappas Hub <span class="text-slate-600 ml-0.5 font-bold">/</span></span>
                     </a>
-                    <h1 class="text-3xl font-bold text-acc-400" id="mainTitle">Greek Power Live</h1>
-                    <div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-slate-400 mt-2">
-                        <div><span id="lastUpdateLabel">Last update:</span> <strong id="lastUpdateVal" class="text-acc-300">–</strong></div>
+                    <h1 class="text-3xl max-[339px]:text-[28px] font-bold text-acc-400 whitespace-nowrap" id="mainTitle">Greek Power Live</h1>
+                    <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-400 mt-2">
+                        <div><span id="lastUpdateLabel" class="hidden md:inline">Last update:</span><span id="lastUpdateShort" class="md:hidden">Updated:</span> <strong id="lastUpdateVal" class="text-acc-300">–</strong></div>
                         <div><span id="nextUpdateLabel">Next update:</span> <strong id="nextUpdateVal" class="text-slate-200">–</strong></div>
-                        <div title="" id="sourceWrap"><span id="sourceLabel">Source:</span> <strong id="sourceVal" class="text-slate-200">–</strong></div>
-                        <span id="statusPill" class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full border text-[11px] font-bold"></span>
+                        <div title="" id="sourceWrap" class="hidden md:block"><span id="sourceLabel">Source:</span> <strong id="sourceVal" class="text-slate-200">–</strong></div>
+                        <span id="statusPill" class="hidden md:inline-flex"></span>
                     </div>
                 </div>
 
-                <div class="flex flex-col md:items-end w-full md:w-auto mt-2 md:mt-0 gap-3">
-                    <div id="pickerBox" class="w-full md:w-auto flex items-center justify-between md:justify-end gap-2 bg-slate-800 p-1 rounded-lg border border-slate-700 shadow-sm h-12 md:h-10 pl-3 pr-1">
-                        <label for="contextSelect" class="text-xs text-slate-300 font-medium whitespace-nowrap" id="pickerLabel">Hour:</label>
-                        <select id="contextSelect" class="bg-slate-900 text-slate-200 text-sm font-semibold rounded p-1 outline-none border border-slate-700 focus:border-acc-400 transition cursor-pointer w-full md:w-auto"></select>
+                <div id="secBox" class="w-full md:w-auto flex flex-col gap-2 p-2 bg-slate-800/45 border border-slate-600/50 rounded-xl md:p-0 md:bg-transparent md:border-0 md:rounded-none md:items-end md:gap-3">
+                    <div id="pickerBox" class="w-full md:w-auto flex items-center justify-between md:justify-end gap-2 bg-slate-950/70 border border-slate-700/60 md:bg-slate-800 md:border-slate-700 md:shadow-sm rounded-lg h-10 pl-3 pr-1">
+                        <label for="contextSelect" class="text-xs text-slate-300 font-medium whitespace-nowrap max-[339px]:hidden" id="pickerLabel">Hour:</label>
+                        <select id="contextSelect" class="bg-slate-900 text-slate-200 text-sm font-semibold rounded p-1 outline-none border border-slate-700 focus:border-acc-400 transition cursor-pointer w-full md:w-auto min-w-0"></select>
+                        <span id="statusPillM" class="md:hidden"></span>
                     </div>
-                    <div class="w-full md:w-auto flex flex-col-reverse md:flex-row gap-3">
-                        <button type="button" id="btnMethodologyWrap" class="w-full md:w-auto flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg px-4 text-xs text-slate-300 transition shadow-sm h-12 md:h-10">
+                    <div class="w-full md:w-auto flex flex-row gap-2 md:gap-3">
+                        <button type="button" id="btnMethodologyWrap" class="flex-1 md:flex-none flex items-center justify-center gap-2 bg-slate-950/70 border border-slate-700/60 md:bg-slate-800 md:border-slate-700 hover:bg-slate-700 rounded-lg px-4 text-xs text-slate-300 transition h-10 md:shadow-sm">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 text-slate-400"><path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" /></svg>
-                            <span id="btnMethodology">Methodology &amp; Sources</span>
+                            <span id="btnMethodology" class="hidden md:inline">Methodology &amp; Sources</span><span id="btnMethodologyShort" class="md:hidden">Methodology</span>
                         </button>
-                        <div class="w-full md:w-auto flex gap-1 bg-slate-800 border border-slate-700 rounded-lg p-1 text-xs font-bold shadow-sm h-12 md:h-10" role="group" aria-label="Language">
+                        <div class="flex-1 md:flex-none flex gap-1 bg-slate-950/70 border border-slate-700/60 md:bg-slate-800 md:border-slate-700 rounded-lg p-1 text-xs font-bold md:shadow-sm h-10" role="group" aria-label="Language">
                             <button type="button" data-lang="el" class="lang-btn flex-1 md:flex-none flex items-center justify-center px-4 rounded transition">GR</button>
                             <button type="button" data-lang="en" class="lang-btn flex-1 md:flex-none flex items-center justify-center px-4 rounded transition">EN</button>
                         </div>
@@ -170,14 +173,14 @@
             </div>
         </header>
 
-        <!-- Tabs -->
-        <nav class="pt-5 mt-2 border-t border-slate-700/50 md:border-none md:pt-0 md:mt-0" role="tablist">
-            <div class="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-0 md:border-b md:border-slate-800">
-                <button type="button" role="tab" data-tab="live" class="tab-btn relative flex items-center justify-center text-xs md:text-base font-bold rounded-lg md:rounded-none h-12 w-full transition whitespace-nowrap px-2 border md:border-0 md:border-b-2"></button>
-                <button type="button" role="tab" data-tab="daily" class="tab-btn relative flex items-center justify-center text-xs md:text-base font-bold rounded-lg md:rounded-none h-12 w-full transition whitespace-nowrap px-2 border md:border-0 md:border-b-2"></button>
-                <button type="button" role="tab" data-tab="clean" class="tab-btn relative flex items-center justify-center text-xs md:text-base font-bold rounded-lg md:rounded-none h-12 w-full transition whitespace-nowrap px-2 border md:border-0 md:border-b-2"></button>
-                <button type="button" role="tab" data-tab="analysis" class="tab-btn relative flex items-center justify-center text-xs md:text-base font-bold rounded-lg md:rounded-none h-12 w-full transition whitespace-nowrap px-2 border md:border-0 md:border-b-2"></button>
-                <button type="button" role="tab" data-tab="records" class="tab-btn col-span-2 md:col-span-1 relative flex items-center justify-center text-xs md:text-base font-bold rounded-lg md:rounded-none h-12 w-full transition whitespace-nowrap px-2 border md:border-0 md:border-b-2"></button>
+        <!-- Tabs (H06): κινητό πλέγμα 6 στηλών = 3 + 2, ετικέτες έως δύο γραμμές, χωρίς γραμμή από πάνω -->
+        <nav role="tablist" id="tabNav">
+            <div class="grid grid-cols-6 md:grid-cols-5 gap-2 md:gap-0 md:border-b md:border-slate-800">
+                <button type="button" role="tab" data-tab="live" class="tab-btn col-span-2 md:col-span-1 relative flex items-center justify-center text-center text-xs md:text-base font-bold leading-tight md:whitespace-nowrap rounded-lg md:rounded-none h-12 w-full transition px-2 border md:border-0 md:border-b-2"></button>
+                <button type="button" role="tab" data-tab="daily" class="tab-btn col-span-2 md:col-span-1 relative flex items-center justify-center text-center text-xs md:text-base font-bold leading-tight md:whitespace-nowrap rounded-lg md:rounded-none h-12 w-full transition px-2 border md:border-0 md:border-b-2"></button>
+                <button type="button" role="tab" data-tab="clean" class="tab-btn col-span-2 md:col-span-1 relative flex items-center justify-center text-center text-xs md:text-base font-bold leading-tight md:whitespace-nowrap rounded-lg md:rounded-none h-12 w-full transition px-2 border md:border-0 md:border-b-2"></button>
+                <button type="button" role="tab" data-tab="analysis" class="tab-btn col-span-3 md:col-span-1 relative flex items-center justify-center text-center text-xs md:text-base font-bold leading-tight md:whitespace-nowrap rounded-lg md:rounded-none h-12 w-full transition px-2 border md:border-0 md:border-b-2"></button>
+                <button type="button" role="tab" data-tab="records" class="tab-btn col-span-3 md:col-span-1 relative flex items-center justify-center text-center text-xs md:text-base font-bold leading-tight md:whitespace-nowrap rounded-lg md:rounded-none h-12 w-full transition px-2 border md:border-0 md:border-b-2"></button>
             </div>
         </nav>
 
@@ -326,7 +329,7 @@
         <!-- VIEW: RECORDS (D45): δύο πάνελ (ωριαία / ημερήσια)· στο κινητό διακόπτης και συμπαγείς γραμμές -->
         <section id="view-records" class="space-y-5 hidden">
             <p class="text-sm text-slate-400 max-w-3xl" id="recordsIntro"></p>
-            <div class="sm:hidden flex gap-1 bg-slate-800 border border-slate-700 rounded-lg p-1 text-xs font-bold" role="tablist" id="recScopeSwitch">
+            <div class="sm:hidden flex gap-1 bg-slate-950/70 border border-slate-700/60 rounded-lg p-1 h-10 text-xs font-bold" role="tablist" id="recScopeSwitch">
                 <button type="button" data-recscope="hourly" class="rec-scope-btn flex-1 h-10 rounded flex items-center justify-center gap-2 transition"></button>
                 <button type="button" data-recscope="daily" class="rec-scope-btn flex-1 h-10 rounded flex items-center justify-center gap-2 transition"></button>
             </div>
@@ -361,5 +364,9 @@
     </div>
 
     <script src="js/dashboard.js"></script>
+    <!-- Βελάκι επιστροφής (H06): μόνο στο κινητό, όταν τα tabs βγουν από την οθόνη -->
+    <button type="button" id="toTop" aria-label="Back to top" class="md:hidden fixed right-4 z-40 w-12 h-12 rounded-full bg-slate-800 border border-slate-600 text-slate-200 shadow-lg flex items-center justify-center transition-opacity duration-200 opacity-0 pointer-events-none" style="bottom: calc(1rem + env(safe-area-inset-bottom, 0px));">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5"/></svg>
+    </button>
 </body>
 </html>
