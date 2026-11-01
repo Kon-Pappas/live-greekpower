@@ -1,0 +1,501 @@
+{
+  "schema": 1,
+  "date": "2026-11-01",
+  "source": "ADMIE/IPTO market portal: prodmixandload, dayaheadmarket, scadainterflows",
+  "updated": "2026-11-01T18:50:31+02:00",
+  "totals": {
+    "hours_with_data": 18,
+    "gen": {
+      "lignite": 8236.0,
+      "gas": 61590.0,
+      "hydro": 3314.0,
+      "res": 35968.0,
+      "total": 109108.0
+    },
+    "imports": 515.0,
+    "exports": 18264.0,
+    "storage": {
+      "dis": 498.0,
+      "chg": 1738.0
+    },
+    "pumping": 332.0,
+    "demand": 89787.0,
+    "dam_price_avg": 254.56,
+    "crete_flow": null,
+    "hours_flows_mismatch": 0,
+    "hours_balance_off": 0,
+    "sources": {
+      "admie.gr": 18
+    }
+  },
+  "hours": [
+    {
+      "hr": 1,
+      "has_data": true,
+      "dam_price": 245.0,
+      "fetched": "2026-11-01T18:49:54.248177+02:00",
+      "source": "admie.gr",
+      "crete_flow": null,
+      "gen": {
+        "lignite": 494.0,
+        "gas": 3932.0,
+        "hydro": 484.0,
+        "res": 690.0,
+        "total": 5600.0
+      },
+      "imports": 4.0,
+      "exports": 913.0,
+      "flows": null,
+      "flows_match": null,
+      "storage": {
+        "dis": 0.0,
+        "chg": 0.0
+      },
+      "pumping": 0.0,
+      "demand": 4691.0,
+      "balance_ok": true
+    },
+    {
+      "hr": 2,
+      "has_data": true,
+      "dam_price": 246.0,
+      "fetched": "2026-11-01T18:49:54.248177+02:00",
+      "source": "admie.gr",
+      "crete_flow": null,
+      "gen": {
+        "lignite": 493.0,
+        "gas": 3851.0,
+        "hydro": 215.0,
+        "res": 832.0,
+        "total": 5391.0
+      },
+      "imports": 35.0,
+      "exports": 824.0,
+      "flows": null,
+      "flows_match": null,
+      "storage": {
+        "dis": 0.0,
+        "chg": 167.0
+      },
+      "pumping": 0.0,
+      "demand": 4435.0,
+      "balance_ok": true
+    },
+    {
+      "hr": 3,
+      "has_data": true,
+      "dam_price": 244.0,
+      "fetched": "2026-11-01T18:49:54.248177+02:00",
+      "source": "admie.gr",
+      "crete_flow": null,
+      "gen": {
+        "lignite": 493.0,
+        "gas": 3593.0,
+        "hydro": 104.0,
+        "res": 959.0,
+        "total": 5149.0
+      },
+      "imports": 24.0,
+      "exports": 856.0,
+      "flows": null,
+      "flows_match": null,
+      "storage": {
+        "dis": 0.0,
+        "chg": 31.0
+      },
+      "pumping": 0.0,
+      "demand": 4286.0,
+      "balance_ok": true
+    },
+    {
+      "hr": 4,
+      "has_data": true,
+      "dam_price": 243.0,
+      "fetched": "2026-11-01T18:49:54.248177+02:00",
+      "source": "admie.gr",
+      "crete_flow": null,
+      "gen": {
+        "lignite": 497.0,
+        "gas": 3629.0,
+        "hydro": 68.0,
+        "res": 1092.0,
+        "total": 5286.0
+      },
+      "imports": 4.0,
+      "exports": 950.0,
+      "flows": null,
+      "flows_match": null,
+      "storage": {
+        "dis": 0.0,
+        "chg": 169.0
+      },
+      "pumping": 0.0,
+      "demand": 4171.0,
+      "balance_ok": true
+    },
+    {
+      "hr": 5,
+      "has_data": true,
+      "dam_price": 243.0,
+      "fetched": "2026-11-01T18:49:54.248177+02:00",
+      "source": "admie.gr",
+      "crete_flow": null,
+      "gen": {
+        "lignite": 497.0,
+        "gas": 3845.0,
+        "hydro": 106.0,
+        "res": 1042.0,
+        "total": 5490.0
+      },
+      "imports": 2.0,
+      "exports": 995.0,
+      "flows": null,
+      "flows_match": null,
+      "storage": {
+        "dis": 0.0,
+        "chg": 388.0
+      },
+      "pumping": 0.0,
+      "demand": 4109.0,
+      "balance_ok": true
+    },
+    {
+      "hr": 6,
+      "has_data": true,
+      "dam_price": 243.0,
+      "fetched": "2026-11-01T18:49:54.248177+02:00",
+      "source": "admie.gr",
+      "crete_flow": null,
+      "gen": {
+        "lignite": 493.0,
+        "gas": 3707.0,
+        "hydro": 80.0,
+        "res": 998.0,
+        "total": 5278.0
+      },
+      "imports": 2.0,
+      "exports": 983.0,
+      "flows": null,
+      "flows_match": null,
+      "storage": {
+        "dis": 0.0,
+        "chg": 155.0
+      },
+      "pumping": 0.0,
+      "demand": 4142.0,
+      "balance_ok": true
+    },
+    {
+      "hr": 7,
+      "has_data": true,
+      "dam_price": 243.0,
+      "fetched": "2026-11-01T18:49:54.248177+02:00",
+      "source": "admie.gr",
+      "crete_flow": null,
+      "gen": {
+        "lignite": 459.0,
+        "gas": 3821.0,
+        "hydro": 187.0,
+        "res": 1134.0,
+        "total": 5601.0
+      },
+      "imports": 3.0,
+      "exports": 1095.0,
+      "flows": null,
+      "flows_match": null,
+      "storage": {
+        "dis": 0.0,
+        "chg": 221.0
+      },
+      "pumping": 0.0,
+      "demand": 4288.0,
+      "balance_ok": true
+    },
+    {
+      "hr": 8,
+      "has_data": true,
+      "dam_price": 244.0,
+      "fetched": "2026-11-01T18:49:54.248177+02:00",
+      "source": "admie.gr",
+      "crete_flow": null,
+      "gen": {
+        "lignite": 440.0,
+        "gas": 3612.0,
+        "hydro": 285.0,
+        "res": 1278.0,
+        "total": 5615.0
+      },
+      "imports": 12.0,
+      "exports": 1171.0,
+      "flows": null,
+      "flows_match": null,
+      "storage": {
+        "dis": 0.0,
+        "chg": 42.0
+      },
+      "pumping": 0.0,
+      "demand": 4414.0,
+      "balance_ok": true
+    },
+    {
+      "hr": 9,
+      "has_data": true,
+      "dam_price": 248.0,
+      "fetched": "2026-11-01T18:49:54.248177+02:00",
+      "source": "admie.gr",
+      "crete_flow": null,
+      "gen": {
+        "lignite": 439.0,
+        "gas": 3262.0,
+        "hydro": 263.0,
+        "res": 1974.0,
+        "total": 5938.0
+      },
+      "imports": 22.0,
+      "exports": 1144.0,
+      "flows": null,
+      "flows_match": null,
+      "storage": {
+        "dis": 0.0,
+        "chg": 8.0
+      },
+      "pumping": 0.0,
+      "demand": 4808.0,
+      "balance_ok": true
+    },
+    {
+      "hr": 10,
+      "has_data": true,
+      "dam_price": 249.0,
+      "fetched": "2026-11-01T18:49:54.248177+02:00",
+      "source": "admie.gr",
+      "crete_flow": null,
+      "gen": {
+        "lignite": 342.0,
+        "gas": 3073.0,
+        "hydro": 183.0,
+        "res": 2799.0,
+        "total": 6397.0
+      },
+      "imports": 14.0,
+      "exports": 1178.0,
+      "flows": null,
+      "flows_match": null,
+      "storage": {
+        "dis": 0.0,
+        "chg": 16.0
+      },
+      "pumping": 0.0,
+      "demand": 5217.0,
+      "balance_ok": true
+    },
+    {
+      "hr": 11,
+      "has_data": true,
+      "dam_price": 250.0,
+      "fetched": "2026-11-01T18:49:54.248177+02:00",
+      "source": "admie.gr",
+      "crete_flow": null,
+      "gen": {
+        "lignite": 434.0,
+        "gas": 2894.0,
+        "hydro": 89.0,
+        "res": 3315.0,
+        "total": 6732.0
+      },
+      "imports": 18.0,
+      "exports": 1142.0,
+      "flows": null,
+      "flows_match": null,
+      "storage": {
+        "dis": 0.0,
+        "chg": 67.0
+      },
+      "pumping": 0.0,
+      "demand": 5541.0,
+      "balance_ok": true
+    },
+    {
+      "hr": 12,
+      "has_data": true,
+      "dam_price": 254.0,
+      "fetched": "2026-11-01T18:49:54.248177+02:00",
+      "source": "admie.gr",
+      "crete_flow": null,
+      "gen": {
+        "lignite": 422.0,
+        "gas": 2870.0,
+        "hydro": 75.0,
+        "res": 3804.0,
+        "total": 7171.0
+      },
+      "imports": 8.0,
+      "exports": 1207.0,
+      "flows": null,
+      "flows_match": null,
+      "storage": {
+        "dis": 0.0,
+        "chg": 116.0
+      },
+      "pumping": 32.0,
+      "demand": 5824.0,
+      "balance_ok": true
+    },
+    {
+      "hr": 13,
+      "has_data": true,
+      "dam_price": 252.0,
+      "fetched": "2026-11-01T18:49:54.248177+02:00",
+      "source": "admie.gr",
+      "crete_flow": null,
+      "gen": {
+        "lignite": 420.0,
+        "gas": 3089.0,
+        "hydro": 73.0,
+        "res": 3857.0,
+        "total": 7439.0
+      },
+      "imports": 4.0,
+      "exports": 1182.0,
+      "flows": null,
+      "flows_match": null,
+      "storage": {
+        "dis": 0.0,
+        "chg": 160.0
+      },
+      "pumping": 109.0,
+      "demand": 5992.0,
+      "balance_ok": true
+    },
+    {
+      "hr": 14,
+      "has_data": true,
+      "dam_price": 267.0,
+      "fetched": "2026-11-01T18:49:54.248177+02:00",
+      "source": "admie.gr",
+      "crete_flow": null,
+      "gen": {
+        "lignite": 461.0,
+        "gas": 3235.0,
+        "hydro": 68.0,
+        "res": 3476.0,
+        "total": 7240.0
+      },
+      "imports": 19.0,
+      "exports": 1094.0,
+      "flows": null,
+      "flows_match": null,
+      "storage": {
+        "dis": 0.0,
+        "chg": 138.0
+      },
+      "pumping": 110.0,
+      "demand": 5917.0,
+      "balance_ok": true
+    },
+    {
+      "hr": 15,
+      "has_data": true,
+      "dam_price": 270.0,
+      "fetched": "2026-11-01T18:49:54.248177+02:00",
+      "source": "admie.gr",
+      "crete_flow": null,
+      "gen": {
+        "lignite": 438.0,
+        "gas": 3088.0,
+        "hydro": 62.0,
+        "res": 3201.0,
+        "total": 6789.0
+      },
+      "imports": 21.0,
+      "exports": 1124.0,
+      "flows": null,
+      "flows_match": null,
+      "storage": {
+        "dis": 0.0,
+        "chg": 32.0
+      },
+      "pumping": 81.0,
+      "demand": 5573.0,
+      "balance_ok": true
+    },
+    {
+      "hr": 16,
+      "has_data": true,
+      "dam_price": 250.0,
+      "fetched": "2026-11-01T18:49:54.248177+02:00",
+      "source": "admie.gr",
+      "crete_flow": null,
+      "gen": {
+        "lignite": 458.0,
+        "gas": 3340.0,
+        "hydro": 154.0,
+        "res": 2635.0,
+        "total": 6587.0
+      },
+      "imports": 12.0,
+      "exports": 1210.0,
+      "flows": null,
+      "flows_match": null,
+      "storage": {
+        "dis": 0.0,
+        "chg": 28.0
+      },
+      "pumping": 0.0,
+      "demand": 5361.0,
+      "balance_ok": true
+    },
+    {
+      "hr": 17,
+      "has_data": true,
+      "dam_price": 289.0,
+      "fetched": "2026-11-01T18:49:54.248177+02:00",
+      "source": "admie.gr",
+      "crete_flow": null,
+      "gen": {
+        "lignite": 485.0,
+        "gas": 3421.0,
+        "hydro": 321.0,
+        "res": 1704.0,
+        "total": 5931.0
+      },
+      "imports": 70.0,
+      "exports": 775.0,
+      "flows": null,
+      "flows_match": null,
+      "storage": {
+        "dis": 118.0,
+        "chg": 0.0
+      },
+      "pumping": 0.0,
+      "demand": 5344.0,
+      "balance_ok": true
+    },
+    {
+      "hr": 18,
+      "has_data": true,
+      "dam_price": 302.0,
+      "fetched": "2026-11-01T18:49:54.248177+02:00",
+      "source": "admie.gr",
+      "crete_flow": null,
+      "gen": {
+        "lignite": 471.0,
+        "gas": 3328.0,
+        "hydro": 497.0,
+        "res": 1178.0,
+        "total": 5474.0
+      },
+      "imports": 241.0,
+      "exports": 421.0,
+      "flows": null,
+      "flows_match": null,
+      "storage": {
+        "dis": 380.0,
+        "chg": 0.0
+      },
+      "pumping": 0.0,
+      "demand": 5674.0,
+      "balance_ok": true
+    }
+  ]
+}
