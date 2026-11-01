@@ -1,0 +1,34 @@
+name: Probe live source
+
+# Έλεγχος πηγής live δεδομένων (D50). Κατεβάζει μια ημέρα που ήδη έχουμε από κάθε πηγή
+# και τη συγκρίνει με το αποθηκευμένο αρχείο. ΔΕΝ γράφει τίποτα στο repo· μόνο log.
+on:
+  workflow_dispatch:
+    inputs:
+      date:
+        description: 'Ημέρα σύγκρισης (YYYYMMDD) — πρέπει να υπάρχει ήδη στο data/live/'
+        required: true
+        default: '20261028'
+      sources:
+        description: 'Πηγές (admie, ipto)'
+        required: true
+        default: 'admie,ipto'
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.10'
+      - run: pip install requests pytz
+      - name: Probe
+        env:
+          PROBE_DATE: ${{ github.event.inputs.date }}
+          PROBE_SOURCES: ${{ github.event.inputs.sources }}
+        run: python probe_source.py

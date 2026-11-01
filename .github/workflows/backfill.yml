@@ -64,6 +64,7 @@ jobs:
           BF_CHUNK: ${{ github.event.inputs.chunk_days }}
           BF_PAUSE: ${{ github.event.inputs.pause_seconds }}
           BF_CHUNK_PAUSE: ${{ github.event.inputs.chunk_pause_seconds }}
+          LIVE_SOURCES: ${{ vars.LIVE_SOURCES || 'admie,ipto' }}
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action Bot"
