@@ -1,32 +1,32 @@
 {
   "schema": 1,
   "date": "2026-10-31",
-  "updated": "2026-11-01T18:59:55+02:00",
+  "updated": "2026-11-01T20:28:35+02:00",
   "calibration": {
     "window_days": 90,
     "from": "2026-08-03",
     "to": "2026-10-31",
-    "hours": 2136,
-    "base": 60.3,
-    "k_wind": 0.0568,
-    "k_solar": 0.1872,
+    "hours": 2161,
+    "base": 59.1,
+    "k_wind": 0.0574,
+    "k_solar": 0.1871,
     "ci90": {
       "base": [
-        25.5805,
-        80.9064
+        38.329,
+        76.6937
       ],
       "k_wind": [
-        0.0425,
-        0.0738
+        0.043,
+        0.0757
       ],
       "k_solar": [
-        0.1811,
-        0.1917
+        0.1818,
+        0.194
       ]
     },
     "diag_bess": {
       "fleet_p99": 576.0,
-      "k_bess": -0.0092,
+      "k_bess": -0.0076,
       "expected_if_in_uce": 0.174
     }
   },
@@ -36,201 +36,201 @@
         "hr": 1,
         "uce": -5.3,
         "pv": 0.2,
-        "wind": 29.6,
-        "base": 60.3,
-        "residual": -95.4
+        "wind": 29.9,
+        "base": 59.1,
+        "residual": -94.5
       },
       {
         "hr": 2,
         "uce": 6.4,
         "pv": 0.2,
-        "wind": 26.1,
-        "base": 60.3,
-        "residual": -80.2
+        "wind": 26.4,
+        "base": 59.1,
+        "residual": -79.3
       },
       {
         "hr": 3,
         "uce": 47.3,
         "pv": 0.2,
-        "wind": 25.3,
-        "base": 60.3,
-        "residual": -38.5
+        "wind": 25.6,
+        "base": 59.1,
+        "residual": -37.6
       },
       {
         "hr": 4,
         "uce": 90.5,
         "pv": 0.2,
-        "wind": 26.1,
-        "base": 60.3,
-        "residual": 3.9
+        "wind": 26.3,
+        "base": 59.1,
+        "residual": 4.9
       },
       {
         "hr": 5,
         "uce": 58.4,
         "pv": 0.2,
-        "wind": 26.1,
-        "base": 60.3,
-        "residual": -28.2
+        "wind": 26.3,
+        "base": 59.1,
+        "residual": -27.2
       },
       {
         "hr": 6,
         "uce": 26.3,
         "pv": 0.2,
-        "wind": 25.6,
-        "base": 60.3,
-        "residual": -59.7
+        "wind": 25.8,
+        "base": 59.1,
+        "residual": -58.8
       },
       {
         "hr": 7,
         "uce": 65.1,
         "pv": 0.3,
-        "wind": 25.0,
-        "base": 60.3,
-        "residual": -20.5
+        "wind": 25.3,
+        "base": 59.1,
+        "residual": -19.6
       },
       {
         "hr": 8,
         "uce": 62.9,
         "pv": 28.3,
-        "wind": 29.1,
-        "base": 60.3,
-        "residual": -54.8
+        "wind": 29.4,
+        "base": 59.1,
+        "residual": -53.9
       },
       {
         "hr": 9,
         "uce": 114.8,
         "pv": 145.3,
-        "wind": 25.9,
-        "base": 60.3,
-        "residual": -116.7
+        "wind": 26.2,
+        "base": 59.1,
+        "residual": -115.7
       },
       {
         "hr": 10,
         "uce": 352.9,
-        "pv": 302.1,
-        "wind": 19.4,
-        "base": 60.3,
-        "residual": -29.0
+        "pv": 302.0,
+        "wind": 19.6,
+        "base": 59.1,
+        "residual": -27.8
       },
       {
         "hr": 11,
         "uce": 391.7,
-        "pv": 434.8,
-        "wind": 13.3,
-        "base": 60.3,
-        "residual": -116.7
+        "pv": 434.6,
+        "wind": 13.4,
+        "base": 59.1,
+        "residual": -115.4
       },
       {
         "hr": 12,
         "uce": 348.9,
-        "pv": 454.8,
-        "wind": 11.4,
-        "base": 60.3,
-        "residual": -177.6
+        "pv": 454.6,
+        "wind": 11.5,
+        "base": 59.1,
+        "residual": -176.2
       },
       {
         "hr": 13,
         "uce": 354.5,
-        "pv": 488.0,
-        "wind": 12.1,
-        "base": 60.3,
-        "residual": -205.9
+        "pv": 487.7,
+        "wind": 12.2,
+        "base": 59.1,
+        "residual": -204.6
       },
       {
         "hr": 14,
         "uce": 311.6,
-        "pv": 426.4,
-        "wind": 13.1,
-        "base": 60.3,
-        "residual": -188.1
+        "pv": 426.1,
+        "wind": 13.2,
+        "base": 59.1,
+        "residual": -186.8
       },
       {
         "hr": 15,
         "uce": 253.5,
-        "pv": 321.1,
-        "wind": 13.3,
-        "base": 60.3,
-        "residual": -141.2
+        "pv": 321.0,
+        "wind": 13.4,
+        "base": 59.1,
+        "residual": -140.0
       },
       {
         "hr": 16,
         "uce": 201.9,
-        "pv": 182.3,
-        "wind": 13.7,
-        "base": 60.3,
-        "residual": -54.4
+        "pv": 182.2,
+        "wind": 13.9,
+        "base": 59.1,
+        "residual": -53.3
       },
       {
         "hr": 17,
         "uce": 83.3,
-        "pv": 52.2,
-        "wind": 16.1,
-        "base": 60.3,
-        "residual": -45.3
+        "pv": 52.1,
+        "wind": 16.3,
+        "base": 59.1,
+        "residual": -44.2
       },
       {
         "hr": 18,
         "uce": -53.0,
         "pv": 1.5,
-        "wind": 20.7,
-        "base": 60.3,
-        "residual": -135.5
+        "wind": 20.9,
+        "base": 59.1,
+        "residual": -134.5
       },
       {
         "hr": 19,
         "uce": -65.7,
         "pv": 0.6,
-        "wind": 20.5,
-        "base": 60.3,
-        "residual": -147.1
+        "wind": 20.7,
+        "base": 59.1,
+        "residual": -146.1
       },
       {
         "hr": 20,
         "uce": -86.8,
         "pv": 0.6,
-        "wind": 19.8,
-        "base": 60.3,
-        "residual": -167.4
+        "wind": 20.0,
+        "base": 59.1,
+        "residual": -166.4
       },
       {
         "hr": 21,
         "uce": -49.7,
         "pv": 0.6,
-        "wind": 17.8,
-        "base": 60.3,
-        "residual": -128.4
+        "wind": 18.0,
+        "base": 59.1,
+        "residual": -127.4
       },
       {
         "hr": 22,
         "uce": -60.6,
         "pv": 0.4,
-        "wind": 19.6,
-        "base": 60.3,
-        "residual": -140.9
+        "wind": 19.8,
+        "base": 59.1,
+        "residual": -139.9
       },
       {
         "hr": 23,
         "uce": -44.4,
         "pv": 0.4,
-        "wind": 19.2,
-        "base": 60.3,
-        "residual": -124.3
+        "wind": 19.4,
+        "base": 59.1,
+        "residual": -123.3
       },
       {
         "hr": 24,
         "uce": 25.9,
         "pv": 0.4,
-        "wind": 21.2,
-        "base": 60.3,
-        "residual": -56.0
+        "wind": 21.4,
+        "base": 59.1,
+        "residual": -55.0
       }
     ],
     "totals": {
       "uce": 2430.4,
-      "pv": 2841.3,
-      "wind": 490.0,
-      "base": 1447.2,
-      "residual": -2347.9
+      "pv": 2839.9,
+      "wind": 494.9,
+      "base": 1418.4,
+      "residual": -2322.6
     }
   },
   "layers": {
