@@ -5,7 +5,7 @@ import time
 import sys
 from datetime import datetime, timedelta
 import pytz
-from jsonio import write_json_atomic
+from jsonio import write_json_atomic, load_json_lenient
 import contract
 import pandas as pd
 import io
@@ -49,53 +49,79 @@ def get_target_dates():
     return dates
 
 def fetch_excel_url(date_str, category):
-    date_formatted = f"{date_str[:4]}-{date_str[4:6]}-{date_str[6:]}"
-    url = f"https://www.admie.gr/getOperationMarketFile?dateStart={date_formatted}&dateEnd={date_formatted}&FileCategory={category}"
-    try:
-        resp = requests.get(url, verify=False, timeout=15)
-        if resp.status_code == 200:
-            data = resp.json()
-            if isinstance(data, list) and len(data) > 0:
-                return data[0].get("file_path")
-            elif isinstance(data, dict):
-                return data.get("file_path")
-    except Exception as e:
-        print(f"Error fetching {category} URL for {date_formatted}: {e}")
+    """Διεύθυνση αρχείου του ΑΔΜΗΕ για την ημέρα date_str (D51).
+    Το RESMV της ημέρας D έχει όνομα D+1 (π.χ. η 25/10 → 20261026_RESMV_01.xls).
+    1) ερώτηση για την ίδια ημέρα (όπως πριν)· 2) αν δεν βρεθεί (π.χ. ημέρα αλλαγής ώρας),
+    ερώτηση για γύρω ημέρες και επιλογή του αρχείου με το αναμενόμενο όνομα· 3) τυπική διεύθυνση."""
+    d = datetime.strptime(date_str, "%Y%m%d")
+    expected = (d + timedelta(days=1 if category == "RESMV" else 0)).strftime("%Y%m%d")
+
+    def query(d0, d1):
+        url = (f"https://www.admie.gr/getOperationMarketFile?dateStart={d0:%Y-%m-%d}"
+               f"&dateEnd={d1:%Y-%m-%d}&FileCategory={category}")
+        try:
+            resp = requests.get(url, verify=False, timeout=15)
+            if resp.status_code == 200:
+                data = resp.json()
+                data = data if isinstance(data, list) else [data] if isinstance(data, dict) else []
+                return [x.get("file_path") for x in data if isinstance(x, dict) and x.get("file_path")]
+        except Exception as e:
+            print(f"Error fetching {category} URL for {d0:%Y-%m-%d}: {e}")
+        return []
+
+    paths = query(d, d)
+    for pth in paths:
+        if os.path.basename(pth).startswith(expected):
+            return pth
+    if paths:
+        return paths[0]                                   # συμπεριφορά όπως πριν
+    for pth in query(d - timedelta(days=1), d + timedelta(days=2)):
+        if os.path.basename(pth).startswith(expected):
+            print(f"[{date_str}] {category}: βρέθηκε με ευρύτερη αναζήτηση ({os.path.basename(pth)})")
+            return pth
+    for k in (0, 1, 2):                                   # φάκελος = μήνας δημοσίευσης
+        f = d + timedelta(days=k)
+        for v in ("01", "02"):
+            url = (f"https://www.admie.gr/sites/default/files/attached-files/type-file/"
+                   f"{f:%Y}/{f:%m}/{expected}_{category}_{v}.xls")
+            try:
+                if requests.head(url, verify=False, timeout=15, allow_redirects=True).status_code == 200:
+                    print(f"[{date_str}] {category}: βρέθηκε με τυπική διεύθυνση ({url})")
+                    return url
+            except Exception:
+                pass
     return None
 
-def fetch_api_supplement(date_str):
-    """Αντλεί MCP, BESS και Pumping απευθείας από το API του ΑΔΜΗΕ για απόλυτη ανεξαρτησία."""
-    base_proxy = "https://iptoanalytics-api.admie.gr/iptoanalytics/api/ipto?endpoint=https:%2F%2Fmarket-public-api.admie.gr%2Frestws%2Fportal%2F"
-    endpoints = {
-        "production": f"{base_proxy}prodmixandload%2F{date_str}",
-        "dam": f"{base_proxy}dayaheadmarket%2F{date_str}"
-    }
-    headers = {'User-Agent': 'live-greekpower-bot (Mozilla/5.0)', 'Accept': 'application/json'}
-    
-    hourly_supp = {hr: {'mcp': 0.0, 'bess_disch': 0.0, 'bess_chg': 0.0, 'pump': 0.0} for hr in range(1, 25)}
-    
-    try:
-        resp_prod = requests.get(endpoints["production"], headers=headers, verify=False, timeout=15)
-        if resp_prod.status_code == 200:
-            for item in resp_prod.json().get("items", []):
-                hr = item.get("hr")
-                tech = item.get("itemname")
-                energy = item.get("energy")
-                if hr and tech:
-                    if tech == 'STORAGE_INJECTION': hourly_supp[hr]['bess_disch'] = float(energy)
-                    elif tech == 'STORAGE_ABSORPTION': hourly_supp[hr]['bess_chg'] = float(abs(energy))
-                    elif tech == 'ΣΥΝΟΛΙΚΗ ΑΝΤΛΗΣΗ': hourly_supp[hr]['pump'] = float(energy)
-        
-        resp_dam = requests.get(endpoints["dam"], headers=headers, verify=False, timeout=15)
-        if resp_dam.status_code == 200:
-             for item in resp_dam.json().get("items", []):
-                 hr = item.get("hr")
-                 if hr and item.get("country") == "GR":
-                     hourly_supp[hr]['mcp'] = float(item.get("value", 0))
-    except Exception as e:
-        print(f"[{date_str}] Σφάλμα λήψης API (MCP/Storage): {e}")
-        
-    return hourly_supp
+
+def local_hour_rows(date_str):
+    """Για κάθε συνεχόμενη ώρα της ημέρας (1…N, N = 23/24/25) → η γραμμή του RESMV (ώρα ρολογιού 1…24).
+    Ημέρα αλλαγής ώρας τον Οκτώβριο: η 03:00–04:00 εμφανίζεται δύο φορές → και οι δύο ώρες δείχνουν τη γραμμή 4
+    (που στο RESMV είναι το άθροισμά τους). Τον Μάρτιο η 03:00–04:00 δεν υπάρχει (N = 23). D51."""
+    tz = pytz.timezone('Europe/Athens')
+    d = datetime.strptime(date_str, "%Y%m%d")
+    start, end = tz.localize(d), tz.localize(d + timedelta(days=1))
+    n = int(round((end - start).total_seconds() / 3600))
+    start_utc = start.astimezone(pytz.utc)
+    return [(start_utc + timedelta(hours=s)).astimezone(tz).hour + 1 for s in range(n)]
+
+
+def live_supplement(date_str):
+    """Τιμή DAM, BESS και άντληση από το live αρχείο της ημέρας (D51· έως 29/10/2026 από τον
+    ενδιάμεσο iptoanalytics, που καταργήθηκε). Ίδια νούμερα, χωρίς εξωτερική εξάρτηση."""
+    iso = f"{date_str[:4]}-{date_str[4:6]}-{date_str[6:]}"
+    day = load_json_lenient(os.path.join(contract.LIVE_DIR, iso + '.json'), None) or {}
+    out = {}
+    for h in day.get('hours', []):
+        hr = h.get('hr')
+        if not hr:
+            continue
+        rec = {'mcp': h.get('dam_price'), 'bess_disch': 0.0, 'bess_chg': 0.0, 'pump': 0.0}   # τιμή: κενό αν λείπει
+        if h.get('has_data'):
+            rec.update({'bess_disch': h['storage']['dis'] or 0.0, 'bess_chg': h['storage']['chg'] or 0.0,
+                        'pump': h['pumping'] or 0.0})
+        out[hr] = rec
+    return out
+
 
 def build_xray_for_date(date_str):
     scada_url = fetch_excel_url(date_str, "SystemRealizationSCADA")
@@ -159,11 +185,16 @@ def build_xray_for_date(date_str):
     row_dc = scada_row('DC KRHTH', 'DC ΚΡΗΤΗ')
     row_netload = scada_row('NET LOAD')
 
-    # Ανάκτηση MCP & Storage από το API
-    api_supp = fetch_api_supplement(date_str)
+    # Τιμή DAM, BESS, άντληση από το live αρχείο (D51)
+    api_supp = live_supplement(date_str)
+    # Συνεχόμενες ώρες της ημέρας (23/24/25) και αντιστοίχιση με τις γραμμές του RESMV (D51)
+    rows = local_hour_rows(date_str)
+    row_count = {r: rows.count(r) for r in set(rows)}
+    if len(rows) != 24:
+        print(f"[{date_str}] Ημέρα αλλαγής ώρας: {len(rows)} ώρες.")
     xray_records = []
-    
-    for hr in range(1, 25):
+
+    for hr in range(1, len(rows) + 1):
         scada_col = str(hr + 1)
         
         # 1. Υπολογισμοί SCADA (Κάνουμε ρητό cast σε float!)
@@ -196,24 +227,26 @@ def build_xray_for_date(date_str):
         crete_flow = None if crete_ac is None and crete_dc is None else (crete_ac or 0.0) + (crete_dc or 0.0)
 
         # 2. Υπολογισμοί RESMV (Ρητό cast σε float!)
-        resmv_row = resmv_df[resmv_df['ΩΡΑ'] == float(hr)]
+        rrow = rows[hr - 1]
+        share = 1.0 / row_count[rrow]          # διπλή ώρα: η γραμμή του RESMV μοιράζεται στα δύο
+        resmv_row = resmv_df[resmv_df['ΩΡΑ'] == float(rrow)]
         if not resmv_row.empty:
             r = resmv_row.iloc[0]
-            resmv_sh = float(r.get('ΜΥΗΣ ΕΝΕΡΓΕΙΑ KWh', 0) / 1000.0)
-            resmv_solar = float(r.get('Φ/Β ΕΝΕΡΓΕΙΑ KWh', 0) / 1000.0)
-            resmv_biomass = float(r.get('B/A ΕΝΕΡΓΕΙΑ KWh', 0) / 1000.0)
-            resmv_cogen = float(r.get('ΣΗΘΥΑ ΕΝΕΡΓΕΙΑ KWh', 0) / 1000.0)
+            resmv_sh = float(r.get('ΜΥΗΣ ΕΝΕΡΓΕΙΑ KWh', 0) / 1000.0) * share
+            resmv_solar = float(r.get('Φ/Β ΕΝΕΡΓΕΙΑ KWh', 0) / 1000.0) * share
+            resmv_biomass = float(r.get('B/A ΕΝΕΡΓΕΙΑ KWh', 0) / 1000.0) * share
+            resmv_cogen = float(r.get('ΣΗΘΥΑ ΕΝΕΡΓΕΙΑ KWh', 0) / 1000.0) * share
         else:
             resmv_sh = resmv_solar = resmv_biomass = resmv_cogen = 0.0
 
         # 3. Ενσωμάτωση δεδομένων
-        supp = api_supp.get(hr, {'mcp': 0.0, 'bess_disch': 0.0, 'bess_chg': 0.0, 'pump': 0.0})
+        supp = api_supp.get(hr, {'mcp': None, 'bess_disch': 0.0, 'bess_chg': 0.0, 'pump': 0.0})
 
         # 4. Χτίσιμο του JSON αντικειμένου, εξασφαλίζοντας ότι ΟΛΑ είναι Python floats/ints
         xray_records.append({
             "date": date_str,
             "target_hour": int(hr),
-            "mcp": float(round(supp['mcp'], 2)),
+            "mcp": None if supp['mcp'] is None else float(round(supp['mcp'], 2)),
             "big_hydro": float(round(scada_bh, 1)),
             "small_hydro": float(round(scada_sh + scada_myis + resmv_sh, 1)),
             "solar": float(round(scada_solar + resmv_solar, 1)),

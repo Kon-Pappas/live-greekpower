@@ -78,6 +78,10 @@ def _fetch(date_str, token, params, label):
     except ET.ParseError:
         print(f"[{date_str}] {label}: σφάλμα ανάλυσης XML")
         return None
+    d0 = ATHENS.localize(datetime.strptime(date_str, "%Y%m%d"))
+    d1 = ATHENS.localize(datetime.strptime(date_str, "%Y%m%d") + timedelta(days=1))
+    day_start_utc = d0.astimezone(pytz.utc)
+    n_hours = int(round((d1 - d0).total_seconds() / 3600))
     out = {}
     for ts in root.findall('ns:TimeSeries', NS):
         psr = ts.find('ns:MktPSRType/ns:psrType', NS)
@@ -95,9 +99,12 @@ def _fetch(date_str, token, params, label):
         for pt in period.findall('ns:Point', NS):
             pos = int(pt.find('ns:position', NS).text)
             qty = float(pt.find('ns:quantity', NS).text)
-            t = (t0 + timedelta(minutes=step * (pos - 1))).astimezone(ATHENS)
-            if t.strftime("%Y%m%d") == date_str:
-                out.setdefault((key, t.hour + 1), []).append(qty)   # 00:00–01:00 = ώρα 1
+            t_utc = t0 + timedelta(minutes=step * (pos - 1))
+            # Συνεχόμενη ώρα της ημέρας (1…N, N = 23/24/25), όπως στο live και στο SCADA (D51):
+            # την ημέρα αλλαγής ώρας η διπλή 03:00–04:00 μένει δύο χωριστές ώρες.
+            slot = int((t_utc - day_start_utc).total_seconds() // 3600) + 1
+            if 1 <= slot <= n_hours:
+                out.setdefault((key, slot), []).append(qty)
     return out
 
 
@@ -113,8 +120,10 @@ def build_entsoe_for_date(date_str, token):
     load = _fetch(date_str, token, {'documentType': 'A65', 'processType': 'A16', 'outBiddingZone_Domain': GR}, 'A65') or {}
 
     avg = lambda v: round(sum(v) / len(v), 1) if v else None   # μέσο MW της ώρας = MWh
+    d0 = ATHENS.localize(datetime.strptime(date_str, "%Y%m%d"))
+    n_hours = int(round((ATHENS.localize(datetime.strptime(date_str, "%Y%m%d") + timedelta(days=1)) - d0).total_seconds() / 3600))
     recs = []
-    for hr in range(1, 25):
+    for hr in range(1, n_hours + 1):
         rec = {'date': date_str, 'target_hour': hr}
         for k in PSR_MAP.values():
             rec[k] = avg(gen.get((k, hr)))
