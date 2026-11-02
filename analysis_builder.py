@@ -198,7 +198,19 @@ def _fmt_date(iso, lang):
     return f"{d} {months[m - 1]} {y}"
 
 
+def _hours_label(hrs):
+    """[12, 13, 15] → «11:00–13:00, 14:00–15:00» (συνεχόμενες ώρες σε ένα διάστημα)."""
+    hrs = sorted(hrs); out = []; a = b = hrs[0]
+    for h in hrs[1:]:
+        if h == b + 1: b = h
+        else: out.append((a, b)); a = b = h
+    out.append((a, b))
+    return ', '.join(f"{x - 1:02d}:00–{y:02d}:00" for x, y in out)
+
+
 def conclusion(day_iso, L, X, E, dec, layers, recs):
+    # D58: ώρες με ένδειξη πιθανής περικοπής φ/β μεταφοράς (μόνο όταν υπάρχουν· ποτέ «καμία περικοπή»)
+    curt = sorted(h['hr'] for h in L.get('hours', []) if (h.get('curtail_hint') or {}).get('flag'))
     """Σταθερές προτάσεις με αριθμούς (GR / EN). Καμία ερμηνεία πέρα από τα δεδομένα."""
     out = {}
     g = L['totals']['gen']
@@ -219,6 +231,8 @@ def conclusion(day_iso, L, X, E, dec, layers, recs):
                          f"{n(t['pv'] / 1000)} GWh φ/β στέγης και χαμηλής τάσης, {n(t['wind'] / 1000)} GWh αιολικά της διανομής "
                          f"και {n(t['base'] / 1000)} GWh μικρές μονάδες· το υπόλοιπο ({'+' if t['residual'] >= 0 else '−'}"
                          f"{n(abs(t['residual']) / 1000)} GWh) είναι απόκλιση της εκτίμησης του ΑΔΜΗΕ από το μοντέλο.")
+            if curt:
+                P.append(f"Ενδείξεις πιθανής περικοπής φ/β μεταφοράς σε {len(curt)} {'ώρα' if len(curt) == 1 else 'ώρες'} ({_hours_label(curt)}).")
             if layers and layers['load'].get('crete') is not None:
                 P.append(f"Προς την Κρήτη στάλθηκαν {n(layers['load']['crete'] / 1000)} GWh μέσα από τα δύο καλώδια.")
             if layers and layers['res'].get('entsoe') is not None:
@@ -239,6 +253,8 @@ def conclusion(day_iso, L, X, E, dec, layers, recs):
                          f"{n(t['pv'] / 1000)} GWh came from rooftop and other low-voltage solar, {n(t['wind'] / 1000)} GWh from "
                          f"distribution-connected wind and {n(t['base'] / 1000)} GWh from small units; the remainder "
                          f"({'+' if t['residual'] >= 0 else '−'}{n(abs(t['residual']) / 1000)} GWh) is the difference between ADMIE's estimate and the model.")
+            if curt:
+                P.append(f"Indications of possible curtailment of transmission solar in {len(curt)} {'hour' if len(curt) == 1 else 'hours'} ({_hours_label(curt)}).")
             if layers and layers['load'].get('crete') is not None:
                 P.append(f"{n(layers['load']['crete'] / 1000)} GWh was sent to Crete through the two cables.")
             if layers and layers['res'].get('entsoe') is not None:

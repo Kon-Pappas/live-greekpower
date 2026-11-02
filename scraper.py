@@ -343,6 +343,21 @@ def res_split_only(dates, pause=1.0, tol=1.0):
 
 
 if __name__ == "__main__":
+    if os.environ.get('CURTAIL_HINTS_ONLY', '') == '1':
+        # D58: ενδείξεις πιθανής περικοπής φ/β μεταφοράς στα ΥΠΑΡΧΟΝΤΑ live αρχεία (μόνο τοπικά, καμία λήψη).
+        # Αλλάζει μόνο το curtail_hint κάθε ώρας και το totals.curtail_hint_hours.
+        n_days, n_flag = 0, 0
+        for d8 in get_target_dates()[0]:
+            path = contract.day_path(contract.LIVE_DIR, d8)
+            day = load_json_strict(path, None)
+            if not day or not day.get('hours'):
+                continue
+            flagged = contract.add_curtail_hints(d8, day['hours'])
+            day.setdefault('totals', {})['curtail_hint_hours'] = flagged
+            write_json_atomic(path, day)
+            n_days += 1; n_flag += len(flagged)
+        print(f"✓ Ενδείξεις περικοπής: {n_days} ημέρες · {n_flag} ώρες με ένδειξη.")
+        sys.exit(0)
     if os.environ.get('RES_SPLIT_ONLY', '') == '1':
         _ok, _skipped = res_split_only(get_target_dates()[0], pause=float(os.environ.get('PAUSE_SECONDS', '1') or 0))
         sys.exit(0)

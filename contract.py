@@ -185,6 +185,72 @@ def live_day_totals(hours):
     }
 
 
+# ---------------------------------------------------------------------
+# D58: ένδειξη πιθανής περικοπής φ/β μεταφοράς (μελέτη ROADMAP, επαλήθευση με τις επίσημες εντολές
+# περιορισμού του ΑΔΜΗΕ, Μάιος–Σεπτέμβριος 2026: σωστή ≈ 8 φορές στις 10 όταν σημαίνει).
+# Για κάθε ώρα 11:00–15:00: λόγος ΑΠΕ μεταφοράς / διανομής, έναντι του λόγου της ίδιας μέρας στις 09:00–10:00,
+# διορθωμένου με τη φυσιολογική μεσημεριανή αναλογία των τελευταίων 30 ημερών (ώρες με τιμή > 20 €).
+# Πτώση > 15 % → «πιθανή περικοπή». Μόνο ένδειξη· η απουσία της ΔΕΝ σημαίνει ότι δεν έγινε περικοπή.
+# ---------------------------------------------------------------------
+CURTAIL_THRESHOLD = 0.15
+CURTAIL_HOURS = (12, 13, 14, 15)        # hr = ώρα λήξης: 11:00–12:00 … 14:00–15:00
+CURTAIL_SHAPE_DEFAULT = 0.85            # διάμεσος Μαΐου–Σεπτεμβρίου 2026 (0,80–0,89), όταν λείπει ιστορικό
+
+
+def _split(h):
+    g = h.get('gen') or {}
+    return g.get('res_system'), g.get('res_network')
+
+
+def curtail_shape(date8, days=30):
+    """Φυσιολογική μεσημεριανή αναλογία (λόγος 12:00–15:00 / λόγος 09:00–10:00) στις προηγούμενες ημέρες,
+    σε ώρες με τιμή > 20 € και διανομή > 2.500 MWh. None αν λιγότερες από 5 ώρες."""
+    d0 = datetime.strptime(date8, '%Y%m%d')
+    vals = []
+    for k in range(1, days + 1):
+        doc = load_json_lenient(day_path(LIVE_DIR, (d0 - timedelta(days=k)).strftime('%Y%m%d')), None)
+        if not doc:
+            continue
+        H = {h['hr']: h for h in doc.get('hours', []) if h.get('has_data')}
+        b = H.get(10)
+        bs, bn = _split(b) if b else (None, None)
+        if bs is None or not bn or bn <= 300:
+            continue
+        for hr in (13, 14, 15):
+            h = H.get(hr)
+            if not h:
+                continue
+            s_, n_ = _split(h)
+            if s_ is None or not n_ or n_ <= 2500 or h.get('dam_price') is None or h['dam_price'] <= 20:
+                continue
+            vals.append((s_ / n_) / (bs / bn))
+    if len(vals) < 5:
+        return None
+    vals.sort()
+    return vals[len(vals) // 2]
+
+
+def add_curtail_hints(date8, hours):
+    """Βάζει σε κάθε ώρα `curtail_hint` = {'drop', 'flag'} (ή None όταν δεν αξιολογείται). Επιστρέφει τις ώρες που σημαίνουν."""
+    shape = curtail_shape(date8) or CURTAIL_SHAPE_DEFAULT
+    H = {h['hr']: h for h in hours}
+    b = H.get(10)
+    bs, bn = _split(b) if b and b.get('has_data') else (None, None)
+    flagged = []
+    for h in hours:
+        h['curtail_hint'] = None
+        if h['hr'] not in CURTAIL_HOURS or not h.get('has_data') or bs is None or not bn or bn <= 300:
+            continue
+        s_, n_ = _split(h)
+        if s_ is None or not n_ or n_ <= 1500:
+            continue
+        drop = 1 - (s_ / n_) / ((bs / bn) * shape)
+        h['curtail_hint'] = {'drop': round(drop, 3), 'flag': drop > CURTAIL_THRESHOLD}
+        if drop > CURTAIL_THRESHOLD:
+            flagged.append(h['hr'])
+    return flagged
+
+
 def write_live_days(raw_records, dates8):
     """Γράφει data/live/<ημέρα>.json για κάθε ημέρα του dates8,
     από τις (ήδη συγχωνευμένες) ωριαίες εγγραφές του scraper."""
@@ -201,12 +267,15 @@ def write_live_days(raw_records, dates8):
         if date8 not in by_date:
             continue
         hours = [normalize_live_hour(by_date[date8][hr]) for hr in sorted(by_date[date8])]
+        flagged = add_curtail_hints(date8, hours)     # D58
+        totals = live_day_totals(hours)
+        totals['curtail_hint_hours'] = flagged
         write_json_atomic(day_path(LIVE_DIR, date8), {
             'schema': SCHEMA,
             'date': iso_date(date8),
             'source': 'ADMIE/IPTO market portal: prodmixandload, dayaheadmarket, scadainterflows',
             'updated': now_athens_iso(),
-            'totals': live_day_totals(hours),
+            'totals': totals,
             'hours': hours,
         })
     print(f"✓ Live day files: {len([d for d in dates8 if d in by_date])} ημέρες.")
