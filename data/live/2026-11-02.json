@@ -2,15 +2,15 @@
   "schema": 1,
   "date": "2026-11-02",
   "source": "ADMIE/IPTO market portal: prodmixandload, dayaheadmarket, scadainterflows",
-  "updated": "2026-11-02T02:06:30+02:00",
+  "updated": "2026-11-02T03:06:30+02:00",
   "totals": {
-    "hours_with_data": 2,
+    "hours_with_data": 3,
     "gen": {
       "lignite": 999.0,
       "gas": 7280.0,
       "hydro": 648.0,
-      "res": 1578.0,
-      "total": 10505.0
+      "res": 5559.0,
+      "total": 14486.0
     },
     "imports": 62.0,
     "exports": 1139.0,
@@ -19,13 +19,13 @@
       "chg": 472.0
     },
     "pumping": 107.0,
-    "demand": 8849.0,
-    "dam_price_avg": 239.5,
+    "demand": 12830.0,
+    "dam_price_avg": 247.67,
     "crete_flow": null,
     "hours_flows_mismatch": 0,
     "hours_balance_off": 0,
     "sources": {
-      "admie.gr": 2
+      "admie.gr": 3
     }
   },
   "hours": [
@@ -33,7 +33,7 @@
       "hr": 1,
       "has_data": true,
       "dam_price": 235.0,
-      "fetched": "2026-11-02T02:06:24.555867+02:00",
+      "fetched": "2026-11-02T03:06:23.528204+02:00",
       "source": "admie.gr",
       "crete_flow": null,
       "gen": {
@@ -59,7 +59,7 @@
       "hr": 2,
       "has_data": true,
       "dam_price": 244.0,
-      "fetched": "2026-11-02T02:06:24.555867+02:00",
+      "fetched": "2026-11-02T03:06:23.528204+02:00",
       "source": "admie.gr",
       "crete_flow": null,
       "gen": {
@@ -79,6 +79,32 @@
       },
       "pumping": 107.0,
       "demand": 4263.0,
+      "balance_ok": true
+    },
+    {
+      "hr": 3,
+      "has_data": true,
+      "dam_price": 264.0,
+      "fetched": "2026-11-02T03:06:23.528204+02:00",
+      "source": "admie.gr",
+      "crete_flow": null,
+      "gen": {
+        "lignite": 0.0,
+        "gas": 0.0,
+        "hydro": 0.0,
+        "res": 3981.0,
+        "total": 3981.0
+      },
+      "imports": 0.0,
+      "exports": 0.0,
+      "flows": null,
+      "flows_match": null,
+      "storage": {
+        "dis": 0.0,
+        "chg": 0.0
+      },
+      "pumping": 0.0,
+      "demand": 3981.0,
       "balance_ok": true
     }
   ]
