@@ -374,10 +374,12 @@ const fmtLag = (min) => min < 120 ? `${min}′` : `${Math.floor(min / 60)}h ${pa
 // Λήψη JSON με μνήμη. Τα αρχεία που αλλάζουν συχνά παίρνουν cache-busting.
 async function getJSON(path, bust = false) {
     if (!bust && path in S.cache) return S.cache[path];
-    const url = `data/${path}.json` + (bust ? `?v=${Date.now()}` : '');
+    // D54 (όπως BESS D53): χωρίς ?v=<ώρα>. Τα αρχεία που αλλάζουν ζητούνται με cache: 'no-cache',
+    // οπότε ο browser ρωτά τον server με το ETag τους· αν δεν άλλαξαν, έρχεται απάντηση 304 (λίγα bytes).
+    const url = `data/${path}.json`;
     let json = null;
     try {
-        const r = await fetch(url);
+        const r = await fetch(url, bust ? { cache: 'no-cache' } : undefined);
         json = r.ok ? await r.json() : null;
     } catch (e) { json = null; }
     S.cache[path] = json;
@@ -904,7 +906,7 @@ async function renderDaily() {
     // Ribbon (D40): τέσσερα κουτάκια, κεντραρισμένα
     const prices = day.hours.map((h) => h.dam_price).filter((v) => v !== null && v !== undefined);
     const tile = (label, value, sub) => `<div class="bg-slate-800/40 border border-slate-700 rounded-xl px-4 py-3 text-center">
-        <div class="text-[11px] uppercase tracking-wide text-slate-400">${esc(label)}</div>
+        <div class="text-[11px] text-slate-400">${esc(label)}</div>
         <div class="text-lg font-bold text-white mt-0.5">${value}</div>${sub ? `<div class="text-[11px] text-slate-500">${sub}</div>` : ''}</div>`;
     const g = tot.gen;
     const cleanShare = g && g.total ? 100 * (g.res + g.hydro) / g.total : null;
