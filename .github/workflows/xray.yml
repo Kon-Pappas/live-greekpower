@@ -57,6 +57,12 @@ jobs:
           ENTSOE_TOKEN: ${{ secrets.ENTSOE_TOKEN }}
         run: python entsoe_builder.py
 
+      - name: Run ISP2 surplus (D59)
+        env:
+          START_DATE: ${{ github.event.inputs.start_date }}
+          END_DATE: ${{ github.event.inputs.end_date }}
+        run: python isp_builder.py
+
       - name: Run Analysis Builder (φάση 4, D46)
         env:
           START_DATE: ${{ github.event.inputs.start_date }}

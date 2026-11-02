@@ -1,0 +1,71 @@
+name: ISP2 history refresh
+
+# D59: κατεβάζει το πλεόνασμα του προγραμματισμού ISP2 του ΑΔΜΗΕ για ένα διάστημα → data/isp/.
+# Μετά: «Curtailment hints refresh» (χαρακτηρισμός Α/Β των ενδείξεων) και «Analysis history refresh».
+# Να μην τρέχει κοντά στις 10:15 / 13:30 (το πρωινό X-Ray γράφει κι αυτό στο data/isp/).
+on:
+  workflow_dispatch:
+    inputs:
+      start_date:
+        description: 'Από (YYYYMMDD)'
+        required: true
+        default: '20260401'
+      end_date:
+        description: 'Έως (YYYYMMDD) · κενό = σήμερα'
+        required: false
+        default: ''
+      pause_seconds:
+        description: 'Παύση ανάμεσα στις ημέρες (δευτερόλεπτα)'
+        required: true
+        default: '2'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: isp-refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests pytz pandas xlrd openpyxl
+
+      - name: Fetch ISP2
+        env:
+          BF_START: ${{ github.event.inputs.start_date }}
+          BF_END: ${{ github.event.inputs.end_date }}
+          PAUSE_SECONDS: ${{ github.event.inputs.pause_seconds }}
+        run: |
+          if [ -z "$BF_END" ]; then BF_END=$(TZ=Europe/Athens date +%Y%m%d); fi
+          START_DATE="$BF_START" END_DATE="$BF_END" python isp_builder.py
+
+      - name: Commit and push changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action Bot"
+          git add -A data/isp
+          if git diff --staged --quiet; then
+            echo "Καμία αλλαγή."
+            exit 0
+          fi
+          git commit -m "ISP2: ιστορικό ($(TZ=Europe/Athens date +'%Y-%m-%d %H:%M'))"
+          for i in 1 2 3; do
+            git pull --rebase origin main && git push && exit 0
+            echo "Push απέτυχε (προσπάθεια $i), νέα δοκιμή σε 10s..."
+            sleep 10
+          done
+          exit 1
