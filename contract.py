@@ -114,6 +114,10 @@ def normalize_live_hour(rec):
         'hydro': r1(m.get('TOTAL HYDRO') or 0),
         'res': r1(m.get('RES_PROD') or 0),
         'total': r1(total or 0),
+        # D55: ΑΠΕ μεταφοράς (RES_SYSTEM) και διανομής, μέση + χαμηλή τάση (RES_NETWORK), όπως τα δίνει ο ΑΔΜΗΕ.
+        # Άθροισμα = res. null όταν η πηγή δεν τα δίνει (π.χ. παλιές εγγραφές), ποτέ 0.
+        'res_system': r1(m['RES_SYSTEM']) if m.get('RES_SYSTEM') is not None else None,
+        'res_network': r1(m['RES_NETWORK']) if m.get('RES_NETWORK') is not None else None,
     }
 
     # Ροές ανά χώρα: μόνο η παλιά πηγή τις δίνει (D50). Χωρίς αυτές: flows = None, όχι «ασυμφωνία».
@@ -164,7 +168,10 @@ def live_day_totals(hours):
                 'dam_price_avg': round(sum(prices) / len(prices), 2) if prices else None}
     return {
         'hours_with_data': len(data),
-        'gen': {k: _sum(h['gen'][k] for h in data) for k in ['lignite', 'gas', 'hydro', 'res', 'total']},
+        'gen': {**{k: _sum(h['gen'][k] for h in data) for k in ['lignite', 'gas', 'hydro', 'res', 'total']},
+                # D55: σύνολο ημέρας μόνο αν το έχουν ΟΛΕΣ οι ώρες με δεδομένα· αλλιώς null (όχι μερικό άθροισμα)
+                **{k: (_sum(h['gen'].get(k) for h in data) if all(h['gen'].get(k) is not None for h in data) else None)
+                   for k in ['res_system', 'res_network']}},
         'imports': _sum(h['imports'] for h in data),
         'exports': _sum(h['exports'] for h in data),
         'storage': {k: _sum(h['storage'][k] for h in data) for k in ['dis', 'chg']},
