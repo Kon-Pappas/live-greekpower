@@ -210,7 +210,11 @@ def _hours_label(hrs):
 
 def conclusion(day_iso, L, X, E, dec, layers, recs):
     # D58: ώρες με ένδειξη πιθανής περικοπής φ/β μεταφοράς (μόνο όταν υπάρχουν· ποτέ «καμία περικοπή»)
-    curt = sorted(h['hr'] for h in L.get('hours', []) if (h.get('curtail_hint') or {}).get('flag'))
+    hrs_ = L.get('hours', [])
+    curt = sorted(h['hr'] for h in hrs_ if (h.get('curtail_hint') or {}).get('flag') and (h.get('curtail_hint') or {}).get('case') != 'B')
+    other = sorted(h['hr'] for h in hrs_ if (h.get('curtail_hint') or {}).get('case') == 'B')          # D59
+    isp_h = sorted(h['hr'] for h in hrs_ if (h.get('isp_surplus') or 0) > 1)
+    isp_c = [hr for hr in curt if hr in isp_h]
     """Σταθερές προτάσεις με αριθμούς (GR / EN). Καμία ερμηνεία πέρα από τα δεδομένα."""
     out = {}
     g = L['totals']['gen']
@@ -231,8 +235,14 @@ def conclusion(day_iso, L, X, E, dec, layers, recs):
                          f"{n(t['pv'] / 1000)} GWh φ/β στέγης και χαμηλής τάσης, {n(t['wind'] / 1000)} GWh αιολικά της διανομής "
                          f"και {n(t['base'] / 1000)} GWh μικρές μονάδες· το υπόλοιπο ({'+' if t['residual'] >= 0 else '−'}"
                          f"{n(abs(t['residual']) / 1000)} GWh) είναι απόκλιση της εκτίμησης του ΑΔΜΗΕ από το μοντέλο.")
-            if curt:
-                P.append(f"Ενδείξεις πιθανής περικοπής φ/β μεταφοράς σε {len(curt)} {'ώρα' if len(curt) == 1 else 'ώρες'} ({_hours_label(curt)}).")
+            if isp_h:
+                P.append(f"Ο προγραμματισμός (ISP2) είχε πλεόνασμα σε {len(isp_h)} {'ώρα' if len(isp_h) == 1 else 'ώρες'} ({_hours_label(isp_h)})"
+                         + (f"· σε {len(isp_c)} από αυτές φάνηκε πιθανή περικοπή φ/β μεταφοράς ({_hours_label(isp_c)})." if isp_c else "."))
+            if curt and len(isp_c) < len(curt):
+                rest = [hr for hr in curt if hr not in isp_c]
+                P.append(f"Ενδείξεις πιθανής περικοπής φ/β μεταφοράς σε {len(rest)} {'ώρα' if len(rest) == 1 else 'ώρες'} ({_hours_label(rest)}).")
+            if other:
+                P.append(f"Σε {len(other)} {'ώρα' if len(other) == 1 else 'ώρες'} ({_hours_label(other)}) η μεταφορά έπεσε χωρίς πλεόνασμα στον προγραμματισμό· πιθανώς άλλη αιτία.")
             if layers and layers['load'].get('crete') is not None:
                 P.append(f"Προς την Κρήτη στάλθηκαν {n(layers['load']['crete'] / 1000)} GWh μέσα από τα δύο καλώδια.")
             if layers and layers['res'].get('entsoe') is not None:
@@ -253,8 +263,14 @@ def conclusion(day_iso, L, X, E, dec, layers, recs):
                          f"{n(t['pv'] / 1000)} GWh came from rooftop and other low-voltage solar, {n(t['wind'] / 1000)} GWh from "
                          f"distribution-connected wind and {n(t['base'] / 1000)} GWh from small units; the remainder "
                          f"({'+' if t['residual'] >= 0 else '−'}{n(abs(t['residual']) / 1000)} GWh) is the difference between ADMIE's estimate and the model.")
-            if curt:
-                P.append(f"Indications of possible curtailment of transmission solar in {len(curt)} {'hour' if len(curt) == 1 else 'hours'} ({_hours_label(curt)}).")
+            if isp_h:
+                P.append(f"The schedule (ISP2) had a surplus in {len(isp_h)} {'hour' if len(isp_h) == 1 else 'hours'} ({_hours_label(isp_h)})"
+                         + (f"; in {len(isp_c)} of them a possible curtailment of transmission solar showed ({_hours_label(isp_c)})." if isp_c else "."))
+            if curt and len(isp_c) < len(curt):
+                rest = [hr for hr in curt if hr not in isp_c]
+                P.append(f"Indications of possible curtailment of transmission solar in {len(rest)} {'hour' if len(rest) == 1 else 'hours'} ({_hours_label(rest)}).")
+            if other:
+                P.append(f"In {len(other)} {'hour' if len(other) == 1 else 'hours'} ({_hours_label(other)}) transmission fell without a surplus in the schedule; probably another cause.")
             if layers and layers['load'].get('crete') is not None:
                 P.append(f"{n(layers['load']['crete'] / 1000)} GWh was sent to Crete through the two cables.")
             if layers and layers['res'].get('entsoe') is not None:

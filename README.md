@@ -40,6 +40,7 @@ scraper.py                    hourly: ADMIE market portal → data/live/, record
 xray_builder.py               daily: ADMIE ex-post files → data/xray/ (with UCE)
 entsoe_builder.py             daily: ENTSO-E A75 generation + A65 load → data/entsoe/ (first and latest version kept)
 analysis_builder.py           daily: 90-day calibration, UCE decomposition, layers, conclusion → data/analysis/
+isp_builder.py                daily: ADMIE ISP2 energy surplus per hour (Greek time) → data/isp/
 recompute_uce.py              recomputes UCE in stored X-Ray files (local only, no download)
 contract.py                   data contract (schema v1): file layout, derived values, records, manifest
 jsonio.py                     safe JSON reading (stop on a corrupt file) and atomic writing
@@ -49,7 +50,7 @@ data/xray/YYYY-MM-DD.json     hourly ex-post clean generation, UCE, Crete flows,
 data/entsoe/YYYY-MM-DD.json   hourly ENTSO-E generation and load, first and latest version (written by entsoe_builder only)
 data/records.json             top-three records
 data/live_raw.json            scraper's merge memory for yesterday and today (not read by the page)
-.github/workflows/            scrape.yml (hourly), probe.yml (manual: compare a live source with stored data, writes nothing), xray.yml (daily), backfill.yml (manual: history + UCE recompute), entsoe_refresh.yml (manual: ENTSO-E history), xray_refresh.yml (manual: SCADA/RESMV history), analysis_refresh.yml (manual: Analysis history), res_split_refresh.yml (manual: transmission/distribution RES split), curtail_hints_refresh.yml (manual: curtailment indication history)
+.github/workflows/            scrape.yml (hourly), probe.yml (manual: compare a live source with stored data, writes nothing), xray.yml (daily), backfill.yml (manual: history + UCE recompute), entsoe_refresh.yml (manual: ENTSO-E history), xray_refresh.yml (manual: SCADA/RESMV history), analysis_refresh.yml (manual: Analysis history), res_split_refresh.yml (manual: transmission/distribution RES split), curtail_hints_refresh.yml (manual: curtailment indication history), isp_refresh.yml (manual: ISP2 surplus history)
 docs/                         DECISIONS, KNOWN_ISSUES, ROADMAP
 ```
 

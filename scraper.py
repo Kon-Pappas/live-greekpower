@@ -353,7 +353,10 @@ if __name__ == "__main__":
             if not day or not day.get('hours'):
                 continue
             flagged = contract.add_curtail_hints(d8, day['hours'])
-            day.setdefault('totals', {})['curtail_hint_hours'] = flagged
+            t = day.setdefault('totals', {})
+            t['curtail_hint_hours'] = flagged
+            t['curtail_other_hours'] = [h['hr'] for h in day['hours'] if (h.get('curtail_hint') or {}).get('case') == 'B']
+            t['isp_surplus_hours'] = contract.isp_hours(day['hours'])
             write_json_atomic(path, day)
             n_days += 1; n_flag += len(flagged)
         print(f"✓ Ενδείξεις περικοπής: {n_days} ημέρες · {n_flag} ώρες με ένδειξη.")

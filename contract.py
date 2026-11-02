@@ -230,8 +230,25 @@ def curtail_shape(date8, days=30):
     return vals[len(vals) // 2]
 
 
+ISP_DIR = os.path.join(DATA_DIR, 'isp')
+ISP_SURPLUS_MIN = 1.0                   # MWh· όπως SURPLUS_HOUR_MIN_MWH στο BESS
+
+
+def load_isp_surplus(date8):
+    """{ώρα Ελλάδας hr: MWh} από το data/isp/<ημέρα>.json (D59), ή None όταν δεν υπάρχει."""
+    doc = load_json_lenient(day_path(ISP_DIR, date8), None)
+    if not doc or not isinstance(doc.get('surplus_mwh'), dict):
+        return None
+    return {int(k): v for k, v in doc['surplus_mwh'].items()}
+
+
 def add_curtail_hints(date8, hours):
-    """Βάζει σε κάθε ώρα `curtail_hint` = {'drop', 'flag'} (ή None όταν δεν αξιολογείται). Επιστρέφει τις ώρες που σημαίνουν."""
+    """Βάζει σε κάθε ώρα `curtail_hint` = {'drop', 'flag', 'case'} (ή None όταν δεν αξιολογείται) και `isp_surplus`.
+    case (D59): 'A' ένδειξη ΚΑΙ πλεόνασμα στο ISP2· 'B' ένδειξη ΧΩΡΙΣ πλεόνασμα (πιθανώς άλλη αιτία· δεν λέγεται
+    «περικοπή»)· None όταν δεν υπάρχει ISP2 για την ημέρα. Επιστρέφει τις ώρες με ένδειξη που ΔΕΝ είναι 'B'."""
+    isp = load_isp_surplus(date8)
+    for h in hours:
+        h['isp_surplus'] = (isp.get(h['hr']) if isp is not None else None)
     shape = curtail_shape(date8) or CURTAIL_SHAPE_DEFAULT
     H = {h['hr']: h for h in hours}
     b = H.get(10)
@@ -245,10 +262,19 @@ def add_curtail_hints(date8, hours):
         if s_ is None or not n_ or n_ <= 1500:
             continue
         drop = 1 - (s_ / n_) / ((bs / bn) * shape)
-        h['curtail_hint'] = {'drop': round(drop, 3), 'flag': drop > CURTAIL_THRESHOLD}
-        if drop > CURTAIL_THRESHOLD:
+        flag = drop > CURTAIL_THRESHOLD
+        case = None
+        if flag and h['isp_surplus'] is not None:
+            case = 'A' if h['isp_surplus'] > ISP_SURPLUS_MIN else 'B'
+        h['curtail_hint'] = {'drop': round(drop, 3), 'flag': flag, 'case': case}
+        if flag and case != 'B':
             flagged.append(h['hr'])
     return flagged
+
+
+def isp_hours(hours):
+    """Ώρες με πλεόνασμα στο ISP2 (D59)."""
+    return [h['hr'] for h in hours if (h.get('isp_surplus') or 0) > ISP_SURPLUS_MIN]
 
 
 def write_live_days(raw_records, dates8):
@@ -267,9 +293,11 @@ def write_live_days(raw_records, dates8):
         if date8 not in by_date:
             continue
         hours = [normalize_live_hour(by_date[date8][hr]) for hr in sorted(by_date[date8])]
-        flagged = add_curtail_hints(date8, hours)     # D58
+        flagged = add_curtail_hints(date8, hours)     # D58, D59
         totals = live_day_totals(hours)
         totals['curtail_hint_hours'] = flagged
+        totals['curtail_other_hours'] = [h['hr'] for h in hours if (h.get('curtail_hint') or {}).get('case') == 'B']
+        totals['isp_surplus_hours'] = isp_hours(hours)
         write_json_atomic(day_path(LIVE_DIR, date8), {
             'schema': SCHEMA,
             'date': iso_date(date8),

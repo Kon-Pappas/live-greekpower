@@ -11,7 +11,7 @@
 // 1. Χρώματα (ένα σημείο για όλη τη σελίδα)
 // ---------------------------------------------------------------------
 const C = {
-    lignite: '#b06a4b', gas: '#d18b57', hydro: '#5b9bd5', res: '#70ad47', resNet: '#a9d18e', curtail: '#fdba74',
+    lignite: '#b06a4b', gas: '#d18b57', hydro: '#5b9bd5', res: '#70ad47', resNet: '#a9d18e', curtail: '#fdba74', curtailOther: '#94a3b8', ispBand: 'rgba(253, 186, 116, 0.16)',
     dis: '#e0c2cd', chg: '#b276a0', imports: '#ffc000', exports: '#e74c3c',
     pumping: '#85c1e9', demand: '#e2e8f0', price: '#00e5ff',
     wind: '#70ad47', bigHydro: '#5b9bd5', solar: '#f39c12', uce: '#e74c3c',
@@ -50,7 +50,7 @@ const T = {
         pickerHour: 'Hour:', pickerDate: 'Date:', today: 'today',
         pill: { live: 'Live', delayed: 'Delayed', stale: 'Stale data', histHour: 'Past hour', today: 'Today', histDay: 'Past day', expost: 'Ex-post data' },
         load: { title: 'System Initialization', g1: 'Data fetching', g2: 'Building views', s1: 'Reading the data', s2: 'Live balance', s3: 'Daily dispatch', s4: 'Clean energy cross-check', s5: 'Analysis of the day', s6: 'Records', ready: 'Dashboard is ready!', error: 'The data could not be loaded. Reload the page in a few minutes.' },
-        names: { lignite: 'Lignite', gas: 'Natural gas', hydro: 'Hydro', res: 'RES (incl. CHP)', resSystem: 'RES, transmission', resNetwork: 'RES, distribution', resSplit: 'transmission · distribution', curtailHint: 'possible curtailment of transmission solar', curtailLegend: 'Possible curtailment of transmission solar', dis: 'BESS discharge', chg: 'BESS charge', imports: 'Imports', exports: 'Exports', pumping: 'Pumping', demand: 'Domestic demand', price: 'Day-ahead price', total: 'Total generation',
+        names: { lignite: 'Lignite', gas: 'Natural gas', hydro: 'Hydro', res: 'RES (incl. CHP)', resSystem: 'RES, transmission', resNetwork: 'RES, distribution', resSplit: 'transmission · distribution', curtailHint: 'possible curtailment of transmission solar', curtailLegend: 'Possible curtailment of transmission solar', ispNote: 'with a surplus in the schedule (ISP2)', otherNote: 'fall of transmission without a surplus in the schedule (ISP2) · probably another cause', otherLegend: 'Fall of transmission, no surplus in the schedule', ispLegend: 'Surplus in the schedule (ISP2)', ispTip: 'Surplus in the schedule (ISP2)', dis: 'BESS discharge', chg: 'BESS charge', imports: 'Imports', exports: 'Exports', pumping: 'Pumping', demand: 'Domestic demand', price: 'Day-ahead price', total: 'Total generation',
                  wind: 'Wind', bigHydro: 'Large hydro', solar: 'Solar', cogen: 'Cogeneration', smallHydro: 'Small hydro', biomass: 'Biomass', uce: 'UCE', entsoeSolar: 'Solar (ENTSO-E)', entsoeWind: 'Wind (ENTSO-E)', admieSolar: 'Solar (ADMIE)', admieWind: 'Wind (ADMIE)' },
         countries: { AL: 'Albania', BG: 'Bulgaria', IT: 'Italy', TR: 'Türkiye', MK: 'North Macedonia' },
         genLedger: 'Generation', balLedger: 'System balance', ledgerTotal: 'Total', ledgerDemand: 'Demand',
@@ -107,7 +107,7 @@ const T = {
         pickerHour: 'Ώρα:', pickerDate: 'Ημέρα:', today: 'σήμερα',
         pill: { live: 'Live', delayed: 'Καθυστέρηση', stale: 'Παλιά δεδομένα', histHour: 'Προηγούμενη ώρα', today: 'Σήμερα', histDay: 'Προηγούμενη ημέρα', expost: 'Εκ των υστέρων' },
         load: { title: 'Εκκίνηση', g1: 'Λήψη δεδομένων', g2: 'Προετοιμασία προβολών', s1: 'Ανάγνωση δεδομένων', s2: 'Ισοζύγιο ώρας', s3: 'Κατανομή ημέρας', s4: 'Διασταύρωση καθαρής ενέργειας', s5: 'Ανάλυση ημέρας', s6: 'Ρεκόρ', ready: 'Το dashboard είναι έτοιμο!', error: 'Τα δεδομένα δεν φορτώθηκαν. Ανανεώστε τη σελίδα σε λίγα λεπτά.' },
-        names: { lignite: 'Λιγνίτης', gas: 'Φυσικό αέριο', hydro: 'Υδροηλεκτρικά', res: 'ΑΠΕ (με ΣΗΘΥΑ)', resSystem: 'ΑΠΕ μεταφοράς', resNetwork: 'ΑΠΕ διανομής', resSplit: 'μεταφορά · διανομή', curtailHint: 'πιθανή περικοπή φ/β μεταφοράς', curtailLegend: 'Πιθανή περικοπή φ/β μεταφοράς', dis: 'Εκφόρτιση BESS', chg: 'Φόρτιση BESS', imports: 'Εισαγωγές', exports: 'Εξαγωγές', pumping: 'Άντληση', demand: 'Εγχώρια ζήτηση', price: 'Τιμή DAM', total: 'Συνολική παραγωγή',
+        names: { lignite: 'Λιγνίτης', gas: 'Φυσικό αέριο', hydro: 'Υδροηλεκτρικά', res: 'ΑΠΕ (με ΣΗΘΥΑ)', resSystem: 'ΑΠΕ μεταφοράς', resNetwork: 'ΑΠΕ διανομής', resSplit: 'μεταφορά · διανομή', curtailHint: 'πιθανή περικοπή φ/β μεταφοράς', curtailLegend: 'Πιθανή περικοπή φ/β μεταφοράς', ispNote: 'με πλεόνασμα στον προγραμματισμό (ISP2)', otherNote: 'πτώση μεταφοράς χωρίς πλεόνασμα στον προγραμματισμό (ISP2) · πιθανώς άλλη αιτία', otherLegend: 'Πτώση μεταφοράς χωρίς πλεόνασμα στον προγραμματισμό', ispLegend: 'Πλεόνασμα στον προγραμματισμό (ISP2)', ispTip: 'Πλεόνασμα στον προγραμματισμό (ISP2)', dis: 'Εκφόρτιση BESS', chg: 'Φόρτιση BESS', imports: 'Εισαγωγές', exports: 'Εξαγωγές', pumping: 'Άντληση', demand: 'Εγχώρια ζήτηση', price: 'Τιμή DAM', total: 'Συνολική παραγωγή',
                  wind: 'Αιολικά', bigHydro: 'Μεγάλα υδροηλεκτρικά', solar: 'Φωτοβολταϊκά', cogen: 'Συμπαραγωγή', smallHydro: 'Μικρά υδροηλεκτρικά', biomass: 'Βιομάζα', uce: 'UCE', entsoeSolar: 'Φ/Β (ENTSO-E)', entsoeWind: 'Αιολικά (ENTSO-E)', admieSolar: 'Φ/Β (ΑΔΜΗΕ)', admieWind: 'Αιολικά (ΑΔΜΗΕ)' },
         countries: { AL: 'Αλβανία', BG: 'Βουλγαρία', IT: 'Ιταλία', TR: 'Τουρκία', MK: 'Βόρεια Μακεδονία' },
         genLedger: 'Παραγωγή', balLedger: 'Ισοζύγιο συστήματος', ledgerTotal: 'Σύνολο', ledgerDemand: 'Ζήτηση',
@@ -164,6 +164,7 @@ const METHOD = {
 <li><strong class="text-slate-200">Dispatch:</strong> The dispatch of the selected day hour by hour; for today, only the hours already published.</li>
 <li><strong class="text-slate-200">Average price:</strong> The average price is the simple mean of the hourly prices.</li>
 <li><strong class="text-slate-200">Clean share:</strong> The clean share is renewables (including CHP) and hydro over domestic generation, as in ADMIE's live figures.</li>
+<li><strong class="text-slate-200">Schedule (ISP2):</strong> hours with an energy surplus in ADMIE's ISP2 are lightly shaded. When the fall of transmission coincides with a surplus the indication is most reliable; without a surplus it is marked in grey as "probably another cause" (e.g. clouds), not as curtailment.</li>
 </ul>
 <h3 class="mt-4 mb-2 text-xs font-bold text-acc-400" data-sec="clean" style="scroll-margin-top:8px">Clean energy</h3>
 <ul class="list-disc pl-5 space-y-2 text-slate-400">
@@ -202,6 +203,7 @@ const METHOD = {
 <li><strong class="text-slate-200">Dispatch:</strong> The dispatch of the selected day hour by hour; for today, only the hours already published.</li>
 <li><strong class="text-slate-200">Average price:</strong> The average price is the simple mean of the hourly prices.</li>
 <li><strong class="text-slate-200">Clean share:</strong> The clean share is renewables (including CHP) and hydro over domestic generation, as in ADMIE's live figures.</li>
+<li><strong class="text-slate-200">Schedule (ISP2):</strong> hours with an energy surplus in ADMIE's ISP2 are lightly shaded. When the fall of transmission coincides with a surplus the indication is most reliable; without a surplus it is marked in grey as "probably another cause" (e.g. clouds), not as curtailment.</li>
 </ul>
 <h3 class="mt-4 mb-2 text-xs font-bold text-acc-400" data-sec="clean" style="scroll-margin-top:8px">Clean energy</h3>
 <ul class="list-disc pl-5 space-y-2 text-slate-400">
@@ -218,6 +220,7 @@ const METHOD = {
 <li id="m-analysis" style="scroll-margin-top:8px"><strong class="text-slate-200">Analysis tab:</strong> For each day the model UCE ≈ base + k₁ × metered wind + k₂ × metered solar is fitted again on the previous 90 days with a robust (Huber) regression; 90% intervals come from a bootstrap over days. Applied to the day's hours it splits UCE into low-voltage solar, distribution wind and small units; what is left is the difference between ADMIE's estimate and the model, which can be negative. Tested on data it had not seen, the model explained about 84% of hourly UCE; day totals are reliable, single hours approximate. The conclusion of the day is written by fixed sentences filled with the day's numbers, the same way every day, without interpretation. The layers come from the exact identities in "Layers of load and of renewables".</li>
 <li><strong class="text-slate-200">Distribution batteries:</strong> According to public announcements of July 2026, about 100 MW / 200 MWh of batteries are connected to the distribution network. On 21 Oct 2026 we tested whether they appear inside UCE, using as a proxy the hourly operation of ADMIE's own BESS fleet (same market signals, including the double daily cycles) and, separately, the day-ahead price. No model improved the prediction on unseen data; after mid-July the fleet factor was −0.03 (90%: −0.08 to +0.01), whereas about 0.18 would be expected if 100 MW with the same pattern were inside UCE; the price only mimicked solar. The most likely reading is that ADMIE's live distribution estimate covers renewables only, so these batteries show up indirectly in the transmission load, not in UCE. Even if some escaped the test, at most about 200 MWh a day is at stake, under 2% of UCE. The check is repeated every day and shown under the coefficients chart.</li>
 <li><strong class="text-slate-200">Possible curtailment of transmission solar (method):</strong> for each hour between 11:00 and 15:00, the ratio of transmission RES to distribution RES is compared with the same day's ratio at 09:00–10:00, corrected by the normal midday change of the last 30 days (hours with a day-ahead price above 20 €). Comparing within the same day largely cancels wind, which changes slowly. A fall of more than 15% is marked as possible curtailment. Checked against ADMIE's monthly reports of RES curtailment orders (per 15 minutes), May–September 2026: when it fires, there was an order about 8 times in 10; it finds about 8 in 10 deep curtailments (allowed output below 60% of capacity), fewer in months with curtailment almost every day. Limits: distribution stations above 400 kW also receive orders, so the indicator measures how much more transmission is cut; clouds over large parks can cause a similar fall. It is an indication, not an official figure.</li>
+<li><strong class="text-slate-200">Schedule (ISP2) and the indication:</strong> the "Energy Surplus" of ADMIE's ISP2 is read as in the BESS dashboard, hour by hour, and shifted from market time to Greek time (+1 hour). Checked against the official orders, June–September 2026: indication with a surplus, an order in 83% of hours; indication without a surplus, rare (4 hours) and usually without an order; surplus without an indication, often a shallow curtailment (deep in only 13%). ISP2 is the previous night's schedule; actual operation can differ. Available on the page from the morning X-Ray (10:15).</li>
 </ul>
 <h3 class="mt-4 mb-2 text-xs font-bold text-acc-400" data-sec="records" style="scroll-margin-top:8px">Records</h3>
 <ul class="list-disc pl-5 space-y-2 text-slate-400">
@@ -246,6 +249,7 @@ const METHOD = {
 <li><strong class="text-slate-200">Κατανομή:</strong> Η κατανομή της επιλεγμένης ημέρας ώρα προς ώρα· για τη σημερινή ημέρα μόνο οι ώρες που έχουν ήδη δημοσιευτεί.</li>
 <li><strong class="text-slate-200">Μέση τιμή:</strong> Η μέση τιμή είναι ο απλός μέσος όρος των ωριαίων τιμών.</li>
 <li><strong class="text-slate-200">Μερίδιο καθαρής:</strong> Το μερίδιο καθαρής ενέργειας είναι ΑΠΕ (μαζί με ΣΗΘΥΑ) και υδροηλεκτρικά προς την εγχώρια παραγωγή, όπως στα live στοιχεία του ΑΔΜΗΕ.</li>
+<li><strong class="text-slate-200">Προγραμματισμός (ISP2):</strong> οι ώρες με πλεόνασμα ενέργειας στο ISP2 του ΑΔΜΗΕ σκιάζονται ελαφρά. Όταν η πτώση της μεταφοράς συμπίπτει με πλεόνασμα, η ένδειξη είναι η πιο αξιόπιστη· όταν δεν υπάρχει πλεόνασμα, σημειώνεται με γκρι ως «πιθανώς άλλη αιτία» (π.χ. νέφωση) και όχι ως περικοπή.</li>
 </ul>
 <h3 class="mt-4 mb-2 text-xs font-bold text-acc-400" data-sec="clean" style="scroll-margin-top:8px">Καθαρή ενέργεια</h3>
 <ul class="list-disc pl-5 space-y-2 text-slate-400">
@@ -284,6 +288,7 @@ const METHOD = {
 <li><strong class="text-slate-200">Κατανομή:</strong> Η κατανομή της επιλεγμένης ημέρας ώρα προς ώρα· για τη σημερινή ημέρα μόνο οι ώρες που έχουν ήδη δημοσιευτεί.</li>
 <li><strong class="text-slate-200">Μέση τιμή:</strong> Η μέση τιμή είναι ο απλός μέσος όρος των ωριαίων τιμών.</li>
 <li><strong class="text-slate-200">Μερίδιο καθαρής:</strong> Το μερίδιο καθαρής ενέργειας είναι ΑΠΕ (μαζί με ΣΗΘΥΑ) και υδροηλεκτρικά προς την εγχώρια παραγωγή, όπως στα live στοιχεία του ΑΔΜΗΕ.</li>
+<li><strong class="text-slate-200">Προγραμματισμός (ISP2):</strong> οι ώρες με πλεόνασμα ενέργειας στο ISP2 του ΑΔΜΗΕ σκιάζονται ελαφρά. Όταν η πτώση της μεταφοράς συμπίπτει με πλεόνασμα, η ένδειξη είναι η πιο αξιόπιστη· όταν δεν υπάρχει πλεόνασμα, σημειώνεται με γκρι ως «πιθανώς άλλη αιτία» (π.χ. νέφωση) και όχι ως περικοπή.</li>
 </ul>
 <h3 class="mt-4 mb-2 text-xs font-bold text-acc-400" data-sec="clean" style="scroll-margin-top:8px">Καθαρή ενέργεια</h3>
 <ul class="list-disc pl-5 space-y-2 text-slate-400">
@@ -300,6 +305,7 @@ const METHOD = {
 <li id="m-analysis" style="scroll-margin-top:8px"><strong class="text-slate-200">Tab «Ανάλυση»:</strong> Για κάθε ημέρα το μοντέλο UCE ≈ βάση + k₁ × μετρημένα αιολικά + k₂ × μετρημένα φ/β προσαρμόζεται ξανά στις 90 προηγούμενες ημέρες με ανθεκτική παλινδρόμηση (Huber)· τα διαστήματα 90% προκύπτουν με bootstrap ανά ημέρα. Εφαρμοσμένο στις ώρες της ημέρας χωρίζει το UCE σε φ/β χαμηλής τάσης, αιολικά διανομής και μικρές μονάδες· ό,τι μένει είναι η απόκλιση της εκτίμησης του ΑΔΜΗΕ από το μοντέλο και μπορεί να είναι αρνητική. Σε δεδομένα που δεν είχε δει, το μοντέλο εξήγησε περίπου το 84% του ωριαίου UCE· τα σύνολα ημέρας είναι αξιόπιστα, οι μεμονωμένες ώρες προσεγγιστικές. Το συμπέρασμα της ημέρας γράφεται με σταθερές προτάσεις που συμπληρώνονται με τους αριθμούς της ημέρας, με τον ίδιο τρόπο κάθε μέρα, χωρίς ερμηνεία. Τα επίπεδα προκύπτουν από τις ακριβείς ταυτότητες της ενότητας «Επίπεδα φορτίου και ΑΠΕ».</li>
 <li><strong class="text-slate-200">Μπαταρίες της διανομής:</strong> Σύμφωνα με δημόσιες ανακοινώσεις του Ιουλίου 2026, περίπου 100 MW / 200 MWh μπαταριών είναι συνδεδεμένες στο δίκτυο διανομής. Στις 21 Οκτ 2026 ελέγξαμε αν εμφανίζονται μέσα στο UCE, με δείκτη την ωριαία λειτουργία του στόλου BESS του ΑΔΜΗΕ (ίδια σήματα αγοράς, μαζί με τους διπλούς ημερήσιους κύκλους) και, χωριστά, την τιμή επόμενης ημέρας. Κανένα μοντέλο δεν βελτίωσε την πρόβλεψη σε δεδομένα που δεν είχε δει· μετά τα μέσα Ιουλίου ο συντελεστής του στόλου ήταν −0,03 (90%: −0,08 έως +0,01), ενώ θα περιμέναμε περίπου 0,18 αν 100 MW με το ίδιο μοτίβο ήταν μέσα στο UCE· η τιμή απλώς μιμήθηκε τα φ/β. Η πιθανότερη ερμηνεία είναι ότι η live εκτίμηση του ΑΔΜΗΕ για τη διανομή καλύπτει μόνο ΑΠΕ, οπότε οι μπαταρίες αυτές φαίνονται έμμεσα στο φορτίο της μεταφοράς και όχι στο UCE. Ακόμα κι αν κάποιο κομμάτι ξέφυγε από τον έλεγχο, πρόκειται για το πολύ περίπου 200 MWh την ημέρα, κάτω από 2% του UCE. Ο έλεγχος επαναλαμβάνεται κάθε μέρα και φαίνεται κάτω από το γράφημα των συντελεστών.</li>
 <li><strong class="text-slate-200">Πιθανή περικοπή φ/β μεταφοράς (μέθοδος):</strong> για κάθε ώρα 11:00–15:00, ο λόγος ΑΠΕ μεταφοράς / ΑΠΕ διανομής συγκρίνεται με τον λόγο της ίδιας ημέρας στις 09:00–10:00, διορθωμένο με τη φυσιολογική μεσημεριανή αναλογία των τελευταίων 30 ημερών (ώρες με τιμή επόμενης ημέρας > 20 €). Η σύγκριση μέσα στην ίδια ημέρα ακυρώνει σε μεγάλο βαθμό τα αιολικά, που αλλάζουν αργά. Πτώση πάνω από 15% σημειώνεται ως πιθανή περικοπή. Έλεγχος με τις μηνιαίες αναφορές περιορισμών ΑΠΕ του ΑΔΜΗΕ (ανά 15λεπτο), Μάιος–Σεπτέμβριος 2026: όταν σημαίνει, υπήρχε εντολή περίπου 8 φορές στις 10· εντοπίζει περίπου 8 στις 10 βαθιές περικοπές (επιτρεπόμενη παραγωγή κάτω από 60% της ισχύος), λιγότερες σε μήνες με περικοπές σχεδόν κάθε μέρα. Περιορισμοί: εντολές λαμβάνουν και σταθμοί της διανομής άνω των 400 kW, οπότε ο δείκτης μετρά πόσο περισσότερο περικόπτεται η μεταφορά· σύννεφα πάνω από μεγάλα πάρκα μπορούν να δώσουν παρόμοια πτώση. Είναι ένδειξη, όχι επίσημο στοιχείο.</li>
+<li><strong class="text-slate-200">Προγραμματισμός (ISP2) και ένδειξη:</strong> το πλεόνασμα («Energy Surplus») του ISP2 του ΑΔΜΗΕ διαβάζεται όπως στο BESS dashboard, ανά ώρα, και μετατρέπεται από ώρα αγοράς σε ώρα Ελλάδας (+1 ώρα). Έλεγχος με τις επίσημες εντολές, Ιούνιος–Σεπτέμβριος 2026: ένδειξη μαζί με πλεόνασμα, εντολή στο 83% των ωρών· ένδειξη χωρίς πλεόνασμα, σπάνια (4 ώρες) και συνήθως χωρίς εντολή· πλεόνασμα χωρίς ένδειξη, συχνά ρηχή περικοπή (βαθιά μόνο στο 13%). Το ISP2 είναι πρόγραμμα της προηγούμενης νύχτας· η πραγματική λειτουργία μπορεί να διαφέρει. Διαθέσιμο στη σελίδα από το πρωινό X-Ray (10:15).</li>
 </ul>
 <h3 class="mt-4 mb-2 text-xs font-bold text-acc-400" data-sec="records" style="scroll-margin-top:8px">Ρεκόρ</h3>
 <ul class="list-disc pl-5 space-y-2 text-slate-400">
@@ -800,7 +806,9 @@ function renderLive() {
             : '') +
         // D58: ένδειξη πιθανής περικοπής φ/β μεταφοράς (ήπιο πορτοκαλί· μόνο όταν σημαίνει)
         (h.curtail_hint && h.curtail_hint.flag
-            ? `<div class="pl-[1.15rem] -mt-0.5 mb-1 text-[11px]" style="color:${C.curtail}">▼ ${esc(n.curtailHint)} · −${fmt(100 * h.curtail_hint.drop, 0)}%</div>`
+            ? (h.curtail_hint.case === 'B'
+                ? `<div class="pl-[1.15rem] -mt-0.5 mb-1 text-[11px]" style="color:${C.curtailOther}">▽ ${esc(n.otherNote)} · −${fmt(100 * h.curtail_hint.drop, 0)}%</div>`
+                : `<div class="pl-[1.15rem] -mt-0.5 mb-1 text-[11px]" style="color:${C.curtail}">▼ ${esc(n.curtailHint)} · −${fmt(100 * h.curtail_hint.drop, 0)}%${h.curtail_hint.case === 'A' ? ` · ${esc(n.ispNote)}` : ''}</div>`)
             : '') +
         ledgerRule + ledgerRow(t().ledgerTotal, '=', g.total, null, true) +
         '<div class="border-t border-dashed border-slate-600 my-2"></div>' +
@@ -951,6 +959,12 @@ async function renderDaily() {
     const bar = (label, data, color) => ({ type: 'bar', label, data, backgroundColor: color, stack: 's', yAxisID: 'y', order: 2 });
     const hasSplit = H.some((h) => h.has_data) && H.filter((h) => h.has_data).every((h) => h.gen.res_system != null && h.gen.res_network != null);   // D57
     upsertChart('dispatchChart', {
+        // D59: ελαφριά σκίαση στις ώρες με πλεόνασμα στον προγραμματισμό (ISP2)
+        plugins: [{ id: 'ispBands', beforeDatasetsDraw(chart) {
+            const { ctx, chartArea: a, scales: { x } } = chart; const w = x.width / Math.max(1, H.length);
+            ctx.save(); ctx.fillStyle = C.ispBand;
+            H.forEach((h, i) => { if ((h.isp_surplus || 0) > 1) ctx.fillRect(x.getPixelForValue(i) - w / 2, a.top, w, a.bottom - a.top); });
+            ctx.restore(); } }],
         data: {
             labels: H.map((h) => hourTick(h.hr)),
             datasets: [
@@ -966,10 +980,17 @@ async function renderDaily() {
                     : [bar(n.res, val((h) => h.gen.res), C.res)]),
                 bar(n.hydro, val((h) => h.gen.hydro), C.hydro),
                 // D58: τρίγωνο πάνω από τη στήλη στις ώρες με ένδειξη πιθανής περικοπής
-                { type: 'line', label: n.curtailLegend, order: 0, showLine: false, pointStyle: 'triangle', rotation: 180,
+                ...(H.some((h) => h.curtail_hint && h.curtail_hint.flag && h.curtail_hint.case !== 'B') ? [{ type: 'line', label: n.curtailLegend, order: 0, showLine: false, pointStyle: 'triangle', rotation: 180,
                   pointRadius: 7, pointHoverRadius: 8, borderColor: C.curtail, backgroundColor: C.curtail,
-                  data: H.map((h) => (h.has_data && h.curtail_hint && h.curtail_hint.flag
-                      ? (h.gen.total || 0) + (h.imports || 0) + ((h.storage && h.storage.dis) || 0) + 350 : null)) },
+                  data: H.map((h) => (h.has_data && h.curtail_hint && h.curtail_hint.flag && h.curtail_hint.case !== 'B'
+                      ? (h.gen.total || 0) + (h.imports || 0) + ((h.storage && h.storage.dis) || 0) + 350 : null)) }] : []),
+                // D59: πτώση της μεταφοράς ΧΩΡΙΣ πλεόνασμα στο ISP2: γκρι, κενό τρίγωνο (όχι «περικοπή»)
+                ...(H.some((h) => h.curtail_hint && h.curtail_hint.case === 'B') ? [{ type: 'line', label: n.otherLegend, order: 0, showLine: false,
+                  pointStyle: 'triangle', rotation: 180, pointRadius: 7, pointHoverRadius: 8, borderColor: C.curtailOther, backgroundColor: 'transparent', borderWidth: 2,
+                  data: H.map((h) => (h.has_data && h.curtail_hint && h.curtail_hint.case === 'B'
+                      ? (h.gen.total || 0) + (h.imports || 0) + ((h.storage && h.storage.dis) || 0) + 350 : null)) }] : []),
+                // D59: υπόμνημα για τη σκίαση των ωρών με πλεόνασμα στο ISP2 (η σκίαση σχεδιάζεται από το plugin)
+                ...(H.some((h) => (h.isp_surplus || 0) > 1) ? [{ type: 'bar', label: n.ispLegend, data: [], backgroundColor: 'rgba(253, 186, 116, 0.30)', borderColor: 'rgba(253, 186, 116, 0.55)', borderWidth: 1 }] : []),
                 { type: 'line', label: n.demand, data: val((h) => h.demand), borderColor: C.demand, borderDash: [6, 4], borderWidth: 2, pointRadius: 0, yAxisID: 'y', order: 1, spanGaps: false },
                 { type: 'line', label: n.price, data: H.map((h) => h.dam_price), borderColor: C.price, backgroundColor: C.price, borderWidth: 2, pointRadius: 2.5, yAxisID: 'y1', order: 0 }
             ]
@@ -991,7 +1012,10 @@ async function renderDaily() {
                         tipRow(n.hydro, h.gen.hydro, C.hydro) +
                         (hasSplit ? tipRow(n.resNetwork, h.gen.res_network, C.resNet) + tipRow(n.resSystem, h.gen.res_system, C.res) : tipRow(n.res, h.gen.res, C.res)) +
                         tipRow(n.dis, h.storage.dis, C.dis) +
-                        (h.curtail_hint && h.curtail_hint.flag ? `<div class="flex justify-between items-baseline gap-6 py-[2px] text-[13.5px]"><span style="color:${C.curtail}">▼ ${esc(n.curtailLegend)}:</span><span class="whitespace-nowrap" style="color:${C.curtail}"><b>−${fmt(100 * h.curtail_hint.drop, 0)}%</b></span></div>` : '') +
+                        (h.curtail_hint && h.curtail_hint.flag ? (h.curtail_hint.case === 'B'
+                            ? `<div class="flex justify-between items-baseline gap-6 py-[2px] text-[13.5px]"><span style="color:${C.curtailOther}">▽ ${esc(n.otherLegend)}:</span><span class="whitespace-nowrap" style="color:${C.curtailOther}"><b>−${fmt(100 * h.curtail_hint.drop, 0)}%</b></span></div>`
+                            : `<div class="flex justify-between items-baseline gap-6 py-[2px] text-[13.5px]"><span style="color:${C.curtail}">▼ ${esc(n.curtailLegend)}:</span><span class="whitespace-nowrap" style="color:${C.curtail}"><b>−${fmt(100 * h.curtail_hint.drop, 0)}%</b></span></div>`) : '') +
+                        ((h.isp_surplus || 0) > 1 ? tipRow(n.ispTip, h.isp_surplus, 'rgba(253, 186, 116, 0.6)') : '') +
                         tipRow(n.imports, h.imports, C.imports) + tipRow(n.gas, h.gen.gas, C.gas) + tipRow(n.lignite, h.gen.lignite, C.lignite),
                         tipRow(n.demand, h.demand, '#94a3b8', { strong: true }) + tipRow(n.pumping, h.pumping, C.pumping) +
                         tipRow(n.chg, h.storage.chg, C.chg) + tipRow(n.exports, h.exports, C.exports));
