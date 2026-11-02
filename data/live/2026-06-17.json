@@ -29,6 +29,19 @@
     "curtail_hint_hours": [
       14,
       15
+    ],
+    "curtail_other_hours": [],
+    "isp_surplus_hours": [
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19
     ]
   },
   "hours": [
@@ -79,7 +92,8 @@
       "pumping": 0.0,
       "demand": 5590.0,
       "balance_ok": true,
-      "curtail_hint": null
+      "curtail_hint": null,
+      "isp_surplus": null
     },
     {
       "hr": 2,
@@ -128,7 +142,8 @@
       "pumping": 0.0,
       "demand": 5199.0,
       "balance_ok": true,
-      "curtail_hint": null
+      "curtail_hint": null,
+      "isp_surplus": 0.0
     },
     {
       "hr": 3,
@@ -177,7 +192,8 @@
       "pumping": 0.0,
       "demand": 5014.0,
       "balance_ok": true,
-      "curtail_hint": null
+      "curtail_hint": null,
+      "isp_surplus": 0.0
     },
     {
       "hr": 4,
@@ -226,7 +242,8 @@
       "pumping": 0.0,
       "demand": 4877.0,
       "balance_ok": true,
-      "curtail_hint": null
+      "curtail_hint": null,
+      "isp_surplus": 0.0
     },
     {
       "hr": 5,
@@ -275,7 +292,8 @@
       "pumping": 0.0,
       "demand": 4817.0,
       "balance_ok": true,
-      "curtail_hint": null
+      "curtail_hint": null,
+      "isp_surplus": 0.0
     },
     {
       "hr": 6,
@@ -324,7 +342,8 @@
       "pumping": 0.0,
       "demand": 4877.0,
       "balance_ok": true,
-      "curtail_hint": null
+      "curtail_hint": null,
+      "isp_surplus": 0.0
     },
     {
       "hr": 7,
@@ -373,7 +392,8 @@
       "pumping": 0.0,
       "demand": 5083.0,
       "balance_ok": true,
-      "curtail_hint": null
+      "curtail_hint": null,
+      "isp_surplus": 0.0
     },
     {
       "hr": 8,
@@ -422,7 +442,8 @@
       "pumping": 0.0,
       "demand": 5739.0,
       "balance_ok": true,
-      "curtail_hint": null
+      "curtail_hint": null,
+      "isp_surplus": 0.0
     },
     {
       "hr": 9,
@@ -471,7 +492,8 @@
       "pumping": 0.0,
       "demand": 6388.0,
       "balance_ok": true,
-      "curtail_hint": null
+      "curtail_hint": null,
+      "isp_surplus": 0.0
     },
     {
       "hr": 10,
@@ -520,7 +542,8 @@
       "pumping": 0.0,
       "demand": 6896.0,
       "balance_ok": true,
-      "curtail_hint": null
+      "curtail_hint": null,
+      "isp_surplus": 10.66
     },
     {
       "hr": 11,
@@ -569,7 +592,8 @@
       "pumping": 2.0,
       "demand": 7191.0,
       "balance_ok": true,
-      "curtail_hint": null
+      "curtail_hint": null,
+      "isp_surplus": 137.74
     },
     {
       "hr": 12,
@@ -620,8 +644,10 @@
       "balance_ok": true,
       "curtail_hint": {
         "drop": -0.084,
-        "flag": false
-      }
+        "flag": false,
+        "case": null
+      },
+      "isp_surplus": 210.97
     },
     {
       "hr": 13,
@@ -672,8 +698,10 @@
       "balance_ok": true,
       "curtail_hint": {
         "drop": 0.08,
-        "flag": false
-      }
+        "flag": false,
+        "case": null
+      },
+      "isp_surplus": 1185.02
     },
     {
       "hr": 14,
@@ -724,8 +752,10 @@
       "balance_ok": true,
       "curtail_hint": {
         "drop": 0.195,
-        "flag": true
-      }
+        "flag": true,
+        "case": "A"
+      },
+      "isp_surplus": 1195.18
     },
     {
       "hr": 15,
@@ -776,8 +806,10 @@
       "balance_ok": true,
       "curtail_hint": {
         "drop": 0.155,
-        "flag": true
-      }
+        "flag": true,
+        "case": "A"
+      },
+      "isp_surplus": 853.44
     },
     {
       "hr": 16,
@@ -826,7 +858,8 @@
       "pumping": 32.0,
       "demand": 7014.0,
       "balance_ok": true,
-      "curtail_hint": null
+      "curtail_hint": null,
+      "isp_surplus": 947.4
     },
     {
       "hr": 17,
@@ -875,7 +908,8 @@
       "pumping": 0.0,
       "demand": 6831.0,
       "balance_ok": true,
-      "curtail_hint": null
+      "curtail_hint": null,
+      "isp_surplus": 693.41
     },
     {
       "hr": 18,
@@ -924,7 +958,8 @@
       "pumping": 0.0,
       "demand": 6778.0,
       "balance_ok": true,
-      "curtail_hint": null
+      "curtail_hint": null,
+      "isp_surplus": 52.19
     },
     {
       "hr": 19,
@@ -973,7 +1008,8 @@
       "pumping": 0.0,
       "demand": 6967.0,
       "balance_ok": true,
-      "curtail_hint": null
+      "curtail_hint": null,
+      "isp_surplus": 80.33
     },
     {
       "hr": 20,
@@ -1022,7 +1058,8 @@
       "pumping": 0.0,
       "demand": 7122.0,
       "balance_ok": true,
-      "curtail_hint": null
+      "curtail_hint": null,
+      "isp_surplus": 0.0
     },
     {
       "hr": 21,
@@ -1071,7 +1108,8 @@
       "pumping": 0.0,
       "demand": 7214.0,
       "balance_ok": true,
-      "curtail_hint": null
+      "curtail_hint": null,
+      "isp_surplus": 0.0
     },
     {
       "hr": 22,
@@ -1120,7 +1158,8 @@
       "pumping": 0.0,
       "demand": 7248.0,
       "balance_ok": true,
-      "curtail_hint": null
+      "curtail_hint": null,
+      "isp_surplus": 0.0
     },
     {
       "hr": 23,
@@ -1169,7 +1208,8 @@
       "pumping": 0.0,
       "demand": 6775.0,
       "balance_ok": true,
-      "curtail_hint": null
+      "curtail_hint": null,
+      "isp_surplus": 0.0
     },
     {
       "hr": 24,
@@ -1218,7 +1258,8 @@
       "pumping": 0.0,
       "demand": 6213.0,
       "balance_ok": true,
-      "curtail_hint": null
+      "curtail_hint": null,
+      "isp_surplus": 0.0
     }
   ]
 }
