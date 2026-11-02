@@ -45,7 +45,7 @@ const T = {
         priceRange: 'Price range', dayClean: 'Clean share of generation',
         recProgTitle: 'Progression of the #1', recTopTitle: 'Top five', viewHistory: 'history →', trackingStart: 'tracking starts',
         newTop5: 'new in the top five', recHourlySub: 'The highest value of a single hour (MWh in one hour)', recShort: { bess_chg_pump: 'BESS + pumping' }, recDailySub: 'The highest total of a whole day', newPlural: 'NEW', newAt: 'NEW #', recRank: 'Rank', recWhen: 'When', recValue: 'Value',
-        lastUpdate: 'Last update:', nextUpdate: 'Next update:', methodology: 'Methodology & Sources', lastUpdateShort: 'Updated:', methodologyShort: 'Methodology', toTop: 'Back to top', sourceLine: 'Source of the latest live hour:',
+        lastUpdate: 'Last update:', nextUpdate: 'Next update:', methodology: 'Methodology & Assumptions', mShort: 'Short', mFull: 'Detailed', lastUpdateShort: 'Updated:', methodologyShort: 'Methodology', toTop: 'Back to top', sourceLine: 'Source of the latest live hour:',
         tabs: { live: 'Live (hour)', daily: 'Daily', clean: 'Clean energy', analysis: 'Analysis', records: 'Records' },
         pickerHour: 'Hour:', pickerDate: 'Date:', today: 'today',
         pill: { live: 'Live', delayed: 'Delayed', stale: 'Stale data', histHour: 'Past hour', today: 'Today', histDay: 'Past day', expost: 'Ex-post data' },
@@ -79,7 +79,7 @@ const T = {
         recordsIntro: 'The highest values since tracking began on {l}. Select a record for its progression and the top five.',
         recHourly: 'Hourly records', recDaily: 'Daily records', newBadge: 'NEW', noData: 'No data yet',
         rec: { solar: 'Solar', wind: 'Wind', exports: 'Exports', bess_chg: 'BESS charge', bess_dis: 'BESS discharge', bess_chg_pump: 'BESS charge + pumping', network_load: 'Network load', res: 'RES (incl. CHP)' },
-        close: 'Close', modalTitle: 'Methodology & Data Sources'
+        close: 'Close', modalTitle: 'Methodology, assumptions and limitations'
     },
     el: {
         locale: 'el-GR', title: 'Greek Power Live',
@@ -102,7 +102,7 @@ const T = {
         priceRange: 'Εύρος τιμής', dayClean: 'Μερίδιο καθαρής στην παραγωγή',
         recProgTitle: 'Εξέλιξη του #1', recTopTitle: 'Οι πέντε κορυφαίες', viewHistory: 'ιστορικό →', trackingStart: 'έναρξη καταγραφής',
         newTop5: 'νέα είσοδος στις πέντε κορυφαίες', recHourlySub: 'Η υψηλότερη τιμή μίας ώρας (MWh σε μία ώρα)', recShort: { bess_chg_pump: 'BESS + άντληση' }, recDailySub: 'Το υψηλότερο σύνολο μίας ημέρας', newPlural: 'ΝΕΑ', newAt: 'ΝΕΟ #', recRank: 'Θέση', recWhen: 'Πότε', recValue: 'Τιμή',
-        lastUpdate: 'Τελευταία ενημέρωση:', nextUpdate: 'Επόμενη:', methodology: 'Μεθοδολογία & Πηγές', lastUpdateShort: 'Ενημέρωση:', methodologyShort: 'Μεθοδολογία', toTop: 'Επιστροφή στην κορυφή', sourceLine: 'Πηγή της τελευταίας live ώρας:',
+        lastUpdate: 'Τελευταία ενημέρωση:', nextUpdate: 'Επόμενη:', methodology: 'Μεθοδολογία & παραδοχές', mShort: 'Σύντομη', mFull: 'Αναλυτική', lastUpdateShort: 'Ενημέρωση:', methodologyShort: 'Μεθοδολογία', toTop: 'Επιστροφή στην κορυφή', sourceLine: 'Πηγή της τελευταίας live ώρας:',
         tabs: { live: 'Live (ώρα)', daily: 'Ημέρα', clean: 'Καθαρή ενέργεια', analysis: 'Ανάλυση', records: 'Ρεκόρ' },
         pickerHour: 'Ώρα:', pickerDate: 'Ημέρα:', today: 'σήμερα',
         pill: { live: 'Live', delayed: 'Καθυστέρηση', stale: 'Παλιά δεδομένα', histHour: 'Προηγούμενη ώρα', today: 'Σήμερα', histDay: 'Προηγούμενη ημέρα', expost: 'Εκ των υστέρων' },
@@ -136,67 +136,171 @@ const T = {
         recordsIntro: 'Οι υψηλότερες τιμές από την έναρξη της καταγραφής, {l}. Πατήστε σε ένα ρεκόρ για την εξέλιξή του και τις πέντε κορυφαίες.',
         recHourly: 'Ωριαία ρεκόρ', recDaily: 'Ημερήσια ρεκόρ', newBadge: 'ΝΕΟ', noData: 'Δεν υπάρχουν ακόμα δεδομένα',
         rec: { solar: 'Φωτοβολταϊκά', wind: 'Αιολικά', exports: 'Εξαγωγές', bess_chg: 'Φόρτιση BESS', bess_dis: 'Εκφόρτιση BESS', bess_chg_pump: 'Φόρτιση BESS + άντληση', network_load: 'Φορτίο δικτύου', res: 'ΑΠΕ (με ΣΗΘΥΑ)' },
-        close: 'Κλείσιμο', modalTitle: 'Μεθοδολογία & Πηγές Δεδομένων'
+        close: 'Κλείσιμο', modalTitle: 'Μεθοδολογία, παραδοχές και περιορισμοί'
     }
 };
 
-const METHODOLOGY = {
-    en: `
-<h4 class="text-acc-300 font-semibold mb-1">Data sources</h4>
-<p class="mb-4">Live figures come from ADMIE's public IPTO Analytics data on www.admie.gr (generation mix and load, imports and exports, storage, day-ahead price) and are fetched every hour at minute 5. Until 29 Oct 2026 they came from the older IPTO Analytics service, which ADMIE withdrew; the two give identical figures (checked field by field on 28 Oct 2026), and the old service is kept as an automatic fallback. Each hour records its source, shown next to "Last update". Per-country flows are no longer published live; they are analysed in the Power Flows dashboard from the next-day SCADA files. The clean-energy breakdown comes from ADMIE's ex-post operation files, published one to two days later. ENTSO-E's Transparency Platform (actual generation per type) is used as an independent cross-check.</p>
-<h4 class="text-acc-300 font-semibold mb-1">Hours</h4>
-<p class="mb-4">All times are Greek local time. ADMIE numbers hours 1 to 24; hour 1 is 00:00–01:00. The page labels each hour by its start (00–01, 01–02, …). Values are MWh in one hour, which equals the average MW of that hour.</p>
-<h4 class="text-acc-300 font-semibold mb-1">System balance and demand</h4>
-<p class="mb-4">Demand is ADMIE's total load. It equals generation + imports − exports + BESS discharge − BESS charge − pumping; the page checks this for every hour and says when it does not hold. Imports and exports are ADMIE's official totals.</p>
-<h4 id="m-uce" class="text-acc-300 font-semibold mb-1 scroll-mt-4">Unallocated clean energy (UCE)</h4>
-<p class="mb-4">ADMIE's live “RES” figure includes cogeneration (CHP) and an estimate of distribution-level generation that is not metered. Physical clean energy is the metered part: large hydro + small hydro + solar + wind + biomass, from the transmission SCADA file and the medium-voltage RESMV file. Live clean energy is live RES + hydro minus cogeneration; cogeneration is removed from both sides because it is mostly gas-fired. UCE is live minus physical and keeps its sign. It is mainly rooftop and other low-voltage solar (its daily shape follows medium-voltage solar closely), distribution-connected wind (RESMV has no wind) and small low-voltage hydro and biomass. Crete is in neither source: both see it only through its two interconnection cables. A negative hour means ADMIE's estimate came out below the metered value, for example through losses; it is not consumption. On the Live and Daily tabs, “RES” is ADMIE's figure, cogeneration included.</p>
-<h4 class="text-acc-300 font-semibold mb-1">Prices</h4>
-<p class="mb-4">The day-ahead price is the hourly value for Greece as published on ADMIE's portal.</p>
-<h4 id="m-entsoe" class="text-acc-300 font-semibold mb-1 scroll-mt-4">ADMIE and ENTSO-E</h4>
-<p class="mb-4">ADMIE's own statistics split renewables into system RES (transmission) and network RES (distribution); network RES include medium-voltage generation metered in the RESMV file and an estimate of low-voltage generation that is not metered hourly. On the ENTSO-E Transparency Platform the first published solar figure is close to that total; about ten days later it is revised to metered generation only, and biomass is not reported. The page keeps both ENTSO-E versions (the first one and the latest, marked provisional or final after 14 days) and the ENTSO-E actual total load, so the two sources can be compared day by day.</p>
-<h4 id="m-analysis" class="text-acc-300 font-semibold mb-1 scroll-mt-4">Analysis tab</h4>
-<p class="mb-4">For each day the model UCE ≈ base + k₁ × metered wind + k₂ × metered solar is fitted again on the previous 90 days with a robust (Huber) regression; 90% intervals come from a bootstrap over days. Applied to the day's hours it splits UCE into low-voltage solar, distribution wind and small units; what is left is the difference between ADMIE's estimate and the model, which can be negative. Tested on data it had not seen, the model explained about 84% of hourly UCE; day totals are reliable, single hours approximate. The conclusion of the day is written by fixed sentences filled with the day's numbers, the same way every day, without interpretation. The layers come from the exact identities in "Layers of load and of renewables".</p>
-<p class="mb-4"><strong>Distribution batteries.</strong> According to public announcements of July 2026, about 100 MW / 200 MWh of batteries are connected to the distribution network. On 21 Oct 2026 we tested whether they appear inside UCE, using as a proxy the hourly operation of ADMIE's own BESS fleet (same market signals, including the double daily cycles) and, separately, the day-ahead price. No model improved the prediction on unseen data; after mid-July the fleet factor was −0.03 (90%: −0.08 to +0.01), whereas about 0.18 would be expected if 100 MW with the same pattern were inside UCE; the price only mimicked solar. The most likely reading is that ADMIE's live distribution estimate covers renewables only, so these batteries show up indirectly in the transmission load, not in UCE. Even if some escaped the test, at most about 200 MWh a day is at stake, under 2% of UCE. The check is repeated every day and shown under the coefficients chart.</p>
-<h4 id="m-layers" class="text-acc-300 font-semibold mb-1 scroll-mt-4">Layers of load and of renewables</h4>
-<p class="mb-2">ADMIE's figures add up exactly, layer by layer (example: 17 Oct 2026, MWh):</p>
-<ul class="mb-2 list-disc pl-5 space-y-1">
+// Μεθοδολογία (D53): ίδια μορφή με το BESS· σύντομη και αναλυτική, ενότητες «όλες οι καρτέλες» + μία ανά tab.
+// Αναλυτική = το προηγούμενο κείμενο αυτούσιο, κάθε υποενότητα ως κουκκίδα με λήμμα τον τίτλο της.
+const METHOD = {
+    en: {
+        short: `
+<p class="mb-1 text-slate-300">An independent tool built on open data. The figures are those published by ADMIE; what is computed here is estimates and indications, not official statistics.</p>
+<h3 class="mt-4 mb-2 text-xs font-bold text-acc-400" data-sec="all" style="scroll-margin-top:8px">All tabs</h3>
+<ul class="list-disc pl-5 space-y-2 text-slate-400">
+<li><strong class="text-slate-200">Sources:</strong> Live figures come from ADMIE's public IPTO Analytics data and are updated every hour at minute 5. The clean-energy analysis is based on ADMIE's ex-post operation files (one to two days later), and ENTSO-E is used as an independent cross-check.</li>
+<li><strong class="text-slate-200">Hours:</strong> Hours are Greek time ("00–01" = 00:00 to 01:00); on clock-change days the day has 23 or 25 hours.</li>
+<li><strong class="text-slate-200">Status:</strong> The status badge shows whether the figures are current, delayed or stale.</li>
+</ul>
+<h3 class="mt-4 mb-2 text-xs font-bold text-acc-400" data-sec="live" style="scroll-margin-top:8px">Live (hour)</h3>
+<ul class="list-disc pl-5 space-y-2 text-slate-400">
+<li><strong class="text-slate-200">Generation and balance:</strong> Generation by fuel and the balance of the selected hour, as published by ADMIE. Demand equals generation + imports − exports + BESS discharge − BESS charge − pumping, checked for every hour.</li>
+<li><strong class="text-slate-200">Interconnections:</strong> Imports and exports are the official totals. The per-interconnection analysis is in the Power Flows dashboard, based on next-day ex-post SCADA data (not live), with hourly detail and further indicators.</li>
+<li><strong class="text-slate-200">Price:</strong> The price is the Greek day-ahead market price.</li>
+</ul>
+<h3 class="mt-4 mb-2 text-xs font-bold text-acc-400" data-sec="daily" style="scroll-margin-top:8px">Daily</h3>
+<ul class="list-disc pl-5 space-y-2 text-slate-400">
+<li><strong class="text-slate-200">Dispatch:</strong> The dispatch of the selected day hour by hour; for today, only the hours already published.</li>
+<li><strong class="text-slate-200">Average price:</strong> The average price is the simple mean of the hourly prices.</li>
+<li><strong class="text-slate-200">Clean share:</strong> The clean share is renewables (including CHP) and hydro over domestic generation, as in ADMIE's live figures.</li>
+</ul>
+<h3 class="mt-4 mb-2 text-xs font-bold text-acc-400" data-sec="clean" style="scroll-margin-top:8px">Clean energy</h3>
+<ul class="list-disc pl-5 space-y-2 text-slate-400">
+<li><strong class="text-slate-200">UCE:</strong> A comparison of clean generation in ADMIE's live figures with the metered generation in the ex-post files. The difference (UCE) is mostly low-voltage generation, mainly rooftop solar, which ADMIE estimates but does not meter hourly; it can be negative.</li>
+<li><strong class="text-slate-200">ENTSO-E:</strong> ENTSO-E's first version includes this estimate, while the final one (about 14 days later) has only metered generation, so it is revised down.</li>
+</ul>
+<h3 class="mt-4 mb-2 text-xs font-bold text-acc-400" data-sec="analysis" style="scroll-margin-top:8px">Analysis</h3>
+<ul class="list-disc pl-5 space-y-2 text-slate-400">
+<li><strong class="text-slate-200">Model:</strong> A model, fitted every day on the previous 90 days, splits UCE into low-voltage solar, distribution wind and small units.</li>
+<li><strong class="text-slate-200">Accuracy:</strong> Day totals are reliable; single hours are approximate.</li>
+<li><strong class="text-slate-200">Conclusion:</strong> The conclusion of the day is written with fixed sentences and the day's numbers, without interpretation.</li>
+</ul>
+<h3 class="mt-4 mb-2 text-xs font-bold text-acc-400" data-sec="records" style="scroll-margin-top:8px">Records</h3>
+<ul class="list-disc pl-5 space-y-2 text-slate-400">
+<li><strong class="text-slate-200">What it measures:</strong> The highest hourly and daily values since tracking began (1 Apr 2026), with the top five per category.</li>
+<li><strong class="text-slate-200">"NEW":</strong> The "NEW" badge marks entries that reached the top five within the last 24 hours of data.</li>
+<li><strong class="text-slate-200">Today:</strong> Today's daily records grow as the hours pass.</li>
+</ul>
+`,
+        full: `
+<p class="mb-1 text-slate-300">Greek Power Live is an independent tool for following the Greek power system hour by hour, built on open data. The figures are those published by ADMIE; what is computed here is estimates and indications, not official statistics.</p>
+<h3 class="mt-4 mb-2 text-xs font-bold text-acc-400" data-sec="all" style="scroll-margin-top:8px">All tabs</h3>
+<ul class="list-disc pl-5 space-y-2 text-slate-400">
+<li><strong class="text-slate-200">Data sources:</strong> Live figures come from ADMIE's public IPTO Analytics data on www.admie.gr (generation mix and load, imports and exports, storage, day-ahead price) and are fetched every hour at minute 5. Until 29 Oct 2026 they came from the older IPTO Analytics service, which ADMIE withdrew; the two give identical figures (checked field by field on 28 Oct 2026), and the old service is kept as an automatic fallback. Each hour records its source, shown next to "Last update". Per-country flows are no longer published live; they are analysed in the Power Flows dashboard from the next-day SCADA files. The clean-energy breakdown comes from ADMIE's ex-post operation files, published one to two days later. ENTSO-E's Transparency Platform (actual generation per type) is used as an independent cross-check.</li>
+<li><strong class="text-slate-200">Hours:</strong> All times are Greek local time. ADMIE numbers hours 1 to 24; hour 1 is 00:00–01:00. The page labels each hour by its start (00–01, 01–02, …). Values are MWh in one hour, which equals the average MW of that hour.</li>
+<li><strong class="text-slate-200">Status:</strong> “Live” means the latest hour ended less than 75 minutes ago. “Delayed” means up to three hours, usually one missed update. “Stale data” means longer than that.</li>
+</ul>
+<h3 class="mt-4 mb-2 text-xs font-bold text-acc-400" data-sec="live" style="scroll-margin-top:8px">Live (hour)</h3>
+<ul class="list-disc pl-5 space-y-2 text-slate-400">
+<li><strong class="text-slate-200">System balance and demand:</strong> Demand is ADMIE's total load. It equals generation + imports − exports + BESS discharge − BESS charge − pumping; the page checks this for every hour and says when it does not hold. Imports and exports are ADMIE's official totals.</li>
+<li><strong class="text-slate-200">Prices:</strong> The day-ahead price is the hourly value for Greece as published on ADMIE's portal.</li>
+</ul>
+<h3 class="mt-4 mb-2 text-xs font-bold text-acc-400" data-sec="daily" style="scroll-margin-top:8px">Daily</h3>
+<ul class="list-disc pl-5 space-y-2 text-slate-400">
+<li><strong class="text-slate-200">Dispatch:</strong> The dispatch of the selected day hour by hour; for today, only the hours already published.</li>
+<li><strong class="text-slate-200">Average price:</strong> The average price is the simple mean of the hourly prices.</li>
+<li><strong class="text-slate-200">Clean share:</strong> The clean share is renewables (including CHP) and hydro over domestic generation, as in ADMIE's live figures.</li>
+</ul>
+<h3 class="mt-4 mb-2 text-xs font-bold text-acc-400" data-sec="clean" style="scroll-margin-top:8px">Clean energy</h3>
+<ul class="list-disc pl-5 space-y-2 text-slate-400">
+<li id="m-uce" style="scroll-margin-top:8px"><strong class="text-slate-200">Unallocated clean energy (UCE):</strong> ADMIE's live “RES” figure includes cogeneration (CHP) and an estimate of distribution-level generation that is not metered. Physical clean energy is the metered part: large hydro + small hydro + solar + wind + biomass, from the transmission SCADA file and the medium-voltage RESMV file. Live clean energy is live RES + hydro minus cogeneration; cogeneration is removed from both sides because it is mostly gas-fired. UCE is live minus physical and keeps its sign. It is mainly rooftop and other low-voltage solar (its daily shape follows medium-voltage solar closely), distribution-connected wind (RESMV has no wind) and small low-voltage hydro and biomass. Crete is in neither source: both see it only through its two interconnection cables. A negative hour means ADMIE's estimate came out below the metered value, for example through losses; it is not consumption. On the Live and Daily tabs, “RES” is ADMIE's figure, cogeneration included.</li>
+<li id="m-entsoe" style="scroll-margin-top:8px"><strong class="text-slate-200">ADMIE and ENTSO-E:</strong> ADMIE's own statistics split renewables into system RES (transmission) and network RES (distribution); network RES include medium-voltage generation metered in the RESMV file and an estimate of low-voltage generation that is not metered hourly. On the ENTSO-E Transparency Platform the first published solar figure is close to that total; about ten days later it is revised to metered generation only, and biomass is not reported. The page keeps both ENTSO-E versions (the first one and the latest, marked provisional or final after 14 days) and the ENTSO-E actual total load, so the two sources can be compared day by day.</li>
+<li id="m-layers" style="scroll-margin-top:8px"><strong class="text-slate-200">Layers of load and of renewables:</strong> ADMIE's figures add up exactly, layer by layer (example: 17 Oct 2026, MWh):<span class="block mt-2">ADMIE therefore publishes three renewables totals for the same day: transmission only (daily bulletin, 66,187), metered transmission + medium voltage (88,977) and live, with the low-voltage estimate (100,953). None is wrong; they measure different things. Crete is outside the mainland figures: its own renewables appear in none of them, only the flow through the cables. ENTSO-E's load leaves out the flow to Crete and about 40% of the low-voltage estimate; its generation leaves out the whole low-voltage estimate.</span><ul class="list-[circle] pl-5 mt-2 space-y-1">
 <li>transmission load without Crete 89,667 + flow to Crete through the two cables 5,937 = SCADA net load 95,604;</li>
 <li>+ pumping and BESS charging − BESS discharging = 97,647, the total of ADMIE's daily energy bulletin;</li>
 <li>SCADA net load + medium-voltage generation (RESMV) 22,790 + the low-voltage estimate (UCE) 11,976 = 130,370, ADMIE's live total load.</li>
+</ul></li>
 </ul>
-<p class="mb-4">ADMIE therefore publishes three renewables totals for the same day: transmission only (daily bulletin, 66,187), metered transmission + medium voltage (88,977) and live, with the low-voltage estimate (100,953). None is wrong; they measure different things. Crete is outside the mainland figures: its own renewables appear in none of them, only the flow through the cables. ENTSO-E's load leaves out the flow to Crete and about 40% of the low-voltage estimate; its generation leaves out the whole low-voltage estimate.</p>
-<h4 class="text-acc-300 font-semibold mb-1">Records</h4>
-<p class="mb-4">The five highest values since tracking began (1 April 2026), recomputed every hour from the full history, so a correction by ADMIE also corrects a record. Each record shows how the #1 progressed; in the first weeks of tracking almost every day is a “record”, which is why that period is shaded. Hourly values are MWh in one hour, equal to the average MW.</p>
-<h4 class="text-acc-300 font-semibold mb-1">Status</h4>
-<p>“Live” means the latest hour ended less than 75 minutes ago. “Delayed” means up to three hours, usually one missed update. “Stale data” means longer than that.</p>`,
-    el: `
-<h4 class="text-acc-300 font-semibold mb-1">Πηγές δεδομένων</h4>
-<p class="mb-4">Τα live στοιχεία προέρχονται από τα δημόσια δεδομένα IPTO Analytics του ΑΔΜΗΕ στο www.admie.gr (μείγμα παραγωγής και φορτίο, εισαγωγές και εξαγωγές, αποθήκευση, τιμή επόμενης ημέρας) και λαμβάνονται κάθε ώρα στο 5ο λεπτό. Έως τις 29 Οκτ 2026 έρχονταν από την παλαιότερη υπηρεσία IPTO Analytics, την οποία ο ΑΔΜΗΕ απέσυρε· οι δύο δίνουν ίδια νούμερα (έλεγχος πεδίο προς πεδίο στις 28 Οκτ 2026), και η παλιά υπηρεσία κρατιέται ως αυτόματη εφεδρεία. Κάθε ώρα καταγράφει την πηγή της, που φαίνεται δίπλα στην «Τελευταία ενημέρωση». Οι ροές ανά χώρα δεν δημοσιεύονται πια live· αναλύονται στο Power Flows dashboard από τα αρχεία SCADA της επομένης. Η ανάλυση της καθαρής ενέργειας προέρχεται από τα εκ των υστέρων αρχεία λειτουργίας του ΑΔΜΗΕ, που δημοσιεύονται μία με δύο ημέρες αργότερα. Η ENTSO-E Transparency Platform (πραγματική παραγωγή ανά τύπο) χρησιμοποιείται ως ανεξάρτητη διασταύρωση.</p>
-<h4 class="text-acc-300 font-semibold mb-1">Ώρες</h4>
-<p class="mb-4">Όλες οι ώρες είναι ώρα Ελλάδας. Ο ΑΔΜΗΕ αριθμεί τις ώρες από 1 έως 24· η ώρα 1 είναι 00:00–01:00. Η σελίδα ονομάζει κάθε ώρα από την έναρξή της (00–01, 01–02, …). Οι τιμές είναι MWh σε μία ώρα, ίσες με τα μέσα MW της ώρας.</p>
-<h4 class="text-acc-300 font-semibold mb-1">Ισοζύγιο και ζήτηση</h4>
-<p class="mb-4">Η ζήτηση είναι το συνολικό φορτίο του ΑΔΜΗΕ. Ισούται με παραγωγή + εισαγωγές − εξαγωγές + εκφόρτιση BESS − φόρτιση BESS − άντληση· η σελίδα το ελέγχει για κάθε ώρα και το επισημαίνει όταν δεν ισχύει. Οι εισαγωγές και οι εξαγωγές είναι τα επίσημα σύνολα του ΑΔΜΗΕ.</p>
-<h4 id="m-uce" class="text-acc-300 font-semibold mb-1 scroll-mt-4">Μη κατανεμημένη καθαρή ενέργεια (UCE)</h4>
-<p class="mb-4">Το live «ΑΠΕ» του ΑΔΜΗΕ περιέχει τη συμπαραγωγή (ΣΗΘΥΑ) και μια εκτίμηση της παραγωγής της διανομής που δεν μετριέται. Η φυσική καθαρή ενέργεια είναι το μετρημένο κομμάτι: μεγάλα + μικρά υδροηλεκτρικά + φωτοβολταϊκά + αιολικά + βιομάζα, από το SCADA μεταφοράς και το αρχείο μέσης τάσης RESMV. Η live καθαρή ενέργεια είναι live ΑΠΕ + υδροηλεκτρικά μείον τη συμπαραγωγή· η συμπαραγωγή αφαιρείται και από τις δύο πλευρές, γιατί είναι κυρίως με φυσικό αέριο. Το UCE είναι live μείον φυσική, με το πρόσημό του. Είναι κυρίως φ/β στέγης και λοιπά φ/β χαμηλής τάσης (το ημερήσιο σχήμα του ακολουθεί στενά τα φ/β μέσης τάσης), αιολικά της διανομής (το RESMV δεν έχει αιολικά) και μικρά υδροηλεκτρικά και βιομάζα χαμηλής τάσης. Η Κρήτη δεν υπάρχει σε καμία από τις δύο πηγές: και οι δύο τη βλέπουν μόνο μέσα από τα δύο καλώδια διασύνδεσης. Μια αρνητική ώρα σημαίνει ότι η εκτίμηση του ΑΔΜΗΕ βγήκε κάτω από τη μέτρηση, για παράδειγμα λόγω απωλειών· δεν είναι κατανάλωση. Στα tabs Live και Ημέρα, το «ΑΠΕ» είναι το στοιχείο του ΑΔΜΗΕ, μαζί με τη συμπαραγωγή.</p>
-<h4 class="text-acc-300 font-semibold mb-1">Τιμές</h4>
-<p class="mb-4">Η τιμή επόμενης ημέρας είναι η ωριαία τιμή για την Ελλάδα όπως δημοσιεύεται στην πύλη του ΑΔΜΗΕ.</p>
-<h4 id="m-entsoe" class="text-acc-300 font-semibold mb-1 scroll-mt-4">ΑΔΜΗΕ και ENTSO-E</h4>
-<p class="mb-4">Τα στατιστικά του ίδιου του ΑΔΜΗΕ χωρίζουν τις ΑΠΕ σε ΑΠΕ συστήματος (μεταφορά) και ΑΠΕ δικτύου (διανομή)· οι ΑΠΕ δικτύου περιέχουν την παραγωγή μέσης τάσης που μετριέται στο αρχείο RESMV και μια εκτίμηση της παραγωγής χαμηλής τάσης που δεν μετριέται ωριαία. Στην ENTSO-E Transparency Platform η πρώτη δημοσιευμένη τιμή των φ/β είναι κοντά σε αυτό το σύνολο· περίπου δέκα ημέρες μετά αναθεωρείται σε μόνο μετρημένη παραγωγή, και η βιομάζα δεν δηλώνεται. Η σελίδα κρατά και τις δύο εκδόσεις της ENTSO-E (την πρώτη και την πιο πρόσφατη, με ένδειξη προσωρινή ή τελική μετά από 14 ημέρες) και το πραγματικό συνολικό φορτίο της ENTSO-E, ώστε οι δύο πηγές να συγκρίνονται ημέρα προς ημέρα.</p>
-<h4 id="m-analysis" class="text-acc-300 font-semibold mb-1 scroll-mt-4">Tab «Ανάλυση»</h4>
-<p class="mb-4">Για κάθε ημέρα το μοντέλο UCE ≈ βάση + k₁ × μετρημένα αιολικά + k₂ × μετρημένα φ/β προσαρμόζεται ξανά στις 90 προηγούμενες ημέρες με ανθεκτική παλινδρόμηση (Huber)· τα διαστήματα 90% προκύπτουν με bootstrap ανά ημέρα. Εφαρμοσμένο στις ώρες της ημέρας χωρίζει το UCE σε φ/β χαμηλής τάσης, αιολικά διανομής και μικρές μονάδες· ό,τι μένει είναι η απόκλιση της εκτίμησης του ΑΔΜΗΕ από το μοντέλο και μπορεί να είναι αρνητική. Σε δεδομένα που δεν είχε δει, το μοντέλο εξήγησε περίπου το 84% του ωριαίου UCE· τα σύνολα ημέρας είναι αξιόπιστα, οι μεμονωμένες ώρες προσεγγιστικές. Το συμπέρασμα της ημέρας γράφεται με σταθερές προτάσεις που συμπληρώνονται με τους αριθμούς της ημέρας, με τον ίδιο τρόπο κάθε μέρα, χωρίς ερμηνεία. Τα επίπεδα προκύπτουν από τις ακριβείς ταυτότητες της ενότητας «Επίπεδα φορτίου και ΑΠΕ».</p>
-<p class="mb-4"><strong>Μπαταρίες της διανομής.</strong> Σύμφωνα με δημόσιες ανακοινώσεις του Ιουλίου 2026, περίπου 100 MW / 200 MWh μπαταριών είναι συνδεδεμένες στο δίκτυο διανομής. Στις 21 Οκτ 2026 ελέγξαμε αν εμφανίζονται μέσα στο UCE, με δείκτη την ωριαία λειτουργία του στόλου BESS του ΑΔΜΗΕ (ίδια σήματα αγοράς, μαζί με τους διπλούς ημερήσιους κύκλους) και, χωριστά, την τιμή επόμενης ημέρας. Κανένα μοντέλο δεν βελτίωσε την πρόβλεψη σε δεδομένα που δεν είχε δει· μετά τα μέσα Ιουλίου ο συντελεστής του στόλου ήταν −0,03 (90%: −0,08 έως +0,01), ενώ θα περιμέναμε περίπου 0,18 αν 100 MW με το ίδιο μοτίβο ήταν μέσα στο UCE· η τιμή απλώς μιμήθηκε τα φ/β. Η πιθανότερη ερμηνεία είναι ότι η live εκτίμηση του ΑΔΜΗΕ για τη διανομή καλύπτει μόνο ΑΠΕ, οπότε οι μπαταρίες αυτές φαίνονται έμμεσα στο φορτίο της μεταφοράς και όχι στο UCE. Ακόμα κι αν κάποιο κομμάτι ξέφυγε από τον έλεγχο, πρόκειται για το πολύ περίπου 200 MWh την ημέρα, κάτω από 2% του UCE. Ο έλεγχος επαναλαμβάνεται κάθε μέρα και φαίνεται κάτω από το γράφημα των συντελεστών.</p>
-<h4 id="m-layers" class="text-acc-300 font-semibold mb-1 scroll-mt-4">Επίπεδα φορτίου και ΑΠΕ</h4>
-<p class="mb-2">Τα στοιχεία του ΑΔΜΗΕ αθροίζουν ακριβώς, επίπεδο προς επίπεδο (παράδειγμα: 17 Οκτ 2026, MWh):</p>
-<ul class="mb-2 list-disc pl-5 space-y-1">
+<h3 class="mt-4 mb-2 text-xs font-bold text-acc-400" data-sec="analysis" style="scroll-margin-top:8px">Analysis</h3>
+<ul class="list-disc pl-5 space-y-2 text-slate-400">
+<li id="m-analysis" style="scroll-margin-top:8px"><strong class="text-slate-200">Analysis tab:</strong> For each day the model UCE ≈ base + k₁ × metered wind + k₂ × metered solar is fitted again on the previous 90 days with a robust (Huber) regression; 90% intervals come from a bootstrap over days. Applied to the day's hours it splits UCE into low-voltage solar, distribution wind and small units; what is left is the difference between ADMIE's estimate and the model, which can be negative. Tested on data it had not seen, the model explained about 84% of hourly UCE; day totals are reliable, single hours approximate. The conclusion of the day is written by fixed sentences filled with the day's numbers, the same way every day, without interpretation. The layers come from the exact identities in "Layers of load and of renewables".</li>
+<li><strong class="text-slate-200">Distribution batteries:</strong> According to public announcements of July 2026, about 100 MW / 200 MWh of batteries are connected to the distribution network. On 21 Oct 2026 we tested whether they appear inside UCE, using as a proxy the hourly operation of ADMIE's own BESS fleet (same market signals, including the double daily cycles) and, separately, the day-ahead price. No model improved the prediction on unseen data; after mid-July the fleet factor was −0.03 (90%: −0.08 to +0.01), whereas about 0.18 would be expected if 100 MW with the same pattern were inside UCE; the price only mimicked solar. The most likely reading is that ADMIE's live distribution estimate covers renewables only, so these batteries show up indirectly in the transmission load, not in UCE. Even if some escaped the test, at most about 200 MWh a day is at stake, under 2% of UCE. The check is repeated every day and shown under the coefficients chart.</li>
+</ul>
+<h3 class="mt-4 mb-2 text-xs font-bold text-acc-400" data-sec="records" style="scroll-margin-top:8px">Records</h3>
+<ul class="list-disc pl-5 space-y-2 text-slate-400">
+<li><strong class="text-slate-200">Records:</strong> The five highest values since tracking began (1 April 2026), recomputed every hour from the full history, so a correction by ADMIE also corrects a record. Each record shows how the #1 progressed; in the first weeks of tracking almost every day is a “record”, which is why that period is shaded. Hourly values are MWh in one hour, equal to the average MW.</li>
+</ul>
+`
+    },
+    el: {
+        short: `
+<p class="mb-1 text-slate-300">Ανεξάρτητο εργαλείο πάνω σε ανοιχτά δεδομένα. Τα στοιχεία είναι όσα δημοσιεύει ο ΑΔΜΗΕ· όσα υπολογίζονται εδώ είναι εκτιμήσεις και ενδείξεις, όχι επίσημα στοιχεία.</p>
+<h3 class="mt-4 mb-2 text-xs font-bold text-acc-400" data-sec="all" style="scroll-margin-top:8px">Όλες οι καρτέλες</h3>
+<ul class="list-disc pl-5 space-y-2 text-slate-400">
+<li><strong class="text-slate-200">Πηγές:</strong> Τα live στοιχεία προέρχονται από τα δημόσια δεδομένα IPTO Analytics του ΑΔΜΗΕ και ενημερώνονται κάθε ώρα στο 5ο λεπτό. Η ανάλυση της καθαρής ενέργειας βασίζεται στα εκ των υστέρων αρχεία λειτουργίας του ΑΔΜΗΕ (μία με δύο ημέρες αργότερα), και η ENTSO-E χρησιμοποιείται ως ανεξάρτητη διασταύρωση.</li>
+<li><strong class="text-slate-200">Ώρες:</strong> Οι ώρες είναι ώρες Ελλάδας («00–01» = από 00:00 έως 01:00)· τις ημέρες αλλαγής ώρας η ημέρα έχει 23 ή 25 ώρες.</li>
+<li><strong class="text-slate-200">Κατάσταση:</strong> Η ένδειξη κατάστασης δείχνει αν τα στοιχεία είναι τρέχοντα, καθυστερημένα ή παλιά.</li>
+</ul>
+<h3 class="mt-4 mb-2 text-xs font-bold text-acc-400" data-sec="live" style="scroll-margin-top:8px">Live (ώρα)</h3>
+<ul class="list-disc pl-5 space-y-2 text-slate-400">
+<li><strong class="text-slate-200">Παραγωγή και ισοζύγιο:</strong> Η παραγωγή ανά καύσιμο και το ισοζύγιο της επιλεγμένης ώρας, όπως τα δίνει ο ΑΔΜΗΕ. Η ζήτηση ισούται με παραγωγή + εισαγωγές − εξαγωγές + εκφόρτιση − φόρτιση BESS − άντληση, και ο έλεγχος γίνεται σε κάθε ώρα.</li>
+<li><strong class="text-slate-200">Διασυνδέσεις:</strong> Οι εισαγωγές και οι εξαγωγές είναι τα επίσημα σύνολα. Η ανάλυση ανά διασύνδεση γίνεται στο Power Flows dashboard, με τα εκ των υστέρων στοιχεία SCADA της επόμενης ημέρας (όχι live), μαζί με ωριαία αποτύπωση και πρόσθετους δείκτες.</li>
+<li><strong class="text-slate-200">Τιμή:</strong> Η τιμή είναι η τιμή της αγοράς επόμενης ημέρας για την Ελλάδα.</li>
+</ul>
+<h3 class="mt-4 mb-2 text-xs font-bold text-acc-400" data-sec="daily" style="scroll-margin-top:8px">Ημέρα</h3>
+<ul class="list-disc pl-5 space-y-2 text-slate-400">
+<li><strong class="text-slate-200">Κατανομή:</strong> Η κατανομή της επιλεγμένης ημέρας ώρα προς ώρα· για τη σημερινή ημέρα μόνο οι ώρες που έχουν ήδη δημοσιευτεί.</li>
+<li><strong class="text-slate-200">Μέση τιμή:</strong> Η μέση τιμή είναι ο απλός μέσος όρος των ωριαίων τιμών.</li>
+<li><strong class="text-slate-200">Μερίδιο καθαρής:</strong> Το μερίδιο καθαρής ενέργειας είναι ΑΠΕ (μαζί με ΣΗΘΥΑ) και υδροηλεκτρικά προς την εγχώρια παραγωγή, όπως στα live στοιχεία του ΑΔΜΗΕ.</li>
+</ul>
+<h3 class="mt-4 mb-2 text-xs font-bold text-acc-400" data-sec="clean" style="scroll-margin-top:8px">Καθαρή ενέργεια</h3>
+<ul class="list-disc pl-5 space-y-2 text-slate-400">
+<li><strong class="text-slate-200">UCE:</strong> Σύγκριση της καθαρής παραγωγής των live στοιχείων του ΑΔΜΗΕ με τη μετρημένη στα εκ των υστέρων αρχεία. Η διαφορά (UCE) είναι κυρίως παραγωγή της χαμηλής τάσης, κυρίως φ/β στέγης, που ο ΑΔΜΗΕ εκτιμά αλλά δεν μετρά ωριαία· μπορεί να είναι και αρνητική.</li>
+<li><strong class="text-slate-200">ENTSO-E:</strong> Η πρώτη έκδοση της ENTSO-E περιέχει αυτή την εκτίμηση, ενώ η τελική (περίπου 14 ημέρες μετά) μόνο τη μετρημένη παραγωγή, γι' αυτό αναθεωρείται προς τα κάτω.</li>
+</ul>
+<h3 class="mt-4 mb-2 text-xs font-bold text-acc-400" data-sec="analysis" style="scroll-margin-top:8px">Ανάλυση</h3>
+<ul class="list-disc pl-5 space-y-2 text-slate-400">
+<li><strong class="text-slate-200">Μοντέλο:</strong> Ένα μοντέλο, που προσαρμόζεται κάθε μέρα στις 90 προηγούμενες ημέρες, χωρίζει το UCE σε φ/β χαμηλής τάσης, αιολικά διανομής και μικρές μονάδες.</li>
+<li><strong class="text-slate-200">Ακρίβεια:</strong> Τα σύνολα της ημέρας είναι αξιόπιστα· οι μεμονωμένες ώρες είναι προσεγγιστικές.</li>
+<li><strong class="text-slate-200">Συμπέρασμα:</strong> Το συμπέρασμα της ημέρας γράφεται με σταθερές προτάσεις και τους αριθμούς της ημέρας, χωρίς ερμηνεία.</li>
+</ul>
+<h3 class="mt-4 mb-2 text-xs font-bold text-acc-400" data-sec="records" style="scroll-margin-top:8px">Ρεκόρ</h3>
+<ul class="list-disc pl-5 space-y-2 text-slate-400">
+<li><strong class="text-slate-200">Τι μετρά:</strong> Οι υψηλότερες ωριαίες και ημερήσιες τιμές από την έναρξη της καταγραφής (1 Απρ 2026), με τις πέντε κορυφαίες ανά κατηγορία.</li>
+<li><strong class="text-slate-200">«ΝΕΟ»:</strong> Το σήμα «ΝΕΟ» μπαίνει σε όσα μπήκαν στις πέντε κορυφαίες μέσα στις τελευταίες 24 ώρες δεδομένων.</li>
+<li><strong class="text-slate-200">Σημερινή ημέρα:</strong> Τα ημερήσια ρεκόρ της σημερινής ημέρας μεγαλώνουν όσο περνούν οι ώρες.</li>
+</ul>
+`,
+        full: `
+<p class="mb-1 text-slate-300">Το Greek Power Live είναι ένα ανεξάρτητο εργαλείο παρακολούθησης του ελληνικού ηλεκτρικού συστήματος ώρα προς ώρα, βασισμένο σε ανοιχτά δεδομένα. Τα στοιχεία είναι όσα δημοσιεύει ο ΑΔΜΗΕ· όσα υπολογίζονται εδώ είναι εκτιμήσεις και ενδείξεις, όχι επίσημα στοιχεία.</p>
+<h3 class="mt-4 mb-2 text-xs font-bold text-acc-400" data-sec="all" style="scroll-margin-top:8px">Όλες οι καρτέλες</h3>
+<ul class="list-disc pl-5 space-y-2 text-slate-400">
+<li><strong class="text-slate-200">Πηγές δεδομένων:</strong> Τα live στοιχεία προέρχονται από τα δημόσια δεδομένα IPTO Analytics του ΑΔΜΗΕ στο www.admie.gr (μείγμα παραγωγής και φορτίο, εισαγωγές και εξαγωγές, αποθήκευση, τιμή επόμενης ημέρας) και λαμβάνονται κάθε ώρα στο 5ο λεπτό. Έως τις 29 Οκτ 2026 έρχονταν από την παλαιότερη υπηρεσία IPTO Analytics, την οποία ο ΑΔΜΗΕ απέσυρε· οι δύο δίνουν ίδια νούμερα (έλεγχος πεδίο προς πεδίο στις 28 Οκτ 2026), και η παλιά υπηρεσία κρατιέται ως αυτόματη εφεδρεία. Κάθε ώρα καταγράφει την πηγή της, που φαίνεται δίπλα στην «Τελευταία ενημέρωση». Οι ροές ανά χώρα δεν δημοσιεύονται πια live· αναλύονται στο Power Flows dashboard από τα αρχεία SCADA της επομένης. Η ανάλυση της καθαρής ενέργειας προέρχεται από τα εκ των υστέρων αρχεία λειτουργίας του ΑΔΜΗΕ, που δημοσιεύονται μία με δύο ημέρες αργότερα. Η ENTSO-E Transparency Platform (πραγματική παραγωγή ανά τύπο) χρησιμοποιείται ως ανεξάρτητη διασταύρωση.</li>
+<li><strong class="text-slate-200">Ώρες:</strong> Όλες οι ώρες είναι ώρα Ελλάδας. Ο ΑΔΜΗΕ αριθμεί τις ώρες από 1 έως 24· η ώρα 1 είναι 00:00–01:00. Η σελίδα ονομάζει κάθε ώρα από την έναρξή της (00–01, 01–02, …). Οι τιμές είναι MWh σε μία ώρα, ίσες με τα μέσα MW της ώρας.</li>
+<li><strong class="text-slate-200">Κατάσταση:</strong> «Live» σημαίνει ότι η τελευταία ώρα τελείωσε πριν από λιγότερα από 75 λεπτά. «Καθυστέρηση» σημαίνει έως τρεις ώρες, συνήθως μία ενημέρωση που χάθηκε. «Παλιά δεδομένα» σημαίνει περισσότερο.</li>
+</ul>
+<h3 class="mt-4 mb-2 text-xs font-bold text-acc-400" data-sec="live" style="scroll-margin-top:8px">Live (ώρα)</h3>
+<ul class="list-disc pl-5 space-y-2 text-slate-400">
+<li><strong class="text-slate-200">Ισοζύγιο και ζήτηση:</strong> Η ζήτηση είναι το συνολικό φορτίο του ΑΔΜΗΕ. Ισούται με παραγωγή + εισαγωγές − εξαγωγές + εκφόρτιση BESS − φόρτιση BESS − άντληση· η σελίδα το ελέγχει για κάθε ώρα και το επισημαίνει όταν δεν ισχύει. Οι εισαγωγές και οι εξαγωγές είναι τα επίσημα σύνολα του ΑΔΜΗΕ.</li>
+<li><strong class="text-slate-200">Τιμές:</strong> Η τιμή επόμενης ημέρας είναι η ωριαία τιμή για την Ελλάδα όπως δημοσιεύεται στην πύλη του ΑΔΜΗΕ.</li>
+</ul>
+<h3 class="mt-4 mb-2 text-xs font-bold text-acc-400" data-sec="daily" style="scroll-margin-top:8px">Ημέρα</h3>
+<ul class="list-disc pl-5 space-y-2 text-slate-400">
+<li><strong class="text-slate-200">Κατανομή:</strong> Η κατανομή της επιλεγμένης ημέρας ώρα προς ώρα· για τη σημερινή ημέρα μόνο οι ώρες που έχουν ήδη δημοσιευτεί.</li>
+<li><strong class="text-slate-200">Μέση τιμή:</strong> Η μέση τιμή είναι ο απλός μέσος όρος των ωριαίων τιμών.</li>
+<li><strong class="text-slate-200">Μερίδιο καθαρής:</strong> Το μερίδιο καθαρής ενέργειας είναι ΑΠΕ (μαζί με ΣΗΘΥΑ) και υδροηλεκτρικά προς την εγχώρια παραγωγή, όπως στα live στοιχεία του ΑΔΜΗΕ.</li>
+</ul>
+<h3 class="mt-4 mb-2 text-xs font-bold text-acc-400" data-sec="clean" style="scroll-margin-top:8px">Καθαρή ενέργεια</h3>
+<ul class="list-disc pl-5 space-y-2 text-slate-400">
+<li id="m-uce" style="scroll-margin-top:8px"><strong class="text-slate-200">Μη κατανεμημένη καθαρή ενέργεια (UCE):</strong> Το live «ΑΠΕ» του ΑΔΜΗΕ περιέχει τη συμπαραγωγή (ΣΗΘΥΑ) και μια εκτίμηση της παραγωγής της διανομής που δεν μετριέται. Η φυσική καθαρή ενέργεια είναι το μετρημένο κομμάτι: μεγάλα + μικρά υδροηλεκτρικά + φωτοβολταϊκά + αιολικά + βιομάζα, από το SCADA μεταφοράς και το αρχείο μέσης τάσης RESMV. Η live καθαρή ενέργεια είναι live ΑΠΕ + υδροηλεκτρικά μείον τη συμπαραγωγή· η συμπαραγωγή αφαιρείται και από τις δύο πλευρές, γιατί είναι κυρίως με φυσικό αέριο. Το UCE είναι live μείον φυσική, με το πρόσημό του. Είναι κυρίως φ/β στέγης και λοιπά φ/β χαμηλής τάσης (το ημερήσιο σχήμα του ακολουθεί στενά τα φ/β μέσης τάσης), αιολικά της διανομής (το RESMV δεν έχει αιολικά) και μικρά υδροηλεκτρικά και βιομάζα χαμηλής τάσης. Η Κρήτη δεν υπάρχει σε καμία από τις δύο πηγές: και οι δύο τη βλέπουν μόνο μέσα από τα δύο καλώδια διασύνδεσης. Μια αρνητική ώρα σημαίνει ότι η εκτίμηση του ΑΔΜΗΕ βγήκε κάτω από τη μέτρηση, για παράδειγμα λόγω απωλειών· δεν είναι κατανάλωση. Στα tabs Live και Ημέρα, το «ΑΠΕ» είναι το στοιχείο του ΑΔΜΗΕ, μαζί με τη συμπαραγωγή.</li>
+<li id="m-entsoe" style="scroll-margin-top:8px"><strong class="text-slate-200">ΑΔΜΗΕ και ENTSO-E:</strong> Τα στατιστικά του ίδιου του ΑΔΜΗΕ χωρίζουν τις ΑΠΕ σε ΑΠΕ συστήματος (μεταφορά) και ΑΠΕ δικτύου (διανομή)· οι ΑΠΕ δικτύου περιέχουν την παραγωγή μέσης τάσης που μετριέται στο αρχείο RESMV και μια εκτίμηση της παραγωγής χαμηλής τάσης που δεν μετριέται ωριαία. Στην ENTSO-E Transparency Platform η πρώτη δημοσιευμένη τιμή των φ/β είναι κοντά σε αυτό το σύνολο· περίπου δέκα ημέρες μετά αναθεωρείται σε μόνο μετρημένη παραγωγή, και η βιομάζα δεν δηλώνεται. Η σελίδα κρατά και τις δύο εκδόσεις της ENTSO-E (την πρώτη και την πιο πρόσφατη, με ένδειξη προσωρινή ή τελική μετά από 14 ημέρες) και το πραγματικό συνολικό φορτίο της ENTSO-E, ώστε οι δύο πηγές να συγκρίνονται ημέρα προς ημέρα.</li>
+<li id="m-layers" style="scroll-margin-top:8px"><strong class="text-slate-200">Επίπεδα φορτίου και ΑΠΕ:</strong> Τα στοιχεία του ΑΔΜΗΕ αθροίζουν ακριβώς, επίπεδο προς επίπεδο (παράδειγμα: 17 Οκτ 2026, MWh):<span class="block mt-2">Ο ΑΔΜΗΕ δημοσιεύει έτσι τρία σύνολα ΑΠΕ για την ίδια ημέρα: μόνο μεταφορά (ημερήσιο δελτίο, 66.187), μετρημένη μεταφορά + μέση τάση (88.977) και live, με την εκτίμηση χαμηλής τάσης (100.953). Κανένα δεν είναι λάθος· μετρούν διαφορετικά πράγματα. Η Κρήτη είναι εκτός των στοιχείων της ηπειρωτικής χώρας: οι ΑΠΕ της δεν εμφανίζονται σε κανένα, μόνο η ροή από τα καλώδια. Το φορτίο της ENTSO-E αφήνει έξω τη ροή προς την Κρήτη και περίπου το 40% της εκτίμησης χαμηλής τάσης· η παραγωγή της αφήνει έξω ολόκληρη την εκτίμηση χαμηλής τάσης.</span><ul class="list-[circle] pl-5 mt-2 space-y-1">
 <li>φορτίο μεταφοράς χωρίς Κρήτη 89.667 + ροή προς Κρήτη από τα δύο καλώδια 5.937 = καθαρό φορτίο SCADA 95.604·</li>
 <li>+ άντληση και φόρτιση BESS − εκφόρτιση BESS = 97.647, το σύνολο του ημερήσιου δελτίου ενέργειας του ΑΔΜΗΕ·</li>
 <li>καθαρό φορτίο SCADA + παραγωγή μέσης τάσης (RESMV) 22.790 + εκτίμηση χαμηλής τάσης (UCE) 11.976 = 130.370, το live συνολικό φορτίο του ΑΔΜΗΕ.</li>
+</ul></li>
 </ul>
-<p class="mb-4">Ο ΑΔΜΗΕ δημοσιεύει έτσι τρία σύνολα ΑΠΕ για την ίδια ημέρα: μόνο μεταφορά (ημερήσιο δελτίο, 66.187), μετρημένη μεταφορά + μέση τάση (88.977) και live, με την εκτίμηση χαμηλής τάσης (100.953). Κανένα δεν είναι λάθος· μετρούν διαφορετικά πράγματα. Η Κρήτη είναι εκτός των στοιχείων της ηπειρωτικής χώρας: οι ΑΠΕ της δεν εμφανίζονται σε κανένα, μόνο η ροή από τα καλώδια. Το φορτίο της ENTSO-E αφήνει έξω τη ροή προς την Κρήτη και περίπου το 40% της εκτίμησης χαμηλής τάσης· η παραγωγή της αφήνει έξω ολόκληρη την εκτίμηση χαμηλής τάσης.</p>
-<h4 class="text-acc-300 font-semibold mb-1">Ρεκόρ</h4>
-<p class="mb-4">Οι πέντε υψηλότερες τιμές από την έναρξη της καταγραφής (1 Απριλίου 2026), που υπολογίζονται κάθε ώρα από όλο το ιστορικό· έτσι μια διόρθωση του ΑΔΜΗΕ διορθώνει και το ρεκόρ. Κάθε ρεκόρ δείχνει πώς εξελίχθηκε το #1· τις πρώτες εβδομάδες σχεδόν κάθε μέρα είναι «ρεκόρ», γι’ αυτό η περίοδος αυτή είναι σκιασμένη. Οι ωριαίες τιμές είναι MWh σε μία ώρα, ίσες με τα μέσα MW.</p>
-<h4 class="text-acc-300 font-semibold mb-1">Κατάσταση</h4>
-<p>«Live» σημαίνει ότι η τελευταία ώρα τελείωσε πριν από λιγότερα από 75 λεπτά. «Καθυστέρηση» σημαίνει έως τρεις ώρες, συνήθως μία ενημέρωση που χάθηκε. «Παλιά δεδομένα» σημαίνει περισσότερο.</p>`
+<h3 class="mt-4 mb-2 text-xs font-bold text-acc-400" data-sec="analysis" style="scroll-margin-top:8px">Ανάλυση</h3>
+<ul class="list-disc pl-5 space-y-2 text-slate-400">
+<li id="m-analysis" style="scroll-margin-top:8px"><strong class="text-slate-200">Tab «Ανάλυση»:</strong> Για κάθε ημέρα το μοντέλο UCE ≈ βάση + k₁ × μετρημένα αιολικά + k₂ × μετρημένα φ/β προσαρμόζεται ξανά στις 90 προηγούμενες ημέρες με ανθεκτική παλινδρόμηση (Huber)· τα διαστήματα 90% προκύπτουν με bootstrap ανά ημέρα. Εφαρμοσμένο στις ώρες της ημέρας χωρίζει το UCE σε φ/β χαμηλής τάσης, αιολικά διανομής και μικρές μονάδες· ό,τι μένει είναι η απόκλιση της εκτίμησης του ΑΔΜΗΕ από το μοντέλο και μπορεί να είναι αρνητική. Σε δεδομένα που δεν είχε δει, το μοντέλο εξήγησε περίπου το 84% του ωριαίου UCE· τα σύνολα ημέρας είναι αξιόπιστα, οι μεμονωμένες ώρες προσεγγιστικές. Το συμπέρασμα της ημέρας γράφεται με σταθερές προτάσεις που συμπληρώνονται με τους αριθμούς της ημέρας, με τον ίδιο τρόπο κάθε μέρα, χωρίς ερμηνεία. Τα επίπεδα προκύπτουν από τις ακριβείς ταυτότητες της ενότητας «Επίπεδα φορτίου και ΑΠΕ».</li>
+<li><strong class="text-slate-200">Μπαταρίες της διανομής:</strong> Σύμφωνα με δημόσιες ανακοινώσεις του Ιουλίου 2026, περίπου 100 MW / 200 MWh μπαταριών είναι συνδεδεμένες στο δίκτυο διανομής. Στις 21 Οκτ 2026 ελέγξαμε αν εμφανίζονται μέσα στο UCE, με δείκτη την ωριαία λειτουργία του στόλου BESS του ΑΔΜΗΕ (ίδια σήματα αγοράς, μαζί με τους διπλούς ημερήσιους κύκλους) και, χωριστά, την τιμή επόμενης ημέρας. Κανένα μοντέλο δεν βελτίωσε την πρόβλεψη σε δεδομένα που δεν είχε δει· μετά τα μέσα Ιουλίου ο συντελεστής του στόλου ήταν −0,03 (90%: −0,08 έως +0,01), ενώ θα περιμέναμε περίπου 0,18 αν 100 MW με το ίδιο μοτίβο ήταν μέσα στο UCE· η τιμή απλώς μιμήθηκε τα φ/β. Η πιθανότερη ερμηνεία είναι ότι η live εκτίμηση του ΑΔΜΗΕ για τη διανομή καλύπτει μόνο ΑΠΕ, οπότε οι μπαταρίες αυτές φαίνονται έμμεσα στο φορτίο της μεταφοράς και όχι στο UCE. Ακόμα κι αν κάποιο κομμάτι ξέφυγε από τον έλεγχο, πρόκειται για το πολύ περίπου 200 MWh την ημέρα, κάτω από 2% του UCE. Ο έλεγχος επαναλαμβάνεται κάθε μέρα και φαίνεται κάτω από το γράφημα των συντελεστών.</li>
+</ul>
+<h3 class="mt-4 mb-2 text-xs font-bold text-acc-400" data-sec="records" style="scroll-margin-top:8px">Ρεκόρ</h3>
+<ul class="list-disc pl-5 space-y-2 text-slate-400">
+<li><strong class="text-slate-200">Ρεκόρ:</strong> Οι πέντε υψηλότερες τιμές από την έναρξη της καταγραφής (1 Απριλίου 2026), που υπολογίζονται κάθε ώρα από όλο το ιστορικό· έτσι μια διόρθωση του ΑΔΜΗΕ διορθώνει και το ρεκόρ. Κάθε ρεκόρ δείχνει πώς εξελίχθηκε το #1· τις πρώτες εβδομάδες σχεδόν κάθε μέρα είναι «ρεκόρ», γι’ αυτό η περίοδος αυτή είναι σκιασμένη. Οι ωριαίες τιμές είναι MWh σε μία ώρα, ίσες με τα μέσα MW.</li>
+</ul>
+`
+    },
 };
 
 // ---------------------------------------------------------------------
@@ -529,7 +633,8 @@ function applyStaticText() {
     };
     Object.entries(ids).forEach(([id, txt]) => { const el = $(id); if (el) el.textContent = txt; });
     document.querySelectorAll('.load-row').forEach((r) => { r.querySelector('[data-load-label]').textContent = x.load[`s${r.dataset.step}`]; });
-    $('modalBody').innerHTML = METHODOLOGY[S.lang];
+    $('methodTabShort').textContent = x.mShort; $('methodTabFull').textContent = x.mFull;
+    renderMethodologyBody();
 }
 
 async function setLang(lang) {
@@ -542,29 +647,73 @@ async function setLang(lang) {
     await renderAll();
 }
 
-function openMethodology(anchor) {
-    toggleModal(true);
-    if (anchor) setTimeout(() => { const el = document.getElementById(anchor); if (el) el.scrollIntoView({ block: 'start', behavior: 'smooth' }); }, 320);
+// Μεθοδολογία (D53) — ίδια συμπεριφορά με το BESS (D28–D29 εκεί):
+// κουμπί → ΣΥΝΤΟΜΗ στην ενότητα του tab· «Μεθοδολογία →» → ΑΝΑΛΥΤΙΚΗ στο σημείο του·
+// η εναλλαγή Σύντομη | Αναλυτική κρατά την ενότητα· Esc κλείνει, το Tab κυκλώνει μέσα στο παράθυρο,
+// το focus επιστρέφει σε ό,τι το άνοιξε· η σελίδα από πίσω δεν κυλάει.
+let methodologyView = 'short', methodologyOpener = null, methodOpenSec = null, methodOpenScroll = 0;
+const ANCHOR_SECTION = { 'm-uce': 'clean', 'm-entsoe': 'clean', 'm-layers': 'clean', 'm-analysis': 'analysis' };
+const TAB_SECTION = { live: 'live', daily: 'daily', clean: 'clean', analysis: 'analysis', records: 'records' };
+function renderMethodologyBody() {
+    const x = t();
+    const src = S.manifest && S.manifest.last_live ? (S.manifest.last_live.source || 'iptoanalytics') : null;
+    const srcLine = src ? `<p class="mt-1 text-xs text-slate-500" id="modalSource">${esc(x.sourceLine)} <strong class="text-slate-300">${esc(src)}</strong></p>` : '';
+    $('modalBody').innerHTML = METHOD[S.lang][methodologyView].replace('</p>', `</p>${srcLine}`);
+    const on = 'flex-1 px-3 py-1.5 rounded-md text-xs font-semibold bg-acc-400 text-slate-900 transition';
+    const off = 'flex-1 px-3 py-1.5 rounded-md text-xs font-semibold text-slate-400 hover:text-slate-200 transition';
+    $('methodTabShort').className = methodologyView === 'short' ? on : off; $('methodTabShort').setAttribute('aria-pressed', methodologyView === 'short');
+    $('methodTabFull').className = methodologyView === 'full' ? on : off; $('methodTabFull').setAttribute('aria-pressed', methodologyView === 'full');
 }
-
-function toggleModal(open) {
-    const modal = $('methodologyModal'), content = $('modalContent');
-    if (open) {
-        // D52: η πηγή της τελευταίας live ώρας, στην κορυφή της Μεθοδολογίας (στο κινητό δεν είναι στην κεφαλίδα)
-        const src = S.manifest && S.manifest.last_live ? (S.manifest.last_live.source || 'iptoanalytics') : null;
-        let line = $('modalSource');
-        if (!line) { line = document.createElement('p'); line.id = 'modalSource'; line.className = 'text-xs text-slate-400 mb-4'; $('modalBody').prepend(line); }
-        line.innerHTML = src ? `${esc(t().sourceLine)} <strong class="text-slate-200">${esc(src)}</strong>` : '';
-        modal.classList.remove('hidden'); modal.classList.add('flex');
-        document.body.style.overflow = 'hidden';
-        requestAnimationFrame(() => { modal.classList.remove('opacity-0'); content.classList.remove('scale-95'); });
-        modal.querySelector('[data-close-modal]').focus();
-    } else {
-        modal.classList.add('opacity-0'); content.classList.add('scale-95');
-        document.body.style.overflow = '';
-        setTimeout(() => { modal.classList.add('hidden'); modal.classList.remove('flex'); $('btnMethodologyWrap').focus(); }, 300);
-    }
+function methodSecTop(body, el) { return el.offsetTop; }   // offsetTop: δεν επηρεάζεται από το scale-95 του fade-in
+function currentMethodSec() {
+    const body = $('modalBody'); let cur = null;
+    body.querySelectorAll('[data-sec]').forEach((el) => { if (methodSecTop(body, el) - 12 <= body.scrollTop) cur = el.dataset.sec; });
+    return cur;
 }
+function scrollMethodologyTo(target, instant) {
+    const body = $('modalBody');
+    const el = body.querySelector(`[data-sec="${target}"]`) || document.getElementById(target);
+    if (!el) return;
+    const top = Math.max(0, methodSecTop(body, el) - 8);
+    body.scrollTo({ top, behavior: instant || REDUCE_MOTION ? 'auto' : 'smooth' });
+}
+function setMethodologyView(view, fromOpen) {
+    const body0 = $('modalBody');
+    const untouched = methodOpenSec && Math.abs(body0.scrollTop - methodOpenScroll) < 2;
+    const keep = fromOpen ? null : (untouched ? methodOpenSec : currentMethodSec());   // μένεις στην ίδια ενότητα
+    methodologyView = view === 'full' ? 'full' : 'short';
+    renderMethodologyBody();
+    const body = $('modalBody'); body.scrollTop = 0;
+    if (keep && keep !== 'all') scrollMethodologyTo(keep, true);
+}
+function openMethodologyModal(sec, view, anchor) {
+    const modal = $('methodologyModal');
+    if (!modal.classList.contains('hidden')) return;
+    methodologyOpener = document.activeElement;
+    setMethodologyView(view || (anchor ? 'full' : 'short'), true);
+    $('modalBody').scrollTop = 0;
+    document.body.style.overflow = 'hidden';
+    modal.classList.remove('hidden');
+    setTimeout(() => { modal.classList.remove('opacity-0'); $('modalContent').classList.remove('scale-95'); }, 10);
+    $('modalXBtn').focus();
+    methodOpenSec = null;
+    const target = anchor || (sec && sec !== 'all' ? sec : null);
+    if (target) { scrollMethodologyTo(target, true); methodOpenSec = sec || ANCHOR_SECTION[anchor]; methodOpenScroll = $('modalBody').scrollTop; }
+}
+function closeMethodologyModal() {
+    const modal = $('methodologyModal');
+    if (modal.classList.contains('hidden')) return;
+    modal.classList.add('opacity-0'); $('modalContent').classList.add('scale-95');
+    document.body.style.overflow = '';
+    setTimeout(() => {
+        modal.classList.add('hidden');
+        if (methodologyOpener && methodologyOpener.focus) methodologyOpener.focus();
+        methodologyOpener = null;
+    }, 300);
+}
+// Συμβατότητα με τις υπάρχουσες κλήσεις
+function openMethodology(anchor) { openMethodologyModal(ANCHOR_SECTION[anchor] || null, 'full', anchor); }
+function toggleModal(open) { if (open) openMethodologyModal(TAB_SECTION[S.tab] || null, 'short'); else closeMethodologyModal(); }
 
 // ---------------------------------------------------------------------
 // 6b. Δικά μας HTML tooltips (επικεφαλίδα ώρα | τιμή, ενότητες, σύνολα)
@@ -1443,6 +1592,22 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.lang-btn').forEach((b) => b.addEventListener('click', () => setLang(b.dataset.lang)));
     $('contextSelect').addEventListener('change', onPickerChange);
     $('btnMethodologyWrap').addEventListener('click', () => toggleModal(true));
+    $('methodTabShort').addEventListener('click', () => setMethodologyView('short'));
+    $('methodTabFull').addEventListener('click', () => setMethodologyView('full'));
+    $('modalXBtn').addEventListener('click', closeMethodologyModal);
+    $('modalCloseBtn').addEventListener('click', closeMethodologyModal);
+    document.addEventListener('keydown', (e) => {   // Tab: το focus κυκλώνει μέσα στο παράθυρο (όπως στο BESS)
+        if (e.key !== 'Tab' || $('methodologyModal').classList.contains('hidden')) return;
+        const f = ['modalXBtn', 'methodTabShort', 'methodTabFull', 'modalCloseBtn'].map((id) => $(id));
+        const i = f.indexOf(document.activeElement);
+        const next = e.shiftKey ? (i <= 0 ? f.length - 1 : i - 1) : (i === f.length - 1 ? 0 : i + 1);
+        e.preventDefault(); f[next].focus();
+    });
+    // Σύνδεσμοι «Μεθοδολογία →» μόνο σε υπολογιστή (H06): χαρακτηριστικό hidden, όχι κλάση
+    const mqM = window.matchMedia('(max-width: 767px)');
+    const syncMethodLinks = () => document.querySelectorAll('[data-method]').forEach((b) => { b.hidden = mqM.matches; });
+    syncMethodLinks();
+    if (mqM.addEventListener) mqM.addEventListener('change', syncMethodLinks);
     // Βελάκι ↑ (H06): φαίνεται στο κινητό όταν τα tabs βγουν από την οθόνη
     const toTop = $('toTop');
     if ('IntersectionObserver' in window) {
@@ -1459,7 +1624,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Οι πίτες αλλάζουν μορφή (βελάκια ή υπόμνημα) με το πλάτος: ξανασχεδιάζονται όταν αλλάζει το παράθυρο.
     let resizeT; let lastW = window.innerWidth;
     window.addEventListener('resize', () => { clearTimeout(resizeT); resizeT = setTimeout(() => { if (Math.abs(window.innerWidth - lastW) > 40) { lastW = window.innerWidth; if (S.tab === 'live') renderLive(); } }, 250); });
-    document.querySelectorAll('[data-close-modal]').forEach((b) => b.addEventListener('click', () => toggleModal(false)));
     $('methodologyModal').addEventListener('click', (e) => { if (e.target.id === 'methodologyModal') toggleModal(false); });
     document.addEventListener('keydown', (e) => { if (e.key !== 'Escape') return; if (!$('recordModal').classList.contains('hidden')) toggleRecModal(false); else if (!$('methodologyModal').classList.contains('hidden')) toggleModal(false); });
     boot();
