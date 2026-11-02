@@ -64,3 +64,6 @@ Live layout, donut callouts, clean/fossil shares, MCP card, daily ribbon, short 
 
 ## Family-wide (separate thread)
 Pin CDN versions in every dashboard; replace the Tailwind play CDN, which is not meant for production.
+
+## Ideas to study (not on the page)
+- **Possible curtailment of transmission RES at midday.** Unofficial sources say transmission-connected RES is curtailed in hours with an ISP energy surplus, usually around midday on days of high output; the owner sees it as a dip in ADMIE's RES line. With the split (D55–D57) the expected sign is a midday dip in **transmission** RES while **distribution** RES keeps following the sun. To check on the history since 1 Apr against ISP surplus hours and low or negative prices, before showing anything as an indication. ADMIE does not publish hourly curtailment; clouds over large parks can give a similar dip.

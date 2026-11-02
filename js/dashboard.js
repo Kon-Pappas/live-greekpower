@@ -11,7 +11,7 @@
 // 1. Χρώματα (ένα σημείο για όλη τη σελίδα)
 // ---------------------------------------------------------------------
 const C = {
-    lignite: '#b06a4b', gas: '#d18b57', hydro: '#5b9bd5', res: '#70ad47',
+    lignite: '#b06a4b', gas: '#d18b57', hydro: '#5b9bd5', res: '#70ad47', resNet: '#a9d18e',
     dis: '#e0c2cd', chg: '#b276a0', imports: '#ffc000', exports: '#e74c3c',
     pumping: '#85c1e9', demand: '#e2e8f0', price: '#00e5ff',
     wind: '#70ad47', bigHydro: '#5b9bd5', solar: '#f39c12', uce: '#e74c3c',
@@ -50,7 +50,7 @@ const T = {
         pickerHour: 'Hour:', pickerDate: 'Date:', today: 'today',
         pill: { live: 'Live', delayed: 'Delayed', stale: 'Stale data', histHour: 'Past hour', today: 'Today', histDay: 'Past day', expost: 'Ex-post data' },
         load: { title: 'System Initialization', g1: 'Data fetching', g2: 'Building views', s1: 'Reading the data', s2: 'Live balance', s3: 'Daily dispatch', s4: 'Clean energy cross-check', s5: 'Analysis of the day', s6: 'Records', ready: 'Dashboard is ready!', error: 'The data could not be loaded. Reload the page in a few minutes.' },
-        names: { lignite: 'Lignite', gas: 'Natural gas', hydro: 'Hydro', res: 'RES (incl. CHP)', dis: 'BESS discharge', chg: 'BESS charge', imports: 'Imports', exports: 'Exports', pumping: 'Pumping', demand: 'Domestic demand', price: 'Day-ahead price', total: 'Total generation',
+        names: { lignite: 'Lignite', gas: 'Natural gas', hydro: 'Hydro', res: 'RES (incl. CHP)', resSystem: 'RES, transmission', resNetwork: 'RES, distribution', resSplit: 'transmission · distribution', dis: 'BESS discharge', chg: 'BESS charge', imports: 'Imports', exports: 'Exports', pumping: 'Pumping', demand: 'Domestic demand', price: 'Day-ahead price', total: 'Total generation',
                  wind: 'Wind', bigHydro: 'Large hydro', solar: 'Solar', cogen: 'Cogeneration', smallHydro: 'Small hydro', biomass: 'Biomass', uce: 'UCE', entsoeSolar: 'Solar (ENTSO-E)', entsoeWind: 'Wind (ENTSO-E)', admieSolar: 'Solar (ADMIE)', admieWind: 'Wind (ADMIE)' },
         countries: { AL: 'Albania', BG: 'Bulgaria', IT: 'Italy', TR: 'Türkiye', MK: 'North Macedonia' },
         genLedger: 'Generation', balLedger: 'System balance', ledgerTotal: 'Total', ledgerDemand: 'Demand',
@@ -107,7 +107,7 @@ const T = {
         pickerHour: 'Ώρα:', pickerDate: 'Ημέρα:', today: 'σήμερα',
         pill: { live: 'Live', delayed: 'Καθυστέρηση', stale: 'Παλιά δεδομένα', histHour: 'Προηγούμενη ώρα', today: 'Σήμερα', histDay: 'Προηγούμενη ημέρα', expost: 'Εκ των υστέρων' },
         load: { title: 'Εκκίνηση', g1: 'Λήψη δεδομένων', g2: 'Προετοιμασία προβολών', s1: 'Ανάγνωση δεδομένων', s2: 'Ισοζύγιο ώρας', s3: 'Κατανομή ημέρας', s4: 'Διασταύρωση καθαρής ενέργειας', s5: 'Ανάλυση ημέρας', s6: 'Ρεκόρ', ready: 'Το dashboard είναι έτοιμο!', error: 'Τα δεδομένα δεν φορτώθηκαν. Ανανεώστε τη σελίδα σε λίγα λεπτά.' },
-        names: { lignite: 'Λιγνίτης', gas: 'Φυσικό αέριο', hydro: 'Υδροηλεκτρικά', res: 'ΑΠΕ (με ΣΗΘΥΑ)', dis: 'Εκφόρτιση BESS', chg: 'Φόρτιση BESS', imports: 'Εισαγωγές', exports: 'Εξαγωγές', pumping: 'Άντληση', demand: 'Εγχώρια ζήτηση', price: 'Τιμή DAM', total: 'Συνολική παραγωγή',
+        names: { lignite: 'Λιγνίτης', gas: 'Φυσικό αέριο', hydro: 'Υδροηλεκτρικά', res: 'ΑΠΕ (με ΣΗΘΥΑ)', resSystem: 'ΑΠΕ μεταφοράς', resNetwork: 'ΑΠΕ διανομής', resSplit: 'μεταφορά · διανομή', dis: 'Εκφόρτιση BESS', chg: 'Φόρτιση BESS', imports: 'Εισαγωγές', exports: 'Εξαγωγές', pumping: 'Άντληση', demand: 'Εγχώρια ζήτηση', price: 'Τιμή DAM', total: 'Συνολική παραγωγή',
                  wind: 'Αιολικά', bigHydro: 'Μεγάλα υδροηλεκτρικά', solar: 'Φωτοβολταϊκά', cogen: 'Συμπαραγωγή', smallHydro: 'Μικρά υδροηλεκτρικά', biomass: 'Βιομάζα', uce: 'UCE', entsoeSolar: 'Φ/Β (ENTSO-E)', entsoeWind: 'Αιολικά (ENTSO-E)', admieSolar: 'Φ/Β (ΑΔΜΗΕ)', admieWind: 'Αιολικά (ΑΔΜΗΕ)' },
         countries: { AL: 'Αλβανία', BG: 'Βουλγαρία', IT: 'Ιταλία', TR: 'Τουρκία', MK: 'Βόρεια Μακεδονία' },
         genLedger: 'Παραγωγή', balLedger: 'Ισοζύγιο συστήματος', ledgerTotal: 'Σύνολο', ledgerDemand: 'Ζήτηση',
@@ -788,6 +788,10 @@ function renderLive() {
     $('genLedger').innerHTML =
         ledgerRow(n.lignite, '', g.lignite, C.lignite) + ledgerRow(n.gas, '+', g.gas, C.gas) +
         ledgerRow(n.hydro, '+', g.hydro, C.hydro) + ledgerRow(n.res, '+', g.res, C.res) +
+        // D57: ΑΠΕ μεταφοράς · διανομής (ΑΔΜΗΕ, D55), μόνο όταν υπάρχουν
+        (g.res_system != null && g.res_network != null
+            ? `<div class="flex justify-between gap-3 pl-[1.15rem] -mt-0.5 mb-1 text-[11px] text-slate-400"><span>${esc(n.resSplit)}</span><span>${fmt(g.res_system)} · ${fmt(g.res_network)} <span class="text-slate-500">MWh</span></span></div>`
+            : '') +
         ledgerRule + ledgerRow(t().ledgerTotal, '=', g.total, null, true) +
         '<div class="border-t border-dashed border-slate-600 my-2"></div>' +
         shareRow(x.cleanEnergy, x.cleanHint, clean, C.res) + shareRow(x.fossilFuels, x.fossilHint, fossil, C.gas);
@@ -935,6 +939,7 @@ async function renderDaily() {
     const H = day.hours;
     const val = (fn) => H.map((h) => (h.has_data ? fn(h) : null));
     const bar = (label, data, color) => ({ type: 'bar', label, data, backgroundColor: color, stack: 's', yAxisID: 'y', order: 2 });
+    const hasSplit = H.some((h) => h.has_data) && H.filter((h) => h.has_data).every((h) => h.gen.res_system != null && h.gen.res_network != null);   // D57
     upsertChart('dispatchChart', {
         data: {
             labels: H.map((h) => hourTick(h.hr)),
@@ -946,7 +951,10 @@ async function renderDaily() {
                 bar(n.exports, val((h) => -h.exports), C.exports),
                 bar(n.lignite, val((h) => h.gen.lignite), C.lignite), bar(n.gas, val((h) => h.gen.gas), C.gas),
                 bar(n.imports, val((h) => h.imports), C.imports), bar(n.dis, val((h) => h.storage.dis), C.dis),
-                bar(n.res, val((h) => h.gen.res), C.res), bar(n.hydro, val((h) => h.gen.hydro), C.hydro),
+                ...(hasSplit
+                    ? [bar(n.resSystem, val((h) => h.gen.res_system), C.res), bar(n.resNetwork, val((h) => h.gen.res_network), C.resNet)]
+                    : [bar(n.res, val((h) => h.gen.res), C.res)]),
+                bar(n.hydro, val((h) => h.gen.hydro), C.hydro),
                 { type: 'line', label: n.demand, data: val((h) => h.demand), borderColor: C.demand, borderDash: [6, 4], borderWidth: 2, pointRadius: 0, yAxisID: 'y', order: 1, spanGaps: false },
                 { type: 'line', label: n.price, data: H.map((h) => h.dam_price), borderColor: C.price, backgroundColor: C.price, borderWidth: 2, pointRadius: 2.5, yAxisID: 'y1', order: 0 }
             ]
@@ -965,7 +973,9 @@ async function renderDaily() {
                     let html = tipHead(tipHourLabel(h.hr), priceStr(h.dam_price));
                     if (!h.has_data) return html + `<p class="text-xs text-slate-400">${S.lang === 'el' ? 'Η ώρα δεν έχει γίνει ακόμα.' : 'This hour has not happened yet.'}</p>`;
                     return html + tipSections(
-                        tipRow(n.hydro, h.gen.hydro, C.hydro) + tipRow(n.res, h.gen.res, C.res) + tipRow(n.dis, h.storage.dis, C.dis) +
+                        tipRow(n.hydro, h.gen.hydro, C.hydro) +
+                        (hasSplit ? tipRow(n.resNetwork, h.gen.res_network, C.resNet) + tipRow(n.resSystem, h.gen.res_system, C.res) : tipRow(n.res, h.gen.res, C.res)) +
+                        tipRow(n.dis, h.storage.dis, C.dis) +
                         tipRow(n.imports, h.imports, C.imports) + tipRow(n.gas, h.gen.gas, C.gas) + tipRow(n.lignite, h.gen.lignite, C.lignite),
                         tipRow(n.demand, h.demand, '#94a3b8', { strong: true }) + tipRow(n.pumping, h.pumping, C.pumping) +
                         tipRow(n.chg, h.storage.chg, C.chg) + tipRow(n.exports, h.exports, C.exports));
