@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "date": "2026-09-28",
-  "updated": "2026-10-21T06:32:39+03:00",
+  "updated": "2026-11-02T11:32:33+02:00",
   "calibration": {
     "window_days": 90,
     "from": "2026-07-01",
@@ -252,29 +252,21 @@
       "entsoe_status": "final"
     }
   },
-  "records": [
-    {
-      "scope": "daily",
-      "cat": "bess_dis",
-      "rank": 4,
-      "value": 2071.0,
-      "id": "2026-09-28"
-    }
-  ],
+  "records": [],
   "conclusion": {
     "el": [
       "Στις 28 Σεπτεμβρίου 2026 η ζήτηση ήταν 123,8 GWh και οι ΑΠΕ με τα υδροηλεκτρικά κάλυψαν το 71,0% της εγχώριας παραγωγής (live ΑΔΜΗΕ, ΑΠΕ με ΣΗΘΥΑ). Οι καθαρές εξαγωγές ήταν 31,0 GWh και η μέση τιμή επόμενης ημέρας 134,50 €/MWh.",
       "Από την παραγωγή της διανομής, 12,5 GWh δεν μετρήθηκαν ωριαία. Εκτιμώνται 8,0 GWh φ/β στέγης και χαμηλής τάσης, 3,4 GWh αιολικά της διανομής και 1,7 GWh μικρές μονάδες· το υπόλοιπο (−0,7 GWh) είναι απόκλιση της εκτίμησης του ΑΔΜΗΕ από το μοντέλο.",
+      "Ενδείξεις πιθανής περικοπής φ/β μεταφοράς σε 4 ώρες (11:00–15:00).",
       "Προς την Κρήτη στάλθηκαν 2,0 GWh μέσα από τα δύο καλώδια.",
-      "Στην ENTSO-E (τελική έκδοση) φ/β, αιολικά και βιομάζα της ημέρας είναι 88,2 GWh, έναντι 99,9 GWh στα live στοιχεία του ΑΔΜΗΕ.",
-      "Ρεκόρ της ημέρας στις πέντε κορυφαίες θέσεις: εκφόρτιση BESS (ημερήσιο, #4)."
+      "Στην ENTSO-E (τελική έκδοση) φ/β, αιολικά και βιομάζα της ημέρας είναι 88,2 GWh, έναντι 99,9 GWh στα live στοιχεία του ΑΔΜΗΕ."
     ],
     "en": [
       "On 28 September 2026 demand was 123.8 GWh and renewables with hydro covered 71.0% of domestic generation (ADMIE live, RES incl. CHP). Net exports were 31.0 GWh and the average day-ahead price 134.50 €/MWh.",
       "Of distribution-level generation, 12.5 GWh was not metered hourly. An estimated 8.0 GWh came from rooftop and other low-voltage solar, 3.4 GWh from distribution-connected wind and 1.7 GWh from small units; the remainder (−0.7 GWh) is the difference between ADMIE's estimate and the model.",
+      "Indications of possible curtailment of transmission solar in 4 hours (11:00–15:00).",
       "2.0 GWh was sent to Crete through the two cables.",
-      "In ENTSO-E's final data, the day's solar, wind and biomass add up to 88.2 GWh, against 99.9 GWh in ADMIE's live figures.",
-      "Records of the day in the top five: BESS discharge (daily, #4)."
+      "In ENTSO-E's final data, the day's solar, wind and biomass add up to 88.2 GWh, against 99.9 GWh in ADMIE's live figures."
     ]
   }
 }

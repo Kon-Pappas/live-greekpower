@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "date": "2026-10-04",
-  "updated": "2026-10-21T06:32:46+03:00",
+  "updated": "2026-11-02T11:32:44+02:00",
   "calibration": {
     "window_days": 90,
     "from": "2026-07-07",
@@ -241,7 +241,7 @@
       "transmission_no_crete": 79911.0,
       "mv": 16992.1,
       "lv": 14328.9,
-      "entsoe": null
+      "entsoe": 106846.7
     },
     "res": {
       "transmission": 75286.0,
@@ -249,7 +249,7 @@
       "live": 106607.0,
       "live_sw": 104876.99999999999,
       "entsoe": 90785.5,
-      "entsoe_status": null
+      "entsoe_status": "final"
     }
   },
   "records": [],
@@ -257,14 +257,16 @@
     "el": [
       "Στις 4 Οκτωβρίου 2026 η ζήτηση ήταν 117,1 GWh και οι ΑΠΕ με τα υδροηλεκτρικά κάλυψαν το 77,0% της εγχώριας παραγωγής (live ΑΔΜΗΕ, ΑΠΕ με ΣΗΘΥΑ). Οι καθαρές εξαγωγές ήταν 31,0 GWh και η μέση τιμή επόμενης ημέρας 110,71 €/MWh.",
       "Από την παραγωγή της διανομής, 14,3 GWh δεν μετρήθηκαν ωριαία. Εκτιμώνται 5,5 GWh φ/β στέγης και χαμηλής τάσης, 3,7 GWh αιολικά της διανομής και 2,2 GWh μικρές μονάδες· το υπόλοιπο (+2,9 GWh) είναι απόκλιση της εκτίμησης του ΑΔΜΗΕ από το μοντέλο.",
+      "Ενδείξεις πιθανής περικοπής φ/β μεταφοράς σε 4 ώρες (11:00–15:00).",
       "Προς την Κρήτη στάλθηκαν 5,9 GWh μέσα από τα δύο καλώδια.",
-      "Στην ENTSO-E (πιο πρόσφατη έκδοση) φ/β, αιολικά και βιομάζα της ημέρας είναι 90,8 GWh, έναντι 104,9 GWh στα live στοιχεία του ΑΔΜΗΕ."
+      "Στην ENTSO-E (τελική έκδοση) φ/β, αιολικά και βιομάζα της ημέρας είναι 90,8 GWh, έναντι 104,9 GWh στα live στοιχεία του ΑΔΜΗΕ."
     ],
     "en": [
       "On 4 October 2026 demand was 117.1 GWh and renewables with hydro covered 77.0% of domestic generation (ADMIE live, RES incl. CHP). Net exports were 31.0 GWh and the average day-ahead price 110.71 €/MWh.",
       "Of distribution-level generation, 14.3 GWh was not metered hourly. An estimated 5.5 GWh came from rooftop and other low-voltage solar, 3.7 GWh from distribution-connected wind and 2.2 GWh from small units; the remainder (+2.9 GWh) is the difference between ADMIE's estimate and the model.",
+      "Indications of possible curtailment of transmission solar in 4 hours (11:00–15:00).",
       "5.9 GWh was sent to Crete through the two cables.",
-      "In ENTSO-E's latest data, the day's solar, wind and biomass add up to 90.8 GWh, against 104.9 GWh in ADMIE's live figures."
+      "In ENTSO-E's final data, the day's solar, wind and biomass add up to 90.8 GWh, against 104.9 GWh in ADMIE's live figures."
     ]
   }
 }
