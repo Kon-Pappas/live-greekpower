@@ -290,7 +290,62 @@ def save_to_json(new_records, is_live_mode, start_str, end_str):
     print(f"✓ Μνήμη συγχώνευσης: {RAW_PATH}.")
     return history
 
+# ---------------------------------------------------------------------
+# D56: λειτουργία «μόνο διαχωρισμός ΑΠΕ» (RES_SPLIT_ONLY=1). Συμπληρώνει στα ΥΠΑΡΧΟΝΤΑ live αρχεία
+# τα res_system / res_network (D55) από το production_fuel_hourly του ΑΔΜΗΕ (μία αίτηση ανά ημέρα).
+# Γράφει μια ημέρα μόνο αν σε ΚΑΘΕ ώρα με δεδομένα ισχύει RES_SYSTEM + RES_NETWORK = αποθηκευμένες ΑΠΕ (±1 MWh)
+# και αλλάζει ΜΟΝΟ αυτά τα δύο πεδία και τα σύνολά τους. Τίποτα άλλο στο αρχείο.
+# ---------------------------------------------------------------------
+def res_split_only(dates, pause=1.0, tol=1.0):
+    ok, skipped = 0, []
+    for i, d8 in enumerate(dates):
+        if i and pause:
+            time.sleep(pause)
+        iso = f"{d8[:4]}-{d8[4:6]}-{d8[6:]}"
+        path = os.path.join(contract.LIVE_DIR, iso + '.json')
+        if not os.path.exists(path):
+            skipped.append((iso, 'δεν υπάρχει live αρχείο')); continue
+        try:
+            r = requests.get(f"https://www.admie.gr/production_fuel_hourly?date_from={d8}", headers=HEADERS, timeout=30)
+            rows = r.json() if r.status_code == 200 else None
+        except Exception as e:
+            rows = None
+            print(f"   [{iso}] {type(e).__name__}: {str(e)[:100]}")
+        if not rows:
+            skipped.append((iso, 'καμία απάντηση από τον ΑΔΜΗΕ')); continue
+        split = {row.get('hour'): (row.get('data') or {}) for row in rows if row.get('hour')}
+        day = load_json_strict(path, None)
+        if not day or not day.get('hours'):
+            skipped.append((iso, 'άκυρο live αρχείο')); continue
+        hours = [h for h in day['hours'] if h.get('has_data')]
+        bad = []
+        for h in hours:
+            dd = split.get(h['hr'])
+            if not dd or dd.get('RES_SYSTEM') is None or dd.get('RES_NETWORK') is None:
+                bad.append(f"ώρα {h['hr']}: λείπει"); continue
+            if abs(dd['RES_SYSTEM'] + dd['RES_NETWORK'] - (h['gen']['res'] or 0)) > tol:
+                bad.append(f"ώρα {h['hr']}: {dd['RES_SYSTEM']}+{dd['RES_NETWORK']}≠{h['gen']['res']}")
+        if bad:
+            skipped.append((iso, '; '.join(bad[:4]) + (' …' if len(bad) > 4 else ''))); continue
+        for h in hours:
+            dd = split[h['hr']]
+            h['gen']['res_system'] = contract.r1(dd['RES_SYSTEM'])
+            h['gen']['res_network'] = contract.r1(dd['RES_NETWORK'])
+        if day.get('totals', {}).get('gen') is not None:
+            for k in ['res_system', 'res_network']:
+                day['totals']['gen'][k] = contract._sum(h['gen'][k] for h in hours)
+        write_json_atomic(path, day)
+        ok += 1
+    print(f"✓ Διαχωρισμός ΑΠΕ: {ok} ημέρες συμπληρώθηκαν · {len(skipped)} παραλείφθηκαν.")
+    for iso, why in skipped:
+        print(f"   ⚠ {iso}: {why}")
+    return ok, skipped
+
+
 if __name__ == "__main__":
+    if os.environ.get('RES_SPLIT_ONLY', '') == '1':
+        _ok, _skipped = res_split_only(get_target_dates()[0], pause=float(os.environ.get('PAUSE_SECONDS', '1') or 0))
+        sys.exit(0)
     target_dates, is_live_mode, start_str, end_str = get_target_dates()
     print(f"Θα αντληθούν δεδομένα για τις εξής {len(target_dates)} ημέρες: {target_dates}")
     
