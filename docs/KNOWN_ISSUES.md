@@ -26,3 +26,36 @@ Status: **open** (needs action or a decision), **accepted** (understood, no acti
 | K20 | 1 Apr–19 Oct 2026 | **Distribution-connected batteries and UCE.** About 100 MW / 200 MWh of BESS on the distribution network (statement by Nikos Tsafos, mid-July 2026; the public page says "public announcements of July 2026"). Tested on 21 Oct 2026 (4,848 hours) with ADMIE's own BESS fleet as proxy (same market signals; on 20 Oct the fleet ran two full cycles: night charge 01–03 → morning discharge 07–08, midday charge 10–15 → evening discharge 18–20; daily charge #1 2,946 MWh, discharge #1 2,851 MWh) and with the day-ahead price. Out-of-sample R² (Sep–Oct): baseline 0.848; + fleet shape 0.847; + price 0.846 (price factor −42, wrong sign, solar factor falls 0.192 → 0.177: price mimics solar); both 0.844; + fleet MWh 0.843 (+0.020, 90% −0.033…+0.057). After 15 Jul: fleet factor −0.03 (90% −0.08…+0.01) against ≈0.18 expected if 100 MW with the same pattern were inside UCE; fortnightly values swing ±0.15 with no trend. Night: model residual is the same whether ADMIE's fleet charges or idles (−36 vs −37 MWh); negative night UCE hours are fewer when it charges (9% vs 17%). Reading: ADMIE's live distribution estimate covers RES only; distribution batteries show indirectly in the transmission load. Bound: ≤ ~200 MWh/day, < 2% of UCE. The announcement may refer to connected or licensed rather than operating capacity; the test cannot tell, only that none of it passes through ADMIE's estimate | Decomposition unchanged | **closed**; monitored daily (`diag_bess` in `calibration.json`, D49) |
 | K21 | 29 Oct 14:00 – 1 Nov 2026 | **Live outage.** ADMIE withdrew the `iptoanalytics-api` proxy (NXDOMAIN); no live data from 29 Oct 14:00. An attempt on 31 Oct to read www.admie.gr used wrong field names and wrote three empty live files (30 Oct – 1 Nov, 0/24 hours); restored on 1 Nov from the 29 Oct backup (scraper, `live_raw.json`, manifest; empty files deleted). No stored data were corrupted; X-Ray, ENTSO-E and analysis ran normally (UCE empty on 30–31 Oct for lack of live data) | Gap 29 Oct 14:00 – resumption | Fixed by D50; gap to be filled by *Backfill live history* (then *Analysis history refresh*) |
 | K22 | 25 Oct 2026; 28–31 Oct 2026 | **Clock change and X-Ray supplement.** No X-Ray (hence no UCE, no analysis) for the 25-hour day of 25 Oct; ENTSO-E on that day averaged the repeated 03:00–04:00 into one hour. X-Ray price/BESS/pumping were 0 on 28–31 Oct (old proxy withdrawn). The live data of 25 Oct were correct (25 hours, balance closes). Remaining cosmetic point: hour labels on a 25-hour day read 00…24 instead of showing the repeated 03 | Fixed by D51; days to rebuild with the X-Ray workflow (manual dates 20261025–20261031) | fixed once rebuilt; next check: 28 Mar 2027 (23 hours) |
+
+## Hub-wide issues
+
+Same structure in every hub page, so a fix here alone would make this page differ from the others. The same IDs are used in every repository's docs (see the hub playbook).
+
+| # | Issue | Seen in | live-greekpower status |
+|---|---|---|---|
+| H01 | Mobile: two divider lines between the header and the tabs | live-greekpower; Flows fixed it as pilot (D25) | **Done (batch 25, D52)**: no line on mobile, 12 px gaps |
+| H02 | Header labels on mobile: short labels ("Updated:" / "Next:", "Ενημέρωση:" / "Επόμενη:") | Flows, live-greekpower (only "Next") | **Done (batch 25, D52)** |
+| H05 | Mobile height: the status pill sits inside the picker box, next to the date | Flows, live-greekpower | **Done (batch 25, D52)**; on desktop it stays in the header |
+| H06 | Mobile layout: one secondaries box (picker + pill; Methodology + GR \| EN) above the tabs, tabs 3 + 2, back-to-top arrow, in-tab "Methodology →" links hidden on mobile | all | **Done (batch 25, D52; links: batch 27, D53)**. First content 582 → 352 px at 360 px. The live source (D50) shows in the header on desktop only; on mobile it is in the Methodology window |
+
+## Hub conventions
+
+Rules that every hub page should follow; checked in each repository during the hub-wide pass.
+
+| # | Convention | live-greekpower status |
+|---|---|---|
+| C01 | **Main title** is the dashboard's name: a capital on every word except articles and conjunctions; **everything else** in Greek has a capital on the first word only | **✓ (existing)**: checked 2 Nov 2026; the remaining capitals are proper names (ΑΔΜΗΕ, Κρήτη, Ελλάδα, Βόρεια Μακεδονία) or sentence starts |
+| C02 | **No all-caps labels.** Captions are written normally, small and grey; numbers carry the colour and weight; units are never uppercased | **✓ (batch 28, D54)**: the last one (Daily tiles) removed |
+
+### Other hub rules, as checked in live-greekpower (2 Nov 2026)
+
+| Rule | Status |
+|---|---|
+| Loading overlay (pace, steps per tab) | ✓ (existing): live is the reference (D47) |
+| Methodology window (title, short \| detailed, opens at the tab's section, BESS markup) | ✓ (batch 27, D53) |
+| Data revalidated with `cache: 'no-cache'`, no `?v=<time>` | ✓ (batch 28, D54) |
+| Accent in one place (`window.ACCENT`, platinum); `kp_lang`, English by default; Chart.js 4.5.1 and Tailwind 3.4.17 pinned | ✓ (existing) |
+| Updates from cron-job.org only (no `schedule:`), Actions v5/v6, last/next update written by Python | ✓ (existing) |
+| `null` for missing values, never 0; 23/25-hour days | ✓ (D51, 1 Nov 2026) |
+| Modal: X in a box, Esc, Tab stays inside, focus returns, page behind does not scroll; footer with a divider line | ✓ (D53, existing footer) |
+| Data size check | Not applicable as in BESS: live keeps one file per day and the page loads only the days it shows. Measured 2 Nov 2026: `data/` 11.4 MB in total; day files 7–23 KB (live 21 KB, X-Ray 12 KB, ENTSO-E 12 KB, analysis 7 KB on average); largest file `analysis/calibration.json` 90 KB |
