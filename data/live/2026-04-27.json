@@ -25,7 +25,10 @@
     "dam_price_avg": 80.21,
     "crete_flow": -5469.0,
     "hours_flows_mismatch": 0,
-    "hours_balance_off": 0
+    "hours_balance_off": 0,
+    "curtail_hint_hours": [
+      15
+    ]
   },
   "hours": [
     {
@@ -74,7 +77,8 @@
       },
       "pumping": 0.0,
       "demand": 4246.0,
-      "balance_ok": true
+      "balance_ok": true,
+      "curtail_hint": null
     },
     {
       "hr": 2,
@@ -122,7 +126,8 @@
       },
       "pumping": 0.0,
       "demand": 3953.0,
-      "balance_ok": true
+      "balance_ok": true,
+      "curtail_hint": null
     },
     {
       "hr": 3,
@@ -170,7 +175,8 @@
       },
       "pumping": 0.0,
       "demand": 3850.0,
-      "balance_ok": true
+      "balance_ok": true,
+      "curtail_hint": null
     },
     {
       "hr": 4,
@@ -218,7 +224,8 @@
       },
       "pumping": 0.0,
       "demand": 3771.0,
-      "balance_ok": true
+      "balance_ok": true,
+      "curtail_hint": null
     },
     {
       "hr": 5,
@@ -266,7 +273,8 @@
       },
       "pumping": 0.0,
       "demand": 3767.0,
-      "balance_ok": true
+      "balance_ok": true,
+      "curtail_hint": null
     },
     {
       "hr": 6,
@@ -314,7 +322,8 @@
       },
       "pumping": 0.0,
       "demand": 3894.0,
-      "balance_ok": true
+      "balance_ok": true,
+      "curtail_hint": null
     },
     {
       "hr": 7,
@@ -362,7 +371,8 @@
       },
       "pumping": 0.0,
       "demand": 4270.0,
-      "balance_ok": true
+      "balance_ok": true,
+      "curtail_hint": null
     },
     {
       "hr": 8,
@@ -410,7 +420,8 @@
       },
       "pumping": 0.0,
       "demand": 4800.0,
-      "balance_ok": true
+      "balance_ok": true,
+      "curtail_hint": null
     },
     {
       "hr": 9,
@@ -458,7 +469,8 @@
       },
       "pumping": 81.0,
       "demand": 5245.0,
-      "balance_ok": true
+      "balance_ok": true,
+      "curtail_hint": null
     },
     {
       "hr": 10,
@@ -506,7 +518,8 @@
       },
       "pumping": 413.0,
       "demand": 5520.0,
-      "balance_ok": true
+      "balance_ok": true,
+      "curtail_hint": null
     },
     {
       "hr": 11,
@@ -554,7 +567,8 @@
       },
       "pumping": 467.0,
       "demand": 5617.0,
-      "balance_ok": true
+      "balance_ok": true,
+      "curtail_hint": null
     },
     {
       "hr": 12,
@@ -602,7 +616,11 @@
       },
       "pumping": 460.0,
       "demand": 5668.0,
-      "balance_ok": true
+      "balance_ok": true,
+      "curtail_hint": {
+        "drop": -0.087,
+        "flag": false
+      }
     },
     {
       "hr": 13,
@@ -650,7 +668,11 @@
       },
       "pumping": 356.0,
       "demand": 5726.0,
-      "balance_ok": true
+      "balance_ok": true,
+      "curtail_hint": {
+        "drop": 0.062,
+        "flag": false
+      }
     },
     {
       "hr": 14,
@@ -698,7 +720,11 @@
       },
       "pumping": 356.0,
       "demand": 5685.0,
-      "balance_ok": true
+      "balance_ok": true,
+      "curtail_hint": {
+        "drop": 0.127,
+        "flag": false
+      }
     },
     {
       "hr": 15,
@@ -746,7 +772,11 @@
       },
       "pumping": 356.0,
       "demand": 5502.0,
-      "balance_ok": true
+      "balance_ok": true,
+      "curtail_hint": {
+        "drop": 0.16,
+        "flag": true
+      }
     },
     {
       "hr": 16,
@@ -794,7 +824,8 @@
       },
       "pumping": 355.0,
       "demand": 5276.0,
-      "balance_ok": true
+      "balance_ok": true,
+      "curtail_hint": null
     },
     {
       "hr": 17,
@@ -842,7 +873,8 @@
       },
       "pumping": 269.0,
       "demand": 5127.0,
-      "balance_ok": true
+      "balance_ok": true,
+      "curtail_hint": null
     },
     {
       "hr": 18,
@@ -890,7 +922,8 @@
       },
       "pumping": 203.0,
       "demand": 5173.0,
-      "balance_ok": true
+      "balance_ok": true,
+      "curtail_hint": null
     },
     {
       "hr": 19,
@@ -938,7 +971,8 @@
       },
       "pumping": 56.0,
       "demand": 5324.0,
-      "balance_ok": true
+      "balance_ok": true,
+      "curtail_hint": null
     },
     {
       "hr": 20,
@@ -986,7 +1020,8 @@
       },
       "pumping": 0.0,
       "demand": 5536.0,
-      "balance_ok": true
+      "balance_ok": true,
+      "curtail_hint": null
     },
     {
       "hr": 21,
@@ -1034,7 +1069,8 @@
       },
       "pumping": 0.0,
       "demand": 5982.0,
-      "balance_ok": true
+      "balance_ok": true,
+      "curtail_hint": null
     },
     {
       "hr": 22,
@@ -1082,7 +1118,8 @@
       },
       "pumping": 0.0,
       "demand": 5965.0,
-      "balance_ok": true
+      "balance_ok": true,
+      "curtail_hint": null
     },
     {
       "hr": 23,
@@ -1130,7 +1167,8 @@
       },
       "pumping": 0.0,
       "demand": 5440.0,
-      "balance_ok": true
+      "balance_ok": true,
+      "curtail_hint": null
     },
     {
       "hr": 24,
@@ -1178,7 +1216,8 @@
       },
       "pumping": 0.0,
       "demand": 4936.0,
-      "balance_ok": true
+      "balance_ok": true,
+      "curtail_hint": null
     }
   ]
 }
