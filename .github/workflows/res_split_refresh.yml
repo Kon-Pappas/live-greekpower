@@ -1,0 +1,72 @@
+name: RES split history refresh
+
+# D56: συμπληρώνει στα υπάρχοντα live αρχεία τον διαχωρισμό ΑΠΕ μεταφοράς / διανομής (res_system,
+# res_network, D55) από το production_fuel_hourly του ΑΔΜΗΕ: μία αίτηση ανά ημέρα. Μια ημέρα γράφεται
+# μόνο αν σε κάθε ώρα RES_SYSTEM + RES_NETWORK = οι αποθηκευμένες ΑΠΕ· τίποτα άλλο δεν αλλάζει.
+# Ίδια «ουρά» με το ωριαίο scrape, ώστε να μη γράφουν ποτέ ταυτόχρονα στα ίδια αρχεία.
+on:
+  workflow_dispatch:
+    inputs:
+      start_date:
+        description: 'Από (YYYYMMDD)'
+        required: true
+        default: '20260401'
+      end_date:
+        description: 'Έως (YYYYMMDD) · κενό = πριν από 2 ημέρες'
+        required: false
+        default: ''
+      pause_seconds:
+        description: 'Παύση ανάμεσα στις ημέρες (δευτερόλεπτα)'
+        required: true
+        default: '1'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: scrape-live
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests pytz
+
+      - name: Fill RES split
+        env:
+          BF_START: ${{ github.event.inputs.start_date }}
+          BF_END: ${{ github.event.inputs.end_date }}
+          PAUSE_SECONDS: ${{ github.event.inputs.pause_seconds }}
+        run: |
+          if [ -z "$BF_END" ]; then BF_END=$(TZ=Europe/Athens date -d '2 days ago' +%Y%m%d); fi
+          RES_SPLIT_ONLY=1 START_DATE="$BF_START" END_DATE="$BF_END" python scraper.py
+
+      - name: Commit and push changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action Bot"
+          git add -A data/live
+          if git diff --staged --quiet; then
+            echo "Καμία αλλαγή."
+            exit 0
+          fi
+          git commit -m "Διαχωρισμός ΑΠΕ: ιστορικό ($(TZ=Europe/Athens date +'%Y-%m-%d %H:%M'))"
+          for i in 1 2 3; do
+            git pull --rebase origin main && git push && exit 0
+            echo "Push απέτυχε (προσπάθεια $i), νέα δοκιμή σε 10s..."
+            sleep 10
+          done
+          exit 1
