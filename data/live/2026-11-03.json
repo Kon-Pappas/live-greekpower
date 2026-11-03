@@ -2,32 +2,32 @@
   "schema": 1,
   "date": "2026-11-03",
   "source": "ADMIE/IPTO market portal: prodmixandload, dayaheadmarket, scadainterflows",
-  "updated": "2026-11-03T01:06:34+02:00",
+  "updated": "2026-11-03T02:06:32+02:00",
   "totals": {
-    "hours_with_data": 1,
+    "hours_with_data": 2,
     "gen": {
-      "lignite": 494.0,
-      "gas": 2732.0,
-      "hydro": 169.0,
-      "res": 3434.0,
-      "total": 6829.0,
-      "res_system": 3111.0,
-      "res_network": 323.0
+      "lignite": 991.0,
+      "gas": 5838.0,
+      "hydro": 212.0,
+      "res": 6807.0,
+      "total": 13848.0,
+      "res_system": 6174.0,
+      "res_network": 633.0
     },
     "imports": 0.0,
-    "exports": 1941.0,
+    "exports": 3913.0,
     "storage": {
       "dis": 0.0,
-      "chg": 5.0
+      "chg": 465.0
     },
-    "pumping": 109.0,
-    "demand": 4774.0,
-    "dam_price_avg": 235.0,
+    "pumping": 218.0,
+    "demand": 9252.0,
+    "dam_price_avg": 233.0,
     "crete_flow": null,
     "hours_flows_mismatch": 0,
     "hours_balance_off": 0,
     "sources": {
-      "admie.gr": 1
+      "admie.gr": 2
     },
     "curtail_hint_hours": [],
     "curtail_other_hours": [],
@@ -38,7 +38,7 @@
       "hr": 1,
       "has_data": true,
       "dam_price": 235.0,
-      "fetched": "2026-11-03T01:06:30.120161+02:00",
+      "fetched": "2026-11-03T02:06:27.421335+02:00",
       "source": "admie.gr",
       "crete_flow": null,
       "gen": {
@@ -60,6 +60,36 @@
       },
       "pumping": 109.0,
       "demand": 4774.0,
+      "balance_ok": true,
+      "isp_surplus": null,
+      "curtail_hint": null
+    },
+    {
+      "hr": 2,
+      "has_data": true,
+      "dam_price": 231.0,
+      "fetched": "2026-11-03T02:06:27.421335+02:00",
+      "source": "admie.gr",
+      "crete_flow": null,
+      "gen": {
+        "lignite": 497.0,
+        "gas": 3106.0,
+        "hydro": 43.0,
+        "res": 3373.0,
+        "total": 7019.0,
+        "res_system": 3063.0,
+        "res_network": 310.0
+      },
+      "imports": 0.0,
+      "exports": 1972.0,
+      "flows": null,
+      "flows_match": null,
+      "storage": {
+        "dis": 0.0,
+        "chg": 460.0
+      },
+      "pumping": 109.0,
+      "demand": 4478.0,
       "balance_ok": true,
       "isp_surplus": null,
       "curtail_hint": null
