@@ -2,32 +2,32 @@
   "schema": 1,
   "date": "2026-11-07",
   "source": "ADMIE/IPTO market portal: prodmixandload, dayaheadmarket, scadainterflows",
-  "updated": "2026-11-07T09:06:40+02:00",
+  "updated": "2026-11-07T10:06:46+02:00",
   "totals": {
-    "hours_with_data": 9,
+    "hours_with_data": 10,
     "gen": {
-      "lignite": 3912.0,
-      "gas": 25540.0,
-      "hydro": 799.0,
-      "res": 22497.0,
-      "total": 52748.0,
-      "res_system": 19220.0,
-      "res_network": 3277.0
+      "lignite": 4243.0,
+      "gas": 26831.0,
+      "hydro": 922.0,
+      "res": 28488.0,
+      "total": 60484.0,
+      "res_system": 23159.0,
+      "res_network": 5329.0
     },
-    "imports": 78.0,
-    "exports": 11302.0,
+    "imports": 177.0,
+    "exports": 13420.0,
     "storage": {
-      "dis": 65.0,
-      "chg": 6.0
+      "dis": 72.0,
+      "chg": 11.0
     },
-    "pumping": 0.0,
-    "demand": 41583.0,
-    "dam_price_avg": 242.44,
+    "pumping": 68.0,
+    "demand": 47234.0,
+    "dam_price_avg": 238.7,
     "crete_flow": null,
     "hours_flows_mismatch": 0,
     "hours_balance_off": 0,
     "sources": {
-      "admie.gr": 9
+      "admie.gr": 10
     },
     "curtail_hint_hours": [],
     "curtail_other_hours": [],
@@ -38,7 +38,7 @@
       "hr": 1,
       "has_data": true,
       "dam_price": 253.0,
-      "fetched": "2026-11-07T09:06:20.333364+02:00",
+      "fetched": "2026-11-07T10:06:25.792223+02:00",
       "source": "admie.gr",
       "crete_flow": null,
       "gen": {
@@ -68,7 +68,7 @@
       "hr": 2,
       "has_data": true,
       "dam_price": 257.0,
-      "fetched": "2026-11-07T09:06:20.333364+02:00",
+      "fetched": "2026-11-07T10:06:25.792223+02:00",
       "source": "admie.gr",
       "crete_flow": null,
       "gen": {
@@ -98,7 +98,7 @@
       "hr": 3,
       "has_data": true,
       "dam_price": 246.0,
-      "fetched": "2026-11-07T09:06:20.333364+02:00",
+      "fetched": "2026-11-07T10:06:25.792223+02:00",
       "source": "admie.gr",
       "crete_flow": null,
       "gen": {
@@ -128,7 +128,7 @@
       "hr": 4,
       "has_data": true,
       "dam_price": 239.0,
-      "fetched": "2026-11-07T09:06:20.333364+02:00",
+      "fetched": "2026-11-07T10:06:25.792223+02:00",
       "source": "admie.gr",
       "crete_flow": null,
       "gen": {
@@ -158,7 +158,7 @@
       "hr": 5,
       "has_data": true,
       "dam_price": 233.0,
-      "fetched": "2026-11-07T09:06:20.333364+02:00",
+      "fetched": "2026-11-07T10:06:25.792223+02:00",
       "source": "admie.gr",
       "crete_flow": null,
       "gen": {
@@ -188,7 +188,7 @@
       "hr": 6,
       "has_data": true,
       "dam_price": 232.0,
-      "fetched": "2026-11-07T09:06:20.333364+02:00",
+      "fetched": "2026-11-07T10:06:25.792223+02:00",
       "source": "admie.gr",
       "crete_flow": null,
       "gen": {
@@ -218,7 +218,7 @@
       "hr": 7,
       "has_data": true,
       "dam_price": 238.0,
-      "fetched": "2026-11-07T09:06:20.333364+02:00",
+      "fetched": "2026-11-07T10:06:25.792223+02:00",
       "source": "admie.gr",
       "crete_flow": null,
       "gen": {
@@ -248,7 +248,7 @@
       "hr": 8,
       "has_data": true,
       "dam_price": 245.0,
-      "fetched": "2026-11-07T09:06:20.333364+02:00",
+      "fetched": "2026-11-07T10:06:25.792223+02:00",
       "source": "admie.gr",
       "crete_flow": null,
       "gen": {
@@ -278,7 +278,7 @@
       "hr": 9,
       "has_data": true,
       "dam_price": 239.0,
-      "fetched": "2026-11-07T09:06:20.333364+02:00",
+      "fetched": "2026-11-07T10:06:25.792223+02:00",
       "source": "admie.gr",
       "crete_flow": null,
       "gen": {
@@ -300,6 +300,36 @@
       },
       "pumping": 0.0,
       "demand": 5291.0,
+      "balance_ok": true,
+      "isp_surplus": null,
+      "curtail_hint": null
+    },
+    {
+      "hr": 10,
+      "has_data": true,
+      "dam_price": 205.0,
+      "fetched": "2026-11-07T10:06:25.792223+02:00",
+      "source": "admie.gr",
+      "crete_flow": null,
+      "gen": {
+        "lignite": 331.0,
+        "gas": 1291.0,
+        "hydro": 123.0,
+        "res": 5991.0,
+        "total": 7736.0,
+        "res_system": 3939.0,
+        "res_network": 2052.0
+      },
+      "imports": 99.0,
+      "exports": 2118.0,
+      "flows": null,
+      "flows_match": null,
+      "storage": {
+        "dis": 7.0,
+        "chg": 5.0
+      },
+      "pumping": 68.0,
+      "demand": 5651.0,
       "balance_ok": true,
       "isp_surplus": null,
       "curtail_hint": null
