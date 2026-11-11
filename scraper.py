@@ -62,6 +62,8 @@ def merge_hourly_record(old_record, new_record):
     merged['fetch_timestamp'] = new_record.get('fetch_timestamp', merged.get('fetch_timestamp'))
     if new_record.get('source'):
         merged['source'] = new_record['source']          # D50: από πού ήρθε η ώρα
+    if new_record.get('flows_source'):
+        merged['flows_source'] = new_record['flows_source']   # D61
     return merged
 
 # =====================================================================
@@ -169,6 +171,26 @@ def fetch_ipto(date_str):
         return []
 
 
+def fetch_ipto_flows(date_str):
+    """D61: ΜΟΝΟ οι ροές ανά χώρα από το iptoanalytics (scadainterflows), μία αίτηση για όλη την ημέρα.
+    {ώρα: {ΧΩΡΑ_IMP / ΧΩΡΑ_EXP: MWh}} ή {} όταν η πηγή δεν απαντά."""
+    url = ("https://iptoanalytics-api.admie.gr/iptoanalytics/api/ipto?endpoint=https:%2F%2Fmarket-public-api.admie.gr"
+           f"%2Frestws%2Fportal%2Fscadainterflows%2F{date_str}")
+    try:
+        r = requests.get(url, headers=HEADERS, timeout=30)
+        if r.status_code != 200:
+            return {}
+        out = {}
+        for item in (r.json() or {}).get("items", []):
+            hr, name = item.get("hr"), item.get("itemname")
+            if hr is not None and name:
+                out.setdefault(hr, {})[name] = item.get("energy")
+        return out
+    except Exception as e:
+        print(f"   [ipto ροές] {date_str}: {type(e).__name__}: {str(e)[:100]}")
+        return {}
+
+
 def fetch_admie(date_str):
     """Νέα πηγή (κύρια): www.admie.gr.
     production_fuel_hourly → όλη η μέρα με μία αίτηση (μείγμα, ζήτηση, άντληση)·
@@ -239,6 +261,15 @@ def fetch_all_data(date_str):
         role = 'κύρια' if i == 0 else 'εφεδρική'
         if n and not bad:
             print(f"✓ {date_str}: {n} ώρες από {SOURCE_NAMES[key]} ({role})")
+            # D61: όταν η κύρια πηγή δεν δίνει ροές ανά χώρα, τις συμπληρώνουμε από το iptoanalytics, αν απαντά.
+            # Το contract ελέγχει ότι το άθροισμά τους ταιριάζει με τα επίσημα σύνολα (flows_match).
+            if key != 'ipto' and os.environ.get('LIVE_FLOWS', '1') == '1':
+                fl, k = fetch_ipto_flows(date_str), 0
+                for r in recs:
+                    hr = r.get('target_hour')
+                    if fl.get(hr) and not r.get('interconnections_mwh'):
+                        r['interconnections_mwh'] = fl[hr]; r['flows_source'] = SOURCE_NAMES['ipto']; k += 1
+                print(f"  ροές ανά χώρα από {SOURCE_NAMES['ipto']}: {k} ώρες" if k else f"  ροές ανά χώρα: η {SOURCE_NAMES['ipto']} δεν έδωσε (μόνο σύνολα)")
             return recs
         why = 'καμία ώρα' if not n else f'ισοζύγιο εκτός στις ώρες {bad}'
         print(f"⚠ {date_str}: {SOURCE_NAMES[key]} ({role}) απορρίφθηκε: {why}")

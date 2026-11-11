@@ -152,6 +152,8 @@ def normalize_live_hour(rec):
         'exports': exports,
         'flows': flows,
         'flows_match': flows_match,
+        # D61: από πού ήρθαν οι ροές ανά χώρα (iptoanalytics, και όταν η ώρα ήρθε από το admie.gr)
+        'flows_source': ((rec.get('flows_source') or rec.get('source') or 'iptoanalytics') if flows else None),
         'storage': storage,
         'pumping': pumping,
         'demand': r1(demand) if demand else r1(balance),
