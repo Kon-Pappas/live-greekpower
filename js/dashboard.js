@@ -38,7 +38,7 @@ const T = {
               calTitle: 'The model, recalibrated every day', calSub: 'Each day the model is fitted again on the previous 90 days: UCE ≈ base + k₁ × metered wind + k₂ × metered solar (robust regression; 90% intervals by bootstrap over days).',
               kSolar: 'Unmetered solar', kWind: 'Distribution wind', kBase: 'Small units', perMeteredSolar: '× metered solar', perMeteredWind: '× metered wind', perHour: 'MWh every hour',
               noCalib: 'Not enough history yet for this day (the model needs two weeks of data).', bessNote: 'Distribution batteries check: when ADMIE\'s BESS fleet is added to the model its factor is {k}; if about 100 MW of distribution batteries were inside UCE with the same pattern it would be about {e}. They are not added to the decomposition.', bessSmall: 'Distribution batteries check: ADMIE\'s BESS fleet was still too small on this day to judge.', ci: '90%', none: 'No analysis for this day.' },
-        mcpTitle: 'Day-ahead price (MCP)', mcpUnit: '€/MWh', mcpDayAvg: 'Day average', mcpRank: 'Rank in the day', mcpRankOf: 'of', mcpRankHigh: 'most expensive',
+        mcpTitle: 'Day-ahead price (MCP)', mcpUnit: '€/MWh', mcpDayAvg: 'Day average', mcpRank: 'Rank in the day', mcpRankShort: 'Rank', mcpTop: 'the most expensive hour', mcpBottom: 'the cheapest hour', mcpNth: 'most expensive', mcpPartial: '{n} of {N} hours published so far', mcpStripHint: 'darker = more expensive',
         cleanEnergy: 'Clean energy', fossilFuels: 'Fossil fuels', cleanHint: 'RES (incl. CHP, as ADMIE reports) + hydro', cleanHintShort: 'RES incl. CHP + hydro', fossilHint: 'lignite + natural gas', shareOfGen: 'of generation',
         minorOther: 'Other', methodLink: 'Methodology →', networkLoad: 'Network load',
         short: { lignite: 'Lignite', gas: 'Gas', hydro: 'Hydro', res: 'RES', dis: 'BESS out', imports: 'Imports', demand: 'Demand', exports: 'Exports', chg: 'BESS in', pumping: 'Pumping' },
@@ -54,7 +54,7 @@ const T = {
                  wind: 'Wind', bigHydro: 'Large hydro', solar: 'Solar', cogen: 'Cogeneration', smallHydro: 'Small hydro', biomass: 'Biomass', uce: 'UCE', entsoeSolar: 'Solar (ENTSO-E)', entsoeWind: 'Wind (ENTSO-E)', admieSolar: 'Solar (ADMIE)', admieWind: 'Wind (ADMIE)' },
         countries: { AL: 'Albania', BG: 'Bulgaria', IT: 'Italy', TR: 'Türkiye', MK: 'North Macedonia' },
         genLedger: 'Generation', balLedger: 'System balance', ledgerTotal: 'Total', ledgerDemand: 'Demand',
-        balanceOk: 'Matches ADMIE total load', balanceOff: 'Differs from ADMIE total load',
+        balanceOk: 'Matches ADMIE total load', balanceOff: 'The balance of this hour differs from ADMIE total load',
         supplyTitle: 'Where the energy came from', usesTitle: 'Where it went',
         flowsTitle: 'Imports and exports, hour by hour', flowsSub: 'Totals of all interconnections, MWh per hour; the selected hour is highlighted.', flowsLink: 'Per-country analysis: Power Flows →', sourceLabel: 'Source:', sourceTip: 'Where the live figures of the latest hour came from',
         flowsMismatch: 'In this hour the per-country flows do not add up to ADMIE\'s official totals; the balance uses the totals.',
@@ -95,7 +95,7 @@ const T = {
               calTitle: 'Το μοντέλο, ξαναβαθμονομημένο κάθε μέρα', calSub: 'Κάθε μέρα το μοντέλο προσαρμόζεται ξανά στις 90 προηγούμενες ημέρες: UCE ≈ βάση + k₁ × μετρημένα αιολικά + k₂ × μετρημένα φ/β (ανθεκτική παλινδρόμηση· διαστήματα 90% με bootstrap ανά ημέρα).',
               kSolar: 'Φ/β που δεν μετρώνται', kWind: 'Αιολικά διανομής', kBase: 'Μικρές μονάδες', perMeteredSolar: '× μετρημένα φ/β', perMeteredWind: '× μετρημένα αιολικά', perHour: 'MWh κάθε ώρα',
               noCalib: 'Δεν υπάρχει ακόμα αρκετό ιστορικό για αυτή την ημέρα (το μοντέλο θέλει δύο εβδομάδες δεδομένων).', bessNote: 'Έλεγχος μπαταριών διανομής: όταν η λειτουργία του στόλου BESS του ΑΔΜΗΕ προστεθεί στο μοντέλο, ο συντελεστής της είναι {k}· αν περίπου 100 MW μπαταριών διανομής ήταν μέσα στο UCE με το ίδιο μοτίβο, θα ήταν περίπου {e}. Δεν προστίθενται στην ανάλυση.', bessSmall: 'Έλεγχος μπαταριών διανομής: ο στόλος BESS του ΑΔΜΗΕ ήταν ακόμα πολύ μικρός αυτή την ημέρα για να κριθεί κάτι.', ci: '90%', none: 'Δεν υπάρχει ανάλυση για αυτή την ημέρα.' },
-        mcpTitle: 'Τιμή επόμενης ημέρας (MCP)', mcpUnit: '€/MWh', mcpDayAvg: 'Μέση ημέρας', mcpRank: 'Θέση στην ημέρα', mcpRankOf: 'από', mcpRankHigh: 'ακριβότερη',
+        mcpTitle: 'Τιμή επόμενης ημέρας (MCP)', mcpUnit: '€/MWh', mcpDayAvg: 'Μέση ημέρας', mcpRank: 'Θέση στην ημέρα', mcpRankShort: 'Θέση', mcpTop: 'η ακριβότερη ώρα', mcpBottom: 'η φθηνότερη ώρα', mcpNth: 'ακριβότερη', mcpPartial: '{n} από {N} ώρες έχουν δημοσιευτεί', mcpStripHint: 'πιο σκούρο = ακριβότερο',
         cleanEnergy: 'Καθαρή ενέργεια', fossilFuels: 'Ορυκτά καύσιμα', cleanHint: 'ΑΠΕ (με ΣΗΘΥΑ, όπως τις δημοσιεύει ο ΑΔΜΗΕ) + υδροηλεκτρικά', cleanHintShort: 'ΑΠΕ με ΣΗΘΥΑ + υδρο', fossilHint: 'λιγνίτης + φυσικό αέριο', shareOfGen: 'της παραγωγής',
         minorOther: 'Λοιπά', methodLink: 'Μεθοδολογία →', networkLoad: 'Φορτίο δικτύου',
         short: { lignite: 'Λιγνίτης', gas: 'Αέριο', hydro: 'Υδρο', res: 'ΑΠΕ', dis: 'Εκφόρτιση', imports: 'Εισαγωγές', demand: 'Ζήτηση', exports: 'Εξαγωγές', chg: 'Φόρτιση', pumping: 'Άντληση' },
@@ -111,7 +111,7 @@ const T = {
                  wind: 'Αιολικά', bigHydro: 'Μεγάλα υδροηλεκτρικά', solar: 'Φωτοβολταϊκά', cogen: 'Συμπαραγωγή', smallHydro: 'Μικρά υδροηλεκτρικά', biomass: 'Βιομάζα', uce: 'UCE', entsoeSolar: 'Φ/Β (ENTSO-E)', entsoeWind: 'Αιολικά (ENTSO-E)', admieSolar: 'Φ/Β (ΑΔΜΗΕ)', admieWind: 'Αιολικά (ΑΔΜΗΕ)' },
         countries: { AL: 'Αλβανία', BG: 'Βουλγαρία', IT: 'Ιταλία', TR: 'Τουρκία', MK: 'Βόρεια Μακεδονία' },
         genLedger: 'Παραγωγή', balLedger: 'Ισοζύγιο συστήματος', ledgerTotal: 'Σύνολο', ledgerDemand: 'Ζήτηση',
-        balanceOk: 'Συμφωνεί με το συνολικό φορτίο του ΑΔΜΗΕ', balanceOff: 'Διαφέρει από το συνολικό φορτίο του ΑΔΜΗΕ',
+        balanceOk: 'Συμφωνεί με το συνολικό φορτίο του ΑΔΜΗΕ', balanceOff: 'Το ισοζύγιο αυτής της ώρας διαφέρει από το συνολικό φορτίο του ΑΔΜΗΕ',
         supplyTitle: 'Από πού ήρθε η ενέργεια', usesTitle: 'Πού πήγε',
         flowsTitle: 'Εισαγωγές και εξαγωγές, ώρα προς ώρα', flowsSub: 'Σύνολα όλων των διασυνδέσεων, MWh ανά ώρα· η επιλεγμένη ώρα τονίζεται.', flowsLink: 'Ανάλυση ανά χώρα: Power Flows →', sourceLabel: 'Πηγή:', sourceTip: 'Από πού ήρθαν τα live στοιχεία της τελευταίας ώρας',
         flowsMismatch: 'Σε αυτή την ώρα οι ροές ανά χώρα δεν αθροίζουν στα επίσημα σύνολα του ΑΔΜΗΕ· το ισοζύγιο χρησιμοποιεί τα σύνολα.',
@@ -814,8 +814,8 @@ function renderLive() {
         '<div class="border-t border-dashed border-slate-600 my-2"></div>' +
         shareRow(x.cleanEnergy, x.cleanHint, clean, C.res) + shareRow(x.fossilFuels, x.fossilHint, fossil, C.gas);
 
-    const check = h.balance_ok === true ? `<p class="mt-3 text-xs text-emerald-400">✓ ${esc(t().balanceOk)}</p>`
-        : h.balance_ok === false ? `<p class="mt-3 text-xs text-orange-300">${esc(t().balanceOff)}</p>` : '';
+    // D60: ο έλεγχος γίνεται πάντα· η σελίδα γράφει κάτι μόνο όταν το ισοζύγιο ΔΕΝ κλείνει
+    const check = h.balance_ok === false ? `<p class="mt-3 text-xs text-orange-300">⚠ ${esc(t().balanceOff)}</p>` : '';
     $('balLedger').innerHTML =
         ledgerRow(n.total, '', g.total, null) + ledgerRow(n.imports, '+', h.imports, C.imports) +
         ledgerRow(n.exports, '−', h.exports, C.exports) + ledgerRow(n.dis, '+', h.storage.dis, C.dis) +
@@ -893,12 +893,35 @@ function renderLive() {
     // MCP της ώρας, με θέση στην ημέρα και μέση τιμή
     const prices = day.hours.map((q) => q.dam_price).filter((v) => v !== null && v !== undefined);
     const rank = h.dam_price === null ? null : 1 + prices.filter((v) => v > h.dam_price).length;
+    // D60: «3η ακριβότερη», «η ακριβότερη ώρα», «η φθηνότερη ώρα» (1η = ακριβότερη)
+    const rankText = !rank ? '–' : rank === 1 ? esc(x.mcpTop)
+        : rank === prices.length && prices.length > 1 ? esc(x.mcpBottom) : `${ordinal(rank)} ${esc(x.mcpNth)}`;
+    // D60: λωρίδα με όλες τις ώρες της ημέρας· πιο σκούρο = ακριβότερο, η επιλεγμένη ώρα με περίγραμμα
+    const pmin = Math.min(...prices), pmax = Math.max(...prices);
+    const cell = (q) => {
+        const p = q.dam_price, on = q.hr === h.hr;
+        if (p === null || p === undefined) return `<span class="flex-1 h-4 rounded-[2px] border border-slate-700/70" title="${esc(hourRange(q.hr))}"></span>`;
+        const a = pmax > pmin ? 0.15 + 0.85 * (p - pmin) / (pmax - pmin) : 0.6;
+        return `<span class="flex-1 h-4 rounded-[2px] ${on ? 'ring-2 ring-white ring-offset-1 ring-offset-slate-800' : ''}" style="background:${C.price};opacity:${on ? 1 : a.toFixed(2)}" title="${esc(hourRange(q.hr))}: ${fmt(p, p % 1 ? 2 : 0)} €/MWh"></span>`;
+    };
+    // Πόσες ώρες έχει η ημέρα (κανόνας ΕΕ: 25 την τελευταία Κυριακή του Οκτωβρίου, 23 του Μαρτίου)
+    const [yy, mm, dd] = S.liveDate.split('-').map(Number);
+    const lastSun = (m) => { const d = new Date(Date.UTC(yy, m, 0)); return d.getUTCDate() - d.getUTCDay(); };
+    const N = mm === 10 && dd === lastSun(10) ? 25 : mm === 3 && dd === lastSun(3) ? 23 : 24;
+    const byHr = Object.fromEntries(day.hours.map((q) => [q.hr, q]));
+    const allHours = Array.from({ length: N }, (_, i) => byHr[i + 1] || { hr: i + 1, dam_price: null });
+    const strip = prices.length ? `<div class="pt-2">
+            <div class="flex gap-[2px]">${allHours.map(cell).join('')}</div>
+            <div class="flex justify-between text-[10px] text-slate-500 mt-1"><span>00</span><span>${esc(x.mcpStripHint)}</span><span>${pad(N - 1)}</span></div>
+            ${prices.length < N ? `<div class="text-[10px] text-slate-500 mt-0.5">${esc(x.mcpPartial.replace('{n}', prices.length).replace('{N}', N))}</div>` : ''}
+        </div>` : '';
     $('mcpBox').innerHTML = `
         <div class="flex items-baseline gap-2"><span class="text-4xl font-bold" style="color:${C.price}">${fmt(h.dam_price, h.dam_price % 1 ? 2 : 0)}</span><span class="text-sm text-slate-400">${esc(x.mcpUnit)}</span></div>
         <p class="text-xs text-slate-400 mt-1">${esc(hourRange(h.hr))}</p>
         <div class="border-t border-slate-700 mt-3 pt-3 space-y-1 text-sm">
             <div class="flex justify-between"><span class="text-slate-400">${esc(x.mcpDayAvg)}</span><span class="text-slate-100">${fmt(day.totals.dam_price_avg, 2)} ${esc(x.mcpUnit)}</span></div>
-            <div class="flex justify-between"><span class="text-slate-400">${esc(x.mcpRank)}</span><span class="text-slate-100">${rank ? `${ordinal(rank)} ${esc(x.mcpRankOf)} ${prices.length} (${esc(x.mcpRankHigh)})` : '–'}</span></div>
+            <div class="flex justify-between gap-3"><span class="text-slate-400 whitespace-nowrap"><span class="max-[339px]:hidden">${esc(x.mcpRank)}</span><span class="hidden max-[339px]:inline">${esc(x.mcpRankShort)}</span></span><span class="text-slate-100 text-right">${rankText}</span></div>
+            ${strip}
         </div>`;
 }
 
@@ -1012,11 +1035,12 @@ async function renderDaily() {
                         tipRow(n.hydro, h.gen.hydro, C.hydro) +
                         (hasSplit ? tipRow(n.resNetwork, h.gen.res_network, C.resNet) + tipRow(n.resSystem, h.gen.res_system, C.res) : tipRow(n.res, h.gen.res, C.res)) +
                         tipRow(n.dis, h.storage.dis, C.dis) +
+                        tipRow(n.imports, h.imports, C.imports) + tipRow(n.gas, h.gen.gas, C.gas) + tipRow(n.lignite, h.gen.lignite, C.lignite),
+                        // D60: ξεχωριστή ενότητα ανάμεσα σε δύο διακεκομμένες γραμμές (όπως το UCE), μόνο όταν υπάρχει κάτι
                         (h.curtail_hint && h.curtail_hint.flag ? (h.curtail_hint.case === 'B'
                             ? `<div class="flex justify-between items-baseline gap-6 py-[2px] text-[13.5px]"><span style="color:${C.curtailOther}">▽ ${esc(n.otherLegend)}:</span><span class="whitespace-nowrap" style="color:${C.curtailOther}"><b>−${fmt(100 * h.curtail_hint.drop, 0)}%</b></span></div>`
                             : `<div class="flex justify-between items-baseline gap-6 py-[2px] text-[13.5px]"><span style="color:${C.curtail}">▼ ${esc(n.curtailLegend)}:</span><span class="whitespace-nowrap" style="color:${C.curtail}"><b>−${fmt(100 * h.curtail_hint.drop, 0)}%</b></span></div>`) : '') +
-                        ((h.isp_surplus || 0) > 1 ? tipRow(n.ispTip, h.isp_surplus, 'rgba(253, 186, 116, 0.6)') : '') +
-                        tipRow(n.imports, h.imports, C.imports) + tipRow(n.gas, h.gen.gas, C.gas) + tipRow(n.lignite, h.gen.lignite, C.lignite),
+                        ((h.isp_surplus || 0) > 1 ? tipRow(n.ispTip, h.isp_surplus, 'rgba(253, 186, 116, 0.6)') : ''),
                         tipRow(n.demand, h.demand, '#94a3b8', { strong: true }) + tipRow(n.pumping, h.pumping, C.pumping) +
                         tipRow(n.chg, h.storage.chg, C.chg) + tipRow(n.exports, h.exports, C.exports));
                 })
