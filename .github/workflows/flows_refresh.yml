@@ -1,0 +1,66 @@
+name: Flows per country history refresh
+
+# D64: συμπληρώνει ροές ανά χώρα από το IPTO Analytics στις ώρες των live αρχείων που δεν έχουν (μία αίτηση ανά ημέρα).
+# Ίδιος έλεγχος αθροίσματος με το ωριαίο scrape· αλλάζει μόνο τις ροές ανά χώρα.
+# Χθες και σήμερα τις γράφει ήδη το ωριαίο scrape.
+on:
+  workflow_dispatch:
+    inputs:
+      start_date:
+        description: 'Από (YYYYMMDD)'
+        required: true
+        default: '20261029'
+      end_date:
+        description: 'Έως (YYYYMMDD) · κενό = πριν από 2 ημέρες'
+        required: false
+        default: ''
+
+permissions:
+  contents: write
+
+concurrency:
+  group: scrape-live
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests pytz
+
+      - name: Fill flows per country
+        env:
+          BF_START: ${{ github.event.inputs.start_date }}
+          BF_END: ${{ github.event.inputs.end_date }}
+        run: |
+          if [ -z "$BF_END" ]; then BF_END=$(TZ=Europe/Athens date -d '2 days ago' +%Y%m%d); fi
+          FLOWS_ONLY=1 PAUSE_SECONDS=1 START_DATE="$BF_START" END_DATE="$BF_END" python scraper.py
+
+      - name: Commit and push changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action Bot"
+          git add -A data/live
+          if git diff --staged --quiet; then
+            echo "Καμία αλλαγή."
+            exit 0
+          fi
+          git commit -m "Ροές ανά χώρα: ιστορικό ($(TZ=Europe/Athens date +'%Y-%m-%d %H:%M'))"
+          for i in 1 2 3; do
+            git pull --rebase origin main && git push && exit 0
+            echo "Push απέτυχε (προσπάθεια $i), νέα δοκιμή σε 10s..."
+            sleep 10
+          done
+          exit 1
