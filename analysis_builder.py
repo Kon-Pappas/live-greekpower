@@ -378,9 +378,15 @@ def analyse_day(day_iso, calib):
         'schema': contract.SCHEMA, 'date': day_iso, 'updated': contract.now_athens_iso(),
         'calibration': calib, 'uce_decomposition': dec, 'layers': layers, 'records': recs,
         'entsoe_gap': entsoe_gap(X, E),   # D63
+        # D65: ποιες ωριαίες τιμές παραγωγής λείπουν από τα αρχεία του ΑΔΜΗΕ (π.χ. κενό κελί)· με αυτές
+        # δεν υπολογίζονται ημερήσια σύνολα (επίπεδα) και η σελίδα το λέει αντί να αφήνει κενά κουτιά
+        'missing': [{'hr': h['hr'], 'field': k} for h in X['hours'] for k in MISSING_FIELDS if h.get(k) is None],
         'conclusion': (_concl := conclusion(day_iso, L, X, E, dec, layers, recs)),
         'conclusion_sections': sections_of(_concl),   # D62
     }
+
+
+MISSING_FIELDS = ('big_hydro', 'small_hydro', 'solar', 'wind', 'biomass', 'cogen')
 
 
 # D63: ό,τι μετρά ο ΑΔΜΗΕ αλλά η ENTSO-E δεν δίνει για την Ελλάδα: βιομάζα και μικρά υδροηλεκτρικά
