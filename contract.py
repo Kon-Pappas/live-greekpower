@@ -82,6 +82,22 @@ def list_days(folder):
 # LIVE (ΑΔΜΗΕ portal)
 # ---------------------------------------------------------------------
 
+def flows_from_inter(inter, imports, exports):
+    """Ροές ανά χώρα από τα στοιχεία διασυνδέσεων του IPTO Analytics ({ΧΩΡΑ_IMP / ΧΩΡΑ_EXP: MWh}) και έλεγχος
+    ότι το άθροισμά τους ταιριάζει με τα επίσημα σύνολα (±1 MWh). Χωρίς στοιχεία: (None, None), όχι «ασυμφωνία».
+    Κοινή για το ωριαίο scrape και τη συμπλήρωση του ιστορικού (D61, D64)."""
+    if not inter:
+        return None, None
+    flows = {}
+    for gr_name, code in COUNTRY_MAP.items():
+        imp = inter.get(f'{gr_name}_IMP')
+        exp = inter.get(f'{gr_name}_EXP')
+        flows[code] = {'imp': r1(imp), 'exp': r1(abs(exp)) if exp is not None else None}
+    flows_imp = sum((f['imp'] or 0) for f in flows.values())
+    flows_exp = sum((f['exp'] or 0) for f in flows.values())
+    return flows, (abs(flows_imp - (imports or 0)) <= 1 and abs(flows_exp - (exports or 0)) <= 1)
+
+
 def normalize_live_hour(rec):
     """Μια ωριαία εγγραφή του ΑΔΜΗΕ (όπως τη φέρνει το scraper) → μορφή v1."""
     m = rec.get('production_mix') or {}
@@ -121,23 +137,12 @@ def normalize_live_hour(rec):
     }
 
     # Ροές ανά χώρα: μόνο η παλιά πηγή τις δίνει (D50). Χωρίς αυτές: flows = None, όχι «ασυμφωνία».
-    flows = None
-    if inter:
-        flows = {}
-        for gr_name, code in COUNTRY_MAP.items():
-            imp = inter.get(f'{gr_name}_IMP')
-            exp = inter.get(f'{gr_name}_EXP')
-            flows[code] = {'imp': r1(imp), 'exp': r1(abs(exp)) if exp is not None else None}
 
     # Επίσημα σύνολα του ΑΔΜΗΕ. Με αυτά ο ισολογισμός κλείνει σε 735/735 ώρες
     # (έλεγχος 18/10/2026)· το άθροισμα ανά χώρα αποκλίνει σε 2.
     imports = r1(m.get('TOTAL IMPORTS') or 0)
     exports = r1(abs(m.get('TOTAL EXPORTS') or 0))
-    flows_match = None
-    if flows:
-        flows_imp = sum((f['imp'] or 0) for f in flows.values())
-        flows_exp = sum((f['exp'] or 0) for f in flows.values())
-        flows_match = abs(flows_imp - imports) <= 1 and abs(flows_exp - exports) <= 1
+    flows, flows_match = flows_from_inter(inter, imports, exports)
 
     storage = {'dis': r1(m.get('STORAGE_INJECTION') or 0),
                'chg': r1(abs(m.get('STORAGE_ABSORPTION') or 0))}

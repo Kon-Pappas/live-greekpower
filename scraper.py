@@ -374,6 +374,36 @@ def res_split_only(dates, pause=1.0, tol=1.0):
 
 
 if __name__ == "__main__":
+    if os.environ.get('FLOWS_ONLY', '') == '1':
+        # D64: συμπληρώνει ροές ανά χώρα από το IPTO Analytics στις ώρες των ΥΠΑΡΧΟΝΤΩΝ live αρχείων που δεν έχουν.
+        # Μία αίτηση ανά ημέρα· ίδιος υπολογισμός και έλεγχος αθροίσματος με το ωριαίο scrape (contract.flows_from_inter).
+        # Αλλάζει μόνο flows, flows_match, flows_source κάθε ώρας και το totals.hours_flows_mismatch.
+        pause = float(os.environ.get('PAUSE_SECONDS', '1') or 0)
+        n_days = n_ok = n_bad = 0; skipped = []
+        for i, d8 in enumerate(get_target_dates()[0]):
+            path = contract.day_path(contract.LIVE_DIR, d8)
+            day = load_json_strict(path, None)
+            if not day or not day.get('hours'):
+                continue
+            need = [h for h in day['hours'] if h.get('has_data') and not h.get('flows')]
+            if not need:
+                continue
+            if i and pause:
+                time.sleep(pause)
+            fl = fetch_ipto_flows(d8)
+            if not fl:
+                skipped.append(d8); continue
+            for h in need:
+                f, ok = contract.flows_from_inter(fl.get(h['hr']), h.get('imports'), h.get('exports'))
+                if f:
+                    h['flows'], h['flows_match'], h['flows_source'] = f, ok, SOURCE_NAMES['ipto']
+                    n_ok += bool(ok); n_bad += (not ok)
+            day.setdefault('totals', {})['hours_flows_mismatch'] = sum(1 for h in day['hours'] if h.get('flows_match') is False)
+            write_json_atomic(path, day); n_days += 1
+        print(f"✓ Ροές ανά χώρα: {n_days} ημέρες · {n_ok} ώρες ταιριάζουν · {n_bad} δεν ταιριάζουν (εμφανίζονται ως σύνολα)"
+              + (f" · χωρίς απάντηση: {skipped}" if skipped else ""))
+        sys.exit(0)
+
     if os.environ.get('CURTAIL_HINTS_ONLY', '') == '1':
         # D58: ενδείξεις πιθανής περικοπής φ/β μεταφοράς στα ΥΠΑΡΧΟΝΤΑ live αρχεία (μόνο τοπικά, καμία λήψη).
         # Αλλάζει μόνο το curtail_hint κάθε ώρας και το totals.curtail_hint_hours.

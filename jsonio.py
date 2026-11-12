@@ -9,6 +9,7 @@ write_json_atomic : γράφει σε προσωρινό αρχείο και μ�
                     ώστε να μη μείνει ποτέ μισογραμμένο JSON.
 """
 import json
+import math
 import os
 import sys
 
@@ -35,9 +36,22 @@ def load_json_lenient(path, default):
         return default
 
 
+def _finite(obj):
+    """D64: NaN / ±άπειρο → None, σε όλη τη δομή. Ένα κενό κελί σε αρχείο του ΑΔΜΗΕ (π.χ. RESMV 11/11/2026,
+    βιομάζα 18:00–19:00) έγινε NaN μέσω pandas· η Python το γράφει, αλλά δεν είναι έγκυρο JSON και ο browser
+    απορρίπτει ΟΛΟ το αρχείο. Κανόνας: κενό αντί για λάθος."""
+    if isinstance(obj, float):
+        return obj if math.isfinite(obj) else None
+    if isinstance(obj, dict):
+        return {k: _finite(v) for k, v in obj.items()}
+    if isinstance(obj, (list, tuple)):
+        return [_finite(v) for v in obj]
+    return obj
+
+
 def write_json_atomic(path, data):
     os.makedirs(os.path.dirname(path) or '.', exist_ok=True)
     tmp = path + '.tmp'
     with open(tmp, 'w', encoding='utf-8') as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
+        json.dump(_finite(data), f, ensure_ascii=False, indent=2, allow_nan=False)   # D64: πάντα έγκυρο JSON
     os.replace(tmp, path)

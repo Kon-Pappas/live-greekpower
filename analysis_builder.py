@@ -1,3 +1,4 @@
+import math
 import re
 """Ανάλυση ημέρας (φάση 4, D46) → data/analysis/YYYY-MM-DD.json και data/analysis/calibration.json.
 
@@ -91,6 +92,15 @@ def _pct(vals, q):
 _ROWS = {}   # μνήμη: κάθε αρχείο X-Ray διαβάζεται μία φορά ανά εκτέλεση
 
 
+def _ok(v):
+    """D64: πραγματικός, πεπερασμένος αριθμός (όχι None, NaN ή άπειρο)."""
+    return isinstance(v, (int, float)) and math.isfinite(v)
+
+
+def _ok0(v):
+    return v is None or _ok(v)
+
+
 def _day_rows(d):
     """Γραμμές ([1, αιολικά, φ/β], UCE, καθαρή λειτουργία BESS ΑΔΜΗΕ) μιας ημέρας."""
     if d not in _ROWS:
@@ -98,7 +108,7 @@ def _day_rows(d):
         lv = load_json_lenient(os.path.join(contract.LIVE_DIR, d + '.json'), None) or {}
         st = {h['hr']: h['storage']['dis'] - h['storage']['chg'] for h in lv.get('hours', []) if h.get('has_data')}
         _ROWS[d] = [([1.0, h.get('wind') or 0.0, h.get('solar') or 0.0], h['uce'], st.get(h['hr']))
-                    for h in (x or {}).get('hours', []) if h.get('uce') is not None]
+                    for h in (x or {}).get('hours', []) if _ok(h.get('uce')) and _ok0(h.get('wind')) and _ok0(h.get('solar'))]
     return _ROWS[d]
 
 
@@ -331,7 +341,7 @@ def analyse_day(day_iso, calib):
     if calib:
         hours = []
         for h in X['hours']:
-            if h.get('uce') is None:
+            if not _ok(h.get('uce')):          # D64: και NaN, όχι μόνο None
                 continue
             pv = calib['k_solar'] * (h.get('solar') or 0)
             wd = calib['k_wind'] * (h.get('wind') or 0)
