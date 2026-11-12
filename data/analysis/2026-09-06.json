@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "date": "2026-09-06",
-  "updated": "2026-11-02T16:38:44+02:00",
+  "updated": "2026-11-12T06:06:12+02:00",
   "calibration": {
     "window_days": 90,
     "from": "2026-06-09",
@@ -267,6 +267,72 @@
       "The schedule (ISP2) had a surplus in 8 hours (10:00–18:00).",
       "7.4 GWh was sent to Crete through the two cables.",
       "In ENTSO-E's final data, the day's solar, wind and biomass add up to 72.5 GWh, against 85.7 GWh in ADMIE's live figures."
+    ]
+  },
+  "conclusion_sections": {
+    "el": [
+      {
+        "k": "day",
+        "ps": [
+          "Στις 6 Σεπτεμβρίου 2026 η ζήτηση ήταν 151,8 GWh και οι ΑΠΕ με τα υδροηλεκτρικά κάλυψαν το 61,2% της εγχώριας παραγωγής (live ΑΔΜΗΕ, ΑΠΕ με ΣΗΘΥΑ). Οι καθαρές εξαγωγές ήταν 6,5 GWh και η μέση τιμή επόμενης ημέρας 115,00 €/MWh."
+        ]
+      },
+      {
+        "k": "uce",
+        "ps": [
+          "Από την παραγωγή της διανομής, 11,9 GWh δεν μετρήθηκαν ωριαία. Εκτιμώνται 10,3 GWh φ/β στέγης και χαμηλής τάσης, 1,4 GWh αιολικά της διανομής και 1,8 GWh μικρές μονάδες· το υπόλοιπο (−1,5 GWh) είναι απόκλιση της εκτίμησης του ΑΔΜΗΕ από το μοντέλο."
+        ]
+      },
+      {
+        "k": "isp",
+        "ps": [
+          "Ο προγραμματισμός (ISP2) είχε πλεόνασμα σε 8 ώρες (10:00–18:00)."
+        ]
+      },
+      {
+        "k": "crete",
+        "ps": [
+          "Προς την Κρήτη στάλθηκαν 7,4 GWh μέσα από τα δύο καλώδια."
+        ]
+      },
+      {
+        "k": "entsoe",
+        "ps": [
+          "Στην ENTSO-E (τελική έκδοση) φ/β, αιολικά και βιομάζα της ημέρας είναι 72,5 GWh, έναντι 85,7 GWh στα live στοιχεία του ΑΔΜΗΕ."
+        ]
+      }
+    ],
+    "en": [
+      {
+        "k": "day",
+        "ps": [
+          "On 6 September 2026 demand was 151.8 GWh and renewables with hydro covered 61.2% of domestic generation (ADMIE live, RES incl. CHP). Net exports were 6.5 GWh and the average day-ahead price 115.00 €/MWh."
+        ]
+      },
+      {
+        "k": "uce",
+        "ps": [
+          "Of distribution-level generation, 11.9 GWh was not metered hourly. An estimated 10.3 GWh came from rooftop and other low-voltage solar, 1.4 GWh from distribution-connected wind and 1.8 GWh from small units; the remainder (−1.5 GWh) is the difference between ADMIE's estimate and the model."
+        ]
+      },
+      {
+        "k": "isp",
+        "ps": [
+          "The schedule (ISP2) had a surplus in 8 hours (10:00–18:00)."
+        ]
+      },
+      {
+        "k": "crete",
+        "ps": [
+          "7.4 GWh was sent to Crete through the two cables."
+        ]
+      },
+      {
+        "k": "entsoe",
+        "ps": [
+          "In ENTSO-E's final data, the day's solar, wind and biomass add up to 72.5 GWh, against 85.7 GWh in ADMIE's live figures."
+        ]
+      }
     ]
   }
 }

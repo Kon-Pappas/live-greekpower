@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "date": "2026-10-28",
-  "updated": "2026-11-02T16:40:24+02:00",
+  "updated": "2026-11-12T06:07:08+02:00",
   "calibration": {
     "window_days": 90,
     "from": "2026-07-31",
@@ -241,15 +241,15 @@
       "transmission_no_crete": 102165.0,
       "mv": 9736.9,
       "lv": 8380.1,
-      "entsoe": 119196.4
+      "entsoe": 118141.6
     },
     "res": {
       "transmission": 65644.0,
       "metered": 75380.9,
       "live": 83761.0,
       "live_sw": 81146.1,
-      "entsoe": 75650.6,
-      "entsoe_status": "provisional"
+      "entsoe": 73737.6,
+      "entsoe_status": "final"
     }
   },
   "records": [
@@ -275,7 +275,7 @@
       "Ο προγραμματισμός (ISP2) είχε πλεόνασμα σε 1 ώρα (09:00–10:00).",
       "Σε 4 ώρες (11:00–15:00) η μεταφορά έπεσε χωρίς πλεόνασμα στον προγραμματισμό· πιθανώς άλλη αιτία.",
       "Προς την Κρήτη στάλθηκαν 6,7 GWh μέσα από τα δύο καλώδια.",
-      "Στην ENTSO-E (προσωρινή έκδοση) φ/β, αιολικά και βιομάζα της ημέρας είναι 75,7 GWh, έναντι 81,1 GWh στα live στοιχεία του ΑΔΜΗΕ.",
+      "Στην ENTSO-E (τελική έκδοση) φ/β, αιολικά και βιομάζα της ημέρας είναι 73,7 GWh, έναντι 81,1 GWh στα live στοιχεία του ΑΔΜΗΕ.",
       "Ρεκόρ της ημέρας στις πέντε κορυφαίες θέσεις: εξαγωγές (ημερήσιο, #5), εκφόρτιση BESS (ωριαίο, #5)."
     ],
     "en": [
@@ -284,8 +284,88 @@
       "The schedule (ISP2) had a surplus in 1 hour (09:00–10:00).",
       "In 4 hours (11:00–15:00) transmission fell without a surplus in the schedule; probably another cause.",
       "6.7 GWh was sent to Crete through the two cables.",
-      "In ENTSO-E's provisional data, the day's solar, wind and biomass add up to 75.7 GWh, against 81.1 GWh in ADMIE's live figures.",
+      "In ENTSO-E's final data, the day's solar, wind and biomass add up to 73.7 GWh, against 81.1 GWh in ADMIE's live figures.",
       "Records of the day in the top five: exports (daily, #5), BESS discharge (hourly, #5)."
+    ]
+  },
+  "conclusion_sections": {
+    "el": [
+      {
+        "k": "day",
+        "ps": [
+          "Στις 28 Οκτωβρίου 2026 η ζήτηση ήταν 127,0 GWh και οι ΑΠΕ με τα υδροηλεκτρικά κάλυψαν το 52,2% της εγχώριας παραγωγής (live ΑΔΜΗΕ, ΑΠΕ με ΣΗΘΥΑ). Οι καθαρές εξαγωγές ήταν 48,0 GWh και η μέση τιμή επόμενης ημέρας 232,33 €/MWh."
+        ]
+      },
+      {
+        "k": "uce",
+        "ps": [
+          "Από την παραγωγή της διανομής, 8,4 GWh δεν μετρήθηκαν ωριαία. Εκτιμώνται 2,8 GWh φ/β στέγης και χαμηλής τάσης, 3,3 GWh αιολικά της διανομής και 1,4 GWh μικρές μονάδες· το υπόλοιπο (+0,9 GWh) είναι απόκλιση της εκτίμησης του ΑΔΜΗΕ από το μοντέλο."
+        ]
+      },
+      {
+        "k": "isp",
+        "ps": [
+          "Ο προγραμματισμός (ISP2) είχε πλεόνασμα σε 1 ώρα (09:00–10:00).",
+          "Σε 4 ώρες (11:00–15:00) η μεταφορά έπεσε χωρίς πλεόνασμα στον προγραμματισμό· πιθανώς άλλη αιτία."
+        ]
+      },
+      {
+        "k": "crete",
+        "ps": [
+          "Προς την Κρήτη στάλθηκαν 6,7 GWh μέσα από τα δύο καλώδια."
+        ]
+      },
+      {
+        "k": "entsoe",
+        "ps": [
+          "Στην ENTSO-E (τελική έκδοση) φ/β, αιολικά και βιομάζα της ημέρας είναι 73,7 GWh, έναντι 81,1 GWh στα live στοιχεία του ΑΔΜΗΕ."
+        ]
+      },
+      {
+        "k": "rec",
+        "ps": [
+          "Ρεκόρ της ημέρας στις πέντε κορυφαίες θέσεις: εξαγωγές (ημερήσιο, #5), εκφόρτιση BESS (ωριαίο, #5)."
+        ]
+      }
+    ],
+    "en": [
+      {
+        "k": "day",
+        "ps": [
+          "On 28 October 2026 demand was 127.0 GWh and renewables with hydro covered 52.2% of domestic generation (ADMIE live, RES incl. CHP). Net exports were 48.0 GWh and the average day-ahead price 232.33 €/MWh."
+        ]
+      },
+      {
+        "k": "uce",
+        "ps": [
+          "Of distribution-level generation, 8.4 GWh was not metered hourly. An estimated 2.8 GWh came from rooftop and other low-voltage solar, 3.3 GWh from distribution-connected wind and 1.4 GWh from small units; the remainder (+0.9 GWh) is the difference between ADMIE's estimate and the model."
+        ]
+      },
+      {
+        "k": "isp",
+        "ps": [
+          "The schedule (ISP2) had a surplus in 1 hour (09:00–10:00).",
+          "In 4 hours (11:00–15:00) transmission fell without a surplus in the schedule; probably another cause."
+        ]
+      },
+      {
+        "k": "crete",
+        "ps": [
+          "6.7 GWh was sent to Crete through the two cables."
+        ]
+      },
+      {
+        "k": "entsoe",
+        "ps": [
+          "In ENTSO-E's final data, the day's solar, wind and biomass add up to 73.7 GWh, against 81.1 GWh in ADMIE's live figures."
+        ]
+      },
+      {
+        "k": "rec",
+        "ps": [
+          "Records of the day in the top five: exports (daily, #5), BESS discharge (hourly, #5)."
+        ]
+      }
     ]
   }
 }

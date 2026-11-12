@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "date": "2026-10-05",
-  "updated": "2026-11-02T16:39:40+02:00",
+  "updated": "2026-11-12T06:06:44+02:00",
   "calibration": {
     "window_days": 90,
     "from": "2026-07-08",
@@ -277,6 +277,84 @@
       "5.7 GWh was sent to Crete through the two cables.",
       "In ENTSO-E's final data, the day's solar, wind and biomass add up to 84.9 GWh, against 96.2 GWh in ADMIE's live figures.",
       "Records of the day in the top five: BESS charge + pumping (daily, #3)."
+    ]
+  },
+  "conclusion_sections": {
+    "el": [
+      {
+        "k": "day",
+        "ps": [
+          "Στις 5 Οκτωβρίου 2026 η ζήτηση ήταν 125,9 GWh και οι ΑΠΕ με τα υδροηλεκτρικά κάλυψαν το 70,5% της εγχώριας παραγωγής (live ΑΔΜΗΕ, ΑΠΕ με ΣΗΘΥΑ). Οι καθαρές εξαγωγές ήταν 24,6 GWh και η μέση τιμή επόμενης ημέρας 148,21 €/MWh."
+        ]
+      },
+      {
+        "k": "uce",
+        "ps": [
+          "Από την παραγωγή της διανομής, 11,2 GWh δεν μετρήθηκαν ωριαία. Εκτιμώνται 7,6 GWh φ/β στέγης και χαμηλής τάσης, 2,6 GWh αιολικά της διανομής και 2,2 GWh μικρές μονάδες· το υπόλοιπο (−1,1 GWh) είναι απόκλιση της εκτίμησης του ΑΔΜΗΕ από το μοντέλο."
+        ]
+      },
+      {
+        "k": "isp",
+        "ps": [
+          "Ο προγραμματισμός (ISP2) είχε πλεόνασμα σε 9 ώρες (09:00–18:00)· σε 4 από αυτές φάνηκε πιθανή περικοπή φ/β μεταφοράς (11:00–15:00)."
+        ]
+      },
+      {
+        "k": "crete",
+        "ps": [
+          "Προς την Κρήτη στάλθηκαν 5,7 GWh μέσα από τα δύο καλώδια."
+        ]
+      },
+      {
+        "k": "entsoe",
+        "ps": [
+          "Στην ENTSO-E (τελική έκδοση) φ/β, αιολικά και βιομάζα της ημέρας είναι 84,9 GWh, έναντι 96,2 GWh στα live στοιχεία του ΑΔΜΗΕ."
+        ]
+      },
+      {
+        "k": "rec",
+        "ps": [
+          "Ρεκόρ της ημέρας στις πέντε κορυφαίες θέσεις: φόρτιση BESS + άντληση (ημερήσιο, #3)."
+        ]
+      }
+    ],
+    "en": [
+      {
+        "k": "day",
+        "ps": [
+          "On 5 October 2026 demand was 125.9 GWh and renewables with hydro covered 70.5% of domestic generation (ADMIE live, RES incl. CHP). Net exports were 24.6 GWh and the average day-ahead price 148.21 €/MWh."
+        ]
+      },
+      {
+        "k": "uce",
+        "ps": [
+          "Of distribution-level generation, 11.2 GWh was not metered hourly. An estimated 7.6 GWh came from rooftop and other low-voltage solar, 2.6 GWh from distribution-connected wind and 2.2 GWh from small units; the remainder (−1.1 GWh) is the difference between ADMIE's estimate and the model."
+        ]
+      },
+      {
+        "k": "isp",
+        "ps": [
+          "The schedule (ISP2) had a surplus in 9 hours (09:00–18:00); in 4 of them a possible curtailment of transmission solar showed (11:00–15:00)."
+        ]
+      },
+      {
+        "k": "crete",
+        "ps": [
+          "5.7 GWh was sent to Crete through the two cables."
+        ]
+      },
+      {
+        "k": "entsoe",
+        "ps": [
+          "In ENTSO-E's final data, the day's solar, wind and biomass add up to 84.9 GWh, against 96.2 GWh in ADMIE's live figures."
+        ]
+      },
+      {
+        "k": "rec",
+        "ps": [
+          "Records of the day in the top five: BESS charge + pumping (daily, #3)."
+        ]
+      }
     ]
   }
 }
