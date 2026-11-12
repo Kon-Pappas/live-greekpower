@@ -1,3 +1,4 @@
+import re
 """Ανάλυση ημέρας (φάση 4, D46) → data/analysis/YYYY-MM-DD.json και data/analysis/calibration.json.
 
 Τα αρχεία του φακέλου data/analysis/ τα γράφει ΜΟΝΟ αυτό το script (τρέχει στο X-Ray workflow
@@ -198,6 +199,39 @@ def _fmt_date(iso, lang):
     return f"{d} {months[m - 1]} {y}"
 
 
+# D62: οι προτάσεις του συμπεράσματος σε ενότητες (ημέρα, διανομή, προγραμματισμός και περικοπές, Κρήτη,
+# ENTSO-E, ρεκόρ). Οι προτάσεις είναι δικές μας, με σταθερή διατύπωση, οπότε η κατάταξη είναι ντετερμινιστική
+# (ελέγχθηκε σε όλο το ιστορικό, 1 Απρ–1 Νοε 2026: καμία λάθος ενότητα, ίδια πλήθη σε GR και EN).
+def _section(i, p):
+    if i == 0:
+        return 'day'
+    if re.search(r'ISP2|περικοπ|curtail|χωρίς πλεόνασμα|without a surplus', p):
+        return 'isp'
+    if re.search(r'Κρήτη|Crete', p):
+        return 'crete'
+    if 'ENTSO-E' in p:
+        return 'entsoe'
+    if re.match(r'Ρεκόρ|Record', p):
+        return 'rec'
+    return 'uce'
+
+
+def sections_of(concl):
+    out = {}
+    for lang, P in (concl or {}).items():
+        groups = []
+        for i, p in enumerate(P):
+            k = _section(i, p)
+            if groups and groups[-1]['k'] == k:
+                groups[-1]['ps'].append(p)
+            elif any(g['k'] == k for g in groups):
+                next(g for g in groups if g['k'] == k)['ps'].append(p)
+            else:
+                groups.append({'k': k, 'ps': [p]})
+        out[lang] = groups
+    return out
+
+
 def _hours_label(hrs):
     """[12, 13, 15] → «11:00–13:00, 14:00–15:00» (συνεχόμενες ώρες σε ένα διάστημα)."""
     hrs = sorted(hrs); out = []; a = b = hrs[0]
@@ -333,7 +367,8 @@ def analyse_day(day_iso, calib):
     return {
         'schema': contract.SCHEMA, 'date': day_iso, 'updated': contract.now_athens_iso(),
         'calibration': calib, 'uce_decomposition': dec, 'layers': layers, 'records': recs,
-        'conclusion': conclusion(day_iso, L, X, E, dec, layers, recs),
+        'conclusion': (_concl := conclusion(day_iso, L, X, E, dec, layers, recs)),
+        'conclusion_sections': sections_of(_concl),   # D62
     }
 
 

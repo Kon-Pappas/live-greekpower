@@ -26,7 +26,7 @@ const C = {
 const T = {
     en: {
         locale: 'en-GB', title: 'Greek Power Live',
-        an: { conclTitle: 'Conclusion of the day', conclSub: 'Written automatically from the day\'s data, the same way every day; the decomposition is a model estimate.',
+        an: { sec: { day: 'The day', uce: 'Distribution (UCE)', isp: 'Schedule and curtailment', crete: 'Crete', entsoe: 'ENTSO-E', rec: 'Records' },  conclTitle: 'Conclusion of the day', conclSub: 'Written automatically from the day\'s data, the same way every day; the decomposition is a model estimate.',
               decTitle: 'What the unmetered generation is made of', decSub: 'UCE hour by hour, split by the model into low-voltage solar, distribution wind and small units; the rest is the difference between ADMIE\'s estimate and the model (it can be negative).',
               pv: 'Low-voltage solar (est.)', wind: 'Distribution wind (est.)', base: 'Small units (est.)', residual: 'Difference from model', uce: 'UCE (ADMIE)',
               loadTitle: 'Layers of the day\'s load', loadSub: 'ADMIE\'s live load built up layer by layer, against ENTSO-E\'s load. GWh.',
@@ -83,7 +83,7 @@ const T = {
     },
     el: {
         locale: 'el-GR', title: 'Greek Power Live',
-        an: { conclTitle: 'Το συμπέρασμα της ημέρας', conclSub: 'Γράφεται αυτόματα από τα δεδομένα της ημέρας, με τον ίδιο τρόπο κάθε μέρα· η ανάλυση είναι εκτίμηση μοντέλου.',
+        an: { sec: { day: 'Η ημέρα', uce: 'Διανομή (UCE)', isp: 'Προγραμματισμός και περικοπές', crete: 'Κρήτη', entsoe: 'ENTSO-E', rec: 'Ρεκόρ' },  conclTitle: 'Το συμπέρασμα της ημέρας', conclSub: 'Γράφεται αυτόματα από τα δεδομένα της ημέρας, με τον ίδιο τρόπο κάθε μέρα· η ανάλυση είναι εκτίμηση μοντέλου.',
               decTitle: 'Από τι αποτελείται η παραγωγή που δεν μετριέται', decSub: 'Το UCE ώρα προς ώρα, χωρισμένο από το μοντέλο σε φ/β χαμηλής τάσης, αιολικά διανομής και μικρές μονάδες· το υπόλοιπο είναι η απόκλιση της εκτίμησης του ΑΔΜΗΕ από το μοντέλο (μπορεί να είναι αρνητική).',
               pv: 'Φ/β χαμηλής τάσης (εκτ.)', wind: 'Αιολικά διανομής (εκτ.)', base: 'Μικρές μονάδες (εκτ.)', residual: 'Απόκλιση από το μοντέλο', uce: 'UCE (ΑΔΜΗΕ)',
               loadTitle: 'Τα επίπεδα του φορτίου της ημέρας', loadSub: 'Το live φορτίο του ΑΔΜΗΕ χτισμένο επίπεδο προς επίπεδο, έναντι του φορτίου της ENTSO-E. GWh.',
@@ -829,7 +829,10 @@ function renderLive() {
         const wide = $(id).parentElement.clientWidth >= CALLOUT_MIN_WIDTH;
         const sum = data.reduce((a, i) => a + i.v, 0);
         const minor = data.filter((i) => i.v / sum < 0.03);
-        $(`${id}Minor`).textContent = wide && minor.length ? `${x.minorOther}: ` + minor.map((i) => `${i.l} ${fmt(i.v)} MWh`).join(' · ') : '';
+        // D62: τα ποσά κάτω από 3% (δεν φαίνονται στην πίτα): 13 px, φωτεινά, με το χρώμα της πηγής
+        $(`${id}Minor`).innerHTML = wide && minor.length
+            ? `<span class="text-slate-400">${esc(x.minorOther)}:</span> ` + minor.map((i) => `<span class="inline-flex items-center gap-1.5 whitespace-nowrap ml-2"><span class="w-2.5 h-2.5 rounded-sm" style="background:${i.c}"></span><span class="text-slate-200">${esc(i.l)}</span> <b class="text-white">${fmt(i.v)}</b> <span class="text-slate-500 text-[11px]">MWh</span></span>`).join('')
+            : '';
         upsertChart(id, {
             type: 'doughnut',
             data: { labels: data.map((i) => i.l), datasets: [{ data: data.map((i) => i.v), backgroundColor: data.map((i) => i.c), borderColor: '#1e293b', borderWidth: 2 }] },
@@ -1462,7 +1465,16 @@ async function renderAnalysis() {
     if (!A) { $('anConclusion').innerHTML = `<p class="text-slate-400">${esc(a.none)}</p>`; return; }
 
     // 1. Συμπέρασμα
-    $('anConclusion').innerHTML = (A.conclusion[S.lang] || []).map((p) => `<p>${esc(p)}</p>`).join('');
+    // D62: ενότητες με τίτλο και χρωματιστή «ράχη» (χρώμα του θέματος στα διαγράμματα)· παλιά αρχεία: απλές παράγραφοι
+    const G = A.conclusion_sections && A.conclusion_sections[S.lang];
+    const COL = { day: '#e2e8f0', uce: C.resNet, isp: C.curtail, crete: C_AN.crete, entsoe: '#94a3b8', rec: '#d946ef' };
+    $('anConclusion').innerHTML = G
+        ? `<div class="grid grid-cols-1 md:grid-cols-2 gap-3">${G.map((g) => `
+            <div class="pl-3 border-l-2 ${g.k === 'day' ? 'md:col-span-2' : ''}" style="border-color:${COL[g.k] || '#94a3b8'}">
+                <div class="text-[11px] font-semibold mb-1" style="color:${COL[g.k] || '#94a3b8'}">${esc(a.sec[g.k] || '')}</div>
+                ${g.ps.map((p) => `<p class="text-sm text-slate-200 leading-relaxed">${esc(p)}</p>`).join('')}
+            </div>`).join('')}</div>`
+        : (A.conclusion[S.lang] || []).map((p) => `<p>${esc(p)}</p>`).join('');
 
     // 2. Ανάλυση UCE ώρα προς ώρα
     const D = A.uce_decomposition;
