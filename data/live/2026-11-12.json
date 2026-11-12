@@ -2,32 +2,32 @@
   "schema": 1,
   "date": "2026-11-12",
   "source": "ADMIE/IPTO market portal: prodmixandload, dayaheadmarket, scadainterflows",
-  "updated": "2026-11-12T06:06:47+02:00",
+  "updated": "2026-11-12T07:06:46+02:00",
   "totals": {
-    "hours_with_data": 6,
+    "hours_with_data": 7,
     "gen": {
-      "lignite": 2612.0,
-      "gas": 18386.0,
-      "hydro": 282.0,
-      "res": 18414.0,
-      "total": 39694.0,
-      "res_system": 16546.0,
-      "res_network": 1868.0
+      "lignite": 3046.0,
+      "gas": 20900.0,
+      "hydro": 398.0,
+      "res": 21606.0,
+      "total": 45950.0,
+      "res_system": 19452.0,
+      "res_network": 2154.0
     },
     "imports": 0.0,
-    "exports": 12075.0,
+    "exports": 13347.0,
     "storage": {
-      "dis": 0.0,
-      "chg": 565.0
+      "dis": 2.0,
+      "chg": 598.0
     },
     "pumping": 0.0,
-    "demand": 27054.0,
-    "dam_price_avg": 236.5,
+    "demand": 32007.0,
+    "dam_price_avg": 237.29,
     "crete_flow": null,
     "hours_flows_mismatch": 0,
     "hours_balance_off": 0,
     "sources": {
-      "admie.gr": 6
+      "admie.gr": 7
     },
     "curtail_hint_hours": [],
     "curtail_other_hours": [],
@@ -38,7 +38,7 @@
       "hr": 1,
       "has_data": true,
       "dam_price": 241.0,
-      "fetched": "2026-11-12T06:06:27.648152+02:00",
+      "fetched": "2026-11-12T07:06:24.644515+02:00",
       "source": "admie.gr",
       "crete_flow": null,
       "gen": {
@@ -90,7 +90,7 @@
       "hr": 2,
       "has_data": true,
       "dam_price": 232.0,
-      "fetched": "2026-11-12T06:06:27.648152+02:00",
+      "fetched": "2026-11-12T07:06:24.644515+02:00",
       "source": "admie.gr",
       "crete_flow": null,
       "gen": {
@@ -142,7 +142,7 @@
       "hr": 3,
       "has_data": true,
       "dam_price": 228.0,
-      "fetched": "2026-11-12T06:06:27.648152+02:00",
+      "fetched": "2026-11-12T07:06:24.644515+02:00",
       "source": "admie.gr",
       "crete_flow": null,
       "gen": {
@@ -194,7 +194,7 @@
       "hr": 4,
       "has_data": true,
       "dam_price": 220.0,
-      "fetched": "2026-11-12T06:06:27.648152+02:00",
+      "fetched": "2026-11-12T07:06:24.644515+02:00",
       "source": "admie.gr",
       "crete_flow": null,
       "gen": {
@@ -246,7 +246,7 @@
       "hr": 5,
       "has_data": true,
       "dam_price": 236.0,
-      "fetched": "2026-11-12T06:06:27.648152+02:00",
+      "fetched": "2026-11-12T07:06:24.644515+02:00",
       "source": "admie.gr",
       "crete_flow": null,
       "gen": {
@@ -298,7 +298,7 @@
       "hr": 6,
       "has_data": true,
       "dam_price": 262.0,
-      "fetched": "2026-11-12T06:06:27.648152+02:00",
+      "fetched": "2026-11-12T07:06:24.644515+02:00",
       "source": "admie.gr",
       "crete_flow": null,
       "gen": {
@@ -342,6 +342,58 @@
       },
       "pumping": 0.0,
       "demand": 4482.0,
+      "balance_ok": true,
+      "isp_surplus": null,
+      "curtail_hint": null
+    },
+    {
+      "hr": 7,
+      "has_data": true,
+      "dam_price": 242.0,
+      "fetched": "2026-11-12T07:06:24.644515+02:00",
+      "source": "admie.gr",
+      "crete_flow": null,
+      "gen": {
+        "lignite": 434.0,
+        "gas": 2514.0,
+        "hydro": 116.0,
+        "res": 3192.0,
+        "total": 6256.0,
+        "res_system": 2906.0,
+        "res_network": 286.0
+      },
+      "imports": 0.0,
+      "exports": 1272.0,
+      "flows": {
+        "AL": {
+          "imp": 0.0,
+          "exp": 118.0
+        },
+        "BG": {
+          "imp": 0.0,
+          "exp": 658.0
+        },
+        "IT": {
+          "imp": 0.0,
+          "exp": 0.0
+        },
+        "TR": {
+          "imp": 0.0,
+          "exp": 143.0
+        },
+        "MK": {
+          "imp": 0.0,
+          "exp": 353.0
+        }
+      },
+      "flows_match": true,
+      "flows_source": "iptoanalytics",
+      "storage": {
+        "dis": 2.0,
+        "chg": 33.0
+      },
+      "pumping": 0.0,
+      "demand": 4953.0,
       "balance_ok": true,
       "isp_surplus": null,
       "curtail_hint": null
