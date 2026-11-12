@@ -5275,14 +5275,39 @@
         "k_bess": -0.0172,
         "expected_if_in_uce": 0.174
       }
+    },
+    "2026-11-11": {
+      "base": NaN,
+      "k_wind": NaN,
+      "k_solar": NaN,
+      "hours": 2161,
+      "ci90": {
+        "base": [
+          43.306,
+          NaN
+        ],
+        "k_wind": [
+          0.0584,
+          NaN
+        ],
+        "k_solar": [
+          0.1841,
+          NaN
+        ]
+      },
+      "diag_bess": {
+        "fleet_p99": 576.0,
+        "k_bess": NaN,
+        "expected_if_in_uce": 0.174
+      }
     }
   },
   "entsoe_gap_total": {
     "from": "2026-04-01",
-    "to": "2026-11-09",
-    "days": 223,
-    "biomass": 517625.7,
-    "small_hydro": 381007.3
+    "to": "2026-11-11",
+    "days": 225,
+    "biomass": NaN,
+    "small_hydro": 383074.7
   },
-  "updated": "2026-11-12T07:17:40+02:00"
+  "updated": "2026-11-12T10:16:56+02:00"
 }
