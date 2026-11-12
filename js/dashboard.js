@@ -26,7 +26,7 @@ const C = {
 const T = {
     en: {
         locale: 'en-GB', title: 'Greek Power Live',
-        an: { sec: { day: 'The day', uce: 'Distribution (UCE)', isp: 'Schedule and curtailment', crete: 'Crete', entsoe: 'ENTSO-E', rec: 'Records' },  conclTitle: 'Conclusion of the day', conclSub: 'Written automatically from the day\'s data, the same way every day; the decomposition is a model estimate.',
+        an: { decAll: 'All clean energy', decUce: 'Unmetered only (UCE)', decTitleAll: 'All clean energy, hour by hour', decSubAll: 'Metered by ADMIE (strong colours) and estimated by the UCE analysis (light shades); the dashed line is ADMIE live clean energy.', bigHydro: 'Large hydro', smallHydro: 'Small hydro', biomass: 'Biomass', windM: 'Wind (metered)', pvM: 'Solar (metered)', liveClean: 'ADMIE live clean', measured: 'Metered', estimated: 'Estimated (UCE)', gapTitle: 'What ENTSO-E does not publish', gapSub: 'ADMIE meters biomass and small hydro hour by hour; ENTSO-E gives no values for "Biomass" or "Hydro Run-of-river" for Greece (shown as n/e).', gapDay: 'The day', gapSince: 'Since', gapAvg: 'average', gapNe: 'ENTSO-E: n/e', gapTotal: 'Total', gapCap: 'installed according to ENTSO-E', gapUse: 'utilisation', otherRes: 'Other renewable', otherResNote: 'ADMIE has no matching category; what it includes is not known.', gapCapSrc: 'Installed capacity: ENTSO-E, Installed Capacity per Production Type, 2026.', sec: { day: 'The day', uce: 'Distribution (UCE)', isp: 'Schedule and curtailment', crete: 'Crete', entsoe: 'ENTSO-E', rec: 'Records' },  conclTitle: 'Conclusion of the day', conclSub: 'Written automatically from the day\'s data, the same way every day; the decomposition is a model estimate.',
               decTitle: 'What the unmetered generation is made of', decSub: 'UCE hour by hour, split by the model into low-voltage solar, distribution wind and small units; the rest is the difference between ADMIE\'s estimate and the model (it can be negative).',
               pv: 'Low-voltage solar (est.)', wind: 'Distribution wind (est.)', base: 'Small units (est.)', residual: 'Difference from model', uce: 'UCE (ADMIE)',
               loadTitle: 'Layers of the day\'s load', loadSub: 'ADMIE\'s live load built up layer by layer, against ENTSO-E\'s load. GWh.',
@@ -83,7 +83,7 @@ const T = {
     },
     el: {
         locale: 'el-GR', title: 'Greek Power Live',
-        an: { sec: { day: 'Η ημέρα', uce: 'Διανομή (UCE)', isp: 'Προγραμματισμός και περικοπές', crete: 'Κρήτη', entsoe: 'ENTSO-E', rec: 'Ρεκόρ' },  conclTitle: 'Το συμπέρασμα της ημέρας', conclSub: 'Γράφεται αυτόματα από τα δεδομένα της ημέρας, με τον ίδιο τρόπο κάθε μέρα· η ανάλυση είναι εκτίμηση μοντέλου.',
+        an: { decAll: 'Όλη η καθαρή', decUce: 'Μόνο η μη μετρημένη (UCE)', decTitleAll: 'Όλη η καθαρή ενέργεια, ώρα προς ώρα', decSubAll: 'Μετρημένη από τον ΑΔΜΗΕ (έντονα χρώματα) και εκτιμώμενη από την ανάλυση του UCE (ανοιχτές αποχρώσεις)· η διακεκομμένη γραμμή είναι η live καθαρή του ΑΔΜΗΕ.', bigHydro: 'Μεγάλα υδροηλεκτρικά', smallHydro: 'Μικρά υδροηλεκτρικά', biomass: 'Βιομάζα', windM: 'Αιολικά (μετρημένα)', pvM: 'Φ/β (μετρημένα)', liveClean: 'Live καθαρή ΑΔΜΗΕ', measured: 'Μετρημένα', estimated: 'Εκτιμώμενα (UCE)', gapTitle: 'Τι δεν δημοσιεύει η ENTSO-E', gapSub: 'Ο ΑΔΜΗΕ μετρά βιομάζα και μικρά υδροηλεκτρικά ώρα προς ώρα· η ENTSO-E δεν δίνει τιμές για «Biomass» ούτε για «Hydro Run-of-river» για την Ελλάδα (εμφανίζονται ως n/e).', gapDay: 'Η ημέρα', gapSince: 'Από', gapAvg: 'μέσος όρος', gapNe: 'ENTSO-E: n/e', gapTotal: 'Σύνολο', gapCap: 'εγκατεστημένα κατά την ENTSO-E', gapUse: 'αξιοποίηση', otherRes: 'Άλλες ΑΠΕ (Other renewable)', otherResNote: 'Ο ΑΔΜΗΕ δεν έχει αντίστοιχη κατηγορία· δεν είναι γνωστό τι περιλαμβάνει.', gapCapSrc: 'Εγκατεστημένη ισχύς: ENTSO-E, Installed Capacity per Production Type, 2026.', sec: { day: 'Η ημέρα', uce: 'Διανομή (UCE)', isp: 'Προγραμματισμός και περικοπές', crete: 'Κρήτη', entsoe: 'ENTSO-E', rec: 'Ρεκόρ' },  conclTitle: 'Το συμπέρασμα της ημέρας', conclSub: 'Γράφεται αυτόματα από τα δεδομένα της ημέρας, με τον ίδιο τρόπο κάθε μέρα· η ανάλυση είναι εκτίμηση μοντέλου.',
               decTitle: 'Από τι αποτελείται η παραγωγή που δεν μετριέται', decSub: 'Το UCE ώρα προς ώρα, χωρισμένο από το μοντέλο σε φ/β χαμηλής τάσης, αιολικά διανομής και μικρές μονάδες· το υπόλοιπο είναι η απόκλιση της εκτίμησης του ΑΔΜΗΕ από το μοντέλο (μπορεί να είναι αρνητική).',
               pv: 'Φ/β χαμηλής τάσης (εκτ.)', wind: 'Αιολικά διανομής (εκτ.)', base: 'Μικρές μονάδες (εκτ.)', residual: 'Απόκλιση από το μοντέλο', uce: 'UCE (ΑΔΜΗΕ)',
               loadTitle: 'Τα επίπεδα του φορτίου της ημέρας', loadSub: 'Το live φορτίο του ΑΔΜΗΕ χτισμένο επίπεδο προς επίπεδο, έναντι του φορτίου της ENTSO-E. GWh.',
@@ -221,6 +221,7 @@ const METHOD = {
 <li><strong class="text-slate-200">Distribution batteries:</strong> According to public announcements of July 2026, about 100 MW / 200 MWh of batteries are connected to the distribution network. On 21 Oct 2026 we tested whether they appear inside UCE, using as a proxy the hourly operation of ADMIE's own BESS fleet (same market signals, including the double daily cycles) and, separately, the day-ahead price. No model improved the prediction on unseen data; after mid-July the fleet factor was −0.03 (90%: −0.08 to +0.01), whereas about 0.18 would be expected if 100 MW with the same pattern were inside UCE; the price only mimicked solar. The most likely reading is that ADMIE's live distribution estimate covers renewables only, so these batteries show up indirectly in the transmission load, not in UCE. Even if some escaped the test, at most about 200 MWh a day is at stake, under 2% of UCE. The check is repeated every day and shown under the coefficients chart.</li>
 <li><strong class="text-slate-200">Possible curtailment of transmission solar (method):</strong> for each hour between 11:00 and 15:00, the ratio of transmission RES to distribution RES is compared with the same day's ratio at 09:00–10:00, corrected by the normal midday change of the last 30 days (hours with a day-ahead price above 20 €). Comparing within the same day largely cancels wind, which changes slowly. A fall of more than 15% is marked as possible curtailment. Checked against ADMIE's monthly reports of RES curtailment orders (per 15 minutes), May–September 2026: when it fires, there was an order about 8 times in 10; it finds about 8 in 10 deep curtailments (allowed output below 60% of capacity), fewer in months with curtailment almost every day. Limits: distribution stations above 400 kW also receive orders, so the indicator measures how much more transmission is cut; clouds over large parks can cause a similar fall. It is an indication, not an official figure.</li>
 <li><strong class="text-slate-200">Schedule (ISP2) and the indication:</strong> the "Energy Surplus" of ADMIE's ISP2 is read as in the BESS dashboard, hour by hour, and shifted from market time to Greek time (+1 hour). Checked against the official orders, June–September 2026: indication with a surplus, an order in 83% of hours; indication without a surplus, rare (4 hours) and usually without an order; surplus without an indication, often a shallow curtailment (deep in only 13%). ISP2 is the previous night's schedule; actual operation can differ. Available on the page from the morning X-Ray (10:15).</li>
+<li><strong class="text-slate-200">All clean energy and what ENTSO-E does not publish:</strong> the chart stacks ADMIE's metered clean generation (large and small hydro, biomass, wind, solar; SCADA and the medium-voltage file) and on top the UCE estimate (low-voltage solar, distribution wind, small units, residual); hour by hour the sum equals ADMIE live clean energy. ENTSO-E gives no generation values for Biomass, Hydro Run-of-river and pondage or Other renewable for Greece, although it states 150, 312 and 165 MW installed (Installed Capacity per Production Type, 2026). ADMIE meters biomass and small hydro; we show them alongside, without claiming the categories match exactly. There is no matching figure for Other renewable.</li>
 </ul>
 <h3 class="mt-4 mb-2 text-xs font-bold text-acc-400" data-sec="records" style="scroll-margin-top:8px">Records</h3>
 <ul class="list-disc pl-5 space-y-2 text-slate-400">
@@ -306,6 +307,7 @@ const METHOD = {
 <li><strong class="text-slate-200">Μπαταρίες της διανομής:</strong> Σύμφωνα με δημόσιες ανακοινώσεις του Ιουλίου 2026, περίπου 100 MW / 200 MWh μπαταριών είναι συνδεδεμένες στο δίκτυο διανομής. Στις 21 Οκτ 2026 ελέγξαμε αν εμφανίζονται μέσα στο UCE, με δείκτη την ωριαία λειτουργία του στόλου BESS του ΑΔΜΗΕ (ίδια σήματα αγοράς, μαζί με τους διπλούς ημερήσιους κύκλους) και, χωριστά, την τιμή επόμενης ημέρας. Κανένα μοντέλο δεν βελτίωσε την πρόβλεψη σε δεδομένα που δεν είχε δει· μετά τα μέσα Ιουλίου ο συντελεστής του στόλου ήταν −0,03 (90%: −0,08 έως +0,01), ενώ θα περιμέναμε περίπου 0,18 αν 100 MW με το ίδιο μοτίβο ήταν μέσα στο UCE· η τιμή απλώς μιμήθηκε τα φ/β. Η πιθανότερη ερμηνεία είναι ότι η live εκτίμηση του ΑΔΜΗΕ για τη διανομή καλύπτει μόνο ΑΠΕ, οπότε οι μπαταρίες αυτές φαίνονται έμμεσα στο φορτίο της μεταφοράς και όχι στο UCE. Ακόμα κι αν κάποιο κομμάτι ξέφυγε από τον έλεγχο, πρόκειται για το πολύ περίπου 200 MWh την ημέρα, κάτω από 2% του UCE. Ο έλεγχος επαναλαμβάνεται κάθε μέρα και φαίνεται κάτω από το γράφημα των συντελεστών.</li>
 <li><strong class="text-slate-200">Πιθανή περικοπή φ/β μεταφοράς (μέθοδος):</strong> για κάθε ώρα 11:00–15:00, ο λόγος ΑΠΕ μεταφοράς / ΑΠΕ διανομής συγκρίνεται με τον λόγο της ίδιας ημέρας στις 09:00–10:00, διορθωμένο με τη φυσιολογική μεσημεριανή αναλογία των τελευταίων 30 ημερών (ώρες με τιμή επόμενης ημέρας > 20 €). Η σύγκριση μέσα στην ίδια ημέρα ακυρώνει σε μεγάλο βαθμό τα αιολικά, που αλλάζουν αργά. Πτώση πάνω από 15% σημειώνεται ως πιθανή περικοπή. Έλεγχος με τις μηνιαίες αναφορές περιορισμών ΑΠΕ του ΑΔΜΗΕ (ανά 15λεπτο), Μάιος–Σεπτέμβριος 2026: όταν σημαίνει, υπήρχε εντολή περίπου 8 φορές στις 10· εντοπίζει περίπου 8 στις 10 βαθιές περικοπές (επιτρεπόμενη παραγωγή κάτω από 60% της ισχύος), λιγότερες σε μήνες με περικοπές σχεδόν κάθε μέρα. Περιορισμοί: εντολές λαμβάνουν και σταθμοί της διανομής άνω των 400 kW, οπότε ο δείκτης μετρά πόσο περισσότερο περικόπτεται η μεταφορά· σύννεφα πάνω από μεγάλα πάρκα μπορούν να δώσουν παρόμοια πτώση. Είναι ένδειξη, όχι επίσημο στοιχείο.</li>
 <li><strong class="text-slate-200">Προγραμματισμός (ISP2) και ένδειξη:</strong> το πλεόνασμα («Energy Surplus») του ISP2 του ΑΔΜΗΕ διαβάζεται όπως στο BESS dashboard, ανά ώρα, και μετατρέπεται από ώρα αγοράς σε ώρα Ελλάδας (+1 ώρα). Έλεγχος με τις επίσημες εντολές, Ιούνιος–Σεπτέμβριος 2026: ένδειξη μαζί με πλεόνασμα, εντολή στο 83% των ωρών· ένδειξη χωρίς πλεόνασμα, σπάνια (4 ώρες) και συνήθως χωρίς εντολή· πλεόνασμα χωρίς ένδειξη, συχνά ρηχή περικοπή (βαθιά μόνο στο 13%). Το ISP2 είναι πρόγραμμα της προηγούμενης νύχτας· η πραγματική λειτουργία μπορεί να διαφέρει. Διαθέσιμο στη σελίδα από το πρωινό X-Ray (10:15).</li>
+<li><strong class="text-slate-200">Όλη η καθαρή ενέργεια και τι δεν δημοσιεύει η ENTSO-E:</strong> το διάγραμμα στοιβάζει τη μετρημένη καθαρή παραγωγή του ΑΔΜΗΕ (μεγάλα και μικρά υδροηλεκτρικά, βιομάζα, αιολικά, φ/β· SCADA και αρχείο μέσης τάσης) και πάνω της την εκτίμηση του UCE (φ/β χαμηλής τάσης, αιολικά διανομής, μικρές μονάδες, απόκλιση)· το άθροισμα ισούται ώρα προς ώρα με τη live καθαρή του ΑΔΜΗΕ. Η ENTSO-E δεν δίνει τιμές παραγωγής για Biomass, Hydro Run-of-river and pondage και Other renewable για την Ελλάδα, αν και δηλώνει εγκατεστημένη ισχύ 150, 312 και 165 MW (Installed Capacity per Production Type, 2026). Ο ΑΔΜΗΕ μετρά βιομάζα και μικρά υδροηλεκτρικά· τα δείχνουμε δίπλα, χωρίς να ισχυριζόμαστε ότι οι κατηγορίες ταυτίζονται ακριβώς. Για το Other renewable δεν υπάρχει αντίστοιχο στοιχείο.</li>
 </ul>
 <h3 class="mt-4 mb-2 text-xs font-bold text-acc-400" data-sec="records" style="scroll-margin-top:8px">Ρεκόρ</h3>
 <ul class="list-disc pl-5 space-y-2 text-slate-400">
@@ -326,7 +328,8 @@ const S = {
     dailyDate: null, cleanDate: null,
     charts: {},
     recScope: 'hourly',  // κινητό: ποια ομάδα ρεκόρ φαίνεται (D45)
-    anDate: null         // ημέρα της «Ανάλυσης» (D46)
+    anDate: null,        // ημέρα της «Ανάλυσης» (D46)
+    anDecMode: 'all'     // D63: όλη η καθαρή | μόνο UCE
 };
 try { const l = localStorage.getItem('kp_lang'); if (l === 'el' || l === 'en') S.lang = l; } catch (e) { /* ιδιωτική περιήγηση */ }
 
@@ -1461,7 +1464,7 @@ const C_AN = { base: '#64748b', crete: '#14b8a6', mv: '#a78bfa' };
 async function renderAnalysis() {
     const x = t(), a = x.an;
     if (!S.anDate) { $('anConclusion').innerHTML = `<p class="text-slate-400">${esc(a.none)}</p>`; return; }
-    const [A, cal] = await Promise.all([getAnalysis(S.anDate), getJSON('analysis/calibration')]);
+    const [A, cal, XR] = await Promise.all([getAnalysis(S.anDate), getJSON('analysis/calibration'), getXray(S.anDate)]);
     if (!A) { $('anConclusion').innerHTML = `<p class="text-slate-400">${esc(a.none)}</p>`; return; }
 
     // 1. Συμπέρασμα
@@ -1476,9 +1479,56 @@ async function renderAnalysis() {
             </div>`).join('')}</div>`
         : (A.conclusion[S.lang] || []).map((p) => `<p>${esc(p)}</p>`).join('');
 
-    // 2. Ανάλυση UCE ώρα προς ώρα
+    // 2. Ανάλυση UCE ώρα προς ώρα · D63: ή όλη η καθαρή ενέργεια (μετρημένη + εκτιμώμενη)
     const D = A.uce_decomposition;
-    if (D) {
+    const allMode = S.anDecMode === 'all' && D && XR && XR.hours;
+    document.querySelectorAll('[data-decmode]').forEach((b) => {
+        const on = b.dataset.decmode === (allMode ? 'all' : 'uce');
+        b.textContent = b.dataset.decmode === 'all' ? a.decAll : a.decUce;
+        b.className = `px-3 rounded transition ${on ? 'bg-acc-400 text-slate-900' : 'text-slate-400 hover:text-white'}`;
+        b.onclick = () => { S.anDecMode = b.dataset.decmode; renderAnalysis(); };
+    });
+    $('anDecTitle').textContent = allMode ? a.decTitleAll : a.decTitle;
+    $('anDecSub').textContent = allMode ? a.decSubAll : a.decSub;
+    if (allMode) {
+        const H = D.hours, XH = Object.fromEntries(XR.hours.map((h) => [h.hr, h]));
+        const xv = (h, k) => (XH[h.hr] ? XH[h.hr][k] : null);
+        const alpha = (hex, a2) => hex + Math.round(a2 * 255).toString(16).padStart(2, '0');
+        const bar = (label, fn, color, extra = {}) => ({ label, data: H.map(fn), backgroundColor: color, stack: 'c', borderRadius: 1, order: 2, ...extra });
+        upsertChart('anDecChart', {
+            type: 'bar',
+            data: {
+                labels: H.map((h) => hourTick(h.hr)),
+                datasets: [
+                    bar(a.bigHydro, (h) => xv(h, 'big_hydro'), C.bigHydro), bar(a.smallHydro, (h) => xv(h, 'small_hydro'), '#93c5fd'),
+                    bar(a.biomass, (h) => xv(h, 'biomass'), '#a3b34f'), bar(a.windM, (h) => xv(h, 'wind'), C.wind), bar(a.pvM, (h) => xv(h, 'solar'), C.solar),
+                    bar(a.base, (h) => h.base, '#94a3b8'), bar(a.wind, (h) => h.wind, C.resNet), bar(a.pv, (h) => h.pv, '#fcd38d'),   // ανοιχτές αποχρώσεις = εκτιμώμενα (όπως η διανομή στο tab Ημέρα)
+                    bar(a.residual, (h) => h.residual, 'rgba(226, 232, 240, 0.10)', { borderColor: '#e2e8f0', borderWidth: 1 }),
+                    { type: 'line', label: a.liveClean, data: H.map((h) => xv(h, 'live_clean')), borderColor: '#e2e8f0', borderDash: [5, 4], borderWidth: 2, pointRadius: 0, tension: 0.25, order: 1 }
+                ]
+            },
+            options: {
+                interaction: { mode: 'index', intersect: false },
+                scales: { x: { stacked: true, grid: { display: false }, title: { display: true, text: x.hourAxis } },
+                          y: { stacked: true, title: { display: true, text: 'MWh' }, ticks: { callback: axisMWh } } },
+                plugins: {
+                    legend: { position: 'bottom' },
+                    tooltip: tipOff((i) => {
+                        const h = H[i], X1 = XH[h.hr] || {};
+                        return tipHead(tipHourLabel(h.hr), '') + tipSections(
+                            `<div class="text-[11px] text-slate-400 mb-1">${esc(a.measured)}</div>` +
+                            tipRow(a.pvM, X1.solar, C.solar) + tipRow(a.windM, X1.wind, C.wind) + tipRow(a.bigHydro, X1.big_hydro, C.bigHydro) +
+                            tipRow(a.smallHydro, X1.small_hydro, '#93c5fd') + tipRow(a.biomass, X1.biomass, '#a3b34f'),
+                            `<div class="text-[11px] text-slate-400 mb-1">${esc(a.estimated)}</div>` +
+                            tipRow(a.pv, h.pv, '#fcd38d') + tipRow(a.wind, h.wind, C.resNet) + tipRow(a.base, h.base, '#94a3b8') +
+                            tipRow(a.residual, h.residual, '#cbd5e1', { sign: true }),
+                            tipRow(a.liveClean, X1.live_clean, '#e2e8f0', { strong: true }));
+                    })
+                }
+            }
+        });
+    } else if (D) {
+
         const H = D.hours;
         const bar = (label, key, color) => ({ label, data: H.map((h) => h[key]), backgroundColor: color, stack: 'u', borderRadius: 2, order: 2 });
         upsertChart('anDecChart', {
@@ -1508,6 +1558,31 @@ async function renderAnalysis() {
             }
         });
     } else if (S.charts.anDecChart) { S.charts.anDecChart.destroy(); delete S.charts.anDecChart; }
+
+    // D63: τι δεν δημοσιεύει η ENTSO-E (ημέρα + σύνολο από την αρχή)
+    $('anGapTitle').textContent = a.gapTitle; $('anGapSub').textContent = a.gapSub;
+    const gp = A.entsoe_gap, gt = cal && cal.entsoe_gap_total;
+    // ENTSO-E, Installed Capacity per Production Type, BZN|GR, 2026 (MW)· στατική τιμή του έτους
+    const CAP = { biomass: 150, ror: 312, other: 165 };
+    const gRow = (label, color, v, hours, cap) => v === null || v === undefined ? '' : `<div class="py-1.5 border-b border-slate-700/50 last:border-0">
+            <div class="flex items-center justify-between gap-3">
+                <span class="flex items-center gap-2 text-sm text-slate-200"><span class="w-2.5 h-2.5 rounded-sm" style="background:${color}"></span>${esc(label)}</span>
+                <span class="text-right whitespace-nowrap"><b class="text-white">${fmt(v / 1000, 1)}</b> <span class="text-xs text-slate-500">GWh</span>
+                <span class="block sm:inline text-xs text-slate-400 sm:ml-2">${esc(a.gapAvg)} ${fmt(v / Math.max(1, hours))} MW</span></span></div>
+            <div class="text-[11px] text-slate-500 mt-0.5 pl-[1.15rem]">${cap ? `${fmt(cap)} MW ${esc(a.gapCap)} · ${esc(a.gapUse)} ≈ ${fmt(100 * v / Math.max(1, hours) / cap)}% · ` : ''}${esc(a.gapNe)}</div></div>`;
+    $('anGap').innerHTML = gp ? `<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div><div class="text-[11px] font-semibold text-slate-400 mb-1">${esc(a.gapDay)} · ${esc(fmtDate(S.anDate))}</div>
+            ${gRow(a.biomass, '#a3b34f', gp.biomass, gp.hours, CAP.biomass)}${gRow(a.smallHydro, '#93c5fd', gp.small_hydro, gp.hours, CAP.ror)}</div>
+        ${gt && gt.days ? `<div><div class="text-[11px] font-semibold text-slate-400 mb-1">${esc(a.gapSince)} ${esc(fmtDate(gt.from))} · ${gt.days} ${S.lang === 'el' ? 'ημέρες' : 'days'}</div>
+            ${gRow(a.biomass, '#a3b34f', gt.biomass, gt.days * 24, CAP.biomass)}${gRow(a.smallHydro, '#93c5fd', gt.small_hydro, gt.days * 24, CAP.ror)}
+            <div class="flex justify-between pt-2 text-sm"><span class="text-slate-300 font-semibold">${esc(a.gapTotal)}</span><span><b class="text-white">${fmt((gt.biomass + gt.small_hydro) / 1000, 0)}</b> <span class="text-xs text-slate-500">GWh</span>
+            <span class="text-xs text-slate-400 ml-2">${esc(a.gapAvg)} ${fmt((gt.biomass + gt.small_hydro) / (gt.days * 24))} MW</span></span></div></div>` : ''}
+        </div>
+        <div class="mt-4 pt-3 border-t border-slate-700/50 flex flex-wrap justify-between gap-2 text-xs">
+            <span class="text-slate-300"><span class="inline-block w-2.5 h-2.5 rounded-sm mr-2 align-middle border border-slate-500"></span>${esc(a.otherRes)}: <b class="text-white">${fmt(CAP.other)}</b> MW ${esc(a.gapCap)} · ${esc(a.gapNe)}</span>
+            <span class="text-slate-500">${esc(a.otherResNote)}</span>
+        </div>
+        <p class="text-[10px] text-slate-500 mt-2">${esc(a.gapCapSrc)}</p>` : '';
 
     // 3. Επίπεδα: φορτίο και τρία σύνολα ΑΠΕ (GWh)
     const Ld = A.layers && A.layers.load, Rs = A.layers && A.layers.res;

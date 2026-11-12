@@ -367,9 +367,22 @@ def analyse_day(day_iso, calib):
     return {
         'schema': contract.SCHEMA, 'date': day_iso, 'updated': contract.now_athens_iso(),
         'calibration': calib, 'uce_decomposition': dec, 'layers': layers, 'records': recs,
+        'entsoe_gap': entsoe_gap(X, E),   # D63
         'conclusion': (_concl := conclusion(day_iso, L, X, E, dec, layers, recs)),
         'conclusion_sections': sections_of(_concl),   # D62
     }
+
+
+# D63: ό,τι μετρά ο ΑΔΜΗΕ αλλά η ENTSO-E δεν δίνει για την Ελλάδα: βιομάζα και μικρά υδροηλεκτρικά
+# (η ENTSO-E δεν έχει τιμές για Biomass ούτε για Hydro Run-of-river, 224/224 ημέρες έως 9 Νοε 2026).
+def entsoe_gap(X, E):
+    xh = (X or {}).get('hours') or []
+    eh = (E or {}).get('hours') or []
+    def tot(rows, k):
+        v = [h.get(k) for h in rows if h.get(k) is not None]
+        return round(sum(v), 1) if v else None
+    return {'biomass': tot(xh, 'biomass'), 'small_hydro': tot(xh, 'small_hydro'),
+            'entsoe_biomass': tot(eh, 'biomass'), 'entsoe_ror': tot(eh, 'hydro_ror'), 'hours': len(xh)}
 
 
 def _target_days():
@@ -404,6 +417,14 @@ if __name__ == '__main__':
         c = (load_json_lenient(os.path.join(ANALYSIS_DIR, d + '.json'), {}) or {}).get('calibration')
         if c:
             cal['days'][d] = {k: c[k] for k in ['base', 'k_wind', 'k_solar', 'hours']} | {'ci90': c['ci90'], 'diag_bess': c.get('diag_bess')}
+    # D63: σύνολο από την πρώτη ημέρα ανάλυσης (ό,τι λείπει από την ENTSO-E)
+    gap = {'from': None, 'to': None, 'days': 0, 'biomass': 0.0, 'small_hydro': 0.0}
+    for d in contract.list_days(ANALYSIS_DIR):
+        g = (load_json_lenient(os.path.join(ANALYSIS_DIR, d + '.json'), {}) or {}).get('entsoe_gap')
+        if g and g.get('biomass') is not None and g.get('small_hydro') is not None:
+            gap['from'] = gap['from'] or d; gap['to'] = d; gap['days'] += 1
+            gap['biomass'] += g['biomass']; gap['small_hydro'] += g['small_hydro']
+    cal['entsoe_gap_total'] = {k: (round(v, 1) if isinstance(v, float) else v) for k, v in gap.items()}
     cal['updated'] = contract.now_athens_iso()
     write_json_atomic(CALIB_PATH, cal)
     print(f"✓ Ανάλυση: {written} ημέρες · βαθμονόμηση: {len(cal['days'])} ημέρες στο ιστορικό.")
