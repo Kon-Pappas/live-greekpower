@@ -2,32 +2,32 @@
   "schema": 1,
   "date": "2026-11-15",
   "source": "ADMIE/IPTO market portal: prodmixandload, dayaheadmarket, scadainterflows",
-  "updated": "2026-11-15T06:06:40+02:00",
+  "updated": "2026-11-15T07:06:53+02:00",
   "totals": {
-    "hours_with_data": 6,
+    "hours_with_data": 7,
     "gen": {
-      "lignite": 2154.0,
-      "gas": 15418.0,
-      "hydro": 371.0,
-      "res": 8894.0,
-      "total": 26837.0,
-      "res_system": 6849.0,
-      "res_network": 2045.0
+      "lignite": 2465.0,
+      "gas": 17805.0,
+      "hydro": 474.0,
+      "res": 10270.0,
+      "total": 31014.0,
+      "res_system": 7894.0,
+      "res_network": 2376.0
     },
-    "imports": 3681.0,
-    "exports": 3829.0,
+    "imports": 4482.0,
+    "exports": 4386.0,
     "storage": {
       "dis": 23.0,
-      "chg": 391.0
+      "chg": 425.0
     },
-    "pumping": 525.0,
-    "demand": 25796.0,
-    "dam_price_avg": 193.67,
+    "pumping": 633.0,
+    "demand": 30075.0,
+    "dam_price_avg": 193.43,
     "crete_flow": null,
     "hours_flows_mismatch": 0,
     "hours_balance_off": 0,
     "sources": {
-      "admie.gr": 6
+      "admie.gr": 7
     },
     "curtail_hint_hours": [],
     "curtail_other_hours": [],
@@ -38,7 +38,7 @@
       "hr": 1,
       "has_data": true,
       "dam_price": 203.0,
-      "fetched": "2026-11-15T06:06:25.843095+02:00",
+      "fetched": "2026-11-15T07:06:33.812437+02:00",
       "source": "admie.gr",
       "crete_flow": null,
       "gen": {
@@ -90,7 +90,7 @@
       "hr": 2,
       "has_data": true,
       "dam_price": 198.0,
-      "fetched": "2026-11-15T06:06:25.843095+02:00",
+      "fetched": "2026-11-15T07:06:33.812437+02:00",
       "source": "admie.gr",
       "crete_flow": null,
       "gen": {
@@ -142,7 +142,7 @@
       "hr": 3,
       "has_data": true,
       "dam_price": 204.0,
-      "fetched": "2026-11-15T06:06:25.843095+02:00",
+      "fetched": "2026-11-15T07:06:33.812437+02:00",
       "source": "admie.gr",
       "crete_flow": null,
       "gen": {
@@ -194,7 +194,7 @@
       "hr": 4,
       "has_data": true,
       "dam_price": 203.0,
-      "fetched": "2026-11-15T06:06:25.843095+02:00",
+      "fetched": "2026-11-15T07:06:33.812437+02:00",
       "source": "admie.gr",
       "crete_flow": null,
       "gen": {
@@ -246,7 +246,7 @@
       "hr": 5,
       "has_data": true,
       "dam_price": 192.0,
-      "fetched": "2026-11-15T06:06:25.843095+02:00",
+      "fetched": "2026-11-15T07:06:33.812437+02:00",
       "source": "admie.gr",
       "crete_flow": null,
       "gen": {
@@ -298,7 +298,7 @@
       "hr": 6,
       "has_data": true,
       "dam_price": 162.0,
-      "fetched": "2026-11-15T06:06:25.843095+02:00",
+      "fetched": "2026-11-15T07:06:33.812437+02:00",
       "source": "admie.gr",
       "crete_flow": null,
       "gen": {
@@ -342,6 +342,58 @@
       },
       "pumping": 110.0,
       "demand": 4148.0,
+      "balance_ok": true,
+      "isp_surplus": null,
+      "curtail_hint": null
+    },
+    {
+      "hr": 7,
+      "has_data": true,
+      "dam_price": 192.0,
+      "fetched": "2026-11-15T07:06:33.812437+02:00",
+      "source": "admie.gr",
+      "crete_flow": null,
+      "gen": {
+        "lignite": 311.0,
+        "gas": 2387.0,
+        "hydro": 103.0,
+        "res": 1376.0,
+        "total": 4177.0,
+        "res_system": 1045.0,
+        "res_network": 331.0
+      },
+      "imports": 801.0,
+      "exports": 557.0,
+      "flows": {
+        "AL": {
+          "imp": 298.0,
+          "exp": 0.0
+        },
+        "BG": {
+          "imp": 5.0,
+          "exp": 44.0
+        },
+        "IT": {
+          "imp": 0.0,
+          "exp": 513.0
+        },
+        "TR": {
+          "imp": 82.0,
+          "exp": 0.0
+        },
+        "MK": {
+          "imp": 416.0,
+          "exp": 0.0
+        }
+      },
+      "flows_match": true,
+      "flows_source": "iptoanalytics",
+      "storage": {
+        "dis": 0.0,
+        "chg": 34.0
+      },
+      "pumping": 108.0,
+      "demand": 4279.0,
       "balance_ok": true,
       "isp_surplus": null,
       "curtail_hint": null
