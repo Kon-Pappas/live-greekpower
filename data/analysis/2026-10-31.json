@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "date": "2026-10-31",
-  "updated": "2026-11-12T07:17:26+02:00",
+  "updated": "2026-11-16T11:30:39+02:00",
   "calibration": {
     "window_days": 90,
     "from": "2026-08-03",
@@ -241,15 +241,15 @@
       "transmission_no_crete": 111368.0,
       "mv": 11003.6,
       "lv": 2430.4,
-      "entsoe": 128026.7
+      "entsoe": 124160.4
     },
     "res": {
       "transmission": 17899.0,
       "metered": 28902.6,
       "live": 31333.0,
       "live_sw": 28246.300000000003,
-      "entsoe": 28909.6,
-      "entsoe_status": "provisional"
+      "entsoe": 23703.800000000003,
+      "entsoe_status": "final"
     }
   },
   "records": [],
@@ -260,18 +260,19 @@
     "entsoe_ror": null,
     "hours": 24
   },
+  "missing": [],
   "conclusion": {
     "el": [
-      "Στις 31 Οκτωβρίου 2026 η ζήτηση ήταν 131,7 GWh και οι ΑΠΕ με τα υδροηλεκτρικά κάλυψαν το 32,6% της εγχώριας παραγωγής (live ΑΔΜΗΕ, ΑΠΕ με ΣΗΘΥΑ). Οι καθαρές εξαγωγές ήταν 17,3 GWh και η μέση τιμή επόμενης ημέρας 281,25 €/MWh.",
+      "Στις 31 Οκτωβρίου 2026 η ζήτηση ήταν 131,7 GWh και οι ΑΠΕ με τα υδροηλεκτρικά κάλυψαν το 32,6% της εγχώριας παραγωγής (live ΑΔΜΗΕ, ΑΠΕ με ΣΗΘΥΑ). Οι καθαρές εξαγωγές ήταν 17,3 GWh και η μέση τιμή επόμενης ημέρας 280,85 €/MWh.",
       "Από την παραγωγή της διανομής, 2,4 GWh δεν μετρήθηκαν ωριαία. Εκτιμώνται 2,8 GWh φ/β στέγης και χαμηλής τάσης, 0,5 GWh αιολικά της διανομής και 1,4 GWh μικρές μονάδες· το υπόλοιπο (−2,3 GWh) είναι απόκλιση της εκτίμησης του ΑΔΜΗΕ από το μοντέλο.",
       "Προς την Κρήτη στάλθηκαν 6,9 GWh μέσα από τα δύο καλώδια.",
-      "Στην ENTSO-E (προσωρινή έκδοση) φ/β, αιολικά και βιομάζα της ημέρας είναι 28,9 GWh, έναντι 28,2 GWh στα live στοιχεία του ΑΔΜΗΕ."
+      "Στην ENTSO-E (τελική έκδοση) φ/β, αιολικά και βιομάζα της ημέρας είναι 23,7 GWh, έναντι 28,2 GWh στα live στοιχεία του ΑΔΜΗΕ."
     ],
     "en": [
-      "On 31 October 2026 demand was 131.7 GWh and renewables with hydro covered 32.6% of domestic generation (ADMIE live, RES incl. CHP). Net exports were 17.3 GWh and the average day-ahead price 281.25 €/MWh.",
+      "On 31 October 2026 demand was 131.7 GWh and renewables with hydro covered 32.6% of domestic generation (ADMIE live, RES incl. CHP). Net exports were 17.3 GWh and the average day-ahead price 280.85 €/MWh.",
       "Of distribution-level generation, 2.4 GWh was not metered hourly. An estimated 2.8 GWh came from rooftop and other low-voltage solar, 0.5 GWh from distribution-connected wind and 1.4 GWh from small units; the remainder (−2.3 GWh) is the difference between ADMIE's estimate and the model.",
       "6.9 GWh was sent to Crete through the two cables.",
-      "In ENTSO-E's provisional data, the day's solar, wind and biomass add up to 28.9 GWh, against 28.2 GWh in ADMIE's live figures."
+      "In ENTSO-E's final data, the day's solar, wind and biomass add up to 23.7 GWh, against 28.2 GWh in ADMIE's live figures."
     ]
   },
   "conclusion_sections": {
@@ -279,7 +280,7 @@
       {
         "k": "day",
         "ps": [
-          "Στις 31 Οκτωβρίου 2026 η ζήτηση ήταν 131,7 GWh και οι ΑΠΕ με τα υδροηλεκτρικά κάλυψαν το 32,6% της εγχώριας παραγωγής (live ΑΔΜΗΕ, ΑΠΕ με ΣΗΘΥΑ). Οι καθαρές εξαγωγές ήταν 17,3 GWh και η μέση τιμή επόμενης ημέρας 281,25 €/MWh."
+          "Στις 31 Οκτωβρίου 2026 η ζήτηση ήταν 131,7 GWh και οι ΑΠΕ με τα υδροηλεκτρικά κάλυψαν το 32,6% της εγχώριας παραγωγής (live ΑΔΜΗΕ, ΑΠΕ με ΣΗΘΥΑ). Οι καθαρές εξαγωγές ήταν 17,3 GWh και η μέση τιμή επόμενης ημέρας 280,85 €/MWh."
         ]
       },
       {
@@ -297,7 +298,7 @@
       {
         "k": "entsoe",
         "ps": [
-          "Στην ENTSO-E (προσωρινή έκδοση) φ/β, αιολικά και βιομάζα της ημέρας είναι 28,9 GWh, έναντι 28,2 GWh στα live στοιχεία του ΑΔΜΗΕ."
+          "Στην ENTSO-E (τελική έκδοση) φ/β, αιολικά και βιομάζα της ημέρας είναι 23,7 GWh, έναντι 28,2 GWh στα live στοιχεία του ΑΔΜΗΕ."
         ]
       }
     ],
@@ -305,7 +306,7 @@
       {
         "k": "day",
         "ps": [
-          "On 31 October 2026 demand was 131.7 GWh and renewables with hydro covered 32.6% of domestic generation (ADMIE live, RES incl. CHP). Net exports were 17.3 GWh and the average day-ahead price 281.25 €/MWh."
+          "On 31 October 2026 demand was 131.7 GWh and renewables with hydro covered 32.6% of domestic generation (ADMIE live, RES incl. CHP). Net exports were 17.3 GWh and the average day-ahead price 280.85 €/MWh."
         ]
       },
       {
@@ -323,7 +324,7 @@
       {
         "k": "entsoe",
         "ps": [
-          "In ENTSO-E's provisional data, the day's solar, wind and biomass add up to 28.9 GWh, against 28.2 GWh in ADMIE's live figures."
+          "In ENTSO-E's final data, the day's solar, wind and biomass add up to 23.7 GWh, against 28.2 GWh in ADMIE's live figures."
         ]
       }
     ]
