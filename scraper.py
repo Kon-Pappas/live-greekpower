@@ -404,6 +404,27 @@ if __name__ == "__main__":
               + (f" · χωρίς απάντηση: {skipped}" if skipped else ""))
         sys.exit(0)
 
+    if os.environ.get('PRICES_ONLY', '') == '1':
+        # D68: τιμή DAM από το ENTSO-E (data/price, γράφει το price_builder.py) στα ΥΠΑΡΧΟΝΤΑ live αρχεία.
+        # Μόνο τοπικά, καμία λήψη. Αλλάζει μόνο dam_price, dam_price_src, dam_price_admie κάθε ώρας
+        # και totals.dam_price_avg / totals.price. Η αρχική τιμή του admie.gr φυλάσσεται (dam_price_admie).
+        n_days = n_full = n_off = 0; cache = {}
+        for d8 in get_target_dates()[0]:
+            path = contract.day_path(contract.LIVE_DIR, d8)
+            day = load_json_strict(path, None)
+            if not day or not day.get('hours'):
+                continue
+            t = day.setdefault('totals', {})
+            contract.apply_prices(d8, day['hours'], t, cache)
+            write_json_atomic(path, day)
+            n_days += 1; n_full += bool(t['price']['market_complete'])
+            if t['price']['check_admie']['off']:
+                n_off += 1
+                print(f"   {d8}: {t['price']['check_admie']['off']} ώρες διαφέρουν από το admie.gr > {contract.PRICE_CHECK_TOL} € "
+                      f"(μέγιστη {t['price']['check_admie']['max_diff']})")
+        print(f"✓ Τιμές ENTSO-E: {n_days} ημέρες · {n_full} με πλήρη ημέρα αγοράς · {n_off} με απόκλιση από το admie.gr.")
+        sys.exit(0)
+
     if os.environ.get('CURTAIL_HINTS_ONLY', '') == '1':
         # D58: ενδείξεις πιθανής περικοπής φ/β μεταφοράς στα ΥΠΑΡΧΟΝΤΑ live αρχεία (μόνο τοπικά, καμία λήψη).
         # Αλλάζει μόνο το curtail_hint κάθε ώρας και το totals.curtail_hint_hours.

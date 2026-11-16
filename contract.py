@@ -284,6 +284,91 @@ def isp_hours(hours):
     return [h['hr'] for h in hours if (h.get('isp_surplus') or 0) > ISP_SURPLUS_MIN]
 
 
+# ---------------------------------------------------------------------
+# D68: τιμή αγοράς επόμενης ημέρας από το ENTSO-E (A44, 15λεπτα· price_builder.py)
+# Ωριαία τιμή = μέσος όρος των 4 15λεπτων της ώρας (ώρα Ελλάδας, ίδια φυσική ώρα με τον ΑΔΜΗΕ).
+# Μέση ημέρας = μέση της ΗΜΕΡΑΣ ΑΓΟΡΑΣ (CET, 01:00–01:00 ώρα Ελλάδας), όπως ΕΧΕ/ENTSO-E/BESS.
+# Εφεδρεία: η ωριαία τιμή του admie.gr (ακέραια) για ώρα που έχει γίνει· ποτέ 0 στη θέση του κενού.
+# ---------------------------------------------------------------------
+PRICE_DIR = os.path.join(DATA_DIR, 'price')
+BRUSSELS = pytz.timezone('Europe/Brussels')
+PRICE_CHECK_TOL = 0.6      # ο ΑΔΜΗΕ δίνει την ωριαία τιμή στρογγυλεμένη σε ακέραιο
+
+
+def _price_file(date8, cache):
+    if date8 not in cache:
+        cache[date8] = load_json_strict(day_path(PRICE_DIR, date8), None)
+    return cache[date8]
+
+
+def entsoe_hour_prices(date8, n_hours, cache=None):
+    """{hr: τιμή ή None} για τις ώρες Ελλάδας 1…n_hours της ημέρας date8."""
+    cache = {} if cache is None else cache
+    d0 = ATHENS.localize(datetime.strptime(date8, "%Y%m%d")).astimezone(pytz.utc)
+    out = {}
+    for hr in range(1, n_hours + 1):
+        t = d0 + timedelta(hours=hr - 1)
+        qs = []
+        for k in range(4):
+            tq = t + timedelta(minutes=15 * k)
+            md = tq.astimezone(BRUSSELS).strftime("%Y%m%d")
+            f = _price_file(md, cache)
+            if not f:
+                break
+            s = datetime.strptime(f['start_utc'], "%Y-%m-%dT%H:%MZ").replace(tzinfo=pytz.utc)
+            i = int((tq - s).total_seconds() // 900)
+            v = f['quarters'][i] if 0 <= i < len(f['quarters']) else None
+            if v is None:
+                break
+            qs.append(v)
+        out[hr] = round(sum(qs) / 4, 2) if len(qs) == 4 else None
+    return out
+
+
+def n_hours_of(date8):
+    d = datetime.strptime(date8, "%Y%m%d")
+    a = ATHENS.localize(d); b = ATHENS.localize(d + timedelta(days=1))
+    return int(round((b - a).total_seconds() / 3600))
+
+
+def apply_prices(date8, hours, totals, cache=None):
+    """Βάζει στις ώρες την τιμή του ENTSO-E (εφεδρεία: admie.gr) και γράφει totals.price + dam_price_avg."""
+    cache = {} if cache is None else cache
+    n = n_hours_of(date8)
+    ent = entsoe_hour_prices(date8, n, cache)
+    diffs = []
+    for h in hours:
+        if 'dam_price_admie' not in h:
+            h['dam_price_admie'] = h.get('dam_price')
+        a, e = h['dam_price_admie'], ent.get(h['hr'])
+        if e is not None:
+            h['dam_price'], h['dam_price_src'] = e, 'entsoe'
+            if a is not None:
+                diffs.append(abs(a - e))
+        elif a is not None and a != 0:
+            h['dam_price'], h['dam_price_src'] = a, 'admie'
+        else:
+            h['dam_price'], h['dam_price_src'] = None, None
+    by_hr = {h['hr']: h for h in hours}
+    strip = []
+    for hr in range(1, n + 1):
+        p = ent.get(hr)
+        if p is None and hr in by_hr:
+            p = by_hr[hr]['dam_price']
+        strip.append(p)
+    mkt = _price_file(date8, cache)
+    totals['dam_price_avg'] = mkt['avg'] if mkt and mkt.get('complete') else None
+    totals['price'] = {
+        'source': 'entsoe' if any(v is not None for v in ent.values()) else 'admie',
+        'hours': strip,                                   # όλες οι ώρες Ελλάδας (κενό = δεν υπάρχει τιμή)
+        'complete': all(v is not None for v in strip),
+        'market_avg': totals['dam_price_avg'],
+        'market_complete': bool(mkt and mkt.get('complete')),
+        'check_admie': {'hours': len(diffs), 'max_diff': round(max(diffs), 2) if diffs else None,
+                        'off': sum(1 for x in diffs if x > PRICE_CHECK_TOL)},
+    }
+
+
 def write_live_days(raw_records, dates8):
     """Γράφει data/live/<ημέρα>.json για κάθε ημέρα του dates8,
     από τις (ήδη συγχωνευμένες) ωριαίες εγγραφές του scraper."""
@@ -296,6 +381,7 @@ def write_live_days(raw_records, dates8):
             prev = by_date[rec['date']].get(hr)
             if prev is None or (rec.get('fetch_timestamp') or '') >= (prev.get('fetch_timestamp') or ''):
                 by_date[rec['date']][hr] = rec
+    price_cache = {}
     for date8 in sorted(dates8):
         if date8 not in by_date:
             continue
@@ -305,6 +391,7 @@ def write_live_days(raw_records, dates8):
         totals['curtail_hint_hours'] = flagged
         totals['curtail_other_hours'] = [h['hr'] for h in hours if (h.get('curtail_hint') or {}).get('case') == 'B']
         totals['isp_surplus_hours'] = isp_hours(hours)
+        apply_prices(date8, hours, totals, price_cache)          # D68
         write_json_atomic(day_path(LIVE_DIR, date8), {
             'schema': SCHEMA,
             'date': iso_date(date8),

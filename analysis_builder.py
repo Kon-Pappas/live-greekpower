@@ -272,7 +272,8 @@ def conclusion(day_iso, L, X, E, dec, layers, recs):
             P.append(f"Στις {date} η ζήτηση ήταν {n(L['totals']['demand'] / 1000)} GWh και οι ΑΠΕ με τα υδροηλεκτρικά "
                      f"κάλυψαν το {n(share)}% της εγχώριας παραγωγής (live ΑΔΜΗΕ, ΑΠΕ με ΣΗΘΥΑ). "
                      + (f"Οι καθαρές εξαγωγές ήταν {n(netexp / 1000)} GWh" if netexp >= 0 else f"Οι καθαρές εισαγωγές ήταν {n(-netexp / 1000)} GWh")
-                     + f" και η μέση τιμή επόμενης ημέρας {n(L['totals']['dam_price_avg'], 2)} €/MWh.")
+                     + (f" και η μέση τιμή επόμενης ημέρας {n(L['totals']['dam_price_avg'], 2)} €/MWh."
+                        if L['totals'].get('dam_price_avg') is not None else "."))
             if dec:
                 t = dec['totals']
                 P.append(f"Από την παραγωγή της διανομής, {n(t['uce'] / 1000)} GWh δεν μετρήθηκαν ωριαία. Εκτιμώνται "
@@ -300,7 +301,8 @@ def conclusion(day_iso, L, X, E, dec, layers, recs):
             P.append(f"On {date} demand was {n(L['totals']['demand'] / 1000)} GWh and renewables with hydro covered "
                      f"{n(share)}% of domestic generation (ADMIE live, RES incl. CHP). "
                      + (f"Net exports were {n(netexp / 1000)} GWh" if netexp >= 0 else f"Net imports were {n(-netexp / 1000)} GWh")
-                     + f" and the average day-ahead price {n(L['totals']['dam_price_avg'], 2)} €/MWh.")
+                     + (f" and the average day-ahead price {n(L['totals']['dam_price_avg'], 2)} €/MWh."
+                        if L['totals'].get('dam_price_avg') is not None else "."))
             if dec:
                 t = dec['totals']
                 P.append(f"Of distribution-level generation, {n(t['uce'] / 1000)} GWh was not metered hourly. An estimated "
