@@ -22,7 +22,7 @@
     },
     "pumping": 362.0,
     "demand": 213823.0,
-    "dam_price_avg": 116.58,
+    "dam_price_avg": 115.88,
     "crete_flow": -12230.0,
     "hours_flows_mismatch": 0,
     "hours_balance_off": 0,
@@ -35,13 +35,50 @@
       16,
       17,
       18
-    ]
+    ],
+    "price": {
+      "source": "entsoe",
+      "hours": [
+        162.92,
+        160.61,
+        150.19,
+        152.88,
+        136.83,
+        131.45,
+        143.62,
+        154.58,
+        147.58,
+        140.23,
+        100.65,
+        76.69,
+        52.54,
+        50.3,
+        52.5,
+        47.7,
+        49.58,
+        68.56,
+        110.77,
+        144.18,
+        146.1,
+        133.34,
+        130.66,
+        151.2
+      ],
+      "complete": true,
+      "market_avg": 115.88,
+      "market_complete": true,
+      "check_admie": {
+        "hours": 24,
+        "max_diff": 0.5,
+        "off": 0
+      }
+    }
   },
   "hours": [
     {
       "hr": 1,
       "has_data": true,
-      "dam_price": 163.0,
+      "dam_price": 162.92,
       "fetched": "2026-10-19T07:29:12.285207+03:00",
       "crete_flow": -449.0,
       "gen": {
@@ -86,12 +123,14 @@
       "demand": 8179.0,
       "balance_ok": true,
       "curtail_hint": null,
-      "isp_surplus": null
+      "isp_surplus": null,
+      "dam_price_admie": 163.0,
+      "dam_price_src": "entsoe"
     },
     {
       "hr": 2,
       "has_data": true,
-      "dam_price": 161.0,
+      "dam_price": 160.61,
       "fetched": "2026-10-19T07:29:12.285207+03:00",
       "crete_flow": -422.0,
       "gen": {
@@ -136,12 +175,14 @@
       "demand": 7713.0,
       "balance_ok": true,
       "curtail_hint": null,
-      "isp_surplus": 0.0
+      "isp_surplus": 0.0,
+      "dam_price_admie": 161.0,
+      "dam_price_src": "entsoe"
     },
     {
       "hr": 3,
       "has_data": true,
-      "dam_price": 150.0,
+      "dam_price": 150.19,
       "fetched": "2026-10-19T07:29:12.285207+03:00",
       "crete_flow": -386.0,
       "gen": {
@@ -186,12 +227,14 @@
       "demand": 7337.0,
       "balance_ok": true,
       "curtail_hint": null,
-      "isp_surplus": 0.0
+      "isp_surplus": 0.0,
+      "dam_price_admie": 150.0,
+      "dam_price_src": "entsoe"
     },
     {
       "hr": 4,
       "has_data": true,
-      "dam_price": 153.0,
+      "dam_price": 152.88,
       "fetched": "2026-10-19T07:29:12.285207+03:00",
       "crete_flow": -364.0,
       "gen": {
@@ -236,12 +279,14 @@
       "demand": 7020.0,
       "balance_ok": true,
       "curtail_hint": null,
-      "isp_surplus": 0.0
+      "isp_surplus": 0.0,
+      "dam_price_admie": 153.0,
+      "dam_price_src": "entsoe"
     },
     {
       "hr": 5,
       "has_data": true,
-      "dam_price": 137.0,
+      "dam_price": 136.83,
       "fetched": "2026-10-19T07:29:12.285207+03:00",
       "crete_flow": -354.0,
       "gen": {
@@ -286,12 +331,14 @@
       "demand": 6792.0,
       "balance_ok": true,
       "curtail_hint": null,
-      "isp_surplus": 0.0
+      "isp_surplus": 0.0,
+      "dam_price_admie": 137.0,
+      "dam_price_src": "entsoe"
     },
     {
       "hr": 6,
       "has_data": true,
-      "dam_price": 131.0,
+      "dam_price": 131.45,
       "fetched": "2026-10-19T07:29:12.285207+03:00",
       "crete_flow": -354.0,
       "gen": {
@@ -336,12 +383,14 @@
       "demand": 6752.0,
       "balance_ok": true,
       "curtail_hint": null,
-      "isp_surplus": 0.0
+      "isp_surplus": 0.0,
+      "dam_price_admie": 131.0,
+      "dam_price_src": "entsoe"
     },
     {
       "hr": 7,
       "has_data": true,
-      "dam_price": 144.0,
+      "dam_price": 143.62,
       "fetched": "2026-10-19T07:29:12.285207+03:00",
       "crete_flow": -366.0,
       "gen": {
@@ -386,12 +435,14 @@
       "demand": 6849.0,
       "balance_ok": true,
       "curtail_hint": null,
-      "isp_surplus": 0.0
+      "isp_surplus": 0.0,
+      "dam_price_admie": 144.0,
+      "dam_price_src": "entsoe"
     },
     {
       "hr": 8,
       "has_data": true,
-      "dam_price": 155.0,
+      "dam_price": 154.58,
       "fetched": "2026-10-19T07:29:12.285207+03:00",
       "crete_flow": -418.0,
       "gen": {
@@ -436,12 +487,14 @@
       "demand": 7403.0,
       "balance_ok": true,
       "curtail_hint": null,
-      "isp_surplus": 0.0
+      "isp_surplus": 0.0,
+      "dam_price_admie": 155.0,
+      "dam_price_src": "entsoe"
     },
     {
       "hr": 9,
       "has_data": true,
-      "dam_price": 148.0,
+      "dam_price": 147.58,
       "fetched": "2026-10-19T07:29:12.285207+03:00",
       "crete_flow": -466.0,
       "gen": {
@@ -486,12 +539,14 @@
       "demand": 8235.0,
       "balance_ok": true,
       "curtail_hint": null,
-      "isp_surplus": 0.0
+      "isp_surplus": 0.0,
+      "dam_price_admie": 148.0,
+      "dam_price_src": "entsoe"
     },
     {
       "hr": 10,
       "has_data": true,
-      "dam_price": 140.0,
+      "dam_price": 140.23,
       "fetched": "2026-10-19T07:29:12.285207+03:00",
       "crete_flow": -528.0,
       "gen": {
@@ -536,12 +591,14 @@
       "demand": 8978.0,
       "balance_ok": true,
       "curtail_hint": null,
-      "isp_surplus": 0.0
+      "isp_surplus": 0.0,
+      "dam_price_admie": 140.0,
+      "dam_price_src": "entsoe"
     },
     {
       "hr": 11,
       "has_data": true,
-      "dam_price": 101.0,
+      "dam_price": 100.65,
       "fetched": "2026-10-19T07:29:12.285207+03:00",
       "crete_flow": -552.0,
       "gen": {
@@ -586,12 +643,14 @@
       "demand": 9520.0,
       "balance_ok": true,
       "curtail_hint": null,
-      "isp_surplus": 0.0
+      "isp_surplus": 0.0,
+      "dam_price_admie": 101.0,
+      "dam_price_src": "entsoe"
     },
     {
       "hr": 12,
       "has_data": true,
-      "dam_price": 77.0,
+      "dam_price": 76.69,
       "fetched": "2026-10-19T07:29:12.285207+03:00",
       "crete_flow": -564.0,
       "gen": {
@@ -640,12 +699,14 @@
         "flag": false,
         "case": null
       },
-      "isp_surplus": 78.95
+      "isp_surplus": 78.95,
+      "dam_price_admie": 77.0,
+      "dam_price_src": "entsoe"
     },
     {
       "hr": 13,
       "has_data": true,
-      "dam_price": 53.0,
+      "dam_price": 52.54,
       "fetched": "2026-10-19T07:29:12.285207+03:00",
       "crete_flow": -543.0,
       "gen": {
@@ -694,12 +755,14 @@
         "flag": false,
         "case": null
       },
-      "isp_surplus": 0.0
+      "isp_surplus": 0.0,
+      "dam_price_admie": 53.0,
+      "dam_price_src": "entsoe"
     },
     {
       "hr": 14,
       "has_data": true,
-      "dam_price": 50.0,
+      "dam_price": 50.3,
       "fetched": "2026-10-19T07:29:12.285207+03:00",
       "crete_flow": -564.0,
       "gen": {
@@ -748,12 +811,14 @@
         "flag": false,
         "case": null
       },
-      "isp_surplus": 32.14
+      "isp_surplus": 32.14,
+      "dam_price_admie": 50.0,
+      "dam_price_src": "entsoe"
     },
     {
       "hr": 15,
       "has_data": true,
-      "dam_price": 52.0,
+      "dam_price": 52.5,
       "fetched": "2026-10-19T07:29:12.285207+03:00",
       "crete_flow": -572.0,
       "gen": {
@@ -802,12 +867,14 @@
         "flag": false,
         "case": null
       },
-      "isp_surplus": 20.1
+      "isp_surplus": 20.1,
+      "dam_price_admie": 52.0,
+      "dam_price_src": "entsoe"
     },
     {
       "hr": 16,
       "has_data": true,
-      "dam_price": 48.0,
+      "dam_price": 47.7,
       "fetched": "2026-10-19T07:29:12.285207+03:00",
       "crete_flow": -584.0,
       "gen": {
@@ -852,12 +919,14 @@
       "demand": 10510.0,
       "balance_ok": true,
       "curtail_hint": null,
-      "isp_surplus": 6.24
+      "isp_surplus": 6.24,
+      "dam_price_admie": 48.0,
+      "dam_price_src": "entsoe"
     },
     {
       "hr": 17,
       "has_data": true,
-      "dam_price": 50.0,
+      "dam_price": 49.58,
       "fetched": "2026-10-19T07:29:12.285207+03:00",
       "crete_flow": -615.0,
       "gen": {
@@ -902,12 +971,14 @@
       "demand": 10359.0,
       "balance_ok": true,
       "curtail_hint": null,
-      "isp_surplus": 10.37
+      "isp_surplus": 10.37,
+      "dam_price_admie": 50.0,
+      "dam_price_src": "entsoe"
     },
     {
       "hr": 18,
       "has_data": true,
-      "dam_price": 69.0,
+      "dam_price": 68.56,
       "fetched": "2026-10-19T07:29:12.285207+03:00",
       "crete_flow": -641.0,
       "gen": {
@@ -952,12 +1023,14 @@
       "demand": 10184.0,
       "balance_ok": true,
       "curtail_hint": null,
-      "isp_surplus": 1.02
+      "isp_surplus": 1.02,
+      "dam_price_admie": 69.0,
+      "dam_price_src": "entsoe"
     },
     {
       "hr": 19,
       "has_data": true,
-      "dam_price": 111.0,
+      "dam_price": 110.77,
       "fetched": "2026-10-19T07:29:12.285207+03:00",
       "crete_flow": -632.0,
       "gen": {
@@ -1002,12 +1075,14 @@
       "demand": 10074.0,
       "balance_ok": true,
       "curtail_hint": null,
-      "isp_surplus": 0.0
+      "isp_surplus": 0.0,
+      "dam_price_admie": 111.0,
+      "dam_price_src": "entsoe"
     },
     {
       "hr": 20,
       "has_data": true,
-      "dam_price": 144.0,
+      "dam_price": 144.18,
       "fetched": "2026-10-19T07:29:12.285207+03:00",
       "crete_flow": -625.0,
       "gen": {
@@ -1052,12 +1127,14 @@
       "demand": 9835.0,
       "balance_ok": true,
       "curtail_hint": null,
-      "isp_surplus": 0.0
+      "isp_surplus": 0.0,
+      "dam_price_admie": 144.0,
+      "dam_price_src": "entsoe"
     },
     {
       "hr": 21,
       "has_data": true,
-      "dam_price": 146.0,
+      "dam_price": 146.1,
       "fetched": "2026-10-19T07:29:12.285207+03:00",
       "crete_flow": -591.0,
       "gen": {
@@ -1102,12 +1179,14 @@
       "demand": 9579.0,
       "balance_ok": true,
       "curtail_hint": null,
-      "isp_surplus": 0.0
+      "isp_surplus": 0.0,
+      "dam_price_admie": 146.0,
+      "dam_price_src": "entsoe"
     },
     {
       "hr": 22,
       "has_data": true,
-      "dam_price": 133.0,
+      "dam_price": 133.34,
       "fetched": "2026-10-19T07:29:12.285207+03:00",
       "crete_flow": -571.0,
       "gen": {
@@ -1152,12 +1231,14 @@
       "demand": 9440.0,
       "balance_ok": true,
       "curtail_hint": null,
-      "isp_surplus": 0.0
+      "isp_surplus": 0.0,
+      "dam_price_admie": 133.0,
+      "dam_price_src": "entsoe"
     },
     {
       "hr": 23,
       "has_data": true,
-      "dam_price": 131.0,
+      "dam_price": 130.66,
       "fetched": "2026-10-19T07:29:12.285207+03:00",
       "crete_flow": -541.0,
       "gen": {
@@ -1202,12 +1283,14 @@
       "demand": 9038.0,
       "balance_ok": true,
       "curtail_hint": null,
-      "isp_surplus": 0.0
+      "isp_surplus": 0.0,
+      "dam_price_admie": 131.0,
+      "dam_price_src": "entsoe"
     },
     {
       "hr": 24,
       "has_data": true,
-      "dam_price": 151.0,
+      "dam_price": 151.2,
       "fetched": "2026-10-19T07:29:12.285207+03:00",
       "crete_flow": -528.0,
       "gen": {
@@ -1252,7 +1335,9 @@
       "demand": 8525.0,
       "balance_ok": true,
       "curtail_hint": null,
-      "isp_surplus": 0.0
+      "isp_surplus": 0.0,
+      "dam_price_admie": 151.0,
+      "dam_price_src": "entsoe"
     }
   ]
 }
