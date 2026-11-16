@@ -288,7 +288,8 @@ def isp_hours(hours):
 # D68: τιμή αγοράς επόμενης ημέρας από το ENTSO-E (A44, 15λεπτα· price_builder.py)
 # Ωριαία τιμή = μέσος όρος των 4 15λεπτων της ώρας (ώρα Ελλάδας, ίδια φυσική ώρα με τον ΑΔΜΗΕ).
 # Μέση ημέρας = μέση της ΗΜΕΡΑΣ ΑΓΟΡΑΣ (CET, 01:00–01:00 ώρα Ελλάδας), όπως ΕΧΕ/ENTSO-E/BESS.
-# Εφεδρεία: η ωριαία τιμή του admie.gr (ακέραια) για ώρα που έχει γίνει· ποτέ 0 στη θέση του κενού.
+# Εφεδρεία: η ωριαία τιμή του admie.gr (ακέραια) για ώρα που έχει γίνει. Τα 0 του ENTSO-E τα ελέγχει το
+# price_builder απέναντι στον ΑΔΜΗΕ (D68): όσα δεν επιβεβαιώνονται φτάνουν εδώ ως κενά.
 # ---------------------------------------------------------------------
 PRICE_DIR = os.path.join(DATA_DIR, 'price')
 BRUSSELS = pytz.timezone('Europe/Brussels')
@@ -345,7 +346,7 @@ def apply_prices(date8, hours, totals, cache=None):
             h['dam_price'], h['dam_price_src'] = e, 'entsoe'
             if a is not None:
                 diffs.append(abs(a - e))
-        elif a is not None and a != 0:
+        elif a is not None:
             h['dam_price'], h['dam_price_src'] = a, 'admie'
         else:
             h['dam_price'], h['dam_price_src'] = None, None
