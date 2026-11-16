@@ -1,0 +1,77 @@
+name: Day-ahead prices history refresh
+
+# D68: κατεβάζει τις τιμές αγοράς επόμενης ημέρας από το ENTSO-E (A44, 15λεπτα) σε data/price/
+# για ένα διάστημα ημερών αγοράς (μία αίτηση ανά ημέρα, 1 s παύση· πλήρεις ημέρες δεν ξανακατεβαίνουν),
+# και μετά τις περνά στα υπάρχοντα live αρχεία (PRICES_ONLY: μόνο τοπικά, μόνο τα πεδία τιμής).
+# Η αρχική τιμή του admie.gr μένει σε κάθε ώρα ως dam_price_admie (έλεγχος).
+# Μετά: «Analysis history refresh» για τα συμπεράσματα (μέση τιμή ημέρας).
+on:
+  workflow_dispatch:
+    inputs:
+      start_date:
+        description: 'Από (YYYYMMDD)'
+        required: true
+        default: '20260331'
+      end_date:
+        description: 'Έως (YYYYMMDD) · κενό = αύριο'
+        required: false
+        default: ''
+
+permissions:
+  contents: write
+
+concurrency:
+  group: scrape-live
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests pytz
+
+      - name: Fetch prices (ENTSO-E A44)
+        env:
+          ENTSOE_TOKEN: ${{ secrets.ENTSOE_TOKEN }}
+          BF_START: ${{ github.event.inputs.start_date }}
+          BF_END: ${{ github.event.inputs.end_date }}
+        run: |
+          if [ -z "$BF_END" ]; then BF_END=$(TZ=Europe/Brussels date -d 'tomorrow' +%Y%m%d); fi
+          START_DATE="$BF_START" END_DATE="$BF_END" python price_builder.py
+
+      - name: Apply prices to live files
+        env:
+          BF_START: ${{ github.event.inputs.start_date }}
+          BF_END: ${{ github.event.inputs.end_date }}
+        run: |
+          if [ -z "$BF_END" ]; then BF_END=$(TZ=Europe/Athens date +%Y%m%d); fi
+          PRICES_ONLY=1 START_DATE="$BF_START" END_DATE="$BF_END" python scraper.py
+
+      - name: Commit and push changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action Bot"
+          git add -A data/price data/live
+          if git diff --staged --quiet; then
+            echo "Καμία αλλαγή."
+            exit 0
+          fi
+          git commit -m "Τιμές DAM (ENTSO-E): ιστορικό ($(TZ=Europe/Athens date +'%Y-%m-%d %H:%M'))"
+          for i in 1 2 3; do
+            git pull --rebase origin main && git push && exit 0
+            echo "Push απέτυχε (προσπάθεια $i), νέα δοκιμή σε 10s..."
+            sleep 10
+          done
+          exit 1

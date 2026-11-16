@@ -42,6 +42,14 @@ jobs:
           python -m pip install --upgrade pip
           pip install requests pytz
 
+      - name: Day-ahead prices (ENTSO-E A44, D68)
+        # Σημερινή και αυριανή ημέρα αγοράς· πλήρεις ημέρες δεν ξανακατεβαίνουν. Αν αποτύχει, το scrape συνεχίζει
+        # (η σελίδα δείχνει τότε την ωριαία τιμή του admie.gr για τις ώρες που έχουν γίνει).
+        continue-on-error: true
+        env:
+          ENTSOE_TOKEN: ${{ secrets.ENTSOE_TOKEN }}
+        run: python price_builder.py
+
       - name: Run scraper
         env:
           START_DATE: ${{ github.event.inputs.start_date }}
