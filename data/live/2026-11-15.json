@@ -2,7 +2,7 @@
   "schema": 1,
   "date": "2026-11-15",
   "source": "ADMIE/IPTO market portal: prodmixandload, dayaheadmarket, scadainterflows",
-  "updated": "2026-11-16T10:06:53+02:00",
+  "updated": "2026-11-16T11:10:07+02:00",
   "totals": {
     "hours_with_data": 24,
     "gen": {
@@ -22,7 +22,7 @@
     },
     "pumping": 1425.0,
     "demand": 123124.0,
-    "dam_price_avg": 202.29,
+    "dam_price_avg": null,
     "crete_flow": null,
     "hours_flows_mismatch": 0,
     "hours_balance_off": 0,
@@ -36,14 +36,51 @@
       11,
       15,
       16
-    ]
+    ],
+    "price": {
+      "source": "admie",
+      "hours": [
+        203.0,
+        198.0,
+        204.0,
+        203.0,
+        192.0,
+        162.0,
+        192.0,
+        141.0,
+        138.0,
+        200.0,
+        210.0,
+        203.0,
+        208.0,
+        204.0,
+        203.0,
+        188.0,
+        220.0,
+        240.0,
+        244.0,
+        217.0,
+        222.0,
+        223.0,
+        225.0,
+        215.0
+      ],
+      "complete": true,
+      "market_avg": null,
+      "market_complete": false,
+      "check_admie": {
+        "hours": 0,
+        "max_diff": null,
+        "off": 0
+      }
+    }
   },
   "hours": [
     {
       "hr": 1,
       "has_data": true,
       "dam_price": 203.0,
-      "fetched": "2026-11-16T10:05:27.886613+02:00",
+      "fetched": "2026-11-16T11:08:44.991643+02:00",
       "source": "admie.gr",
       "crete_flow": null,
       "gen": {
@@ -89,13 +126,15 @@
       "demand": 4699.0,
       "balance_ok": true,
       "isp_surplus": null,
-      "curtail_hint": null
+      "curtail_hint": null,
+      "dam_price_admie": 203.0,
+      "dam_price_src": "admie"
     },
     {
       "hr": 2,
       "has_data": true,
       "dam_price": 198.0,
-      "fetched": "2026-11-16T10:05:27.886613+02:00",
+      "fetched": "2026-11-16T11:08:44.991643+02:00",
       "source": "admie.gr",
       "crete_flow": null,
       "gen": {
@@ -141,13 +180,15 @@
       "demand": 4403.0,
       "balance_ok": true,
       "isp_surplus": 0.81,
-      "curtail_hint": null
+      "curtail_hint": null,
+      "dam_price_admie": 198.0,
+      "dam_price_src": "admie"
     },
     {
       "hr": 3,
       "has_data": true,
       "dam_price": 204.0,
-      "fetched": "2026-11-16T10:05:27.886613+02:00",
+      "fetched": "2026-11-16T11:08:44.991643+02:00",
       "source": "admie.gr",
       "crete_flow": null,
       "gen": {
@@ -193,13 +234,15 @@
       "demand": 4269.0,
       "balance_ok": true,
       "isp_surplus": 0.0,
-      "curtail_hint": null
+      "curtail_hint": null,
+      "dam_price_admie": 204.0,
+      "dam_price_src": "admie"
     },
     {
       "hr": 4,
       "has_data": true,
       "dam_price": 203.0,
-      "fetched": "2026-11-16T10:05:27.886613+02:00",
+      "fetched": "2026-11-16T11:08:44.991643+02:00",
       "source": "admie.gr",
       "crete_flow": null,
       "gen": {
@@ -245,13 +288,15 @@
       "demand": 4162.0,
       "balance_ok": true,
       "isp_surplus": 0.0,
-      "curtail_hint": null
+      "curtail_hint": null,
+      "dam_price_admie": 203.0,
+      "dam_price_src": "admie"
     },
     {
       "hr": 5,
       "has_data": true,
       "dam_price": 192.0,
-      "fetched": "2026-11-16T10:05:27.886613+02:00",
+      "fetched": "2026-11-16T11:08:44.991643+02:00",
       "source": "admie.gr",
       "crete_flow": null,
       "gen": {
@@ -297,13 +342,15 @@
       "demand": 4115.0,
       "balance_ok": true,
       "isp_surplus": 0.0,
-      "curtail_hint": null
+      "curtail_hint": null,
+      "dam_price_admie": 192.0,
+      "dam_price_src": "admie"
     },
     {
       "hr": 6,
       "has_data": true,
       "dam_price": 162.0,
-      "fetched": "2026-11-16T10:05:27.886613+02:00",
+      "fetched": "2026-11-16T11:08:44.991643+02:00",
       "source": "admie.gr",
       "crete_flow": null,
       "gen": {
@@ -349,13 +396,15 @@
       "demand": 4148.0,
       "balance_ok": true,
       "isp_surplus": 0.0,
-      "curtail_hint": null
+      "curtail_hint": null,
+      "dam_price_admie": 162.0,
+      "dam_price_src": "admie"
     },
     {
       "hr": 7,
       "has_data": true,
       "dam_price": 192.0,
-      "fetched": "2026-11-16T10:05:27.886613+02:00",
+      "fetched": "2026-11-16T11:08:44.991643+02:00",
       "source": "admie.gr",
       "crete_flow": null,
       "gen": {
@@ -401,13 +450,15 @@
       "demand": 4279.0,
       "balance_ok": true,
       "isp_surplus": 0.0,
-      "curtail_hint": null
+      "curtail_hint": null,
+      "dam_price_admie": 192.0,
+      "dam_price_src": "admie"
     },
     {
       "hr": 8,
       "has_data": true,
       "dam_price": 141.0,
-      "fetched": "2026-11-16T10:05:27.886613+02:00",
+      "fetched": "2026-11-16T11:08:44.991643+02:00",
       "source": "admie.gr",
       "crete_flow": null,
       "gen": {
@@ -453,13 +504,15 @@
       "demand": 4383.0,
       "balance_ok": true,
       "isp_surplus": 0.0,
-      "curtail_hint": null
+      "curtail_hint": null,
+      "dam_price_admie": 141.0,
+      "dam_price_src": "admie"
     },
     {
       "hr": 9,
       "has_data": true,
       "dam_price": 138.0,
-      "fetched": "2026-11-16T10:05:27.886613+02:00",
+      "fetched": "2026-11-16T11:08:44.991643+02:00",
       "source": "admie.gr",
       "crete_flow": null,
       "gen": {
@@ -505,13 +558,15 @@
       "demand": 4664.0,
       "balance_ok": true,
       "isp_surplus": 0.0,
-      "curtail_hint": null
+      "curtail_hint": null,
+      "dam_price_admie": 138.0,
+      "dam_price_src": "admie"
     },
     {
       "hr": 10,
       "has_data": true,
       "dam_price": 200.0,
-      "fetched": "2026-11-16T10:05:27.886613+02:00",
+      "fetched": "2026-11-16T11:08:44.991643+02:00",
       "source": "admie.gr",
       "crete_flow": null,
       "gen": {
@@ -557,13 +612,15 @@
       "demand": 5076.0,
       "balance_ok": true,
       "isp_surplus": 9.47,
-      "curtail_hint": null
+      "curtail_hint": null,
+      "dam_price_admie": 200.0,
+      "dam_price_src": "admie"
     },
     {
       "hr": 11,
       "has_data": true,
       "dam_price": 210.0,
-      "fetched": "2026-11-16T10:05:27.886613+02:00",
+      "fetched": "2026-11-16T11:08:44.991643+02:00",
       "source": "admie.gr",
       "crete_flow": null,
       "gen": {
@@ -609,13 +666,15 @@
       "demand": 5398.0,
       "balance_ok": true,
       "isp_surplus": 236.46,
-      "curtail_hint": null
+      "curtail_hint": null,
+      "dam_price_admie": 210.0,
+      "dam_price_src": "admie"
     },
     {
       "hr": 12,
       "has_data": true,
       "dam_price": 203.0,
-      "fetched": "2026-11-16T10:05:27.886613+02:00",
+      "fetched": "2026-11-16T11:08:44.991643+02:00",
       "source": "admie.gr",
       "crete_flow": null,
       "gen": {
@@ -665,13 +724,15 @@
         "drop": -0.025,
         "flag": false,
         "case": null
-      }
+      },
+      "dam_price_admie": 203.0,
+      "dam_price_src": "admie"
     },
     {
       "hr": 13,
       "has_data": true,
       "dam_price": 208.0,
-      "fetched": "2026-11-16T10:05:27.886613+02:00",
+      "fetched": "2026-11-16T11:08:44.991643+02:00",
       "source": "admie.gr",
       "crete_flow": null,
       "gen": {
@@ -721,13 +782,15 @@
         "drop": -0.042,
         "flag": false,
         "case": null
-      }
+      },
+      "dam_price_admie": 208.0,
+      "dam_price_src": "admie"
     },
     {
       "hr": 14,
       "has_data": true,
       "dam_price": 204.0,
-      "fetched": "2026-11-16T10:05:27.886613+02:00",
+      "fetched": "2026-11-16T11:08:44.991643+02:00",
       "source": "admie.gr",
       "crete_flow": null,
       "gen": {
@@ -777,13 +840,15 @@
         "drop": -0.008,
         "flag": false,
         "case": null
-      }
+      },
+      "dam_price_admie": 204.0,
+      "dam_price_src": "admie"
     },
     {
       "hr": 15,
       "has_data": true,
       "dam_price": 203.0,
-      "fetched": "2026-11-16T10:05:27.886613+02:00",
+      "fetched": "2026-11-16T11:08:44.991643+02:00",
       "source": "admie.gr",
       "crete_flow": null,
       "gen": {
@@ -829,13 +894,15 @@
       "demand": 5452.0,
       "balance_ok": true,
       "isp_surplus": 44.89,
-      "curtail_hint": null
+      "curtail_hint": null,
+      "dam_price_admie": 203.0,
+      "dam_price_src": "admie"
     },
     {
       "hr": 16,
       "has_data": true,
       "dam_price": 188.0,
-      "fetched": "2026-11-16T10:05:27.886613+02:00",
+      "fetched": "2026-11-16T11:08:44.991643+02:00",
       "source": "admie.gr",
       "crete_flow": null,
       "gen": {
@@ -881,13 +948,15 @@
       "demand": 5286.0,
       "balance_ok": true,
       "isp_surplus": 36.3,
-      "curtail_hint": null
+      "curtail_hint": null,
+      "dam_price_admie": 188.0,
+      "dam_price_src": "admie"
     },
     {
       "hr": 17,
       "has_data": true,
       "dam_price": 220.0,
-      "fetched": "2026-11-16T10:05:27.886613+02:00",
+      "fetched": "2026-11-16T11:08:44.991643+02:00",
       "source": "admie.gr",
       "crete_flow": null,
       "gen": {
@@ -933,13 +1002,15 @@
       "demand": 5336.0,
       "balance_ok": true,
       "isp_surplus": 0.0,
-      "curtail_hint": null
+      "curtail_hint": null,
+      "dam_price_admie": 220.0,
+      "dam_price_src": "admie"
     },
     {
       "hr": 18,
       "has_data": true,
       "dam_price": 240.0,
-      "fetched": "2026-11-16T10:05:27.886613+02:00",
+      "fetched": "2026-11-16T11:08:44.991643+02:00",
       "source": "admie.gr",
       "crete_flow": null,
       "gen": {
@@ -985,13 +1056,15 @@
       "demand": 5766.0,
       "balance_ok": true,
       "isp_surplus": 0.0,
-      "curtail_hint": null
+      "curtail_hint": null,
+      "dam_price_admie": 240.0,
+      "dam_price_src": "admie"
     },
     {
       "hr": 19,
       "has_data": true,
       "dam_price": 244.0,
-      "fetched": "2026-11-16T10:05:27.886613+02:00",
+      "fetched": "2026-11-16T11:08:44.991643+02:00",
       "source": "admie.gr",
       "crete_flow": null,
       "gen": {
@@ -1037,13 +1110,15 @@
       "demand": 6090.0,
       "balance_ok": true,
       "isp_surplus": 0.0,
-      "curtail_hint": null
+      "curtail_hint": null,
+      "dam_price_admie": 244.0,
+      "dam_price_src": "admie"
     },
     {
       "hr": 20,
       "has_data": true,
       "dam_price": 217.0,
-      "fetched": "2026-11-16T10:05:27.886613+02:00",
+      "fetched": "2026-11-16T11:08:44.991643+02:00",
       "source": "admie.gr",
       "crete_flow": null,
       "gen": {
@@ -1089,13 +1164,15 @@
       "demand": 6129.0,
       "balance_ok": true,
       "isp_surplus": 0.0,
-      "curtail_hint": null
+      "curtail_hint": null,
+      "dam_price_admie": 217.0,
+      "dam_price_src": "admie"
     },
     {
       "hr": 21,
       "has_data": true,
       "dam_price": 222.0,
-      "fetched": "2026-11-16T10:05:27.886613+02:00",
+      "fetched": "2026-11-16T11:08:44.991643+02:00",
       "source": "admie.gr",
       "crete_flow": null,
       "gen": {
@@ -1141,13 +1218,15 @@
       "demand": 6043.0,
       "balance_ok": true,
       "isp_surplus": 0.0,
-      "curtail_hint": null
+      "curtail_hint": null,
+      "dam_price_admie": 222.0,
+      "dam_price_src": "admie"
     },
     {
       "hr": 22,
       "has_data": true,
       "dam_price": 223.0,
-      "fetched": "2026-11-16T10:05:27.886613+02:00",
+      "fetched": "2026-11-16T11:08:44.991643+02:00",
       "source": "admie.gr",
       "crete_flow": null,
       "gen": {
@@ -1193,13 +1272,15 @@
       "demand": 5774.0,
       "balance_ok": true,
       "isp_surplus": 0.0,
-      "curtail_hint": null
+      "curtail_hint": null,
+      "dam_price_admie": 223.0,
+      "dam_price_src": "admie"
     },
     {
       "hr": 23,
       "has_data": true,
       "dam_price": 225.0,
-      "fetched": "2026-11-16T10:05:27.886613+02:00",
+      "fetched": "2026-11-16T11:08:44.991643+02:00",
       "source": "admie.gr",
       "crete_flow": null,
       "gen": {
@@ -1245,13 +1326,15 @@
       "demand": 5386.0,
       "balance_ok": true,
       "isp_surplus": 0.0,
-      "curtail_hint": null
+      "curtail_hint": null,
+      "dam_price_admie": 225.0,
+      "dam_price_src": "admie"
     },
     {
       "hr": 24,
       "has_data": true,
       "dam_price": 215.0,
-      "fetched": "2026-11-16T10:05:27.886613+02:00",
+      "fetched": "2026-11-16T11:08:44.991643+02:00",
       "source": "admie.gr",
       "crete_flow": null,
       "gen": {
@@ -1297,7 +1380,9 @@
       "demand": 4990.0,
       "balance_ok": true,
       "isp_surplus": 0.0,
-      "curtail_hint": null
+      "curtail_hint": null,
+      "dam_price_admie": 215.0,
+      "dam_price_src": "admie"
     }
   ]
 }
