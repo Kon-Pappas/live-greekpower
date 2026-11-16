@@ -48,7 +48,7 @@ jobs:
         continue-on-error: true
         env:
           ENTSOE_TOKEN: ${{ secrets.ENTSOE_TOKEN }}
-        run: python price_builder.py
+        run: python -u price_builder.py
 
       - name: Run scraper
         env:

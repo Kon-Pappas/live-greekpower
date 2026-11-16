@@ -1,7 +1,7 @@
 name: Day-ahead prices history refresh
 
 # D68: κατεβάζει τις τιμές αγοράς επόμενης ημέρας από το ENTSO-E (A44, 15λεπτα) σε data/price/
-# για ένα διάστημα ημερών αγοράς (μία αίτηση ανά ημέρα, 1 s παύση· πλήρεις ημέρες δεν ξανακατεβαίνουν),
+# για ένα διάστημα ημερών αγοράς (έως 31 ημέρες ανά αίτηση· πλήρεις ημέρες δεν ξανακατεβαίνουν),
 # και μετά τις περνά στα υπάρχοντα live αρχεία (PRICES_ONLY: μόνο τοπικά, μόνο τα πεδία τιμής).
 # Η αρχική τιμή του admie.gr μένει σε κάθε ώρα ως dam_price_admie (έλεγχος).
 # Μετά: «Analysis history refresh» για τα συμπεράσματα (μέση τιμή ημέρας).
@@ -27,7 +27,7 @@ concurrency:
 jobs:
   refresh:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 60
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
@@ -49,7 +49,7 @@ jobs:
           BF_END: ${{ github.event.inputs.end_date }}
         run: |
           if [ -z "$BF_END" ]; then BF_END=$(TZ=Europe/Brussels date -d 'tomorrow' +%Y%m%d); fi
-          START_DATE="$BF_START" END_DATE="$BF_END" python price_builder.py
+          START_DATE="$BF_START" END_DATE="$BF_END" python -u price_builder.py
 
       - name: Apply prices to live files
         env:
