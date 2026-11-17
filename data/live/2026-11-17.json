@@ -2,41 +2,43 @@
   "schema": 1,
   "date": "2026-11-17",
   "source": "ADMIE/IPTO market portal: prodmixandload, dayaheadmarket, scadainterflows",
-  "updated": "2026-11-17T12:07:11+02:00",
+  "updated": "2026-11-17T13:07:19+02:00",
   "totals": {
-    "hours_with_data": 12,
+    "hours_with_data": 13,
     "gen": {
-      "lignite": 4116.0,
-      "gas": 27164.0,
-      "hydro": 1139.0,
-      "res": 51075.0,
-      "total": 83494.0,
-      "res_system": 37575.0,
-      "res_network": 13500.0
+      "lignite": 4446.0,
+      "gas": 27963.0,
+      "hydro": 1200.0,
+      "res": 58858.0,
+      "total": 92467.0,
+      "res_system": 41571.0,
+      "res_network": 17287.0
     },
-    "imports": 1034.0,
-    "exports": 20792.0,
+    "imports": 1494.0,
+    "exports": 22792.0,
     "storage": {
       "dis": 240.0,
-      "chg": 904.0
+      "chg": 1428.0
     },
-    "pumping": 1060.0,
-    "demand": 62012.0,
+    "pumping": 1524.0,
+    "demand": 68457.0,
     "dam_price_avg": 179.43,
     "crete_flow": null,
     "hours_flows_mismatch": 0,
     "hours_balance_off": 0,
     "sources": {
-      "admie.gr": 12
+      "admie.gr": 13
     },
     "curtail_hint_hours": [
-      12
+      12,
+      13
     ],
     "curtail_other_hours": [],
     "isp_surplus_hours": [
       10,
       11,
-      12
+      12,
+      13
     ],
     "price": {
       "source": "entsoe",
@@ -70,7 +72,7 @@
       "market_avg": 179.43,
       "market_complete": true,
       "check_admie": {
-        "hours": 12,
+        "hours": 13,
         "max_diff": 0.48,
         "off": 0
       }
@@ -81,7 +83,7 @@
       "hr": 1,
       "has_data": true,
       "dam_price": 204.48,
-      "fetched": "2026-11-17T12:06:45.825087+02:00",
+      "fetched": "2026-11-17T13:06:46.539047+02:00",
       "source": "admie.gr",
       "crete_flow": null,
       "gen": {
@@ -135,7 +137,7 @@
       "hr": 2,
       "has_data": true,
       "dam_price": 215.26,
-      "fetched": "2026-11-17T12:06:45.825087+02:00",
+      "fetched": "2026-11-17T13:06:46.539047+02:00",
       "source": "admie.gr",
       "crete_flow": null,
       "gen": {
@@ -189,7 +191,7 @@
       "hr": 3,
       "has_data": true,
       "dam_price": 208.05,
-      "fetched": "2026-11-17T12:06:45.825087+02:00",
+      "fetched": "2026-11-17T13:06:46.539047+02:00",
       "source": "admie.gr",
       "crete_flow": null,
       "gen": {
@@ -243,7 +245,7 @@
       "hr": 4,
       "has_data": true,
       "dam_price": 205.33,
-      "fetched": "2026-11-17T12:06:45.825087+02:00",
+      "fetched": "2026-11-17T13:06:46.539047+02:00",
       "source": "admie.gr",
       "crete_flow": null,
       "gen": {
@@ -297,7 +299,7 @@
       "hr": 5,
       "has_data": true,
       "dam_price": 208.85,
-      "fetched": "2026-11-17T12:06:45.825087+02:00",
+      "fetched": "2026-11-17T13:06:46.539047+02:00",
       "source": "admie.gr",
       "crete_flow": null,
       "gen": {
@@ -351,7 +353,7 @@
       "hr": 6,
       "has_data": true,
       "dam_price": 209.87,
-      "fetched": "2026-11-17T12:06:45.825087+02:00",
+      "fetched": "2026-11-17T13:06:46.539047+02:00",
       "source": "admie.gr",
       "crete_flow": null,
       "gen": {
@@ -405,7 +407,7 @@
       "hr": 7,
       "has_data": true,
       "dam_price": 219.93,
-      "fetched": "2026-11-17T12:06:45.825087+02:00",
+      "fetched": "2026-11-17T13:06:46.539047+02:00",
       "source": "admie.gr",
       "crete_flow": null,
       "gen": {
@@ -459,7 +461,7 @@
       "hr": 8,
       "has_data": true,
       "dam_price": 254.03,
-      "fetched": "2026-11-17T12:06:45.825087+02:00",
+      "fetched": "2026-11-17T13:06:46.539047+02:00",
       "source": "admie.gr",
       "crete_flow": null,
       "gen": {
@@ -513,7 +515,7 @@
       "hr": 9,
       "has_data": true,
       "dam_price": 254.25,
-      "fetched": "2026-11-17T12:06:45.825087+02:00",
+      "fetched": "2026-11-17T13:06:46.539047+02:00",
       "source": "admie.gr",
       "crete_flow": null,
       "gen": {
@@ -567,7 +569,7 @@
       "hr": 10,
       "has_data": true,
       "dam_price": 167.62,
-      "fetched": "2026-11-17T12:06:45.825087+02:00",
+      "fetched": "2026-11-17T13:06:46.539047+02:00",
       "source": "admie.gr",
       "crete_flow": null,
       "gen": {
@@ -621,7 +623,7 @@
       "hr": 11,
       "has_data": true,
       "dam_price": 0.25,
-      "fetched": "2026-11-17T12:06:45.825087+02:00",
+      "fetched": "2026-11-17T13:06:46.539047+02:00",
       "source": "admie.gr",
       "crete_flow": null,
       "gen": {
@@ -675,7 +677,7 @@
       "hr": 12,
       "has_data": true,
       "dam_price": 0.01,
-      "fetched": "2026-11-17T12:06:45.825087+02:00",
+      "fetched": "2026-11-17T13:06:46.539047+02:00",
       "source": "admie.gr",
       "crete_flow": null,
       "gen": {
@@ -723,6 +725,64 @@
       "isp_surplus": 1722.06,
       "curtail_hint": {
         "drop": 0.264,
+        "flag": true,
+        "case": "A"
+      },
+      "dam_price_admie": 0.0,
+      "dam_price_src": "entsoe"
+    },
+    {
+      "hr": 13,
+      "has_data": true,
+      "dam_price": 0.0,
+      "fetched": "2026-11-17T13:06:46.539047+02:00",
+      "source": "admie.gr",
+      "crete_flow": null,
+      "gen": {
+        "lignite": 330.0,
+        "gas": 799.0,
+        "hydro": 61.0,
+        "res": 7783.0,
+        "total": 8973.0,
+        "res_system": 3996.0,
+        "res_network": 3787.0
+      },
+      "imports": 460.0,
+      "exports": 2000.0,
+      "flows": {
+        "AL": {
+          "imp": 0.0,
+          "exp": 542.0
+        },
+        "BG": {
+          "imp": 0.0,
+          "exp": 418.0
+        },
+        "IT": {
+          "imp": 457.0,
+          "exp": 0.0
+        },
+        "TR": {
+          "imp": 3.0,
+          "exp": 71.0
+        },
+        "MK": {
+          "imp": 0.0,
+          "exp": 969.0
+        }
+      },
+      "flows_match": true,
+      "flows_source": "iptoanalytics",
+      "storage": {
+        "dis": 0.0,
+        "chg": 524.0
+      },
+      "pumping": 464.0,
+      "demand": 6445.0,
+      "balance_ok": true,
+      "isp_surplus": 1845.11,
+      "curtail_hint": {
+        "drop": 0.322,
         "flag": true,
         "case": "A"
       },
