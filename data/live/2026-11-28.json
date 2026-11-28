@@ -2,32 +2,32 @@
   "schema": 1,
   "date": "2026-11-28",
   "source": "ADMIE/IPTO market portal: prodmixandload, dayaheadmarket, scadainterflows",
-  "updated": "2026-11-28T10:06:50+02:00",
+  "updated": "2026-11-28T11:06:53+02:00",
   "totals": {
-    "hours_with_data": 10,
+    "hours_with_data": 11,
     "gen": {
-      "lignite": 4366.0,
-      "gas": 34749.0,
-      "hydro": 4026.0,
-      "res": 13235.0,
-      "total": 56376.0,
-      "res_system": 10214.0,
-      "res_network": 3021.0
+      "lignite": 4712.0,
+      "gas": 37494.0,
+      "hydro": 4293.0,
+      "res": 16794.0,
+      "total": 63293.0,
+      "res_system": 12569.0,
+      "res_network": 4225.0
     },
-    "imports": 1546.0,
-    "exports": 8300.0,
+    "imports": 1642.0,
+    "exports": 9210.0,
     "storage": {
-      "dis": 0.0,
+      "dis": 11.0,
       "chg": 509.0
     },
     "pumping": 0.0,
-    "demand": 49113.0,
+    "demand": 55227.0,
     "dam_price_avg": 210.39,
     "crete_flow": null,
     "hours_flows_mismatch": 0,
     "hours_balance_off": 0,
     "sources": {
-      "admie.gr": 10
+      "admie.gr": 11
     },
     "curtail_hint_hours": [],
     "curtail_other_hours": [],
@@ -64,8 +64,8 @@
       "market_avg": 210.39,
       "market_complete": true,
       "check_admie": {
-        "hours": 10,
-        "max_diff": 0.47,
+        "hours": 11,
+        "max_diff": 0.5,
         "off": 0
       }
     }
@@ -75,7 +75,7 @@
       "hr": 1,
       "has_data": true,
       "dam_price": 213.75,
-      "fetched": "2026-11-28T10:06:29.573984+02:00",
+      "fetched": "2026-11-28T11:06:30.273668+02:00",
       "source": "admie.gr",
       "crete_flow": null,
       "gen": {
@@ -129,7 +129,7 @@
       "hr": 2,
       "has_data": true,
       "dam_price": 213.69,
-      "fetched": "2026-11-28T10:06:29.573984+02:00",
+      "fetched": "2026-11-28T11:06:30.273668+02:00",
       "source": "admie.gr",
       "crete_flow": null,
       "gen": {
@@ -174,7 +174,7 @@
       "pumping": 0.0,
       "demand": 4779.0,
       "balance_ok": true,
-      "isp_surplus": null,
+      "isp_surplus": 0.0,
       "curtail_hint": null,
       "dam_price_admie": 214.0,
       "dam_price_src": "entsoe"
@@ -183,7 +183,7 @@
       "hr": 3,
       "has_data": true,
       "dam_price": 214.0,
-      "fetched": "2026-11-28T10:06:29.573984+02:00",
+      "fetched": "2026-11-28T11:06:30.273668+02:00",
       "source": "admie.gr",
       "crete_flow": null,
       "gen": {
@@ -228,7 +228,7 @@
       "pumping": 0.0,
       "demand": 4635.0,
       "balance_ok": true,
-      "isp_surplus": null,
+      "isp_surplus": 0.0,
       "curtail_hint": null,
       "dam_price_admie": 214.0,
       "dam_price_src": "entsoe"
@@ -237,7 +237,7 @@
       "hr": 4,
       "has_data": true,
       "dam_price": 202.9,
-      "fetched": "2026-11-28T10:06:29.573984+02:00",
+      "fetched": "2026-11-28T11:06:30.273668+02:00",
       "source": "admie.gr",
       "crete_flow": null,
       "gen": {
@@ -282,7 +282,7 @@
       "pumping": 0.0,
       "demand": 4500.0,
       "balance_ok": true,
-      "isp_surplus": null,
+      "isp_surplus": 0.0,
       "curtail_hint": null,
       "dam_price_admie": 203.0,
       "dam_price_src": "entsoe"
@@ -291,7 +291,7 @@
       "hr": 5,
       "has_data": true,
       "dam_price": 197.13,
-      "fetched": "2026-11-28T10:06:29.573984+02:00",
+      "fetched": "2026-11-28T11:06:30.273668+02:00",
       "source": "admie.gr",
       "crete_flow": null,
       "gen": {
@@ -336,7 +336,7 @@
       "pumping": 0.0,
       "demand": 4445.0,
       "balance_ok": true,
-      "isp_surplus": null,
+      "isp_surplus": 0.0,
       "curtail_hint": null,
       "dam_price_admie": 197.0,
       "dam_price_src": "entsoe"
@@ -345,7 +345,7 @@
       "hr": 6,
       "has_data": true,
       "dam_price": 195.01,
-      "fetched": "2026-11-28T10:06:29.573984+02:00",
+      "fetched": "2026-11-28T11:06:30.273668+02:00",
       "source": "admie.gr",
       "crete_flow": null,
       "gen": {
@@ -390,7 +390,7 @@
       "pumping": 0.0,
       "demand": 4515.0,
       "balance_ok": true,
-      "isp_surplus": null,
+      "isp_surplus": 0.0,
       "curtail_hint": null,
       "dam_price_admie": 195.0,
       "dam_price_src": "entsoe"
@@ -399,7 +399,7 @@
       "hr": 7,
       "has_data": true,
       "dam_price": 194.41,
-      "fetched": "2026-11-28T10:06:29.573984+02:00",
+      "fetched": "2026-11-28T11:06:30.273668+02:00",
       "source": "admie.gr",
       "crete_flow": null,
       "gen": {
@@ -444,7 +444,7 @@
       "pumping": 0.0,
       "demand": 4759.0,
       "balance_ok": true,
-      "isp_surplus": null,
+      "isp_surplus": 0.0,
       "curtail_hint": null,
       "dam_price_admie": 194.0,
       "dam_price_src": "entsoe"
@@ -453,7 +453,7 @@
       "hr": 8,
       "has_data": true,
       "dam_price": 207.94,
-      "fetched": "2026-11-28T10:06:29.573984+02:00",
+      "fetched": "2026-11-28T11:06:30.273668+02:00",
       "source": "admie.gr",
       "crete_flow": null,
       "gen": {
@@ -498,7 +498,7 @@
       "pumping": 0.0,
       "demand": 5065.0,
       "balance_ok": true,
-      "isp_surplus": null,
+      "isp_surplus": 0.0,
       "curtail_hint": null,
       "dam_price_admie": 208.0,
       "dam_price_src": "entsoe"
@@ -507,7 +507,7 @@
       "hr": 9,
       "has_data": true,
       "dam_price": 216.53,
-      "fetched": "2026-11-28T10:06:29.573984+02:00",
+      "fetched": "2026-11-28T11:06:30.273668+02:00",
       "source": "admie.gr",
       "crete_flow": null,
       "gen": {
@@ -552,7 +552,7 @@
       "pumping": 0.0,
       "demand": 5485.0,
       "balance_ok": true,
-      "isp_surplus": null,
+      "isp_surplus": 0.0,
       "curtail_hint": null,
       "dam_price_admie": 217.0,
       "dam_price_src": "entsoe"
@@ -561,7 +561,7 @@
       "hr": 10,
       "has_data": true,
       "dam_price": 222.85,
-      "fetched": "2026-11-28T10:06:29.573984+02:00",
+      "fetched": "2026-11-28T11:06:30.273668+02:00",
       "source": "admie.gr",
       "crete_flow": null,
       "gen": {
@@ -606,9 +606,63 @@
       "pumping": 0.0,
       "demand": 5852.0,
       "balance_ok": true,
-      "isp_surplus": null,
+      "isp_surplus": 0.0,
       "curtail_hint": null,
       "dam_price_admie": 223.0,
+      "dam_price_src": "entsoe"
+    },
+    {
+      "hr": 11,
+      "has_data": true,
+      "dam_price": 221.5,
+      "fetched": "2026-11-28T11:06:30.273668+02:00",
+      "source": "admie.gr",
+      "crete_flow": null,
+      "gen": {
+        "lignite": 346.0,
+        "gas": 2745.0,
+        "hydro": 267.0,
+        "res": 3559.0,
+        "total": 6917.0,
+        "res_system": 2355.0,
+        "res_network": 1204.0
+      },
+      "imports": 96.0,
+      "exports": 910.0,
+      "flows": {
+        "AL": {
+          "imp": 12.0,
+          "exp": 16.0
+        },
+        "BG": {
+          "imp": 0.0,
+          "exp": 127.0
+        },
+        "IT": {
+          "imp": 0.0,
+          "exp": 510.0
+        },
+        "TR": {
+          "imp": 84.0,
+          "exp": 0.0
+        },
+        "MK": {
+          "imp": 0.0,
+          "exp": 257.0
+        }
+      },
+      "flows_match": true,
+      "flows_source": "iptoanalytics",
+      "storage": {
+        "dis": 11.0,
+        "chg": 0.0
+      },
+      "pumping": 0.0,
+      "demand": 6114.0,
+      "balance_ok": true,
+      "isp_surplus": 0.0,
+      "curtail_hint": null,
+      "dam_price_admie": 222.0,
       "dam_price_src": "entsoe"
     }
   ]
